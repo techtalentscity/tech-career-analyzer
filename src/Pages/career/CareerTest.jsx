@@ -14,25 +14,50 @@ const CareerTest = () => {
   const [aiAnalyzing, setAiAnalyzing] = useState(false);
   const [showAiAssistant, setShowAiAssistant] = useState(false);
   const [formData, setFormData] = useState({
+    // Personal information
     fullName: '',
     email: '',
+    
+    // Career background
+    currentField: '', 
+    yearsExperience: '',
+    currentRole: '',
+    
+    // Transition information
+    transitionReason: '',
+    transferableSkills: '',
+    previousTechExposure: '',
+    anticipatedChallenges: '',
+    
+    // Personal motivation and strengths
     bestActivity: '',
-    workPreference: '',
-    learningComfort: '',
-    techExcitement: '',
-    techInterests: '',
-    techActivities: '',
     personalStrength: '',
     techMotivation: '',
+    techPassion: '',
+    
+    // Tech preferences and interests
+    workPreference: '',
+    techInterests: '',
+    learningComfort: '',
+    toolsUsed: [],
+    
+    // Tech aspirations
+    careerPathsInterest: [],
+    industryPreference: [],
+    leverageDomainExpertise: '',
+    
+    // Experience
     experienceLevel: '',
-    emergingTechInterest: '',
     certifications: '',
     certificationsDetail: '',
-    toolsUsed: [],
+    
+    // Goals and timeline
     timeCommitment: '',
-    impactType: '',
-    guidanceNeeded: '',
-    futureGoal: ''
+    targetSalary: '',
+    transitionTimeline: '',
+    continueCurrent: '',
+    futureGoal: '',
+    guidanceNeeded: ''
   });
 
   const [careerAnalysis, setCareerAnalysis] = useState(null);
@@ -53,14 +78,14 @@ const CareerTest = () => {
   };
 
   const handleMultiSelect = (e) => {
-    const { value, options } = e.target;
+    const { name, options } = e.target;
     const selectedValues = Array.from(options)
       .filter(option => option.selected)
       .map(option => option.value);
     
     setFormData(prevState => ({
       ...prevState,
-      toolsUsed: selectedValues
+      [name]: selectedValues
     }));
   };
 
@@ -81,10 +106,60 @@ const CareerTest = () => {
       
       // Process each line of Claude's response to extract relevant information
       suggestionLines.forEach(line => {
+        // Process previous career fields
+        if (line.toLowerCase().includes('current field') || line.toLowerCase().includes('previous field')) {
+          const match = line.match(/:\s*(.+)/);
+          if (match) newFormData.currentField = match[1].trim();
+        }
+        if (line.toLowerCase().includes('years of experience')) {
+          if (line.toLowerCase().includes('less than 1')) newFormData.yearsExperience = 'Less than 1 year';
+          else if (line.toLowerCase().includes('1-3')) newFormData.yearsExperience = '1-3 years';
+          else if (line.toLowerCase().includes('3-5')) newFormData.yearsExperience = '3-5 years';
+          else if (line.toLowerCase().includes('5-10')) newFormData.yearsExperience = '5-10 years';
+          else if (line.toLowerCase().includes('10+')) newFormData.yearsExperience = '10+ years';
+        }
+        if (line.toLowerCase().includes('current role') || line.toLowerCase().includes('job title')) {
+          const match = line.match(/:\s*(.+)/);
+          if (match) newFormData.currentRole = match[1].trim();
+        }
+        
+        // Process motivation and personal strength
         if (line.toLowerCase().includes('like doing best') || line.toLowerCase().includes('favorite activity')) {
           const match = line.match(/:\s*(.+)/);
           if (match) newFormData.bestActivity = match[1].trim();
         }
+        if (line.toLowerCase().includes('personal strength') || line.toLowerCase().includes('strength')) {
+          const match = line.match(/:\s*(.+)/);
+          if (match) newFormData.personalStrength = match[1].trim();
+        }
+        if (line.toLowerCase().includes('motivation') || line.toLowerCase().includes('motivated by')) {
+          const match = line.match(/:\s*(.+)/);
+          if (match) newFormData.techMotivation = match[1].trim();
+        }
+        if (line.toLowerCase().includes('passion') || line.toLowerCase().includes('passionate about')) {
+          const match = line.match(/:\s*(.+)/);
+          if (match) newFormData.techPassion = match[1].trim();
+        }
+        
+        // Process transition information
+        if (line.toLowerCase().includes('transition reason')) {
+          const match = line.match(/:\s*(.+)/);
+          if (match) newFormData.transitionReason = match[1].trim();
+        }
+        if (line.toLowerCase().includes('transferable skills')) {
+          const match = line.match(/:\s*(.+)/);
+          if (match) newFormData.transferableSkills = match[1].trim();
+        }
+        if (line.toLowerCase().includes('tech exposure') || line.toLowerCase().includes('previous tech')) {
+          const match = line.match(/:\s*(.+)/);
+          if (match) newFormData.previousTechExposure = match[1].trim();
+        }
+        if (line.toLowerCase().includes('challenges')) {
+          const match = line.match(/:\s*(.+)/);
+          if (match) newFormData.anticipatedChallenges = match[1].trim();
+        }
+        
+        // Process existing fields
         if (line.toLowerCase().includes('work preference') || line.toLowerCase().includes('prefer to work')) {
           if (line.toLowerCase().includes('remote')) newFormData.workPreference = 'Remote work';
           else if (line.toLowerCase().includes('office')) newFormData.workPreference = 'Office work';
@@ -97,26 +172,49 @@ const CareerTest = () => {
           else if (line.toLowerCase().includes('somewhat')) newFormData.learningComfort = 'Somewhat comfortable';
           else newFormData.learningComfort = 'Not very comfortable';
         }
-        if (line.toLowerCase().includes('excites me') || line.toLowerCase().includes('exciting about')) {
-          const match = line.match(/:\s*(.+)/);
-          if (match) newFormData.techExcitement = match[1].trim();
-        }
         if (line.toLowerCase().includes('tech interests') || line.toLowerCase().includes('interested in learning')) {
           const match = line.match(/:\s*(.+)/);
           if (match) newFormData.techInterests = match[1].trim();
         }
-        if (line.toLowerCase().includes('activities enjoyed') || line.toLowerCase().includes('enjoyed')) {
-          const match = line.match(/:\s*(.+)/);
-          if (match) newFormData.techActivities = match[1].trim();
+        
+        // Process career aspirations
+        if (line.toLowerCase().includes('career paths')) {
+          const careerPaths = [];
+          if (line.toLowerCase().includes('software')) careerPaths.push('Software Development');
+          if (line.toLowerCase().includes('data')) careerPaths.push('Data Analysis/Science');
+          if (line.toLowerCase().includes('design')) careerPaths.push('UX/UI Design');
+          if (line.toLowerCase().includes('product')) careerPaths.push('Product Management');
+          if (line.toLowerCase().includes('cyber')) careerPaths.push('Cybersecurity');
+          if (line.toLowerCase().includes('cloud')) careerPaths.push('Cloud Engineering');
+          if (line.toLowerCase().includes('devops')) careerPaths.push('DevOps');
+          if (line.toLowerCase().includes('ai') || line.toLowerCase().includes('machine learning')) careerPaths.push('AI/Machine Learning');
+          
+          if (careerPaths.length > 0) {
+            newFormData.careerPathsInterest = careerPaths;
+          }
         }
-        if (line.toLowerCase().includes('personal strength') || line.toLowerCase().includes('strength')) {
-          const match = line.match(/:\s*(.+)/);
-          if (match) newFormData.personalStrength = match[1].trim();
+        if (line.toLowerCase().includes('industry preference')) {
+          const industries = [];
+          if (line.toLowerCase().includes('healthcare')) industries.push('Healthcare/Medical');
+          if (line.toLowerCase().includes('finance')) industries.push('Finance/Fintech');
+          if (line.toLowerCase().includes('education')) industries.push('Education');
+          if (line.toLowerCase().includes('commerce')) industries.push('E-commerce');
+          if (line.toLowerCase().includes('media')) industries.push('Entertainment/Media');
+          
+          if (industries.length > 0) {
+            newFormData.industryPreference = industries;
+          } else {
+            newFormData.industryPreference = ['No preference'];
+          }
         }
-        if (line.toLowerCase().includes('motivation') || line.toLowerCase().includes('motivated by')) {
-          const match = line.match(/:\s*(.+)/);
-          if (match) newFormData.techMotivation = match[1].trim();
+        if (line.toLowerCase().includes('leverage domain') || line.toLowerCase().includes('current expertise')) {
+          if (line.toLowerCase().includes('definitely')) newFormData.leverageDomainExpertise = 'Yes, definitely';
+          else if (line.toLowerCase().includes('somewhat')) newFormData.leverageDomainExpertise = 'Yes, somewhat';
+          else if (line.toLowerCase().includes('not sure')) newFormData.leverageDomainExpertise = 'Not sure';
+          else if (line.toLowerCase().includes('change')) newFormData.leverageDomainExpertise = 'No, I want a complete change';
         }
+        
+        // Process existing experience fields
         if (line.toLowerCase().includes('experience level')) {
           if (line.toLowerCase().includes('beginner')) {
             if (line.toLowerCase().includes('complete')) newFormData.experienceLevel = 'Complete beginner';
@@ -125,12 +223,6 @@ const CareerTest = () => {
           else if (line.toLowerCase().includes('intermediate')) newFormData.experienceLevel = 'Intermediate';
           else if (line.toLowerCase().includes('advanced')) newFormData.experienceLevel = 'Advanced';
           else newFormData.experienceLevel = 'Some exposure';
-        }
-        if (line.toLowerCase().includes('emerging tech') || line.toLowerCase().includes('ai') || line.toLowerCase().includes('blockchain')) {
-          if (line.toLowerCase().includes('very interested')) newFormData.emergingTechInterest = 'Yes, very interested';
-          else if (line.toLowerCase().includes('somewhat interested')) newFormData.emergingTechInterest = 'Yes, somewhat interested';
-          else if (line.toLowerCase().includes('not sure')) newFormData.emergingTechInterest = 'Not sure';
-          else newFormData.emergingTechInterest = 'Not particularly interested';
         }
         if (line.toLowerCase().includes('certifications') && !line.includes('?')) {
           if (line.toLowerCase().includes('yes')) newFormData.certifications = 'Yes';
@@ -163,6 +255,8 @@ const CareerTest = () => {
             newFormData.toolsUsed = ['None'];
           }
         }
+        
+        // Process timeline and goals
         if (line.toLowerCase().includes('time commitment') || line.toLowerCase().includes('hours per week')) {
           if (line.toLowerCase().includes('5 hours or less')) newFormData.timeCommitment = '5 hours or less';
           else if (line.toLowerCase().includes('5-10')) newFormData.timeCommitment = '5-10 hours';
@@ -171,15 +265,32 @@ const CareerTest = () => {
           else if (line.toLowerCase().includes('20+')) newFormData.timeCommitment = '20+ hours';
           else newFormData.timeCommitment = '10-15 hours';
         }
-        if (line.toLowerCase().includes('impact') || line.toLowerCase().includes('make a difference')) {
-          const match = line.match(/:\s*(.+)/);
-          if (match) newFormData.impactType = match[1].trim();
+        if (line.toLowerCase().includes('salary') || line.toLowerCase().includes('compensation')) {
+          if (line.toLowerCase().includes('40,000-60,000')) newFormData.targetSalary = '$40,000-$60,000';
+          else if (line.toLowerCase().includes('60,000-80,000')) newFormData.targetSalary = '$60,000-$80,000';
+          else if (line.toLowerCase().includes('80,000-100,000')) newFormData.targetSalary = '$80,000-$100,000';
+          else if (line.toLowerCase().includes('100,000-120,000')) newFormData.targetSalary = '$100,000-$120,000';
+          else if (line.toLowerCase().includes('120,000')) newFormData.targetSalary = '$120,000+';
+          else newFormData.targetSalary = 'Not sure';
         }
-        if (line.toLowerCase().includes('guidance') || line.toLowerCase().includes('help needed')) {
+        if (line.toLowerCase().includes('transition timeline') || line.toLowerCase().includes('how long')) {
+          if (line.toLowerCase().includes('less than 6')) newFormData.transitionTimeline = 'Less than 6 months';
+          else if (line.toLowerCase().includes('6-12')) newFormData.transitionTimeline = '6-12 months';
+          else if (line.toLowerCase().includes('1-2 years')) newFormData.transitionTimeline = '1-2 years';
+          else if (line.toLowerCase().includes('2+')) newFormData.transitionTimeline = '2+ years';
+          else newFormData.transitionTimeline = '6-12 months';
+        }
+        if (line.toLowerCase().includes('continue in current role') || line.toLowerCase().includes('current job')) {
+          if (line.toLowerCase().includes('full-time')) newFormData.continueCurrent = 'Yes, continuing full-time';
+          else if (line.toLowerCase().includes('part-time')) newFormData.continueCurrent = 'Yes, but reducing to part-time';
+          else if (line.toLowerCase().includes('no')) newFormData.continueCurrent = 'No, focusing exclusively on the transition';
+          else if (line.toLowerCase().includes('unemployed')) newFormData.continueCurrent = 'Currently unemployed/between roles';
+        }
+        if (line.toLowerCase().includes('guidance needed') || line.toLowerCase().includes('help needed')) {
           const match = line.match(/:\s*(.+)/);
           if (match) newFormData.guidanceNeeded = match[1].trim();
         }
-        if (line.toLowerCase().includes('12-month') || line.toLowerCase().includes('future goal')) {
+        if (line.toLowerCase().includes('future goal') || line.toLowerCase().includes('12-month')) {
           const match = line.match(/:\s*(.+)/);
           if (match) newFormData.futureGoal = match[1].trim();
         }
@@ -243,8 +354,8 @@ const CareerTest = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Career Path in Tech</h1>
-      <p className="mb-8">Help us understand your tech interests and experience</p>
+      <h1 className="text-3xl font-bold mb-6">Career Transition to Tech</h1>
+      <p className="mb-8">Help us understand your background and tech interests to recommend the best career path</p>
       
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -284,7 +395,7 @@ const CareerTest = () => {
         </div>
         <div className="flex items-center">
           <div className="bg-gray-300 text-gray-700 rounded-full w-8 h-8 flex items-center justify-center mr-2">2</div>
-          <span>Verification</span>
+          <span>Analysis</span>
         </div>
         <div className="flex items-center">
           <div className="bg-gray-300 text-gray-700 rounded-full w-8 h-8 flex items-center justify-center mr-2">3</div>
@@ -325,7 +436,59 @@ const CareerTest = () => {
           </div>
         </FormSection>
         
-        <FormSection title="Tech Interests & Experience">
+        <FormSection title="Current Career Background">
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Current or Previous Field of Work
+            </label>
+            <input
+              type="text"
+              name="currentField"
+              value={formData.currentField}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              placeholder="E.g., Healthcare, Finance, Education, etc."
+              required
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Current or Most Recent Job Title
+            </label>
+            <input
+              type="text"
+              name="currentRole"
+              value={formData.currentRole}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              placeholder="E.g., Registered Nurse, Project Manager, Teacher, etc."
+              required
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Years of Experience in Current/Previous Field
+            </label>
+            <select
+              name="yearsExperience"
+              value={formData.yearsExperience}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              required
+            >
+              <option value="">Select an option</option>
+              <option value="Less than 1 year">Less than 1 year</option>
+              <option value="1-3 years">1-3 years</option>
+              <option value="3-5 years">3-5 years</option>
+              <option value="5-10 years">5-10 years</option>
+              <option value="10+ years">10+ years</option>
+            </select>
+          </div>
+        </FormSection>
+        
+        <FormSection title="Motivation & Personal Strengths">
           <div className="mb-4">
             <label className="block mb-2">
               <span className="text-red-500">*</span> What do you like doing best?
@@ -335,7 +498,7 @@ const CareerTest = () => {
               value={formData.bestActivity}
               onChange={handleChange}
               className="w-full p-2 border rounded-md"
-              placeholder="Enter your answer"
+              placeholder="Describe activities you enjoy and find most fulfilling"
               rows="3"
               required
             />
@@ -343,21 +506,134 @@ const CareerTest = () => {
           
           <div className="mb-4">
             <label className="block mb-2">
-              <span className="text-red-500">*</span> How do you prefer to work?
+              <span className="text-red-500">*</span> What is one personal strength you believe will help you succeed in tech?
+            </label>
+            <textarea
+              name="personalStrength"
+              value={formData.personalStrength}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              placeholder="E.g., problem-solving, attention to detail, creativity, persistence, etc."
+              rows="3"
+              required
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> What is your biggest motivation for pursuing a tech career?
+            </label>
+            <textarea
+              name="techMotivation"
+              value={formData.techMotivation}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              placeholder="What drives you to pursue a career in technology?"
+              rows="3"
+              required
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> What are you passionate about?
+            </label>
+            <textarea
+              name="techPassion"
+              value={formData.techPassion}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              placeholder="Describe topics, activities or causes you're passionate about"
+              rows="3"
+              required
+            />
+          </div>
+        </FormSection>
+        
+        <FormSection title="Transition Information">
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> What is your primary reason for transitioning to tech?
             </label>
             <select
-              name="workPreference"
-              value={formData.workPreference}
+              name="transitionReason"
+              value={formData.transitionReason}
               onChange={handleChange}
               className="w-full p-2 border rounded-md"
               required
             >
               <option value="">Select an option</option>
-              <option value="Remote work">Remote work</option>
-              <option value="Office work">Office work</option>
-              <option value="Hybrid">Hybrid</option>
-              <option value="Flexible">Flexible</option>
+              <option value="Better career prospects">Better career prospects</option>
+              <option value="Higher salary potential">Higher salary potential</option>
+              <option value="Work-life balance">Work-life balance</option>
+              <option value="Remote work opportunities">Remote work opportunities</option>
+              <option value="Interest in technology">Interest in technology</option>
+              <option value="Career advancement">Career advancement</option>
+              <option value="Industry is changing/declining">Industry is changing/declining</option>
+              <option value="Other">Other (please specify in comments)</option>
             </select>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Which skills from your current/previous career do you believe will transfer well to tech?
+            </label>
+            <textarea
+              name="transferableSkills"
+              value={formData.transferableSkills}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              placeholder="E.g., analytical thinking, project management, attention to detail, etc."
+              rows="4"
+              required
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Have you used any technology tools or software in your current/previous role?
+            </label>
+            <textarea
+              name="previousTechExposure"
+              value={formData.previousTechExposure}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              placeholder="List any software, systems, or technical tools you've used professionally"
+              rows="4"
+              required
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> What challenges do you anticipate in transitioning to tech?
+            </label>
+            <textarea
+              name="anticipatedChallenges"
+              value={formData.anticipatedChallenges}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              placeholder="E.g., learning programming, technical terminology, finding entry-level positions, etc."
+              rows="4"
+              required
+            />
+          </div>
+        </FormSection>
+        
+        <FormSection title="Tech Preferences & Experience">
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Which tech areas are you most curious about or interested in learning?
+            </label>
+            <textarea
+              name="techInterests"
+              value={formData.techInterests}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              placeholder="E.g., web development, data science, cybersecurity, etc."
+              rows="3"
+              required
+            />
           </div>
           
           <div className="mb-4">
@@ -381,82 +657,23 @@ const CareerTest = () => {
           
           <div className="mb-4">
             <label className="block mb-2">
-              <span className="text-red-500">*</span> What excites you most about working in tech?
+              <span className="text-red-500">*</span> How do you prefer to work?
             </label>
-            <textarea
-              name="techExcitement"
-              value={formData.techExcitement}
+            <select
+              name="workPreference"
+              value={formData.workPreference}
               onChange={handleChange}
               className="w-full p-2 border rounded-md"
-              placeholder="Enter your answer"
-              rows="3"
               required
-            />
+            >
+              <option value="">Select an option</option>
+              <option value="Remote work">Remote work</option>
+              <option value="Office work">Office work</option>
+              <option value="Hybrid">Hybrid</option>
+              <option value="Flexible">Flexible</option>
+            </select>
           </div>
           
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Which tech areas are you most curious about or interested in learning?
-            </label>
-            <textarea
-              name="techInterests"
-              value={formData.techInterests}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="Enter your answer"
-              rows="3"
-              required
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Which tech-related activities have you enjoyed the most so far?
-            </label>
-            <textarea
-              name="techActivities"
-              value={formData.techActivities}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="Enter your answer"
-              rows="4"
-              required
-            />
-            <p className="text-sm text-gray-500 mt-1">(even if it's informal — e.g., tinkering with websites, playing with data, cybersecurity games, etc.)</p>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> What is one personal strength you believe will help you succeed in tech?
-            </label>
-            <textarea
-              name="personalStrength"
-              value={formData.personalStrength}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="Enter your answer"
-              rows="4"
-              required
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> What is your biggest motivation for pursuing a tech career?
-            </label>
-            <textarea
-              name="techMotivation"
-              value={formData.techMotivation}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="Enter your answer"
-              rows="3"
-              required
-            />
-          </div>
-        </FormSection>
-        
-        <FormSection title="Experience & Skills">
           <div className="mb-4">
             <label className="block mb-2">
               <span className="text-red-500">*</span> Which of these best describes your current experience level in tech?
@@ -479,21 +696,29 @@ const CareerTest = () => {
           
           <div className="mb-4">
             <label className="block mb-2">
-              <span className="text-red-500">*</span> Are you open to working in emerging areas like AI, Blockchain, or Cybersecurity if given the right support?
+              <span className="text-red-500">*</span> Which of the following tools or platforms have you used before?
             </label>
             <select
-              name="emergingTechInterest"
-              value={formData.emergingTechInterest}
-              onChange={handleChange}
+              name="toolsUsed"
+              value={formData.toolsUsed}
+              onChange={handleMultiSelect}
               className="w-full p-2 border rounded-md"
+              multiple
               required
+              size="5"
             >
-              <option value="">Select an option</option>
-              <option value="Yes, very interested">Yes, very interested</option>
-              <option value="Yes, somewhat interested">Yes, somewhat interested</option>
-              <option value="Not sure">Not sure</option>
-              <option value="Not particularly interested">Not particularly interested</option>
+              <option value="VS Code">VS Code</option>
+              <option value="GitHub">GitHub</option>
+              <option value="JavaScript">JavaScript</option>
+              <option value="Python">Python</option>
+              <option value="React">React</option>
+              <option value="Node.js">Node.js</option>
+              <option value="SQL">SQL</option>
+              <option value="AWS">AWS</option>
+              <option value="Docker">Docker</option>
+              <option value="None">None</option>
             </select>
+            <p className="text-sm text-gray-500 mt-1">(Hold Ctrl/Cmd to select multiple options)</p>
           </div>
           
           <div className="mb-4">
@@ -524,36 +749,106 @@ const CareerTest = () => {
               onChange={handleChange}
               className="w-full p-2 border rounded-md"
               placeholder="Enter your answer (or type 'None' if you don't have any)"
-              rows="4"
+              rows="3"
               required
             />
+          </div>
+        </FormSection>
+        
+        <FormSection title="Tech Career Aspirations">
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Which tech career paths are you most interested in exploring?
+            </label>
+            <select
+              name="careerPathsInterest"
+              value={formData.careerPathsInterest}
+              onChange={handleMultiSelect}
+              className="w-full p-2 border rounded-md"
+              multiple
+              required
+              size="8"
+            >
+              <option value="Software Development">Software Development</option>
+              <option value="Data Analysis/Science">Data Analysis/Science</option>
+              <option value="UX/UI Design">UX/UI Design</option>
+              <option value="Product Management">Product Management</option>
+              <option value="Cybersecurity">Cybersecurity</option>
+              <option value="Cloud Engineering">Cloud Engineering</option>
+              <option value="DevOps">DevOps</option>
+              <option value="AI/Machine Learning">AI/Machine Learning</option>
+              <option value="Technical Writing">Technical Writing</option>
+              <option value="Quality Assurance">Quality Assurance</option>
+              <option value="Technical Support">Technical Support</option>
+              <option value="Not Sure Yet">Not Sure Yet</option>
+            </select>
+            <p className="text-sm text-gray-500 mt-1">(Hold Ctrl/Cmd to select multiple options)</p>
           </div>
           
           <div className="mb-4">
             <label className="block mb-2">
-              <span className="text-red-500">*</span> Which of the following tools or platforms have you used before?
+              <span className="text-red-500">*</span> Do you have a preference for working in specific industries or sectors with your tech skills?
             </label>
             <select
-              name="toolsUsed"
-              value={formData.toolsUsed}
+              name="industryPreference"
+              value={formData.industryPreference}
               onChange={handleMultiSelect}
               className="w-full p-2 border rounded-md"
               multiple
               required
               size="5"
             >
-              <option value="VS Code">VS Code</option>
-              <option value="GitHub">GitHub</option>
-              <option value="JavaScript">JavaScript</option>
-              <option value="Python">Python</option>
-              <option value="React">React</option>
-              <option value="Node.js">Node.js</option>
-              <option value="SQL">SQL</option>
-              <option value="AWS">AWS</option>
-              <option value="Docker">Docker</option>
-              <option value="None">None</option>
+              <option value="Healthcare/Medical">Healthcare/Medical</option>
+              <option value="Finance/Fintech">Finance/Fintech</option>
+              <option value="Education">Education</option>
+              <option value="E-commerce">E-commerce</option>
+              <option value="Entertainment/Media">Entertainment/Media</option>
+              <option value="Government">Government</option>
+              <option value="Same as current industry">Same as current industry</option>
+              <option value="No preference">No preference</option>
+              <option value="Other">Other</option>
             </select>
             <p className="text-sm text-gray-500 mt-1">(Hold Ctrl/Cmd to select multiple options)</p>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Would you prefer to leverage your domain expertise from your current field in your tech role?
+            </label>
+            <select
+              name="leverageDomainExpertise"
+              value={formData.leverageDomainExpertise}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              required
+            >
+              <option value="">Select an option</option>
+              <option value="Yes, definitely">Yes, definitely</option>
+              <option value="Yes, somewhat">Yes, somewhat</option>
+              <option value="Not sure">Not sure</option>
+              <option value="No, I want a complete change">No, I want a complete change</option>
+            </select>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> What salary range are you targeting in your tech role?
+            </label>
+            <select
+              name="targetSalary"
+              value={formData.targetSalary}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              required
+            >
+              <option value="">Select an option</option>
+              <option value="$40,000-$60,000">$40,000-$60,000</option>
+              <option value="$60,000-$80,000">$60,000-$80,000</option>
+              <option value="$80,000-$100,000">$80,000-$100,000</option>
+              <option value="$100,000-$120,000">$100,000-$120,000</option>
+              <option value="$120,000+">$120,000+</option>
+              <option value="Not sure">Not sure</option>
+            </select>
           </div>
         </FormSection>
         
@@ -580,17 +875,41 @@ const CareerTest = () => {
           
           <div className="mb-4">
             <label className="block mb-2">
-              <span className="text-red-500">*</span> What type of impact do you want your work to have?
+              <span className="text-red-500">*</span> What timeline do you envision for your transition to tech?
             </label>
-            <textarea
-              name="impactType"
-              value={formData.impactType}
+            <select
+              name="transitionTimeline"
+              value={formData.transitionTimeline}
               onChange={handleChange}
               className="w-full p-2 border rounded-md"
-              placeholder="Enter your answer"
-              rows="3"
               required
-            />
+            >
+              <option value="">Select an option</option>
+              <option value="Less than 6 months">Less than 6 months</option>
+              <option value="6-12 months">6-12 months</option>
+              <option value="1-2 years">1-2 years</option>
+              <option value="2+ years">2+ years</option>
+              <option value="Already transitioning">Already transitioning</option>
+            </select>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Are you planning to continue in your current role while learning tech skills?
+            </label>
+            <select
+              name="continueCurrent"
+              value={formData.continueCurrent}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              required
+            >
+              <option value="">Select an option</option>
+              <option value="Yes, continuing full-time">Yes, continuing full-time</option>
+              <option value="Yes, but reducing to part-time">Yes, but reducing to part-time</option>
+              <option value="No, focusing exclusively on the transition">No, focusing exclusively on the transition</option>
+              <option value="Currently unemployed/between roles">Currently unemployed/between roles</option>
+            </select>
           </div>
           
           <div className="mb-4">
@@ -602,7 +921,7 @@ const CareerTest = () => {
               value={formData.guidanceNeeded}
               onChange={handleChange}
               className="w-full p-2 border rounded-md"
-              placeholder="Enter your answer"
+              placeholder="E.g., learning resources, career roadmap, resume help, etc."
               rows="3"
               required
             />
@@ -617,7 +936,7 @@ const CareerTest = () => {
               value={formData.futureGoal}
               onChange={handleChange}
               className="w-full p-2 border rounded-md"
-              placeholder="Enter your answer"
+              placeholder="E.g., completing a bootcamp, landing first tech job, etc."
               rows="3"
               required
             />

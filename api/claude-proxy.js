@@ -24,14 +24,22 @@ export default async function handler(req, res) {
 
   // Check for proper request body
   if (!req.body || !req.body.messages || !req.body.model) {
-    return res.status(400).json({ error: 'Invalid request format', body: req.body });
+    return res.status(400).json({ 
+      error: 'Invalid request format', 
+      details: {
+        bodyExists: !!req.body,
+        messagesExist: req.body ? !!req.body.messages : false,
+        modelExists: req.body ? !!req.body.model : false
+      }
+    });
   }
 
   try {
-    // Debug: Log key existence and request details
-    console.log('API Key exists:', !!process.env.CLAUDE_API_KEY);
-    console.log('Request model:', req.body.model);
-    console.log('Request max_tokens:', req.body.max_tokens);
+    // Log API request details for debugging
+    console.log('API Request Details:');
+    console.log('- Model:', req.body.model);
+    console.log('- Max Tokens:', req.body.max_tokens);
+    console.log('- API Key exists:', !!process.env.CLAUDE_API_KEY);
     
     // Call the Claude API with your secure API key
     const response = await axios.post(
@@ -46,25 +54,22 @@ export default async function handler(req, res) {
       }
     );
     
-    // Debug: Log successful response
-    console.log('Claude API response successful');
+    console.log('Claude API call successful');
     
     // Return the Claude API response to the client
     return res.status(200).json(response.data);
   } catch (error) {
-    // Detailed error logging
-    console.error('Claude API error details:');
-    console.error('Status:', error.response?.status);
-    console.error('Data:', error.response?.data);
-    console.error('Message:', error.message);
+    console.error('Claude API error:');
+    console.error('- Status:', error.response?.status);
+    console.error('- Error Data:', JSON.stringify(error.response?.data || {}));
+    console.error('- Error Message:', error.message);
     
-    // Return a detailed error message
+    // Return a detailed error response
     return res.status(error.response?.status || 500).json({ 
       error: 'Error calling Claude API',
       message: error.response?.data?.error?.message || error.message,
-      status: error.response?.status,
-      data: error.response?.data,
-      type: error.response?.data?.error?.type || 'unknown'
+      details: error.response?.data || {},
+      status: error.response?.status
     });
   }
 }

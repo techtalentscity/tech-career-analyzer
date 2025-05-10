@@ -14,6 +14,11 @@ const CareerDashboard = () => {
     email: '',
     experienceLevel: '',
     currentField: '',
+    currentRole: '',
+    jobResponsibilities: '',
+    jobProjects: '',
+    jobTechnologies: '',
+    transferableSkills: '',
     interests: []
   });
   const [dashboardData, setDashboardData] = useState({
@@ -39,10 +44,14 @@ const CareerDashboard = () => {
               email, 
               experienceLevel, 
               techInterests,
-              personalStrength,
               techMotivation,
               techPassion,
-              currentField
+              currentField,
+              currentRole,
+              jobResponsibilities,
+              jobProjects,
+              jobTechnologies,
+              transferableSkills
             } = location.state.formData;
             
             setUserData({
@@ -50,6 +59,11 @@ const CareerDashboard = () => {
               email: email,
               experienceLevel: experienceLevel,
               currentField: currentField || 'Not specified',
+              currentRole: currentRole || 'Not specified',
+              jobResponsibilities: jobResponsibilities || 'Not specified',
+              jobProjects: jobProjects || 'Not specified',
+              jobTechnologies: jobTechnologies || 'Not specified',
+              transferableSkills: transferableSkills || 'Not specified',
               interests: typeof techInterests === 'string' 
                 ? techInterests.split(',').map(i => i.trim()) 
                 : (Array.isArray(techInterests) ? techInterests : [])
@@ -71,6 +85,11 @@ const CareerDashboard = () => {
                 email: submission.email,
                 experienceLevel: submission.experienceLevel,
                 currentField: submission.currentField || 'Not specified',
+                currentRole: submission.currentRole || 'Not specified',
+                jobResponsibilities: submission.jobResponsibilities || 'Not specified',
+                jobProjects: submission.jobProjects || 'Not specified',
+                jobTechnologies: submission.jobTechnologies || 'Not specified',
+                transferableSkills: submission.transferableSkills || 'Not specified',
                 interests: typeof submission.techInterests === 'string' 
                   ? submission.techInterests.split(',').map(i => i.trim()) 
                   : (Array.isArray(submission.techInterests) ? submission.techInterests : [])
@@ -149,6 +168,18 @@ const CareerDashboard = () => {
       'Udemy - Affordable tech courses',
       'YouTube tutorials for beginners'
     ];
+
+    // Extract some job-related skills from user data
+    const techKeywords = ['software', 'programming', 'development', 'analysis', 'design', 'database', 'web', 'testing', 'automation', 'cloud', 'security'];
+    let jobTechSkills = [];
+    
+    // Try to extract tech skills from job technologies
+    if (userData.jobTechnologies && userData.jobTechnologies !== 'Not specified') {
+      const techItems = userData.jobTechnologies.split(/[,;]/).map(item => item.trim());
+      jobTechSkills = techItems.filter(item => 
+        techKeywords.some(keyword => item.toLowerCase().includes(keyword))
+      );
+    }
     
     // Set dashboard data with defaults
     setDashboardData({
@@ -157,11 +188,13 @@ const CareerDashboard = () => {
       resources,
       strengthsWeaknesses: { 
         strengths: [
+          'Transferable skills from ' + userData.currentField,
+          ...jobTechSkills.slice(0, 3),
           'Willingness to learn new skills',
           'Problem-solving aptitude',
           'Attention to detail',
           'Adaptability to new technologies'
-        ], 
+        ].filter(s => s !== 'Transferable skills from Not specified'), 
         weaknesses: [
           'Technical knowledge in programming languages',
           'Experience with development tools',
@@ -567,6 +600,27 @@ const CareerDashboard = () => {
                 </div>
               </div>
               
+              {/* Job Experience Highlights - New Section */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-bold mb-4">Job Experience Highlights</h2>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium text-gray-800">Current/Previous Role:</h3>
+                    <p className="text-gray-600">{userData.currentRole}</p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium text-gray-800">Key Technologies Used:</h3>
+                    <p className="text-gray-600">{userData.jobTechnologies}</p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium text-gray-800">Notable Achievements:</h3>
+                    <p className="text-gray-600">{userData.jobProjects}</p>
+                  </div>
+                </div>
+              </div>
+              
               {/* Key Skills to Develop */}
               <div className="bg-white rounded-lg shadow p-6">
                 <h2 className="text-xl font-bold mb-4">Key Skills to Develop</h2>
@@ -611,6 +665,17 @@ const CareerDashboard = () => {
                       )}
                     </div>
                   </div>
+                </div>
+              </div>
+              
+              {/* Transferable Skills - Modified Section */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-bold mb-4">Transferable Skills</h2>
+                <p className="text-gray-600 mb-3">
+                  Based on your background in {userData.currentField}:
+                </p>
+                <div className="mt-2">
+                  <p className="text-gray-700">{userData.transferableSkills}</p>
                 </div>
               </div>
               
@@ -742,6 +807,18 @@ const CareerDashboard = () => {
                       </ul>
                     </div>
                   </div>
+                  
+                  {/* Relevant Experience Section - New */}
+                  <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <h4 className="font-semibold mb-2">How Your Experience Relates</h4>
+                    <p className="text-gray-700">
+                      Your experience in {userData.currentField} as a {userData.currentRole} provides valuable transferable skills. 
+                      {userData.jobProjects !== 'Not specified' && userData.jobProjects ? 
+                        ` Your work on ${userData.jobProjects.split('.')[0]} demonstrates skills applicable to this path.` : ''}
+                      {userData.jobTechnologies !== 'Not specified' && userData.jobTechnologies ? 
+                        ` Your familiarity with ${userData.jobTechnologies.split(',')[0]} is also relevant.` : ''}
+                    </p>
+                  </div>
                 </div>
                 
                 <div className="bg-gray-50 px-6 py-4 flex justify-end">
@@ -778,7 +855,7 @@ const CareerDashboard = () => {
                           style={{ width: `${Math.min(100, dashboardData.skillsMap[skill].count * 20)}%` }} 
                           className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500">
                         </div>
-                        </div>
+                      </div>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {dashboardData.skillsMap[skill].careers.map((career, careerIndex) => (
@@ -800,6 +877,28 @@ const CareerDashboard = () => {
               </div>
             </div>
             
+            {/* New Section - Existing Skills */}
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <h3 className="text-lg font-semibold mb-4">Your Existing Technical Skills</h3>
+              <p className="mb-4">From your current/previous job experience:</p>
+              
+              {userData.jobTechnologies !== 'Not specified' && userData.jobTechnologies ? (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {userData.jobTechnologies.split(/[,;]/).map((tech, index) => (
+                    <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                      {tech.trim()}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 italic mb-4">No specific technologies mentioned</p>
+              )}
+              
+              <p className="text-sm text-gray-600">
+                These skills from your work as a {userData.currentRole} can be leveraged in your tech career transition.
+              </p>
+            </div>
+            
             <div className="bg-indigo-50 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-2">Skill Development Tips</h3>
               <ul className="space-y-2">
@@ -818,6 +917,10 @@ const CareerDashboard = () => {
                 <li className="flex items-start">
                   <span className="text-indigo-600 mr-2">•</span>
                   <p>Track your progress by keeping a learning journal or portfolio</p>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-indigo-600 mr-2">•</span>
+                  <p>Look for ways to apply your experience with {userData.jobTechnologies ? userData.jobTechnologies.split(',')[0] : 'previous tools'} to new tech contexts</p>
                 </li>
               </ul>
             </div>
@@ -877,6 +980,28 @@ const CareerDashboard = () => {
                   </ul>
                 </div>
                 
+                {/* Domain-Specific Resources - New Section */}
+                <div className="bg-white rounded-lg shadow p-6 mb-6">
+                  <h3 className="text-lg font-semibold mb-4">Resources for {userData.currentField} Professionals</h3>
+                  <p className="mb-4">Specialized resources for professionals transitioning from your field:</p>
+                  <ul className="space-y-3">
+                    <li className="flex items-start">
+                      <span className="text-purple-500 mr-2">•</span>
+                      <div>
+                        <p className="font-medium">{userData.currentField} to Tech Communities</p>
+                        <p className="text-sm text-gray-600">Connect with others making similar transitions</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-purple-500 mr-2">•</span>
+                      <div>
+                        <p className="font-medium">Domain-Specific Tech Projects</p>
+                        <p className="text-sm text-gray-600">Build projects that leverage your {userData.currentField} expertise</p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                
                 <div className="bg-white rounded-lg shadow p-6">
                   <h3 className="text-lg font-semibold mb-4">Project Ideas</h3>
                   <p className="mb-4">Building projects is crucial for skill development. Here are some ideas to get started:</p>
@@ -901,6 +1026,12 @@ const CareerDashboard = () => {
                       <span className="text-indigo-500 mr-2">•</span>
                       <p>E-commerce store or product catalog</p>
                     </li>
+                    {userData.currentField !== 'Not specified' && (
+                      <li className="flex items-start">
+                        <span className="text-indigo-500 mr-2">•</span>
+                        <p>A tech solution for a common problem in the {userData.currentField} industry</p>
+                      </li>
+                    )}
                   </ul>
                 </div>
               </div>
@@ -913,6 +1044,28 @@ const CareerDashboard = () => {
           <div>
             <div className="bg-white rounded-lg shadow p-6 mb-6">
               <h2 className="text-2xl font-bold mb-6">Full Analysis</h2>
+              
+              {/* Job Experience Summary - New Section */}
+              <div className="mb-8 bg-blue-50 p-6 rounded-lg">
+                <h3 className="text-xl font-bold mb-4">Job Experience Summary</h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold text-blue-700 mb-2">Current/Previous Role</h4>
+                    <p className="mb-4">{userData.currentRole} in {userData.currentField} with {userData.yearsExperience} experience</p>
+                    
+                    <h4 className="font-semibold text-blue-700 mb-2">Key Responsibilities</h4>
+                    <p className="mb-4">{userData.jobResponsibilities}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold text-blue-700 mb-2">Notable Projects/Achievements</h4>
+                    <p className="mb-4">{userData.jobProjects}</p>
+                    
+                    <h4 className="font-semibold text-blue-700 mb-2">Technologies Used</h4>
+                    <p>{userData.jobTechnologies}</p>
+                  </div>
+                </div>
+              </div>
               
               {/* Data Visualizations */}
               <div className="mb-8">

@@ -1,5 +1,3 @@
-# tech-career-analyzer
-
 # Tech Career Path Analyzer
 
 An interactive dashboard for analyzing tech career test responses and generating personalized career path recommendations using the Claude API.

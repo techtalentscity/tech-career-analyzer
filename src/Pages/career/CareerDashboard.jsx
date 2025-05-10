@@ -307,6 +307,79 @@ const CareerDashboard = () => {
               {/* Top Career Matches */}
               <div className="bg-white rounded-lg shadow p-6">
                 <h2 className="text-xl font-bold mb-4">Top Career Matches</h2>
+                <div className="space-y-4">
+                  {dashboardData.careerPaths.slice(0, 3).map((path, index) => (
+                    <div key={index} className="flex items-center">
+                      <div 
+                        className="w-16 h-16 rounded-full flex items-center justify-center mr-4 flex-shrink-0" 
+                        style={{ 
+                          background: `conic-gradient(#3b82f6 ${path.match}%, #e5e7eb 0)`,
+                          position: 'relative'
+                        }}
+                      >
+                        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
+                          <span className="text-blue-600 font-bold">{path.match}%</span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">{path.title}</h3>
+                        <p className="text-sm text-gray-600">Est. timeline: {dashboardData.timeToCareer[path.title] || '9-15 months'}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Key Skills to Develop */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-bold mb-4">Key Skills to Develop</h2>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {getTopSkills().map((skill, index) => (
+                    <div key={index} className="border rounded-lg p-4">
+                      <h3 className="font-medium">{skill}</h3>
+                      <p className="text-sm text-gray-600 mb-2">
+                        Relevant for {dashboardData.skillsMap[skill].careers.length} career paths
+                      </p>
+                      <button 
+                        onClick={() => handleStartLearning(skill)}
+                        className="text-blue-600 text-sm font-medium hover:underline"
+                      >
+                        Find learning resources →
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            {/* Right Column - Sidebar */}
+            <div className="space-y-6">
+              {/* Profile Card */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-bold mb-2">Your Profile</h2>
+                <div className="space-y-2">
+                  <p><span className="font-medium">Experience:</span> {userData.experienceLevel || 'Not specified'}</p>
+                  <div>
+                    <p className="font-medium mb-1">Interests:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {userData.interests && userData.interests.length > 0 ? (
+                        userData.interests.map((interest, index) => (
+                          <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                            {interest}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-gray-500 text-sm">No interests specified</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Strengths & Weaknesses */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-bold mb-4">Your Profile Analysis</h2>
+                
                 <div className="mb-4">
                   <h3 className="font-medium text-green-600 mb-2">Strengths</h3>
                   <ul className="list-disc list-inside space-y-1">
@@ -450,7 +523,6 @@ const CareerDashboard = () => {
         {activeTab === 'skills' && (
           <div>
             <h2 className="text-2xl font-bold mb-6">Skills Development Plan</h2>
-            
             <div className="bg-white rounded-lg shadow p-6 mb-6">
               <h3 className="text-lg font-semibold mb-4">Top Skills by Importance</h3>
               <div className="space-y-4">
@@ -466,9 +538,9 @@ const CareerDashboard = () => {
                       <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
                         <div 
                           style={{ width: `${Math.min(100, dashboardData.skillsMap[skill].count * 20)}%` }} 
-                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"
-                        ></div>
-                      </div>
+                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500">
+                        </div>
+                        </div>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {dashboardData.skillsMap[skill].careers.map((career, careerIndex) => (
@@ -755,77 +827,4 @@ const CareerDashboard = () => {
   );
 };
 
-export default CareerDashboard;="space-y-4">
-                  {dashboardData.careerPaths.slice(0, 3).map((path, index) => (
-                    <div key={index} className="flex items-center">
-                      <div 
-                        className="w-16 h-16 rounded-full flex items-center justify-center mr-4 flex-shrink-0" 
-                        style={{ 
-                          background: `conic-gradient(#3b82f6 ${path.match}%, #e5e7eb 0)`,
-                          position: 'relative'
-                        }}
-                      >
-                        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
-                          <span className="text-blue-600 font-bold">{path.match}%</span>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">{path.title}</h3>
-                        <p className="text-sm text-gray-600">Est. timeline: {dashboardData.timeToCareer[path.title] || '9-15 months'}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Key Skills to Develop */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-4">Key Skills to Develop</h2>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {getTopSkills().map((skill, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <h3 className="font-medium">{skill}</h3>
-                      <p className="text-sm text-gray-600 mb-2">
-                        Relevant for {dashboardData.skillsMap[skill].careers.length} career paths
-                      </p>
-                      <button 
-                        onClick={() => handleStartLearning(skill)}
-                        className="text-blue-600 text-sm font-medium hover:underline"
-                      >
-                        Find learning resources →
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            
-            {/* Right Column - Sidebar */}
-            <div className="space-y-6">
-              {/* Profile Card */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-2">Your Profile</h2>
-                <div className="space-y-2">
-                  <p><span className="font-medium">Experience:</span> {userData.experienceLevel || 'Not specified'}</p>
-                  <div>
-                    <p className="font-medium mb-1">Interests:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {userData.interests && userData.interests.length > 0 ? (
-                        userData.interests.map((interest, index) => (
-                          <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
-                            {interest}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-gray-500 text-sm">No interests specified</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Strengths & Weaknesses */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-4">Your Profile Analysis</h2>
-                
-                <div className
+export default CareerDashboard;

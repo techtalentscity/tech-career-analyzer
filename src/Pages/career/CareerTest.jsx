@@ -23,6 +23,12 @@ const CareerTest = () => {
     yearsExperience: '',
     currentRole: '',
     
+    // Job Experience (new section)
+    jobResponsibilities: '',
+    jobProjects: '',
+    jobTechnologies: '',
+    internships: '',
+    
     // Transition information
     transitionReason: '',
     transferableSkills: '',
@@ -31,7 +37,6 @@ const CareerTest = () => {
     
     // Personal motivation and strengths
     bestActivity: '',
-    personalStrength: '',
     techMotivation: '',
     techPassion: '',
     
@@ -123,14 +128,40 @@ const CareerTest = () => {
           if (match) newFormData.currentRole = match[1].trim();
         }
         
+        // Process job experience fields
+        if (line.toLowerCase().includes('job responsibilities') || 
+            line.toLowerCase().includes('key responsibilities') || 
+            line.toLowerCase().includes('main duties')) {
+          const match = line.match(/:\s*(.+)/);
+          if (match) newFormData.jobResponsibilities = match[1].trim();
+        }
+        if (line.toLowerCase().includes('projects') || 
+            line.toLowerCase().includes('achievements') || 
+            line.toLowerCase().includes('accomplishments')) {
+          const match = line.match(/:\s*(.+)/);
+          if (match) newFormData.jobProjects = match[1].trim();
+        }
+        if (line.toLowerCase().includes('software used') || 
+            line.toLowerCase().includes('technologies used') || 
+            line.toLowerCase().includes('tools used in job')) {
+          const match = line.match(/:\s*(.+)/);
+          if (match) newFormData.jobTechnologies = match[1].trim();
+        }
+        if (line.toLowerCase().includes('internship') || 
+            line.toLowerCase().includes('relevant experience')) {
+          const match = line.match(/:\s*(.+)/);
+          if (match) newFormData.internships = match[1].trim();
+        }
+        
         // Process motivation and personal strength
         if (line.toLowerCase().includes('like doing best') || line.toLowerCase().includes('favorite activity')) {
           const match = line.match(/:\s*(.+)/);
           if (match) newFormData.bestActivity = match[1].trim();
         }
-        if (line.toLowerCase().includes('personal strength') || line.toLowerCase().includes('strength')) {
+        if (line.toLowerCase().includes('personal strength') || line.toLowerCase().includes('strength') || 
+            line.toLowerCase().includes('transferable skills')) {
           const match = line.match(/:\s*(.+)/);
-          if (match) newFormData.personalStrength = match[1].trim();
+          if (match) newFormData.transferableSkills = match[1].trim();
         }
         if (line.toLowerCase().includes('motivation') || line.toLowerCase().includes('motivated by')) {
           const match = line.match(/:\s*(.+)/);
@@ -145,10 +176,6 @@ const CareerTest = () => {
         if (line.toLowerCase().includes('transition reason')) {
           const match = line.match(/:\s*(.+)/);
           if (match) newFormData.transitionReason = match[1].trim();
-        }
-        if (line.toLowerCase().includes('transferable skills')) {
-          const match = line.match(/:\s*(.+)/);
-          if (match) newFormData.transferableSkills = match[1].trim();
         }
         if (line.toLowerCase().includes('tech exposure') || line.toLowerCase().includes('previous tech')) {
           const match = line.match(/:\s*(.+)/);
@@ -488,6 +515,72 @@ const CareerTest = () => {
           </div>
         </FormSection>
         
+        {/* New Job Experience Section */}
+        <FormSection title="Job Experience Details">
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Key Job Responsibilities
+            </label>
+            <textarea
+              name="jobResponsibilities"
+              value={formData.jobResponsibilities}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              placeholder="Describe your main responsibilities in your current/previous role. Feel free to copy and paste from your resume."
+              rows="4"
+              required
+            />
+            <p className="text-sm text-gray-500 mt-1">List your key responsibilities, tasks performed, or duties from your current/previous job</p>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Notable Projects or Achievements
+            </label>
+            <textarea
+              name="jobProjects"
+              value={formData.jobProjects}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              placeholder="Describe 2-3 significant projects, achievements, or initiatives you've worked on"
+              rows="4"
+              required
+            />
+            <p className="text-sm text-gray-500 mt-1">Include measurable results if possible (e.g., "Increased efficiency by 20%", "Managed a team of 5")</p>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Software or Technologies Used
+            </label>
+            <textarea
+              name="jobTechnologies"
+              value={formData.jobTechnologies}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              placeholder="List all software, tools, systems, or technologies you've used professionally"
+              rows="3"
+              required
+            />
+            <p className="text-sm text-gray-500 mt-1">Include all technical and non-technical tools (e.g., CRM systems, MS Office, specialized software)</p>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              Internships or Relevant Experience
+            </label>
+            <textarea
+              name="internships"
+              value={formData.internships}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              placeholder="Describe any internships, volunteer work, or other experiences relevant to technology"
+              rows="3"
+            />
+            <p className="text-sm text-gray-500 mt-1">Include any tech-related side projects, freelance work, or personal initiatives</p>
+          </div>
+        </FormSection>
+        
         <FormSection title="Motivation & Personal Strengths">
           <div className="mb-4">
             <label className="block mb-2">
@@ -499,21 +592,6 @@ const CareerTest = () => {
               onChange={handleChange}
               className="w-full p-2 border rounded-md"
               placeholder="Describe activities you enjoy and find most fulfilling"
-              rows="3"
-              required
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> What is one personal strength you believe will help you succeed in tech?
-            </label>
-            <textarea
-              name="personalStrength"
-              value={formData.personalStrength}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="E.g., problem-solving, attention to detail, creativity, persistence, etc."
               rows="3"
               required
             />
@@ -583,7 +661,7 @@ const CareerTest = () => {
               value={formData.transferableSkills}
               onChange={handleChange}
               className="w-full p-2 border rounded-md"
-              placeholder="E.g., analytical thinking, project management, attention to detail, etc."
+              placeholder="E.g., analytical thinking, project management, attention to detail, problem-solving, etc."
               rows="4"
               required
             />

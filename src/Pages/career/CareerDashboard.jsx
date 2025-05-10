@@ -13,6 +13,7 @@ const CareerDashboard = () => {
     name: '',
     email: '',
     experienceLevel: '',
+    currentField: '',
     interests: []
   });
   const [dashboardData, setDashboardData] = useState({
@@ -33,12 +34,25 @@ const CareerDashboard = () => {
           
           // If form data is available, set user data
           if (location.state.formData) {
-            const { fullName, email, experienceLevel, techInterests } = location.state.formData;
+            const { 
+              fullName, 
+              email, 
+              experienceLevel, 
+              techInterests,
+              personalStrength,
+              techMotivation,
+              techPassion,
+              currentField
+            } = location.state.formData;
+            
             setUserData({
               name: fullName,
               email: email,
               experienceLevel: experienceLevel,
-              interests: techInterests.split(',').map(i => i.trim())
+              currentField: currentField || 'Not specified',
+              interests: typeof techInterests === 'string' 
+                ? techInterests.split(',').map(i => i.trim()) 
+                : (Array.isArray(techInterests) ? techInterests : [])
             });
           }
           
@@ -56,7 +70,10 @@ const CareerDashboard = () => {
                 name: submission.fullName,
                 email: submission.email,
                 experienceLevel: submission.experienceLevel,
-                interests: submission.techInterests.split(',').map(i => i.trim())
+                currentField: submission.currentField || 'Not specified',
+                interests: typeof submission.techInterests === 'string' 
+                  ? submission.techInterests.split(',').map(i => i.trim()) 
+                  : (Array.isArray(submission.techInterests) ? submission.techInterests : [])
               });
             }
             
@@ -68,6 +85,16 @@ const CareerDashboard = () => {
             });
             return;
           }
+        }
+        
+        // Add fallback check to ensure we have data to display
+        if (
+          dashboardData.careerPaths.length === 0 &&
+          Object.keys(dashboardData.skillsMap).length === 0 &&
+          dashboardData.resources.length === 0
+        ) {
+          // If still no data after parsing, create some defaults based on user data
+          createDefaultDashboardData();
         }
       } catch (error) {
         console.error('Error loading dashboard data:', error);
@@ -82,6 +109,69 @@ const CareerDashboard = () => {
     loadData();
   }, [location, navigate]);
 
+  const createDefaultDashboardData = () => {
+    // Create some default career paths based on tech interests if available
+    const careerPaths = [];
+    const interests = userData.interests && userData.interests.length > 0 
+      ? userData.interests 
+      : ['Software Development', 'Data Analysis'];
+    
+    interests.forEach((interest, index) => {
+      careerPaths.push({
+        title: interest,
+        match: 95 - (index * 5),
+        description: `Career path based on your interest in ${interest}`,
+        skills: ['Programming fundamentals', 'Problem solving', 'Communication skills'],
+        resources: []
+      });
+    });
+    
+    // Add some default skills
+    const skillsMap = {};
+    ['Programming fundamentals', 'Problem solving', 'Communication skills', 'Web development', 'Data analysis'].forEach((skill, index) => {
+      skillsMap[skill] = {
+        count: 5 - index,
+        careers: careerPaths.map(p => p.title)
+      };
+    });
+    
+    // Add default timeline
+    const timeToCareer = {};
+    careerPaths.forEach(path => {
+      timeToCareer[path.title] = "9-15 months";
+    });
+    
+    // Add some default resources
+    const resources = [
+      'Codecademy - Interactive coding lessons',
+      'freeCodeCamp - Full web development curriculum',
+      'Coursera - Technology courses from top universities',
+      'Udemy - Affordable tech courses',
+      'YouTube tutorials for beginners'
+    ];
+    
+    // Set dashboard data with defaults
+    setDashboardData({
+      careerPaths,
+      skillsMap,
+      resources,
+      strengthsWeaknesses: { 
+        strengths: [
+          'Willingness to learn new skills',
+          'Problem-solving aptitude',
+          'Attention to detail',
+          'Adaptability to new technologies'
+        ], 
+        weaknesses: [
+          'Technical knowledge in programming languages',
+          'Experience with development tools',
+          'Portfolio of completed projects'
+        ] 
+      },
+      timeToCareer
+    });
+  };
+
   const parseAnalysisData = (analysisText) => {
     // Initialize data structures
     const careerPaths = [];
@@ -95,40 +185,65 @@ const CareerDashboard = () => {
     const lines = analysisText.split('\n');
     
     // Set up regex patterns for career paths
-    // This pattern looks for lines like "a) Data Scientist (90% match, 2-3 years to senior level)"
-    const careerPathRegex = /([a-z]\)\s+)?(.*?)\s+\((\d+)%\s+match,\s+(.*?)\)/i;
+    // This pattern is more flexible to match different formats
+    // It will match both "a) Data Scientist (90% match, 2-3 years to senior level)"
+    // and "Data Scientist (90% match)" formats
+    const careerPathRegex = /([a-z]\)\s+)?([^(]+)\s+\((\d+)%\s+match[,\s]*(.*?)?\)/i;
+    
+    // Also create a section matcher pattern that's more flexible
+    const sectionMatchers = {
+      careerPaths: /career path recommendations|recommended career paths|career paths|path recommendations/i,
+      skills: /skills development|skills gap|skills to develop|priority skills|skills analysis/i,
+      resources: /learning resources|recommended resources|resources|learning plan/i,
+      strengths: /strengths|your strengths|key strengths|strengths analysis/i,
+      weaknesses: /areas for improvement|areas to improve|weaknesses|gaps|improvement areas/i,
+      roadmap: /learning roadmap|roadmap|learning plan|development plan/i,
+      transition: /transition strategy|transition plan|career transition/i
+    };
     
     let currentSection = '';
+    let subSection = '';
     
     // Process each line
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       
-      // Identify sections
-      if (line.match(/career path recommendations/i)) {
-        currentSection = 'careerPaths';
-        continue;
-      } else if (line.match(/skills development plan/i)) {
-        currentSection = 'skills';
-        continue;
-      } else if (line.match(/learning resources/i)) {
-        currentSection = 'resources';
-        continue;
-      } else if (line.match(/strengths/i) && !line.match(/areas for improvement/i)) {
-        currentSection = 'strengths';
-        continue;
-      } else if (line.match(/areas for improvement/i) || line.match(/areas to improve/i)) {
-        currentSection = 'weaknesses';
+      // Skip empty lines
+      if (!line) continue;
+      
+      // Check for section headers (now more flexible)
+      if (line.match(/^\d+[\.\)]\s+/)) {
+        // This is likely a numbered section header (e.g. "1. Career Path Recommendations")
+        for (const [section, pattern] of Object.entries(sectionMatchers)) {
+          if (line.match(pattern)) {
+            currentSection = section;
+            subSection = '';
+            break;
+          }
+        }
         continue;
       }
       
-      // Process career paths
-      if (currentSection === 'careerPaths') {
+      // Check for subsection headers
+      if (line.match(/^[A-Z][\.\)]\s+/i) || 
+          line.match(/^[a-z]\)\s+/i) || 
+          line.startsWith('**') || 
+          line.match(/^#+\s+/)) {
+        subSection = line;
+        continue;
+      }
+      
+      // Process career paths - either from numbered lists or from subsections
+      if (currentSection === 'careerPaths' || 
+          (currentSection === '' && (subSection.match(/career path/i) || line.match(careerPathRegex)))) {
+        
+        // Try to match the career path pattern
         const match = line.match(careerPathRegex);
+        
         if (match) {
           const title = match[2].trim();
           const matchPercentage = parseInt(match[3], 10);
-          const timeline = match[4].trim();
+          const timeline = match[4] ? match[4].trim() : "6-12 months"; // Default timeline
           
           // Create a new career path
           const careerPath = {
@@ -145,17 +260,40 @@ const CareerDashboard = () => {
           // Store the timeline
           timeToCareer[title] = timeline;
           
-          // Look ahead for the description lines (usually start with "- ")
+          // Look ahead for the description lines
           let j = i + 1;
-          while (j < lines.length && lines[j].trim().startsWith('-')) {
-            const descLine = lines[j].trim().substring(2).trim();
-            if (careerPath.description) {
-              careerPath.description += ' ' + descLine;
-            } else {
-              careerPath.description = descLine;
+          let descriptionText = '';
+          
+          // Keep looking until we hit another career path or a new section
+          while (j < lines.length && 
+                !lines[j].match(careerPathRegex) && 
+                !lines[j].match(/^\d+[\.\)]\s+/) &&
+                lines[j].trim() !== '') {
+            
+            const descLine = lines[j].trim();
+            
+            // If it's a bullet point about skills, add to skills
+            if (descLine.match(/^\-\s+/) && 
+                (descLine.toLowerCase().includes('skill') || descLine.toLowerCase().includes('knowledge'))) {
+              const skill = descLine.replace(/^\-\s+/, '').trim();
+              if (skill && !careerPath.skills.includes(skill)) {
+                careerPath.skills.push(skill);
+              }
+            } 
+            // Otherwise add to description
+            else if (descLine.match(/^\-\s+/) || descLine.match(/^\*\s+/)) {
+              const descPart = descLine.replace(/^[\-\*]\s+/, '').trim();
+              if (descriptionText) {
+                descriptionText += ' ' + descPart;
+              } else {
+                descriptionText = descPart;
+              }
             }
+            
             j++;
           }
+          
+          careerPath.description = descriptionText;
           
           // Skip the lines we've already processed
           i = j - 1;
@@ -163,8 +301,12 @@ const CareerDashboard = () => {
       }
       
       // Process skills
-      else if (currentSection === 'skills' && line.match(/^\d+\.\s+/)) {
-        const skill = line.replace(/^\d+\.\s+/, '').trim();
+      else if ((currentSection === 'skills' || currentSection === 'roadmap') && 
+              (line.match(/^\-\s+/) || line.match(/^\d+[\.\)]\s+/) || line.match(/^\*\s+/))) {
+        
+        // Extract the skill from bullet points or numbered lists
+        const skill = line.replace(/^[\-\*\d\.]\s+/, '').trim();
+        
         if (skill) {
           // Add to overall skills map
           if (!skillsMap[skill]) {
@@ -188,24 +330,47 @@ const CareerDashboard = () => {
       }
       
       // Process resources
-      else if (currentSection === 'resources' && line.match(/^-\s+/)) {
-        const resource = line.replace(/^-\s+/, '').trim();
+      else if ((currentSection === 'resources' || currentSection === 'roadmap') && 
+              (line.match(/^\-\s+/) || line.match(/^\*\s+/) || line.startsWith('http'))) {
+        
+        // Extract resource from bullet points or links
+        const resource = line.replace(/^[\-\*]\s+/, '').trim();
+        
         if (resource && !resources.includes(resource)) {
           resources.push(resource);
+          
+          // Try to associate with career paths if in a subsection
+          if (subSection) {
+            for (const path of careerPaths) {
+              // Check if the subsection contains this career path name
+              if (subSection.toLowerCase().includes(path.title.toLowerCase()) && 
+                  !path.resources.includes(resource)) {
+                path.resources.push(resource);
+              }
+            }
+          }
         }
       }
       
       // Process strengths
-      else if (currentSection === 'strengths' && line.match(/^-\s+/)) {
-        const strength = line.replace(/^-\s+/, '').trim();
+      else if (currentSection === 'strengths' || 
+              (line.match(/^\-\s+/) && (line.toLowerCase().includes('strength') || subSection.toLowerCase().includes('strength')))) {
+        
+        const strength = line.replace(/^[\-\*]\s+/, '').trim();
         if (strength && !strengths.includes(strength)) {
           strengths.push(strength);
         }
       }
       
       // Process weaknesses/areas for improvement
-      else if (currentSection === 'weaknesses' && line.match(/^-\s+/)) {
-        const weakness = line.replace(/^-\s+/, '').trim();
+      else if (currentSection === 'weaknesses' ||
+              (line.match(/^\-\s+/) && 
+              (line.toLowerCase().includes('improve') || 
+               line.toLowerCase().includes('weakness') || 
+               subSection.toLowerCase().includes('improve') ||
+               subSection.toLowerCase().includes('weakness')))) {
+        
+        const weakness = line.replace(/^[\-\*]\s+/, '').trim();
         if (weakness && !weaknesses.includes(weakness)) {
           weaknesses.push(weakness);
         }
@@ -220,13 +385,85 @@ const CareerDashboard = () => {
         sortedSkillsMap[key] = skillsMap[key];
       });
     
-    setDashboardData({
-      careerPaths,
-      skillsMap: sortedSkillsMap,
-      resources,
-      strengthsWeaknesses: { strengths, weaknesses },
-      timeToCareer
-    });
+    // If we don't have career paths data yet, try a second pass with different patterns
+    // This handles cases where the format doesn't match our initial expectations
+    if (careerPaths.length === 0) {
+      let currentCareerPath = null;
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        
+        // Look for lines that might indicate career paths
+        if (line.match(/^[\d\.]+\s+(.+)$/)) {
+          const title = line.match(/^[\d\.]+\s+(.+)$/)[1].trim();
+          
+          // Check if this might be a career path heading
+          if (title.match(/developer|engineer|scientist|analyst|designer|manager/i)) {
+            currentCareerPath = {
+              title,
+              match: Math.floor(Math.random() * 20) + 80, // Generate a random match percentage 80-99
+              description: '',
+              skills: [],
+              resources: []
+            };
+            
+            // Add default timeline
+            timeToCareer[title] = "9-15 months";
+            
+            careerPaths.push(currentCareerPath);
+          }
+        }
+        
+        // If we have a current path, add details to it
+        if (currentCareerPath && line.match(/^\-\s+/)) {
+          const point = line.replace(/^\-\s+/, '').trim();
+          
+          // Add to description
+          if (currentCareerPath.description) {
+            currentCareerPath.description += ' ' + point;
+          } else {
+            currentCareerPath.description = point;
+          }
+          
+          // If it mentions skills, add to skills
+          if (point.toLowerCase().includes('skill') || 
+              point.toLowerCase().includes('knowledge')) {
+            const skillWords = point.split(/[,;]/).map(s => s.trim());
+            for (const skillWord of skillWords) {
+              if (skillWord && !currentCareerPath.skills.includes(skillWord)) {
+                currentCareerPath.skills.push(skillWord);
+                
+                // Add to skills map
+                if (!sortedSkillsMap[skillWord]) {
+                  sortedSkillsMap[skillWord] = {
+                    count: 0,
+                    careers: []
+                  };
+                }
+                sortedSkillsMap[skillWord].count++;
+                if (!sortedSkillsMap[skillWord].careers.includes(currentCareerPath.title)) {
+                  sortedSkillsMap[skillWord].careers.push(currentCareerPath.title);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    // Check if we have enough data and set it
+    if (careerPaths.length > 0 || Object.keys(sortedSkillsMap).length > 0 || resources.length > 0) {
+      setDashboardData({
+        careerPaths,
+        skillsMap: sortedSkillsMap,
+        resources,
+        strengthsWeaknesses: { strengths, weaknesses },
+        timeToCareer
+      });
+    } else {
+      // If no meaningful data was parsed, create defaults
+      createDefaultDashboardData();
+    }
   };
 
   const handleStartLearning = (skill) => {
@@ -359,6 +596,7 @@ const CareerDashboard = () => {
                 <h2 className="text-xl font-bold mb-2">Your Profile</h2>
                 <div className="space-y-2">
                   <p><span className="font-medium">Experience:</span> {userData.experienceLevel || 'Not specified'}</p>
+                  <p><span className="font-medium">Field:</span> {userData.currentField || 'Not specified'}</p>
                   <div>
                     <p className="font-medium mb-1">Interests:</p>
                     <div className="flex flex-wrap gap-2">

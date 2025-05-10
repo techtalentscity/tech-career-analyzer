@@ -18,7 +18,8 @@ const CLAUDE_PROMPTS = {
     "I'm filling out a tech career assessment form for someone transitioning into tech. " +
     "Based on a typical career changer profile, suggest realistic answers for a form with these fields: " +
     "Current/Previous Field of Work, Years of Experience, Current/Previous Role, " +
-    "What they like doing best, Personal strength for tech success, Biggest motivation for tech career, " +
+    "Job Responsibilities, Notable Projects or Achievements, Software or Technologies Used, Internships or Relevant Experience, " +
+    "What they like doing best, Biggest motivation for tech career, " +
     "What they're passionate about, Primary reason for transition, Transferable skills from previous career, " +
     "Previous tech exposure, Anticipated challenges in transition, Tech areas they're curious about, " +
     "Comfort with learning new tools, Preferred work method, Current tech experience level, " +
@@ -30,7 +31,7 @@ const CLAUDE_PROMPTS = {
   careerAnalysis: (formData) => `
     I'm a career transition expert helping someone move into technology from a different field.
     Please analyze this comprehensive career assessment for someone looking to transition into tech.
-    Focus especially on their personal strengths, interests, tech preferences, and background.
+    Focus especially on their job experience, transferable skills, interests, tech preferences, and background.
     
     ASSESSMENT DATA (IMPORTANT FIELDS MARKED):
     
@@ -39,9 +40,14 @@ const CLAUDE_PROMPTS = {
     - Current/Previous Role: ${formData.currentRole || 'Not specified'}
     - Years of Experience: ${formData.yearsExperience || 'Not specified'}
     
+    JOB EXPERIENCE DETAILS (IMPORTANT):
+    - Key Job Responsibilities: ${formData.jobResponsibilities || 'Not specified'}
+    - Notable Projects or Achievements: ${formData.jobProjects || 'Not specified'}
+    - Software or Technologies Used: ${formData.jobTechnologies || 'Not specified'}
+    - Internships or Relevant Experience: ${formData.internships || 'Not specified'}
+    
     PERSONAL STRENGTHS & MOTIVATION (IMPORTANT):
     - What they like doing best: ${formData.bestActivity || 'Not specified'}
-    - Personal strength for tech success: ${formData.personalStrength || 'Not specified'}
     - Biggest motivation for tech career: ${formData.techMotivation || 'Not specified'}
     - What they're passionate about: ${formData.techPassion || 'Not specified'}
     - What excites them about tech: ${formData.techExcitement || 'Not specified'}

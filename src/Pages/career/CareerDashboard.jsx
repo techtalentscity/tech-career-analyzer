@@ -83,7 +83,7 @@ const CareerDashboard = () => {
   }, [location, navigate]);
 
   const parseAnalysisData = (analysisText) => {
-    // Parse the analysis text to extract structured data for dashboard
+    // Initialize data structures
     const careerPaths = [];
     const skillsMap = {};
     const resources = [];
@@ -91,63 +91,82 @@ const CareerDashboard = () => {
     const weaknesses = [];
     const timeToCareer = {};
     
-    // Extract career paths with descriptions
-    const careerPathRegex = /(?:Career Path|Option) \d+:\s*([^:]+)(?::|$)/g;
-    let match;
+    // Split into lines for processing
+    const lines = analysisText.split('\n');
     
-    let analysisLines = analysisText.split('\n');
+    // Set up regex patterns for career paths
+    // This pattern looks for lines like "a) Data Scientist (90% match, 2-3 years to senior level)"
+    const careerPathRegex = /([a-z]\)\s+)?(.*?)\s+\((\d+)%\s+match,\s+(.*?)\)/i;
     
-    // Process the text line by line to extract structured data
     let currentSection = '';
-    let currentCareerPath = '';
     
-    analysisLines.forEach(line => {
-      const trimmedLine = line.trim();
+    // Process each line
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
       
       // Identify sections
-      if (/Career Path|Career Option/.test(trimmedLine)) {
+      if (line.match(/career path recommendations/i)) {
         currentSection = 'careerPaths';
-        const pathMatch = trimmedLine.match(/.*?:\s*(.*?)(?:$|\s*-)/);
-        if (pathMatch && pathMatch[1]) {
-          currentCareerPath = pathMatch[1].trim();
-          careerPaths.push({
-            title: currentCareerPath,
-            description: '',
-            match: Math.floor(Math.random() * 30) + 70, // Simulate match percentage (70-100%)
-            skills: [],
-            resources: []
-          });
-        }
-      } else if (/Skills (to|you should) Develop|Required Skills/.test(trimmedLine)) {
+        continue;
+      } else if (line.match(/skills development plan/i)) {
         currentSection = 'skills';
-      } else if (/Resources|Recommended Resources|Learning Resources/.test(trimmedLine)) {
+        continue;
+      } else if (line.match(/learning resources/i)) {
         currentSection = 'resources';
-      } else if (/Strengths|Your Strengths/.test(trimmedLine)) {
+        continue;
+      } else if (line.match(/strengths/i) && !line.match(/areas for improvement/i)) {
         currentSection = 'strengths';
-      } else if (/Areas to Improve|Weaknesses|Growth Areas/.test(trimmedLine)) {
+        continue;
+      } else if (line.match(/areas for improvement/i) || line.match(/areas to improve/i)) {
         currentSection = 'weaknesses';
-      } else if (/Time to Career|Timeline|Career Timeline/.test(trimmedLine)) {
-        currentSection = 'timeToCareer';
+        continue;
       }
       
-      // Process content based on current section
-      if (currentSection === 'careerPaths' && trimmedLine.length > 0 && !trimmedLine.startsWith('Career Path')) {
-        if (careerPaths.length > 0) {
-          const lastPath = careerPaths[careerPaths.length - 1];
-          if (lastPath.description.length === 0) {
-            lastPath.description = trimmedLine;
-          } else if (!trimmedLine.includes(':')) {
-            lastPath.description += ' ' + trimmedLine;
-          }
-        }
-      } else if (currentSection === 'skills' && trimmedLine.startsWith('-')) {
-        const skill = trimmedLine.replace(/^- /, '').trim();
-        if (skill && careerPaths.length > 0 && currentCareerPath) {
-          // Add to current career path
-          const lastPath = careerPaths[careerPaths.length - 1];
-          lastPath.skills.push(skill);
+      // Process career paths
+      if (currentSection === 'careerPaths') {
+        const match = line.match(careerPathRegex);
+        if (match) {
+          const title = match[2].trim();
+          const matchPercentage = parseInt(match[3], 10);
+          const timeline = match[4].trim();
           
-          // Also add to overall skills map
+          // Create a new career path
+          const careerPath = {
+            title,
+            match: matchPercentage,
+            description: '',
+            skills: [],
+            resources: []
+          };
+          
+          // Add to the careerPaths array
+          careerPaths.push(careerPath);
+          
+          // Store the timeline
+          timeToCareer[title] = timeline;
+          
+          // Look ahead for the description lines (usually start with "- ")
+          let j = i + 1;
+          while (j < lines.length && lines[j].trim().startsWith('-')) {
+            const descLine = lines[j].trim().substring(2).trim();
+            if (careerPath.description) {
+              careerPath.description += ' ' + descLine;
+            } else {
+              careerPath.description = descLine;
+            }
+            j++;
+          }
+          
+          // Skip the lines we've already processed
+          i = j - 1;
+        }
+      }
+      
+      // Process skills
+      else if (currentSection === 'skills' && line.match(/^\d+\.\s+/)) {
+        const skill = line.replace(/^\d+\.\s+/, '').trim();
+        if (skill) {
+          // Add to overall skills map
           if (!skillsMap[skill]) {
             skillsMap[skill] = {
               count: 0,
@@ -155,54 +174,42 @@ const CareerDashboard = () => {
             };
           }
           skillsMap[skill].count++;
-          if (!skillsMap[skill].careers.includes(currentCareerPath)) {
-            skillsMap[skill].careers.push(currentCareerPath);
-          }
-        }
-      } else if (currentSection === 'resources' && trimmedLine.startsWith('-')) {
-        const resource = trimmedLine.replace(/^- /, '').trim();
-        if (resource) {
-          resources.push(resource);
-          // Add to current career path if applicable
-          if (careerPaths.length > 0 && currentCareerPath) {
-            const lastPath = careerPaths[careerPaths.length - 1];
-            if (lastPath.title === currentCareerPath) {
-              lastPath.resources.push(resource);
+          
+          // Try to associate with career paths
+          for (const path of careerPaths) {
+            if (!path.skills.includes(skill)) {
+              path.skills.push(skill);
+            }
+            if (!skillsMap[skill].careers.includes(path.title)) {
+              skillsMap[skill].careers.push(path.title);
             }
           }
         }
-      } else if (currentSection === 'strengths' && trimmedLine.startsWith('-')) {
-        strengths.push(trimmedLine.replace(/^- /, '').trim());
-      } else if (currentSection === 'weaknesses' && trimmedLine.startsWith('-')) {
-        weaknesses.push(trimmedLine.replace(/^- /, '').trim());
-      } else if (currentSection === 'timeToCareer' && trimmedLine.includes(':')) {
-        const parts = trimmedLine.split(':');
-        if (parts.length >= 2) {
-          const careerTitle = parts[0].trim();
-          const timeframe = parts[1].trim();
-          timeToCareer[careerTitle] = timeframe;
+      }
+      
+      // Process resources
+      else if (currentSection === 'resources' && line.match(/^-\s+/)) {
+        const resource = line.replace(/^-\s+/, '').trim();
+        if (resource && !resources.includes(resource)) {
+          resources.push(resource);
         }
       }
-    });
-    
-    // If no explicit timeframes were found, generate estimated ones
-    if (Object.keys(timeToCareer).length === 0) {
-      careerPaths.forEach(path => {
-        const experienceLevel = userData.experienceLevel || '';
-        let timeframe;
-        
-        if (experienceLevel.toLowerCase().includes('beginner')) {
-          timeframe = '12-18 months';
-        } else if (experienceLevel.toLowerCase().includes('intermediate')) {
-          timeframe = '6-12 months';
-        } else if (experienceLevel.toLowerCase().includes('advanced')) {
-          timeframe = '3-6 months';
-        } else {
-          timeframe = '9-15 months';
+      
+      // Process strengths
+      else if (currentSection === 'strengths' && line.match(/^-\s+/)) {
+        const strength = line.replace(/^-\s+/, '').trim();
+        if (strength && !strengths.includes(strength)) {
+          strengths.push(strength);
         }
-        
-        timeToCareer[path.title] = timeframe;
-      });
+      }
+      
+      // Process weaknesses/areas for improvement
+      else if (currentSection === 'weaknesses' && line.match(/^-\s+/)) {
+        const weakness = line.replace(/^-\s+/, '').trim();
+        if (weakness && !weaknesses.includes(weakness)) {
+          weaknesses.push(weakness);
+        }
+      }
     }
     
     // Sort skills by frequency

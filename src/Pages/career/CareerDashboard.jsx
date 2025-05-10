@@ -243,6 +243,188 @@ const CareerDashboard = () => {
     return Object.keys(dashboardData.skillsMap).slice(0, 5);
   };
   
+  // Career Match Chart Component
+  const CareerMatchChart = () => {
+    if (!dashboardData.careerPaths || dashboardData.careerPaths.length === 0) {
+      return <p className="text-gray-500">No career path data available</p>;
+    }
+    
+    return (
+      <div className="mt-8 mb-10">
+        <h3 className="text-xl font-bold mb-4">Career Match Comparison</h3>
+        <div className="relative overflow-hidden">
+          <div className="flex items-end h-64 space-x-4">
+            {dashboardData.careerPaths.map((path, index) => (
+              <div key={index} className="flex flex-col items-center flex-1">
+                <div 
+                  className="w-full bg-blue-500 rounded-t" 
+                  style={{ height: `${path.match * 0.6}%` }}
+                ></div>
+                <div className="mt-2 text-center">
+                  <span className="font-bold text-blue-600">{path.match}%</span>
+                  <p className="text-sm">{path.title}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Horizontal axis lines */}
+          <div className="absolute left-0 right-0 top-0 h-px bg-gray-200"></div>
+          <div className="absolute left-0 right-0 top-1/4 h-px bg-gray-200"></div>
+          <div className="absolute left-0 right-0 top-1/2 h-px bg-gray-200"></div>
+          <div className="absolute left-0 right-0 top-3/4 h-px bg-gray-200"></div>
+          <div className="absolute left-0 right-0 bottom-8 h-px bg-gray-200"></div>
+        </div>
+      </div>
+    );
+  };
+  
+  // Skills Distribution Chart Component
+  const SkillsDistributionChart = () => {
+    const skills = Object.keys(dashboardData.skillsMap);
+    
+    if (skills.length === 0) {
+      return <p className="text-gray-500">No skills data available</p>;
+    }
+    
+    // Get top 5 skills
+    const topSkills = skills.slice(0, Math.min(5, skills.length));
+    
+    return (
+      <div className="mt-10 mb-10">
+        <h3 className="text-xl font-bold mb-4">Top Skills Importance</h3>
+        <div className="space-y-4">
+          {topSkills.map((skill, index) => (
+            <div key={index} className="relative">
+              <div className="flex justify-between mb-1">
+                <span className="font-medium">{skill}</span>
+                <span className="text-sm text-gray-600">
+                  {dashboardData.skillsMap[skill].careers.length} career paths
+                </span>
+              </div>
+              <div className="h-4 w-full bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-indigo-600 rounded-full"
+                  style={{ width: `${Math.min(100, (dashboardData.skillsMap[skill].count / skills.length) * 100)}%` }}
+                ></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+  
+  // Timeline Visualization Component
+  const TimelineVisualization = () => {
+    if (Object.keys(dashboardData.timeToCareer).length === 0) {
+      return <p className="text-gray-500">No timeline data available</p>;
+    }
+    
+    // Convert timeline strings to numbers for visualization
+    const timelineData = {};
+    Object.keys(dashboardData.timeToCareer).forEach(career => {
+      const timeline = dashboardData.timeToCareer[career];
+      // Extract numbers from strings like "2-3 years" or "6-12 months"
+      const matches = timeline.match(/(\d+)-(\d+)/);
+      if (matches && matches.length >= 3) {
+        const minTime = parseInt(matches[1], 10);
+        const maxTime = parseInt(matches[2], 10);
+        
+        // Convert to months if necessary
+        const unit = timeline.includes('year') ? 12 : 1;
+        timelineData[career] = {
+          min: minTime * unit,
+          max: maxTime * unit,
+          original: timeline
+        };
+      }
+    });
+    
+    return (
+      <div className="mt-10 mb-10">
+        <h3 className="text-xl font-bold mb-4">Career Timeline Comparison</h3>
+        <div className="relative pt-2">
+          {/* Timeline scale */}
+          <div className="border-t border-gray-300 h-6 mb-2 relative">
+            {[0, 6, 12, 18, 24, 30, 36].map((month, index) => (
+              <div key={index} className="absolute" style={{ left: `${(month / 36) * 100}%` }}>
+                <div className="h-2 w-px bg-gray-400 -mt-1"></div>
+                <span className="text-xs text-gray-500">{month}m</span>
+              </div>
+            ))}
+          </div>
+          
+          {/* Career timelines */}
+          <div className="space-y-6">
+            {Object.keys(timelineData).map((career, index) => {
+              const data = timelineData[career];
+              return (
+                <div key={index} className="relative">
+                  <div className="flex justify-between mb-1">
+                    <span className="font-medium">{career}</span>
+                    <span className="text-sm text-gray-600">{data.original}</span>
+                  </div>
+                  <div className="h-6 w-full bg-gray-100 rounded-full relative">
+                    <div 
+                      className="absolute h-6 bg-green-200 rounded-full"
+                      style={{ 
+                        left: `${(data.min / 36) * 100}%`,
+                        width: `${((data.max - data.min) / 36) * 100}%`
+                      }}
+                    ></div>
+                    <div
+                      className="absolute h-6 w-3 bg-green-500 rounded-full z-10"
+                      style={{ left: `${(data.min / 36) * 100}%`, transform: 'translateX(-50%)' }}
+                    ></div>
+                    <div
+                      className="absolute h-6 w-3 bg-green-500 rounded-full z-10"
+                      style={{ left: `${(data.max / 36) * 100}%`, transform: 'translateX(-50%)' }}
+                    ></div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
+  // Strengths vs Weaknesses Chart
+  const StrengthWeaknessChart = () => {
+    const strengthsCount = dashboardData.strengthsWeaknesses.strengths.length;
+    const weaknessesCount = dashboardData.strengthsWeaknesses.weaknesses.length;
+    
+    if (strengthsCount === 0 && weaknessesCount === 0) {
+      return <p className="text-gray-500">No strengths/weaknesses data available</p>;
+    }
+    
+    // Calculate the percentage (with a minimum to make the chart look balanced)
+    const total = Math.max(10, strengthsCount + weaknessesCount);
+    const strengthsPercentage = Math.max(15, (strengthsCount / total) * 100);
+    const weaknessesPercentage = Math.max(15, (weaknessesCount / total) * 100);
+    
+    return (
+      <div className="mt-10 mb-10">
+        <h3 className="text-xl font-bold mb-4">Profile Balance</h3>
+        <div className="flex mb-6 h-10">
+          <div 
+            className="bg-green-500 text-white flex items-center justify-center rounded-l"
+            style={{ width: `${strengthsPercentage}%` }}
+          >
+            <span className="font-bold">{strengthsCount} Strengths</span>
+          </div>
+          <div 
+            className="bg-amber-500 text-white flex items-center justify-center rounded-r"
+            style={{ width: `${weaknessesPercentage}%` }}
+          >
+            <span className="font-bold">{weaknessesCount} Areas to Improve</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
   if (loading) {
     return <LoadingSpinner message="Loading your career dashboard..." />;
   }
@@ -673,12 +855,36 @@ const CareerDashboard = () => {
         
         {/* Full Analysis Tab */}
         {activeTab === 'analysis' && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold mb-6">Full Analysis</h2>
-            <div className="prose max-w-none">
-              {analysis.split('\n').map((line, index) => (
-                line.trim() === '' ? <br key={index} /> : <p key={index}>{line}</p>
-              ))}
+          <div>
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <h2 className="text-2xl font-bold mb-6">Full Analysis</h2>
+              
+              {/* Data Visualizations */}
+              <div className="mb-8">
+                <h3 className="text-xl font-bold mb-4">Data Visualizations</h3>
+                
+                {/* Career Match Chart */}
+                <CareerMatchChart />
+                
+                {/* Skills Distribution Chart */}
+                <SkillsDistributionChart />
+                
+                {/* Timeline Visualization */}
+                <TimelineVisualization />
+                
+                {/* Strengths vs Weaknesses */}
+                <StrengthWeaknessChart />
+              </div>
+              
+              {/* Text Analysis */}
+              <div className="border-t pt-8">
+                <h3 className="text-xl font-bold mb-4">Complete Analysis</h3>
+                <div className="prose max-w-none">
+                  {analysis.split('\n').map((line, index) => (
+                    line.trim() === '' ? <br key={index} /> : <p key={index}>{line}</p>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}

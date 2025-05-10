@@ -24,11 +24,14 @@ export default async function handler(req, res) {
 
   // Check for proper request body
   if (!req.body || !req.body.messages || !req.body.model) {
-    return res.status(400).json({ error: 'Invalid request format' });
+    return res.status(400).json({ error: 'Invalid request format', body: req.body });
   }
 
   try {
-    console.log('Attempting to call Claude API with key:', process.env.CLAUDE_API_KEY ? 'Key exists' : 'Key missing');
+    // Debug: Log key existence and request details
+    console.log('API Key exists:', !!process.env.CLAUDE_API_KEY);
+    console.log('Request model:', req.body.model);
+    console.log('Request max_tokens:', req.body.max_tokens);
     
     // Call the Claude API with your secure API key
     const response = await axios.post(
@@ -42,15 +45,25 @@ export default async function handler(req, res) {
         }
       }
     );
+    
+    // Debug: Log successful response
+    console.log('Claude API response successful');
+    
     // Return the Claude API response to the client
     return res.status(200).json(response.data);
   } catch (error) {
-    console.error('Claude API error:', error.response?.data || error.message);
+    // Detailed error logging
+    console.error('Claude API error details:');
+    console.error('Status:', error.response?.status);
+    console.error('Data:', error.response?.data);
+    console.error('Message:', error.message);
     
-    // Return a sanitized error message
+    // Return a detailed error message
     return res.status(error.response?.status || 500).json({ 
       error: 'Error calling Claude API',
       message: error.response?.data?.error?.message || error.message,
+      status: error.response?.status,
+      data: error.response?.data,
       type: error.response?.data?.error?.type || 'unknown'
     });
   }

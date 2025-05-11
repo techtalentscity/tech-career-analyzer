@@ -211,25 +211,37 @@ const CareerDashboard = () => {
           </h4>
         );
       }
-
-        
       // Format skills gap numbered items (e.g., "1. Programming: Focus on Python...")
       else if (line.match(/^\d+\.\s+/) && isInSkillsGapSection(index)) {
-        const prefixMatch = line.match(/^\d+\./);
-        const content = line.replace(/^\d+\.\s+/, '');
-        formattedContent.push(
-          <div key={`skill-gap-${index}`} className="flex items-start ml-4 mb-2">
-            <span className="text-black mr-2 font-medium">{prefixMatch ? prefixMatch[0] : ''}</span>
-            <p className="text-black text-base" dangerouslySetInnerHTML={processContent(content)} />
-          </div>
-        );
+        // Extract the skill name and description
+        const match = line.match(/^\d+\.\s+([\w\s]+):\s+(.+)/);
+        
+        if (match) {
+          const [, skillName, description] = match;
+          formattedContent.push(
+            <div key={`skill-gap-${index}`} className="mb-3">
+              <div className="flex items-start">
+                <span className="text-blue-600 mr-2">•</span>
+                <p className="font-semibold">{skillName}:</p>
+              </div>
+              <p className="ml-5" dangerouslySetInnerHTML={processContent(description)} />
+            </div>
+          );
+        } else {
+          // Fallback for other numbered items in the skills gap section
+          formattedContent.push(
+            <div key={`skill-gap-${index}`} className="flex items-start mb-3">
+              <span className="text-blue-600 mr-2">•</span>
+              <p dangerouslySetInnerHTML={processContent(line.replace(/^\d+\.\s+/, ''))} />
+            </div>
+          );
+        }
       }
-
       // Format list items starting with "-"
       else if (line.trim().startsWith('-')) {
         const content = line.replace(/^-\s+/, '');
         formattedContent.push(
-          <div key={`bullet-${index}`} className="flex items-start ml-4 mb-2">
+          <div key={`bullet-${index}`} className="flex items-start mb-3">
             <span className="text-blue-600 mr-2">•</span>
             <p dangerouslySetInnerHTML={processContent(content)} />
           </div>
@@ -237,12 +249,11 @@ const CareerDashboard = () => {
       }
       // Format list items starting with numbers (e.g., "1. Item") - standard numbered items
       else if (line.trim().match(/^\d+\.\s+/)) {
-        const prefixMatch = line.match(/^\d+\./);
         const content = line.replace(/^\d+\.\s+/, '');
         
         formattedContent.push(
-          <div key={`numbered-${index}`} className="flex items-start ml-4 mb-2">
-            <span className="text-blue-600 mr-2 font-medium">{prefixMatch ? prefixMatch[0] : ''}</span>
+          <div key={`numbered-${index}`} className="flex items-start mb-3">
+            <span className="text-blue-600 mr-2">•</span>
             <p dangerouslySetInnerHTML={processContent(content)} />
           </div>
         );

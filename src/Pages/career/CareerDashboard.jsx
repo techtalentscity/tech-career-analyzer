@@ -119,13 +119,40 @@ const CareerDashboard = () => {
     loadData();
   }, [location, navigate]);
 
+  // Extract career paths and their match percentages from analysis text
+  const extractCareerPaths = (text) => {
+    const lines = text.split('\n');
+    const careerPaths = [];
+    
+    // Regular expression to match career path lines with percentages
+    const careerPathRegex = /^[a-z]\)\s+(.*?)\s+\((\d+)%\s+match/i;
+    
+    lines.forEach(line => {
+      const match = line.match(careerPathRegex);
+      if (match) {
+        careerPaths.push({
+          title: match[1].trim(),
+          match: parseInt(match[2], 10)
+        });
+      }
+    });
+    
+    return careerPaths;
+  };
+
   // Format analysis text for display with emphasis on important elements
   const formatAnalysisText = (text) => {
     const lines = text.split('\n');
     let formattedContent = [];
 
-    // Helper function to highlight important keywords
-    const highlightImportantTerms = (content) => {
+    // Helper function to highlight important keywords and fix pronouns
+    const processContent = (content) => {
+      // First, replace third-person pronouns with second-person
+      content = content.replace(/\btheir\b/gi, 'your');
+      content = content.replace(/\bthey\b/gi, 'you');
+      content = content.replace(/\bthem\b/gi, 'you');
+      content = content.replace(/\bthemselves\b/gi, 'yourself');
+      
       // Check if we need to highlight educational terms
       if (userData.educationLevel && userData.educationLevel !== 'Not specified') {
         const educationTerms = [userData.educationLevel, userData.studyField].filter(Boolean);
@@ -170,17 +197,29 @@ const CareerDashboard = () => {
           </h4>
         );
       }
+      // Format skills gap numbered items (e.g., "1. Advanced software engineering practices...")
+      else if (line.match(/^\d+\.\s+[A-Z]/) && (
+              // Check if we're in the skills gap section by looking at previous lines
+              index > 0 && lines.slice(Math.max(0, index-5), index).some(l => l.includes("SKILLS GAP ANALYSIS"))
+            )) {
+        const content = line;
+        formattedContent.push(
+          <div key={`numbered-skill-${index}`} className="flex items-start ml-4 mb-4">
+            <p className="text-base" dangerouslySetInnerHTML={processContent(content)} />
+          </div>
+        );
+      }
       // Format list items starting with "-"
       else if (line.trim().startsWith('-')) {
         const content = line.replace(/^-\s+/, '');
         formattedContent.push(
           <div key={`bullet-${index}`} className="flex items-start ml-4 mb-2">
             <span className="text-blue-600 mr-2">•</span>
-            <p dangerouslySetInnerHTML={highlightImportantTerms(content)} />
+            <p dangerouslySetInnerHTML={processContent(content)} />
           </div>
         );
       }
-      // Format list items starting with numbers (e.g., "1. Item")
+      // Format list items starting with numbers (e.g., "1. Item") - standard numbered items
       else if (line.trim().match(/^\d+\.\s+/)) {
         const prefixMatch = line.match(/^\d+\./);
         const content = line.replace(/^\d+\.\s+/, '');
@@ -188,7 +227,7 @@ const CareerDashboard = () => {
         formattedContent.push(
           <div key={`numbered-${index}`} className="flex items-start ml-4 mb-2">
             <span className="text-blue-600 mr-2 font-medium">{prefixMatch ? prefixMatch[0] : ''}</span>
-            <p dangerouslySetInnerHTML={highlightImportantTerms(content)} />
+            <p dangerouslySetInnerHTML={processContent(content)} />
           </div>
         );
       }
@@ -215,7 +254,7 @@ const CareerDashboard = () => {
       // Format regular text
       else {
         formattedContent.push(
-          <p key={`text-${index}`} className="mb-3" dangerouslySetInnerHTML={highlightImportantTerms(line)} />
+          <p key={`text-${index}`} className="mb-3" dangerouslySetInnerHTML={processContent(line)} />
         );
       }
     });
@@ -226,6 +265,11 @@ const CareerDashboard = () => {
   if (loading) {
     return <LoadingSpinner message="Loading your career analysis..." />;
   }
+
+  // Get career paths for visualization
+  const careerPaths = React.useMemo(() => {
+    return extractCareerPaths(analysis);
+  }, [analysis]);
 
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
@@ -281,6 +325,100 @@ const CareerDashboard = () => {
             </a>
           </div>
         </div>
+        
+        {/* Career Path Matches Visualization */}
+        {careerPaths.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold mb-6">Career Path Matches</h2>
+            
+            {/* Bar Chart Visualization */}
+            <div className="space-y-6">
+              {careerPaths.map((path, index) => (
+                <div key={index} className="mb-4">
+                  <div className="flex justify-between mb-2">
+                    <span className="font-medium text-lg">{path.title}</span>
+                    <span className="font-bold text-blue-600">{path.match}%</span>
+                  </div>
+                  <div className="relative h-8 w-full bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                      className={`absolute top-0 left-0 h-full rounded-full ${
+                        index === 0 ? 'bg-blue-600' : index === 1 ? 'bg-green-500' : 'bg-purple-500'
+                      }`}
+                      style={{ width: `${path.match}%` }}
+                    ></div>
+                  </div>
+                  <div className="grid grid-cols-5 text-xs text-gray-500 mt-1">
+                    <div>0%</div>
+                    <div className="text-center">25%</div>
+                    <div className="text-center">50%</div>
+                    <div className="text-center">75%</div>
+                    <div className="text-right">100%</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Radar/Spider Chart Alternative (using a simple visual) */}
+            <div className="mt-12 mb-6">
+              <h3 className="text-lg font-semibold mb-4">Match Comparison</h3>
+              <div className="relative h-64 w-full flex items-center justify-center">
+                <div className="absolute w-64 h-64 rounded-full border-2 border-gray-200 flex items-center justify-center">
+                  <div className="absolute w-48 h-48 rounded-full border-2 border-gray-200"></div>
+                  <div className="absolute w-32 h-32 rounded-full border-2 border-gray-200"></div>
+                  <div className="absolute w-16 h-16 rounded-full border-2 border-gray-200"></div>
+                  
+                  {/* Center point */}
+                  <div className="absolute w-2 h-2 rounded-full bg-gray-500"></div>
+                  
+                  {/* Career path lines */}
+                  {careerPaths.map((path, index) => {
+                    const angle = (360 / careerPaths.length) * index * (Math.PI / 180);
+                    const radius = (path.match / 100) * 32; // 32 is half of max width (64)
+                    const x = Math.cos(angle) * radius;
+                    const y = Math.sin(angle) * radius;
+                    
+                    const color = index === 0 ? 'bg-blue-600' : 
+                                  index === 1 ? 'bg-green-500' : 'bg-purple-500';
+                    
+                    return (
+                      <React.Fragment key={index}>
+                        {/* Line from center */}
+                        <div 
+                          className={`absolute w-1 ${color}`} 
+                          style={{
+                            height: `${radius}px`,
+                            transformOrigin: 'bottom center',
+                            transform: `rotate(${angle * (180 / Math.PI)}deg) translateX(-0.5px)`
+                          }}
+                        ></div>
+                        
+                        {/* Point at end */}
+                        <div 
+                          className={`absolute w-4 h-4 rounded-full ${color} shadow-md flex items-center justify-center text-white text-xs font-bold`}
+                          style={{
+                            transform: `translate(${x}px, ${-y}px)`
+                          }}
+                        >
+                          {path.match}
+                        </div>
+                        
+                        {/* Label */}
+                        <div 
+                          className="absolute text-sm font-medium text-gray-700"
+                          style={{
+                            transform: `translate(${x * 1.3}px, ${-y * 1.3}px)`
+                          }}
+                        >
+                          {path.title}
+                        </div>
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         
         <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
           {/* User Profile Summary */}

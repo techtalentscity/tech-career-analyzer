@@ -39,7 +39,7 @@ const CareerHome = () => {
               <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0 mt-1">2</div>
               <div>
                 <p className="font-semibold text-lg">AI Analysis</p>
-                <p className="text-gray-600">Our Claude AI analyzes your responses to identify the best career paths for you.</p>
+                <p className="text-gray-600">Our AI analyzes your responses to identify the best career paths for you.</p>
               </div>
             </li>
             <li className="flex items-start">
@@ -73,7 +73,7 @@ const CareerHome = () => {
             </li>
             <li className="flex items-start">
               <span className="text-green-500 mr-2 text-xl">✓</span>
-              <p><span className="font-semibold">100% Free</span> - No cost, no strings attached - just valuable insights for your tech journey</p>
+              <p><span className="font-semibold">100% Free</span> - No cost - just valuable insights for your tech journey</p>
             </li>
           </ul>
         </div>

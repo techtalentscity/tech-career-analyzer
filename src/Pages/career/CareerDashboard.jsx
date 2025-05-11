@@ -222,10 +222,10 @@ const CareerDashboard = () => {
           
           formattedContent.push(
             <div key={`skill-gap-${index}`} className="mb-4">
-              <h4 className="text-lg font-semibold text-blue-600 mb-1">
+              <p className="font-semibold text-blue-600 mb-1">
                 {titlePart}
-              </h4>
-              <p className="text-gray-800">
+              </p>
+              <p className="text-gray-900">
                 {descriptionPart}
               </p>
             </div>
@@ -233,7 +233,7 @@ const CareerDashboard = () => {
         } else {
           // If no colon, format as a regular numbered item
           formattedContent.push(
-            <p key={`skill-gap-${index}`} className="mb-3 text-gray-800">
+            <p key={`skill-gap-${index}`} className="mb-3 text-gray-900">
               {line}
             </p>
           );
@@ -261,7 +261,7 @@ const CareerDashboard = () => {
         );
       }
       // Format monthly sections (e.g., "Month 1-2:")
-      else if (line.trim().match(/^Month\s+\d+-\d+:/i)) {
+      else if (line.trim().match(/^Month\s+\d+-?\d*:/i)) {
         formattedContent.push(
           <h5 key={`month-${index}`} className="font-semibold mt-4 mb-2 text-blue-600 ml-4">
             {line}
@@ -283,7 +283,7 @@ const CareerDashboard = () => {
       // Format regular text
       else {
         formattedContent.push(
-          <p key={`text-${index}`} className="mb-3" dangerouslySetInnerHTML={processContent(line)} />
+          <p key={`text-${index}`} className="mb-3 text-gray-900" dangerouslySetInnerHTML={processContent(line)} />
         );
       }
     });
@@ -436,7 +436,7 @@ const CareerDashboard = () => {
           {/* Complete Analysis Text */}
           <div>
             <h2 className="text-2xl font-bold mb-6">Complete Analysis</h2>
-            <div className="text-base leading-relaxed">
+            <div>
               {formatAnalysisText(analysis)}
             </div>
           </div>

@@ -359,66 +359,6 @@ const CareerDashboard = () => {
                 </div>
               ))}
             </div>
-            
-            {/* Radar/Spider Chart Alternative (using a simple visual) */}
-            <div className="mt-12 mb-6">
-              <h3 className="text-lg font-semibold mb-4">Match Comparison</h3>
-              <div className="relative h-64 w-full flex items-center justify-center">
-                <div className="absolute w-64 h-64 rounded-full border-2 border-gray-200 flex items-center justify-center">
-                  <div className="absolute w-48 h-48 rounded-full border-2 border-gray-200"></div>
-                  <div className="absolute w-32 h-32 rounded-full border-2 border-gray-200"></div>
-                  <div className="absolute w-16 h-16 rounded-full border-2 border-gray-200"></div>
-                  
-                  {/* Center point */}
-                  <div className="absolute w-2 h-2 rounded-full bg-gray-500"></div>
-                  
-                  {/* Career path lines */}
-                  {careerPaths.map((path, index) => {
-                    const angle = (360 / careerPaths.length) * index * (Math.PI / 180);
-                    const radius = (path.match / 100) * 32; // 32 is half of max width (64)
-                    const x = Math.cos(angle) * radius;
-                    const y = Math.sin(angle) * radius;
-                    
-                    const color = index === 0 ? 'bg-blue-600' : 
-                                  index === 1 ? 'bg-green-500' : 'bg-purple-500';
-                    
-                    return (
-                      <React.Fragment key={index}>
-                        {/* Line from center */}
-                        <div 
-                          className={`absolute w-1 ${color}`} 
-                          style={{
-                            height: `${radius}px`,
-                            transformOrigin: 'bottom center',
-                            transform: `rotate(${angle * (180 / Math.PI)}deg) translateX(-0.5px)`
-                          }}
-                        ></div>
-                        
-                        {/* Point at end */}
-                        <div 
-                          className={`absolute w-4 h-4 rounded-full ${color} shadow-md flex items-center justify-center text-white text-xs font-bold`}
-                          style={{
-                            transform: `translate(${x}px, ${-y}px)`
-                          }}
-                        >
-                          {path.match}
-                        </div>
-                        
-                        {/* Label */}
-                        <div 
-                          className="absolute text-sm font-medium text-gray-700"
-                          style={{
-                            transform: `translate(${x * 1.3}px, ${-y * 1.3}px)`
-                          }}
-                        >
-                          {path.title}
-                        </div>
-                      </React.Fragment>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
           </div>
         )}
         

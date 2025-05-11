@@ -119,10 +119,39 @@ const CareerDashboard = () => {
     loadData();
   }, [location, navigate]);
 
-  // Format analysis text for display
+  // Format analysis text for display with emphasis on important elements
   const formatAnalysisText = (text) => {
     const lines = text.split('\n');
     let formattedContent = [];
+
+    // Helper function to highlight important keywords
+    const highlightImportantTerms = (content) => {
+      // Check if we need to highlight educational terms
+      if (userData.educationLevel && userData.educationLevel !== 'Not specified') {
+        const educationTerms = [userData.educationLevel, userData.studyField].filter(Boolean);
+        
+        // Create regex patterns for education terms to highlight
+        educationTerms.forEach(term => {
+          if (term && term.length > 3) { // Only highlight meaningful terms
+            const regex = new RegExp(`(${term})`, 'gi');
+            content = content.replace(regex, '<strong class="text-blue-700">$1</strong>');
+          }
+        });
+      }
+      
+      // Check if we need to highlight publication/research terms
+      if (userData.publications && userData.publications !== 'Not specified') {
+        const researchTerms = ['publication', 'research', 'academic', 'paper', 'journal'];
+        
+        // Create regex for research terms
+        researchTerms.forEach(term => {
+          const regex = new RegExp(`(${term})`, 'gi');
+          content = content.replace(regex, '<strong class="text-purple-700">$1</strong>');
+        });
+      }
+      
+      return { __html: content };
+    };
 
     lines.forEach((line, index) => {
       // Format section headers (e.g., "1. CAREER PATH RECOMMENDATIONS")
@@ -143,19 +172,23 @@ const CareerDashboard = () => {
       }
       // Format list items starting with "-"
       else if (line.trim().startsWith('-')) {
+        const content = line.replace(/^-\s+/, '');
         formattedContent.push(
           <div key={`bullet-${index}`} className="flex items-start ml-4 mb-2">
             <span className="text-blue-600 mr-2">•</span>
-            <p>{line.replace(/^-\s+/, '')}</p>
+            <p dangerouslySetInnerHTML={highlightImportantTerms(content)} />
           </div>
         );
       }
       // Format list items starting with numbers (e.g., "1. Item")
       else if (line.trim().match(/^\d+\.\s+/)) {
+        const prefixMatch = line.match(/^\d+\./);
+        const content = line.replace(/^\d+\.\s+/, '');
+        
         formattedContent.push(
           <div key={`numbered-${index}`} className="flex items-start ml-4 mb-2">
-            <span className="text-blue-600 mr-2 font-medium">{line.match(/^\d+\./)[0]}</span>
-            <p>{line.replace(/^\d+\.\s+/, '')}</p>
+            <span className="text-blue-600 mr-2 font-medium">{prefixMatch ? prefixMatch[0] : ''}</span>
+            <p dangerouslySetInnerHTML={highlightImportantTerms(content)} />
           </div>
         );
       }
@@ -181,7 +214,9 @@ const CareerDashboard = () => {
       }
       // Format regular text
       else {
-        formattedContent.push(<p key={`text-${index}`} className="mb-3">{line}</p>);
+        formattedContent.push(
+          <p key={`text-${index}`} className="mb-3" dangerouslySetInnerHTML={highlightImportantTerms(line)} />
+        );
       }
     });
 

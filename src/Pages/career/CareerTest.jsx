@@ -5,6 +5,7 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import FormSection from '../../components/FormSection';
 import claudeApiService from '../../services/claudeApiService';
 import storageService from '../../services/storageService';
+import googleFormService from '../../services/googleFormService';
 import { toast } from 'react-toastify';
 
 const CareerTest = () => {
@@ -347,14 +348,27 @@ const CareerTest = () => {
     try {
       setAiAnalyzing(true);
       
-      // Save form data to storage
+      // 1. Save form data to local storage for the app's use
       const savedSubmission = storageService.saveCareerTest(formData);
       
-      // Use the Claude API service to analyze the form data
+      // 2. Submit only name and email to Google Form
+      const googleFormData = {
+        fullName: formData.fullName,
+        email: formData.email
+      };
+      
+      // Submit the minimal data to Google Form
+      const formSubmissionResult = await googleFormService.submitToGoogleForm(googleFormData);
+      
+      if (!formSubmissionResult.success) {
+        console.warn('Google Form submission may have failed, but continuing analysis');
+      }
+      
+      // 3. Use the Claude API service to analyze the complete form data
       const analysis = await claudeApiService.analyzeCareerPath(formData);
       setCareerAnalysis(analysis);
       
-      // Save the analysis to storage
+      // 4. Save the analysis to storage
       storageService.saveCareerAnalysis({
         userId: formData.email,
         analysis
@@ -362,7 +376,7 @@ const CareerTest = () => {
       
       setAiAnalyzing(false);
       
-      // Navigate to dashboard page with analysis and form data
+      // 5. Navigate to dashboard page with analysis and form data
       navigate('/career/dashboard', { 
         state: { 
           analysis,

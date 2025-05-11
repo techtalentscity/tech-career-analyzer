@@ -13,11 +13,13 @@ const CareerDashboard = () => {
     name: '',
     email: '',
     experienceLevel: '',
-    currentField: '',
+    studyField: '',          // Changed from currentField
+    educationLevel: '',      // New field
     currentRole: '',
     jobResponsibilities: '',
     jobProjects: '',
     jobTechnologies: '',
+    publications: '',        // New field
     transferableSkills: '',
     interests: []
   });
@@ -46,11 +48,13 @@ const CareerDashboard = () => {
               techInterests,
               techMotivation,
               techPassion,
-              currentField,
+              studyField,           // Changed from currentField
+              educationLevel,       // New field
               currentRole,
               jobResponsibilities,
               jobProjects,
               jobTechnologies,
+              publications,         // New field
               transferableSkills
             } = location.state.formData;
             
@@ -58,11 +62,13 @@ const CareerDashboard = () => {
               name: fullName,
               email: email,
               experienceLevel: experienceLevel,
-              currentField: currentField || 'Not specified',
+              studyField: studyField || 'Not specified',  // Changed from currentField
+              educationLevel: educationLevel || 'Not specified', // New field
               currentRole: currentRole || 'Not specified',
               jobResponsibilities: jobResponsibilities || 'Not specified',
               jobProjects: jobProjects || 'Not specified',
               jobTechnologies: jobTechnologies || 'Not specified',
+              publications: publications || 'Not specified', // New field
               transferableSkills: transferableSkills || 'Not specified',
               interests: typeof techInterests === 'string' 
                 ? techInterests.split(',').map(i => i.trim()) 
@@ -84,11 +90,13 @@ const CareerDashboard = () => {
                 name: submission.fullName,
                 email: submission.email,
                 experienceLevel: submission.experienceLevel,
-                currentField: submission.currentField || 'Not specified',
+                studyField: submission.studyField || 'Not specified',  // Changed from currentField
+                educationLevel: submission.educationLevel || 'Not specified', // New field
                 currentRole: submission.currentRole || 'Not specified',
                 jobResponsibilities: submission.jobResponsibilities || 'Not specified',
                 jobProjects: submission.jobProjects || 'Not specified',
                 jobTechnologies: submission.jobTechnologies || 'Not specified',
+                publications: submission.publications || 'Not specified', // New field
                 transferableSkills: submission.transferableSkills || 'Not specified',
                 interests: typeof submission.techInterests === 'string' 
                   ? submission.techInterests.split(',').map(i => i.trim()) 
@@ -169,7 +177,7 @@ const CareerDashboard = () => {
       'YouTube tutorials for beginners'
     ];
 
-    // Extract some job-related skills from user data
+    // Extract some study-related skills from user data
     const techKeywords = ['software', 'programming', 'development', 'analysis', 'design', 'database', 'web', 'testing', 'automation', 'cloud', 'security'];
     let jobTechSkills = [];
     
@@ -188,13 +196,13 @@ const CareerDashboard = () => {
       resources,
       strengthsWeaknesses: { 
         strengths: [
-          'Transferable skills from ' + userData.currentField,
+          'Educational background in ' + userData.studyField,  // Changed from currentField
           ...jobTechSkills.slice(0, 3),
           'Willingness to learn new skills',
           'Problem-solving aptitude',
           'Attention to detail',
           'Adaptability to new technologies'
-        ].filter(s => s !== 'Transferable skills from Not specified'), 
+        ].filter(s => s !== 'Educational background in Not specified'), 
         weaknesses: [
           'Technical knowledge in programming languages',
           'Experience with development tools',
@@ -600,10 +608,20 @@ const CareerDashboard = () => {
                 </div>
               </div>
               
-              {/* Job Experience Highlights - New Section */}
+              {/* Education and Experience Highlights - Renamed Section */}
               <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-4">Job Experience Highlights</h2>
+                <h2 className="text-xl font-bold mb-4">Education and Experience Highlights</h2>
                 <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium text-gray-800">Education Level:</h3>
+                    <p className="text-gray-600">{userData.educationLevel}</p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium text-gray-800">Field of Study:</h3>
+                    <p className="text-gray-600">{userData.studyField}</p>
+                  </div>
+                  
                   <div>
                     <h3 className="font-medium text-gray-800">Current/Previous Role:</h3>
                     <p className="text-gray-600">{userData.currentRole}</p>
@@ -614,10 +632,12 @@ const CareerDashboard = () => {
                     <p className="text-gray-600">{userData.jobTechnologies}</p>
                   </div>
                   
-                  <div>
-                    <h3 className="font-medium text-gray-800">Notable Achievements:</h3>
-                    <p className="text-gray-600">{userData.jobProjects}</p>
-                  </div>
+                  {userData.publications && userData.publications !== 'Not specified' && (
+                    <div>
+                      <h3 className="font-medium text-gray-800">Publications/Research:</h3>
+                      <p className="text-gray-600">{userData.publications}</p>
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -650,7 +670,8 @@ const CareerDashboard = () => {
                 <h2 className="text-xl font-bold mb-2">Your Profile</h2>
                 <div className="space-y-2">
                   <p><span className="font-medium">Experience:</span> {userData.experienceLevel || 'Not specified'}</p>
-                  <p><span className="font-medium">Field:</span> {userData.currentField || 'Not specified'}</p>
+                  <p><span className="font-medium">Education:</span> {userData.educationLevel || 'Not specified'}</p>
+                  <p><span className="font-medium">Study Field:</span> {userData.studyField || 'Not specified'}</p>
                   <div>
                     <p className="font-medium mb-1">Interests:</p>
                     <div className="flex flex-wrap gap-2">
@@ -672,7 +693,7 @@ const CareerDashboard = () => {
               <div className="bg-white rounded-lg shadow p-6">
                 <h2 className="text-xl font-bold mb-4">Transferable Skills</h2>
                 <p className="text-gray-600 mb-3">
-                  Based on your background in {userData.currentField}:
+                  Based on your background in {userData.studyField}:
                 </p>
                 <div className="mt-2">
                   <p className="text-gray-700">{userData.transferableSkills}</p>
@@ -808,13 +829,15 @@ const CareerDashboard = () => {
                     </div>
                   </div>
                   
-                  {/* Relevant Experience Section - New */}
+                  {/* Education and Experience Section - Updated */}
                   <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold mb-2">How Your Experience Relates</h4>
+                    <h4 className="font-semibold mb-2">How Your Background Relates</h4>
                     <p className="text-gray-700">
-                      Your experience in {userData.currentField} as a {userData.currentRole} provides valuable transferable skills. 
+                      Your {userData.educationLevel} education in {userData.studyField} and experience as a {userData.currentRole} provides valuable transferable skills. 
                       {userData.jobProjects !== 'Not specified' && userData.jobProjects ? 
                         ` Your work on ${userData.jobProjects.split('.')[0]} demonstrates skills applicable to this path.` : ''}
+                      {userData.publications !== 'Not specified' && userData.publications ? 
+                        ` Your publications in "${userData.publications.split('.')[0]}" are also valuable for this career path.` : ''}
                       {userData.jobTechnologies !== 'Not specified' && userData.jobTechnologies ? 
                         ` Your familiarity with ${userData.jobTechnologies.split(',')[0]} is also relevant.` : ''}
                     </p>
@@ -879,23 +902,74 @@ const CareerDashboard = () => {
             
             {/* New Section - Existing Skills */}
             <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <h3 className="text-lg font-semibold mb-4">Your Existing Technical Skills</h3>
-              <p className="mb-4">From your current/previous job experience:</p>
+              <h3 className="text-lg font-semibold mb-4">Your Existing Skills</h3>
+              <p className="mb-4">From your education and work experience:</p>
               
-              {userData.jobTechnologies !== 'Not specified' && userData.jobTechnologies ? (
+              {/* Academic Skills */}
+              <div className="mb-4">
+                <h4 className="font-medium text-gray-700 mb-2">Academic Skills ({userData.educationLevel} in {userData.studyField})</h4>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {userData.jobTechnologies.split(/[,;]/).map((tech, index) => (
-                    <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                      {tech.trim()}
+                  {userData.studyField.split(/[,;]/).map((field, index) => (
+                    <span key={index} className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">
+                      {field.trim()}
                     </span>
                   ))}
+                  
+                  {/* Add some generic academic skills based on education level */}
+                  {userData.educationLevel && userData.educationLevel.includes("Bachelor") && (
+                    <>
+                      <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">Research Methods</span>
+                      <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">Critical Thinking</span>
+                    </>
+                  )}
+                  
+                  {userData.educationLevel && (userData.educationLevel.includes("Master") || userData.educationLevel.includes("PhD")) && (
+                    <>
+                      <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">Advanced Research</span>
+                      <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">Data Analysis</span>
+                      <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">Academic Writing</span>
+                    </>
+                  )}
                 </div>
-              ) : (
-                <p className="text-gray-500 italic mb-4">No specific technologies mentioned</p>
+              </div>
+              
+              {/* Work Experience Skills */}
+              <div>
+                <h4 className="font-medium text-gray-700 mb-2">Professional Skills</h4>
+                {userData.jobTechnologies !== 'Not specified' && userData.jobTechnologies ? (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {userData.jobTechnologies.split(/[,;]/).map((tech, index) => (
+                      <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                        {tech.trim()}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 italic mb-4">No specific technologies mentioned</p>
+                )}
+              </div>
+              
+              {/* Publications if available */}
+              {userData.publications && userData.publications !== 'Not specified' && (
+                <div className="mt-4">
+                  <h4 className="font-medium text-gray-700 mb-2">Research & Publications</h4>
+                  <p className="text-gray-600 mb-2">{userData.publications}</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                      Academic Writing
+                    </span>
+                    <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                      Research
+                    </span>
+                    <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                      Technical Communication
+                    </span>
+                  </div>
+                </div>
               )}
               
-              <p className="text-sm text-gray-600">
-                These skills from your work as a {userData.currentRole} can be leveraged in your tech career transition.
+              <p className="text-sm text-gray-600 mt-4">
+                These skills from your {userData.educationLevel} education in {userData.studyField} and your work as a {userData.currentRole} can be leveraged in your tech career transition.
               </p>
             </div>
             
@@ -918,9 +992,15 @@ const CareerDashboard = () => {
                   <span className="text-indigo-600 mr-2">•</span>
                   <p>Track your progress by keeping a learning journal or portfolio</p>
                 </li>
+                {userData.educationLevel && (userData.educationLevel.includes("Master") || userData.educationLevel.includes("PhD")) && (
+                  <li className="flex items-start">
+                    <span className="text-indigo-600 mr-2">•</span>
+                    <p>Leverage your advanced research skills from your {userData.educationLevel} to quickly master new technical concepts</p>
+                  </li>
+                )}
                 <li className="flex items-start">
                   <span className="text-indigo-600 mr-2">•</span>
-                  <p>Look for ways to apply your experience with {userData.jobTechnologies ? userData.jobTechnologies.split(',')[0] : 'previous tools'} to new tech contexts</p>
+                  <p>Look for ways to apply your academic knowledge in {userData.studyField} to technical problems in related domains</p>
                 </li>
               </ul>
             </div>
@@ -980,25 +1060,43 @@ const CareerDashboard = () => {
                   </ul>
                 </div>
                 
-                {/* Domain-Specific Resources - New Section */}
+                {/* Education-Specific Resources - Updated Section */}
                 <div className="bg-white rounded-lg shadow p-6 mb-6">
-                  <h3 className="text-lg font-semibold mb-4">Resources for {userData.currentField} Professionals</h3>
-                  <p className="mb-4">Specialized resources for professionals transitioning from your field:</p>
+                  <h3 className="text-lg font-semibold mb-4">Resources for {userData.educationLevel} Graduates in {userData.studyField}</h3>
+                  <p className="mb-4">Specialized resources for professionals with your educational background:</p>
                   <ul className="space-y-3">
                     <li className="flex items-start">
                       <span className="text-purple-500 mr-2">•</span>
                       <div>
-                        <p className="font-medium">{userData.currentField} to Tech Communities</p>
+                        <p className="font-medium">{userData.studyField} to Tech Communities</p>
                         <p className="text-sm text-gray-600">Connect with others making similar transitions</p>
                       </div>
                     </li>
+                    {userData.educationLevel && (userData.educationLevel.includes("Master") || userData.educationLevel.includes("PhD")) && (
+                      <li className="flex items-start">
+                        <span className="text-purple-500 mr-2">•</span>
+                        <div>
+                          <p className="font-medium">Advanced Research Skills Workshops</p>
+                          <p className="text-sm text-gray-600">Leverage your research expertise in tech projects</p>
+                        </div>
+                      </li>
+                    )}
                     <li className="flex items-start">
                       <span className="text-purple-500 mr-2">•</span>
                       <div>
                         <p className="font-medium">Domain-Specific Tech Projects</p>
-                        <p className="text-sm text-gray-600">Build projects that leverage your {userData.currentField} expertise</p>
+                        <p className="text-sm text-gray-600">Build projects that leverage your {userData.studyField} expertise</p>
                       </div>
                     </li>
+                    {userData.publications && userData.publications !== 'Not specified' && (
+                      <li className="flex items-start">
+                        <span className="text-purple-500 mr-2">•</span>
+                        <div>
+                          <p className="font-medium">Technical Writing & Documentation</p>
+                          <p className="text-sm text-gray-600">Use your publication experience for technical documentation</p>
+                        </div>
+                      </li>
+                    )}
                   </ul>
                 </div>
                 
@@ -1026,10 +1124,16 @@ const CareerDashboard = () => {
                       <span className="text-indigo-500 mr-2">•</span>
                       <p>E-commerce store or product catalog</p>
                     </li>
-                    {userData.currentField !== 'Not specified' && (
+                    {userData.studyField !== 'Not specified' && (
                       <li className="flex items-start">
                         <span className="text-indigo-500 mr-2">•</span>
-                        <p>A tech solution for a common problem in the {userData.currentField} industry</p>
+                        <p>A tech solution for a common problem in {userData.studyField}</p>
+                      </li>
+                    )}
+                    {userData.educationLevel && userData.educationLevel.includes("PhD") && (
+                      <li className="flex items-start">
+                        <span className="text-indigo-500 mr-2">•</span>
+                        <p>Research data visualization dashboard</p>
                       </li>
                     )}
                   </ul>
@@ -1045,13 +1149,16 @@ const CareerDashboard = () => {
             <div className="bg-white rounded-lg shadow p-6 mb-6">
               <h2 className="text-2xl font-bold mb-6">Full Analysis</h2>
               
-              {/* Job Experience Summary - New Section */}
+              {/* Education and Experience Summary - Updated Section */}
               <div className="mb-8 bg-blue-50 p-6 rounded-lg">
-                <h3 className="text-xl font-bold mb-4">Job Experience Summary</h3>
+                <h3 className="text-xl font-bold mb-4">Education and Experience Summary</h3>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
+                    <h4 className="font-semibold text-blue-700 mb-2">Educational Background</h4>
+                    <p className="mb-4">{userData.educationLevel} in {userData.studyField}</p>
+                    
                     <h4 className="font-semibold text-blue-700 mb-2">Current/Previous Role</h4>
-                    <p className="mb-4">{userData.currentRole} in {userData.currentField} with {userData.yearsExperience} experience</p>
+                    <p className="mb-4">{userData.currentRole} with {userData.yearsExperience} experience</p>
                     
                     <h4 className="font-semibold text-blue-700 mb-2">Key Responsibilities</h4>
                     <p className="mb-4">{userData.jobResponsibilities}</p>
@@ -1062,7 +1169,14 @@ const CareerDashboard = () => {
                     <p className="mb-4">{userData.jobProjects}</p>
                     
                     <h4 className="font-semibold text-blue-700 mb-2">Technologies Used</h4>
-                    <p>{userData.jobTechnologies}</p>
+                    <p className="mb-4">{userData.jobTechnologies}</p>
+                    
+                    {userData.publications && userData.publications !== 'Not specified' && (
+                      <>
+                        <h4 className="font-semibold text-blue-700 mb-2">Publications/Research</h4>
+                        <p>{userData.publications}</p>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

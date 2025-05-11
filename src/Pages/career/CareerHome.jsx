@@ -46,7 +46,7 @@ const CareerHome = () => {
               <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0 mt-1">3</div>
               <div>
                 <p className="font-semibold text-lg">Get Your Personalized Results</p>
-                <p className="text-gray-600">Receive detailed career recommendations, skill development advice, and learning resources.</p>
+                <p className="text-gray-600">Receive detailed career recommendations, skill development advice, and courses.</p>
               </div>
             </li>
           </ol>
@@ -57,7 +57,7 @@ const CareerHome = () => {
           <ul className="space-y-3">
             <li className="flex items-start">
               <span className="text-green-500 mr-2 text-xl">✓</span>
-              <p><span className="font-semibold">AI-Powered Analysis</span> - Utilizing Claude, an advanced AI assistant, to analyze your unique profile</p>
+              <p><span className="font-semibold">AI-Powered Analysis</span> - An advanced AI assistant, to analyze your unique profile</p>
             </li>
             <li className="flex items-start">
               <span className="text-green-500 mr-2 text-xl">✓</span>
@@ -69,7 +69,7 @@ const CareerHome = () => {
             </li>
             <li className="flex items-start">
               <span className="text-green-500 mr-2 text-xl">✓</span>
-              <p><span className="font-semibold">Curated Learning Resources</span> - Recommended courses, tutorials, and tools to get started</p>
+              <p><span className="font-semibold">Curated Learning Resources</span> - Recommended courses, learning roadmap and transition strategy</p>
             </li>
             <li className="flex items-start">
               <span className="text-green-500 mr-2 text-xl">✓</span>

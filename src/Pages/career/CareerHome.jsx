@@ -73,7 +73,7 @@ const CareerHome = () => {
             </li>
             <li className="flex items-start">
               <span className="text-green-500 mr-2 text-xl">✓</span>
-              <p><span className="font-semibold">100% Free</span> - No cost - just valuable insights for your tech journey</p>
+              <p><span className="font-semibold">100% Free</span> - No cost</p>
             </li>
           </ul>
         </div>

@@ -487,211 +487,6 @@ const CareerTest = () => {
           </div>
         </FormSection>
         
-        <FormSection title="Tech Career Aspirations">
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Which tech career paths are you most interested in exploring?
-            </label>
-            <select
-              name="careerPathsInterest"
-              value={formData.careerPathsInterest}
-              onChange={handleMultiSelect}
-              className="w-full p-2 border rounded-md"
-              multiple
-              required
-              size="8"
-            >
-              <option value="Software Development">Software Development</option>
-              <option value="Data Analysis/Science">Data Analysis/Science</option>
-              <option value="UX/UI Design">UX/UI Design</option>
-              <option value="Product Management">Product Management</option>
-              <option value="Cybersecurity">Cybersecurity</option>
-              <option value="Cloud Engineering">Cloud Engineering</option>
-              <option value="DevOps">DevOps</option>
-              <option value="AI/Machine Learning">AI/Machine Learning</option>
-              <option value="Technical Writing">Technical Writing</option>
-              <option value="Quality Assurance">Quality Assurance</option>
-              <option value="Technical Support">Technical Support</option>
-              <option value="Not Sure Yet">Not Sure Yet</option>
-            </select>
-            <p className="text-sm text-gray-500 mt-1">(Hold Ctrl/Cmd to select multiple options)</p>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Do you have a preference for working in specific industries or sectors with your tech skills?
-            </label>
-            <select
-              name="industryPreference"
-              value={formData.industryPreference}
-              onChange={handleMultiSelect}
-              className="w-full p-2 border rounded-md"
-              multiple
-              required
-              size="5"
-            >
-              <option value="Healthcare/Medical">Healthcare/Medical</option>
-              <option value="Finance/Fintech">Finance/Fintech</option>
-              <option value="Education">Education</option>
-              <option value="E-commerce">E-commerce</option>
-              <option value="Entertainment/Media">Entertainment/Media</option>
-              <option value="Government">Government</option>
-              <option value="Same as current industry">Same as current industry</option>
-              <option value="No preference">No preference</option>
-              <option value="Other">Other</option>
-            </select>
-            <p className="text-sm text-gray-500 mt-1">(Hold Ctrl/Cmd to select multiple options)</p>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Would you prefer to leverage your domain expertise from your current field in your tech role?
-            </label>
-            <select
-              name="leverageDomainExpertise"
-              value={formData.leverageDomainExpertise}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="Yes, definitely">Yes, definitely</option>
-              <option value="Yes, somewhat">Yes, somewhat</option>
-              <option value="Not sure">Not sure</option>
-              <option value="No, I want a complete change">No, I want a complete change</option>
-            </select>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> What salary range are you targeting in your tech role?
-            </label>
-            <select
-              name="targetSalary"
-              value={formData.targetSalary}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="$40,000-$60,000">$40,000-$60,000</option>
-              <option value="$60,000-$80,000">$60,000-$80,000</option>
-              <option value="$80,000-$100,000">$80,000-$100,000</option>
-              <option value="$100,000-$120,000">$100,000-$120,000</option>
-              <option value="$120,000+">$120,000+</option>
-              <option value="Not sure">Not sure</option>
-            </select>
-          </div>
-        </FormSection>
-        
-        <FormSection title="Commitment & Goals">
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> How much time can you realistically commit to learning or working on a project each week?
-            </label>
-            <select
-              name="timeCommitment"
-              value={formData.timeCommitment}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="5 hours or less">5 hours or less</option>
-              <option value="5-10 hours">5-10 hours</option>
-              <option value="10-15 hours">10-15 hours</option>
-              <option value="15-20 hours">15-20 hours</option>
-              <option value="20+ hours">20+ hours</option>
-            </select>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> What timeline do you envision for your transition to tech?
-            </label>
-            <select
-              name="transitionTimeline"
-              value={formData.transitionTimeline}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="Less than 6 months">Less than 6 months</option>
-              <option value="6-12 months">6-12 months</option>
-              <option value="1-2 years">1-2 years</option>
-              <option value="2+ years">2+ years</option>
-              <option value="Already transitioning">Already transitioning</option>
-            </select>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Are you planning to continue in your current role while learning tech skills?
-            </label>
-            <select
-              name="continueCurrent"
-              value={formData.continueCurrent}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="Yes, continuing full-time">Yes, continuing full-time</option>
-              <option value="Yes, but reducing to part-time">Yes, but reducing to part-time</option>
-              <option value="No, focusing exclusively on the transition">No, focusing exclusively on the transition</option>
-              <option value="Currently unemployed/between roles">Currently unemployed/between roles</option>
-            </select>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> What kind of guidance do you need most right now?
-            </label>
-            <textarea
-              name="guidanceNeeded"
-              value={formData.guidanceNeeded}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="E.g., learning resources, career roadmap, resume help, etc."
-              rows="3"
-              required
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> In the next 12 months, where would you like to be in your tech journey?
-            </label>
-            <textarea
-              name="futureGoal"
-              value={formData.futureGoal}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="E.g., completing a bootcamp, landing first tech job, etc."
-              rows="3"
-              required
-            />
-          </div>
-        </FormSection>
-        
-        <div className="text-sm text-gray-600 mb-6">
-          By continuing, you agree to the <a href="/terms" className="text-blue-600">Terms of Service</a> and acknowledge you've read our <a href="/privacy" className="text-blue-600">Privacy Policy</a>.
-        </div>
-        
-        <button 
-          type="submit" 
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
-        >
-          Continue to Results
-        </button>
-      </form>
-    </div>
-  );
-};
-
-export default CareerTest;
-        
         <FormSection title="Educational Background">
           <div className="mb-4">
             <label className="block mb-2">
@@ -1042,6 +837,194 @@ export default CareerTest;
               onChange={handleChange}
               className="w-full p-2 border rounded-md"
               placeholder="Enter your answer (or type 'None' if you don't have any)"
+              rows="3"
+              required
+            />
+          </div>
+        </FormSection>
+        
+        <FormSection title="Tech Career Aspirations">
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Which tech career paths are you most interested in exploring?
+            </label>
+            <select
+              name="careerPathsInterest"
+              value={formData.careerPathsInterest}
+              onChange={handleMultiSelect}
+              className="w-full p-2 border rounded-md"
+              multiple
+              required
+              size="8"
+            >
+              <option value="Software Development">Software Development</option>
+              <option value="Data Analysis/Science">Data Analysis/Science</option>
+              <option value="UX/UI Design">UX/UI Design</option>
+              <option value="Product Management">Product Management</option>
+              <option value="Cybersecurity">Cybersecurity</option>
+              <option value="Cloud Engineering">Cloud Engineering</option>
+              <option value="DevOps">DevOps</option>
+              <option value="AI/Machine Learning">AI/Machine Learning</option>
+              <option value="Technical Writing">Technical Writing</option>
+              <option value="Quality Assurance">Quality Assurance</option>
+              <option value="Technical Support">Technical Support</option>
+              <option value="Not Sure Yet">Not Sure Yet</option>
+            </select>
+            <p className="text-sm text-gray-500 mt-1">(Hold Ctrl/Cmd to select multiple options)</p>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Do you have a preference for working in specific industries or sectors with your tech skills?
+            </label>
+            <select
+              name="industryPreference"
+              value={formData.industryPreference}
+              onChange={handleMultiSelect}
+              className="w-full p-2 border rounded-md"
+              multiple
+              required
+              size="5"
+            >
+              <option value="Healthcare/Medical">Healthcare/Medical</option>
+              <option value="Finance/Fintech">Finance/Fintech</option>
+              <option value="Education">Education</option>
+              <option value="E-commerce">E-commerce</option>
+              <option value="Entertainment/Media">Entertainment/Media</option>
+              <option value="Government">Government</option>
+              <option value="Same as current industry">Same as current industry</option>
+              <option value="No preference">No preference</option>
+              <option value="Other">Other</option>
+            </select>
+            <p className="text-sm text-gray-500 mt-1">(Hold Ctrl/Cmd to select multiple options)</p>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Would you prefer to leverage your domain expertise from your current field in your tech role?
+            </label>
+            <select
+              name="leverageDomainExpertise"
+              value={formData.leverageDomainExpertise}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              required
+            >
+              <option value="">Select an option</option>
+              <option value="Yes, definitely">Yes, definitely</option>
+              <option value="Yes, somewhat">Yes, somewhat</option>
+              <option value="Not sure">Not sure</option>
+              <option value="No, I want a complete change">No, I want a complete change</option>
+            </select>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> What salary range are you targeting in your tech role?
+            </label>
+            <select
+              name="targetSalary"
+              value={formData.targetSalary}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              required
+            >
+              <option value="">Select an option</option>
+              <option value="$40,000-$60,000">$40,000-$60,000</option>
+              <option value="$60,000-$80,000">$60,000-$80,000</option>
+              <option value="$80,000-$100,000">$80,000-$100,000</option>
+              <option value="$100,000-$120,000">$100,000-$120,000</option>
+              <option value="$120,000+">$120,000+</option>
+              <option value="Not sure">Not sure</option>
+            </select>
+          </div>
+        </FormSection>
+        
+        <FormSection title="Commitment & Goals">
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> How much time can you realistically commit to learning or working on a project each week?
+            </label>
+            <select
+              name="timeCommitment"
+              value={formData.timeCommitment}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              required
+            >
+              <option value="">Select an option</option>
+              <option value="5 hours or less">5 hours or less</option>
+              <option value="5-10 hours">5-10 hours</option>
+              <option value="10-15 hours">10-15 hours</option>
+              <option value="15-20 hours">15-20 hours</option>
+              <option value="20+ hours">20+ hours</option>
+            </select>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> What timeline do you envision for your transition to tech?
+            </label>
+            <select
+              name="transitionTimeline"
+              value={formData.transitionTimeline}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              required
+            >
+              <option value="">Select an option</option>
+              <option value="Less than 6 months">Less than 6 months</option>
+              <option value="6-12 months">6-12 months</option>
+              <option value="1-2 years">1-2 years</option>
+              <option value="2+ years">2+ years</option>
+              <option value="Already transitioning">Already transitioning</option>
+            </select>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> Are you planning to continue in your current role while learning tech skills?
+            </label>
+            <select
+              name="continueCurrent"
+              value={formData.continueCurrent}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              required
+            >
+              <option value="">Select an option</option>
+              <option value="Yes, continuing full-time">Yes, continuing full-time</option>
+              <option value="Yes, but reducing to part-time">Yes, but reducing to part-time</option>
+              <option value="No, focusing exclusively on the transition">No, focusing exclusively on the transition</option>
+              <option value="Currently unemployed/between roles">Currently unemployed/between roles</option>
+            </select>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> What kind of guidance do you need most right now?
+            </label>
+            <textarea
+              name="guidanceNeeded"
+              value={formData.guidanceNeeded}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              placeholder="E.g., learning resources, career roadmap, resume help, etc."
+              rows="3"
+              required
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="block mb-2">
+              <span className="text-red-500">*</span> In the next 12 months, where would you like to be in your tech journey?
+            </label>
+            <textarea
+              name="futureGoal"
+              value={formData.futureGoal}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              placeholder="E.g., completing a bootcamp, landing first tech job, etc."
               rows="3"
               required
             />

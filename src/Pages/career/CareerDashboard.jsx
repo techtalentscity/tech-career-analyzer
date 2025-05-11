@@ -211,14 +211,20 @@ const CareerDashboard = () => {
           </h4>
         );
       }
+
+        
       // Format skills gap numbered items (e.g., "1. Programming: Focus on Python...")
       else if (line.match(/^\d+\.\s+/) && isInSkillsGapSection(index)) {
+        const prefixMatch = line.match(/^\d+\./);
+        const content = line.replace(/^\d+\.\s+/, '');
         formattedContent.push(
-          <p key={`skill-item-${index}`} className="ml-4 mb-4 text-base text-gray-900">
-            {line}
-          </p>
+          <div key={`skill-gap-${index}`} className="flex items-start ml-4 mb-2">
+            <span className="text-black mr-2 font-medium">{prefixMatch ? prefixMatch[0] : ''}</span>
+            <p className="text-black text-base" dangerouslySetInnerHTML={processContent(content)} />
+          </div>
         );
       }
+
       // Format list items starting with "-"
       else if (line.trim().startsWith('-')) {
         const content = line.replace(/^-\s+/, '');

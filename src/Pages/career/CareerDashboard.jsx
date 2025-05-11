@@ -184,6 +184,16 @@ const CareerDashboard = () => {
       return { __html: content };
     };
 
+    // Helper to check if line is in Skills Gap Analysis section
+    const isInSkillsGapSection = (index) => {
+      // Look for "SKILLS GAP ANALYSIS" in previous lines
+      return index > 0 && lines.slice(Math.max(0, index-10), index).some(l => 
+        l.includes("SKILLS GAP ANALYSIS")
+      ) && !lines.slice(Math.max(0, index-10), index).some(l => 
+        l.includes("LEARNING ROADMAP") || l.includes("TRANSITION STRATEGY")
+      );
+    };
+
     lines.forEach((line, index) => {
       // Format section headers (e.g., "1. CAREER PATH RECOMMENDATIONS")
       if (line.match(/^\d+\.\s+[A-Z]/)) {
@@ -201,16 +211,12 @@ const CareerDashboard = () => {
           </h4>
         );
       }
-      // Format skills gap numbered items (e.g., "1. Advanced software engineering practices...")
-      else if (line.match(/^\d+\.\s+[A-Z]/) && (
-              // Check if we're in the skills gap section by looking at previous lines
-              index > 0 && lines.slice(Math.max(0, index-5), index).some(l => l.includes("SKILLS GAP ANALYSIS"))
-            )) {
-        const content = line;
+      // Format skills gap numbered items (e.g., "1. Programming: Focus on Python...")
+      else if (line.match(/^\d+\.\s+/) && isInSkillsGapSection(index)) {
         formattedContent.push(
-          <div key={`numbered-skill-${index}`} className="flex items-start ml-4 mb-4">
-            <p className="text-base" dangerouslySetInnerHTML={processContent(content)} />
-          </div>
+          <p key={`skill-item-${index}`} className="ml-4 mb-4 text-base text-gray-900">
+            {line}
+          </p>
         );
       }
       // Format list items starting with "-"
@@ -238,7 +244,7 @@ const CareerDashboard = () => {
       // Format monthly sections (e.g., "Month 1-2:")
       else if (line.trim().match(/^Month\s+\d+-\d+:/i)) {
         formattedContent.push(
-          <h5 key={`month-${index}`} className="font-semibold mt-4 mb-2 text-blue-600">
+          <h5 key={`month-${index}`} className="font-semibold mt-4 mb-2 text-blue-600 ml-4">
             {line}
           </h5>
         );
@@ -246,7 +252,7 @@ const CareerDashboard = () => {
       // Format section labeled "Throughout:"
       else if (line.trim() === "Throughout:") {
         formattedContent.push(
-          <h5 key={`throughout-${index}`} className="font-semibold mt-4 mb-2 text-blue-600">
+          <h5 key={`throughout-${index}`} className="font-semibold mt-4 mb-2 text-blue-600 ml-4">
             {line}
           </h5>
         );

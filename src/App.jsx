@@ -9,6 +9,10 @@ import CareerHome from './Pages/career/CareerHome';
 import CareerTest from './Pages/career/CareerTest';
 import CareerDashboard from './Pages/career/CareerDashboard';
 
+// Import services - these are imported for initialization
+// You don't need to use them directly in App.jsx
+import './services/googleFormService'; // Import the Google Form service
+
 function App() {
   return (
     <Router>

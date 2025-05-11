@@ -60,6 +60,13 @@ class ClaudeApiService {
     try {
       console.log("Calling Claude API for career analysis");
       
+      // Log important new fields to help with debugging
+      console.log("Key form data fields:", {
+        educationLevel: formData.educationLevel || 'Not provided',
+        studyField: formData.studyField || 'Not provided',
+        publications: formData.publications ? 'Provided' : 'Not provided'
+      });
+      
       // Use the updated prompt from configuration that highlights important questions
       const requestBody = {
         model: CLAUDE_API_CONFIG.models.default,
@@ -103,7 +110,26 @@ class ClaudeApiService {
       
       const data = await response.json();
       console.log("Received successful response from Claude API");
-      return data.content[0].text;
+      
+      // Verify that the response includes relevant content about education and publications
+      const responseText = data.content[0].text;
+      const containsEducationRef = responseText.toLowerCase().includes('education') || 
+                                  responseText.toLowerCase().includes('degree') ||
+                                  responseText.toLowerCase().includes('study');
+      
+      const containsPublicationsRef = formData.publications ? 
+                                      responseText.toLowerCase().includes('publication') || 
+                                      responseText.toLowerCase().includes('research') : true;
+      
+      if (formData.educationLevel && !containsEducationRef) {
+        console.warn("Warning: Response does not mention education despite education level being provided");
+      }
+      
+      if (formData.publications && !containsPublicationsRef) {
+        console.warn("Warning: Response does not mention publications despite publications being provided");
+      }
+      
+      return responseText;
     } catch (error) {
       console.error('Error getting career analysis from Claude API:', error);
       throw error;

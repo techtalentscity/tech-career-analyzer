@@ -121,6 +121,8 @@ const CareerDashboard = () => {
 
   // Extract career paths and their match percentages from analysis text
   const extractCareerPaths = (text) => {
+    if (!text) return [];
+    
     const lines = text.split('\n');
     const careerPaths = [];
     
@@ -142,6 +144,8 @@ const CareerDashboard = () => {
 
   // Format analysis text for display with emphasis on important elements
   const formatAnalysisText = (text) => {
+    if (!text) return [];
+    
     const lines = text.split('\n');
     let formattedContent = [];
 
@@ -266,11 +270,8 @@ const CareerDashboard = () => {
     return <LoadingSpinner message="Loading your career analysis..." />;
   }
 
-  // Get career paths for visualization
-  const careerPaths = React.useMemo(() => {
-    if (!analysis) return [];
-    return extractCareerPaths(analysis);
-  }, [analysis]);
+  // The career paths data
+  const careerPaths = extractCareerPaths(analysis);
 
   return (
     <div className="bg-gray-50 min-h-screen pb-12">

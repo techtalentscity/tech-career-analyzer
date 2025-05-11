@@ -16,6 +16,7 @@ const CareerDashboard = () => {
     studyField: '',          // Changed from currentField
     educationLevel: '',      // New field
     currentRole: '',
+    yearsExperience: '',
     jobResponsibilities: '',
     jobProjects: '',
     jobTechnologies: '',
@@ -51,6 +52,7 @@ const CareerDashboard = () => {
               studyField,           // Changed from currentField
               educationLevel,       // New field
               currentRole,
+              yearsExperience,
               jobResponsibilities,
               jobProjects,
               jobTechnologies,
@@ -65,6 +67,7 @@ const CareerDashboard = () => {
               studyField: studyField || 'Not specified',  // Changed from currentField
               educationLevel: educationLevel || 'Not specified', // New field
               currentRole: currentRole || 'Not specified',
+              yearsExperience: yearsExperience || 'Not specified',
               jobResponsibilities: jobResponsibilities || 'Not specified',
               jobProjects: jobProjects || 'Not specified',
               jobTechnologies: jobTechnologies || 'Not specified',
@@ -76,7 +79,8 @@ const CareerDashboard = () => {
             });
           }
           
-          parseAnalysisData(location.state.analysis);
+          const parsedData = parseAnalysisData(location.state.analysis);
+          setDashboardData(parsedData);
         } else {
           // If not in location state, try to retrieve from storage
           const storedAnalysis = storageService.getLatestAnalysis();
@@ -93,6 +97,7 @@ const CareerDashboard = () => {
                 studyField: submission.studyField || 'Not specified',  // Changed from currentField
                 educationLevel: submission.educationLevel || 'Not specified', // New field
                 currentRole: submission.currentRole || 'Not specified',
+                yearsExperience: submission.yearsExperience || 'Not specified',
                 jobResponsibilities: submission.jobResponsibilities || 'Not specified',
                 jobProjects: submission.jobProjects || 'Not specified',
                 jobTechnologies: submission.jobTechnologies || 'Not specified',
@@ -104,7 +109,8 @@ const CareerDashboard = () => {
               });
             }
             
-            parseAnalysisData(storedAnalysis.analysis);
+            const parsedData = parseAnalysisData(storedAnalysis.analysis);
+            setDashboardData(parsedData);
           } else {
             // No analysis found, redirect to career test
             navigate('/career/test', { 
@@ -214,296 +220,436 @@ const CareerDashboard = () => {
   };
 
   const parseAnalysisData = (analysisText) => {
-    // Initialize data structures
-    const careerPaths = [];
-    const skillsMap = {};
-    const resources = [];
-    const strengths = [];
-    const weaknesses = [];
-    const timeToCareer = {};
-    
-    // Split into lines for processing
-    const lines = analysisText.split('\n');
-    
-    // Set up regex patterns for career paths
-    // This pattern is more flexible to match different formats
-    // It will match both "a) Data Scientist (90% match, 2-3 years to senior level)"
-    // and "Data Scientist (90% match)" formats
-    const careerPathRegex = /([a-z]\)\s+)?([^(]+)\s+\((\d+)%\s+match[,\s]*(.*?)?\)/i;
-    
-    // Also create a section matcher pattern that's more flexible
-    const sectionMatchers = {
-      careerPaths: /career path recommendations|recommended career paths|career paths|path recommendations/i,
-      skills: /skills development|skills gap|skills to develop|priority skills|skills analysis/i,
-      resources: /learning resources|recommended resources|resources|learning plan/i,
-      strengths: /strengths|your strengths|key strengths|strengths analysis/i,
-      weaknesses: /areas for improvement|areas to improve|weaknesses|gaps|improvement areas/i,
-      roadmap: /learning roadmap|roadmap|learning plan|development plan/i,
-      transition: /transition strategy|transition plan|career transition/i
-    };
-    
-    let currentSection = '';
-    let subSection = '';
-    
-    // Process each line
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+    try {
+      // Initialize data structures
+      const careerPaths = [];
+      const skillsMap = {};
+      const resources = [];
+      const strengths = [];
+      const weaknesses = [];
+      const timeToCareer = {};
       
-      // Skip empty lines
-      if (!line) continue;
+      // Split into lines for processing
+      const lines = analysisText.split('\n');
       
-      // Check for section headers (now more flexible)
-      if (line.match(/^\d+[\.\)]\s+/)) {
-        // This is likely a numbered section header (e.g. "1. Career Path Recommendations")
-        for (const [section, pattern] of Object.entries(sectionMatchers)) {
-          if (line.match(pattern)) {
-            currentSection = section;
-            subSection = '';
-            break;
-          }
-        }
-        continue;
-      }
+      // Updated regex patterns for more accurate career path extraction - handles "a) Role Name (XX% match)"
+      const careerPathRegex = /([a-z]\)\s+)?([^(]+)\s+\((\d+)%\s+match[,\s]*(.*?)?\)/i;
       
-      // Check for subsection headers
-      if (line.match(/^[A-Z][\.\)]\s+/i) || 
-          line.match(/^[a-z]\)\s+/i) || 
-          line.startsWith('**') || 
-          line.match(/^#+\s+/)) {
-        subSection = line;
-        continue;
-      }
+      // Define section matchers for identifying different parts of the analysis
+      const sectionMatchers = {
+        careerPaths: /career path recommendations|recommended career paths|career paths|path recommendations/i,
+        skills: /skills development|skills gap|skills to develop|priority skills|skills analysis/i,
+        resources: /learning resources|recommended resources|resources|learning plan/i,
+        strengths: /strengths|your strengths|key strengths|strengths analysis/i,
+        weaknesses: /areas for improvement|areas to improve|weaknesses|gaps|improvement areas/i,
+        roadmap: /learning roadmap|roadmap|learning plan|development plan/i,
+        transition: /transition strategy|transition plan|career transition/i
+      };
       
-      // Process career paths - either from numbered lists or from subsections
-      if (currentSection === 'careerPaths' || 
-          (currentSection === '' && (subSection.match(/career path/i) || line.match(careerPathRegex)))) {
-        
-        // Try to match the career path pattern
-        const match = line.match(careerPathRegex);
-        
-        if (match) {
-          const title = match[2].trim();
-          const matchPercentage = parseInt(match[3], 10);
-          const timeline = match[4] ? match[4].trim() : "6-12 months"; // Default timeline
-          
-          // Create a new career path
-          const careerPath = {
-            title,
-            match: matchPercentage,
-            description: '',
-            skills: [],
-            resources: []
-          };
-          
-          // Add to the careerPaths array
-          careerPaths.push(careerPath);
-          
-          // Store the timeline
-          timeToCareer[title] = timeline;
-          
-          // Look ahead for the description lines
-          let j = i + 1;
-          let descriptionText = '';
-          
-          // Keep looking until we hit another career path or a new section
-          while (j < lines.length && 
-                !lines[j].match(careerPathRegex) && 
-                !lines[j].match(/^\d+[\.\)]\s+/) &&
-                lines[j].trim() !== '') {
-            
-            const descLine = lines[j].trim();
-            
-            // If it's a bullet point about skills, add to skills
-            if (descLine.match(/^\-\s+/) && 
-                (descLine.toLowerCase().includes('skill') || descLine.toLowerCase().includes('knowledge'))) {
-              const skill = descLine.replace(/^\-\s+/, '').trim();
-              if (skill && !careerPath.skills.includes(skill)) {
-                careerPath.skills.push(skill);
-              }
-            } 
-            // Otherwise add to description
-            else if (descLine.match(/^\-\s+/) || descLine.match(/^\*\s+/)) {
-              const descPart = descLine.replace(/^[\-\*]\s+/, '').trim();
-              if (descriptionText) {
-                descriptionText += ' ' + descPart;
-              } else {
-                descriptionText = descPart;
-              }
-            }
-            
-            j++;
-          }
-          
-          careerPath.description = descriptionText;
-          
-          // Skip the lines we've already processed
-          i = j - 1;
-        }
-      }
+      let currentSection = '';
+      let subSection = '';
+      let inCareerPathsSection = false;
       
-      // Process skills
-      else if ((currentSection === 'skills' || currentSection === 'roadmap') && 
-              (line.match(/^\-\s+/) || line.match(/^\d+[\.\)]\s+/) || line.match(/^\*\s+/))) {
-        
-        // Extract the skill from bullet points or numbered lists
-        const skill = line.replace(/^[\-\*\d\.]\s+/, '').trim();
-        
-        if (skill) {
-          // Add to overall skills map
-          if (!skillsMap[skill]) {
-            skillsMap[skill] = {
-              count: 0,
-              careers: []
-            };
-          }
-          skillsMap[skill].count++;
-          
-          // Try to associate with career paths
-          for (const path of careerPaths) {
-            if (!path.skills.includes(skill)) {
-              path.skills.push(skill);
-            }
-            if (!skillsMap[skill].careers.includes(path.title)) {
-              skillsMap[skill].careers.push(path.title);
-            }
-          }
-        }
-      }
-      
-      // Process resources
-      else if ((currentSection === 'resources' || currentSection === 'roadmap') && 
-              (line.match(/^\-\s+/) || line.match(/^\*\s+/) || line.startsWith('http'))) {
-        
-        // Extract resource from bullet points or links
-        const resource = line.replace(/^[\-\*]\s+/, '').trim();
-        
-        if (resource && !resources.includes(resource)) {
-          resources.push(resource);
-          
-          // Try to associate with career paths if in a subsection
-          if (subSection) {
-            for (const path of careerPaths) {
-              // Check if the subsection contains this career path name
-              if (subSection.toLowerCase().includes(path.title.toLowerCase()) && 
-                  !path.resources.includes(resource)) {
-                path.resources.push(resource);
-              }
-            }
-          }
-        }
-      }
-      
-      // Process strengths
-      else if (currentSection === 'strengths' || 
-              (line.match(/^\-\s+/) && (line.toLowerCase().includes('strength') || subSection.toLowerCase().includes('strength')))) {
-        
-        const strength = line.replace(/^[\-\*]\s+/, '').trim();
-        if (strength && !strengths.includes(strength)) {
-          strengths.push(strength);
-        }
-      }
-      
-      // Process weaknesses/areas for improvement
-      else if (currentSection === 'weaknesses' ||
-              (line.match(/^\-\s+/) && 
-              (line.toLowerCase().includes('improve') || 
-               line.toLowerCase().includes('weakness') || 
-               subSection.toLowerCase().includes('improve') ||
-               subSection.toLowerCase().includes('weakness')))) {
-        
-        const weakness = line.replace(/^[\-\*]\s+/, '').trim();
-        if (weakness && !weaknesses.includes(weakness)) {
-          weaknesses.push(weakness);
-        }
-      }
-    }
-    
-    // Sort skills by frequency
-    const sortedSkillsMap = {};
-    Object.keys(skillsMap)
-      .sort((a, b) => skillsMap[b].count - skillsMap[a].count)
-      .forEach(key => {
-        sortedSkillsMap[key] = skillsMap[key];
-      });
-    
-    // If we don't have career paths data yet, try a second pass with different patterns
-    // This handles cases where the format doesn't match our initial expectations
-    if (careerPaths.length === 0) {
-      let currentCareerPath = null;
-      
+      // First pass - identify the CAREER PATH RECOMMENDATIONS section to prioritize those paths
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
         
-        // Look for lines that might indicate career paths
-        if (line.match(/^[\d\.]+\s+(.+)$/)) {
-          const title = line.match(/^[\d\.]+\s+(.+)$/)[1].trim();
+        // Look for section headers like "1. CAREER PATH RECOMMENDATIONS:"
+        if (line.match(/^\d+[\.\)]\s+CAREER PATH/i) || line.match(/CAREER PATH RECOMMENDATIONS/i)) {
+          inCareerPathsSection = true;
+          break;
+        }
+      }
+      
+      // Process each line
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        
+        // Skip empty lines
+        if (!line) continue;
+        
+        // Check for section headers (now more flexible)
+        if (line.match(/^\d+[\.\)]\s+/)) {
+          // This is likely a numbered section header (e.g. "1. Career Path Recommendations")
+          for (const [section, pattern] of Object.entries(sectionMatchers)) {
+            if (line.match(pattern)) {
+              currentSection = section;
+              subSection = '';
+              // If we enter the career paths section, set the flag
+              if (section === 'careerPaths') {
+                inCareerPathsSection = true;
+              } else if (inCareerPathsSection) {
+                // If we're leaving the career paths section, set the flag to false
+                inCareerPathsSection = false;
+              }
+              break;
+            }
+          }
+          continue;
+        }
+        
+        // Check for subsection headers like "a) Bioinformatics Specialist (85% match)"
+        if (line.match(/^[a-z]\)\s+.+\(\d+%\s+match/i)) {
+          subSection = line;
           
-          // Check if this might be a career path heading
-          if (title.match(/developer|engineer|scientist|analyst|designer|manager/i)) {
-            currentCareerPath = {
+          // If we're in the career paths section, extract the career path
+          if (inCareerPathsSection || currentSection === 'careerPaths') {
+            const match = line.match(careerPathRegex);
+            
+            if (match) {
+              const title = match[2].trim();
+              const matchPercentage = parseInt(match[3], 10);
+              
+              // Look for timeline lines in the next lines
+              let timeline = "12-18 months"; // Default timeline
+              let j = i + 1;
+              while (j < lines.length && j < i + 5) { // Look only a few lines ahead
+                const nextLine = lines[j].trim();
+                if (nextLine.match(/timeline|months|transition/i)) {
+                  const timeMatch = nextLine.match(/(\d+)[-–](\d+)\s*(months|years)/i);
+                  if (timeMatch) {
+                    let start = parseInt(timeMatch[1], 10);
+                    let end = parseInt(timeMatch[2], 10);
+                    let unit = timeMatch[3].toLowerCase();
+                    
+                    if (unit.includes('year')) {
+                      // Convert years to months for consistency
+                      timeline = `${start*12}-${end*12} months`;
+                    } else {
+                      timeline = `${start}-${end} months`;
+                    }
+                    break;
+                  }
+                }
+                j++;
+              }
+              
+              // Create a new career path
+              const careerPath = {
+                title,
+                match: matchPercentage,
+                description: '',
+                skills: [],
+                resources: []
+              };
+              
+              // Add to the careerPaths array
+              careerPaths.push(careerPath);
+              
+              // Store the timeline
+              timeToCareer[title] = timeline;
+              
+              // Look ahead for the description, which often starts with "- Explanation:"
+              j = i + 1;
+              let descriptionText = '';
+              
+              while (j < lines.length && 
+                     !lines[j].match(/^[a-z]\)\s+.+\(\d+%\s+match/i) && 
+                     !lines[j].match(/^\d+[\.\)]\s+/) &&
+                     lines[j].trim() !== '') {
+                    
+                const descLine = lines[j].trim();
+                
+                // If this is an explanation line, use it as the description
+                if (descLine.match(/^-\s+Explanation:/i)) {
+                  const explanationMatch = descLine.match(/^-\s+Explanation:\s*(.+)/i);
+                  if (explanationMatch) {
+                    descriptionText = explanationMatch[1].trim();
+                    
+                    // Sometimes the explanation continues to the next line
+                    if (j+1 < lines.length && !lines[j+1].match(/^-/)) {
+                      const nextLine = lines[j+1].trim();
+                      if (nextLine && !nextLine.match(/^[a-z]\)/i)) {
+                        descriptionText += ' ' + nextLine;
+                      }
+                    }
+                  }
+                }
+                
+                // If it's another bullet point about skills mentioned in the explanation
+                if (descLine.match(/^-\s+/) && 
+                    (descLine.toLowerCase().includes('skill') || descLine.toLowerCase().includes('knowledge'))) {
+                  const skill = descLine.replace(/^-\s+/, '').trim();
+                  if (skill && !careerPath.skills.includes(skill)) {
+                    careerPath.skills.push(skill);
+                  }
+                } 
+                
+                j++;
+              }
+              
+              if (descriptionText) {
+                careerPath.description = descriptionText;
+              }
+            }
+          }
+          
+          continue;
+        }
+        
+        // Process skills
+        if ((currentSection === 'skills' || currentSection === 'roadmap') && 
+            (line.match(/^\-\s+/) || line.match(/^\d+[\.\)]\s+/) || line.match(/^\*\s+/))) {
+          
+          // Extract the skill from bullet points or numbered lists
+          const skill = line.replace(/^[\-\*\d\.]\s+/, '').trim();
+          
+          if (skill) {
+            // Add to overall skills map
+            if (!skillsMap[skill]) {
+              skillsMap[skill] = {
+                count: 0,
+                careers: []
+              };
+            }
+            skillsMap[skill].count++;
+            
+            // Try to associate with career paths
+            for (const path of careerPaths) {
+              if (!path.skills.includes(skill)) {
+                path.skills.push(skill);
+              }
+              if (!skillsMap[skill].careers.includes(path.title)) {
+                skillsMap[skill].careers.push(path.title);
+              }
+            }
+          }
+        }
+        
+        // Process strengths section
+        if (currentSection === 'strengths' || line.match(/^\d+[\.\)]\s+STRENGTHS ANALYSIS/i)) {
+          currentSection = 'strengths';
+          if (line.match(/^\-\s+/)) {
+            const strength = line.replace(/^[\-\*]\s+/, '').trim();
+            if (strength && !strengths.includes(strength)) {
+              strengths.push(strength);
+            }
+          }
+        }
+        
+        // Process weaknesses/areas for improvement
+        if (currentSection === 'weaknesses' || 
+            (line.match(/^\-\s+/) && 
+             (line.toLowerCase().includes('improve') || 
+              line.toLowerCase().includes('weakness') || 
+              subSection.toLowerCase().includes('improve') ||
+              subSection.toLowerCase().includes('weakness')))) {
+          
+          const weakness = line.replace(/^[\-\*]\s+/, '').trim();
+          if (weakness && !weaknesses.includes(weakness)) {
+            weaknesses.push(weakness);
+          }
+        }
+        
+        // Process resources
+        if ((currentSection === 'resources' || currentSection === 'roadmap') && 
+            (line.match(/^\-\s+/) || line.match(/^\*\s+/) || line.startsWith('http'))) {
+          
+          // Extract resource from bullet points or links
+          const resource = line.replace(/^[\-\*]\s+/, '').trim();
+          
+          if (resource && !resources.includes(resource)) {
+            resources.push(resource);
+            
+            // Try to associate with career paths if in a subsection
+            if (subSection) {
+              for (const path of careerPaths) {
+                // Check if the subsection contains this career path name
+                if (subSection.toLowerCase().includes(path.title.toLowerCase()) && 
+                    !path.resources.includes(resource)) {
+                  path.resources.push(resource);
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      // If we didn't find specialized career paths, fallback to the original method
+      if (careerPaths.length === 0) {
+        // Process the analysis text again with the regular expression for more general career paths
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          
+          const match = line.match(careerPathRegex);
+          
+          if (match) {
+            const title = match[2].trim();
+            const matchPercentage = parseInt(match[3], 10);
+            const timeline = match[4] ? match[4].trim() : "6-12 months"; // Default timeline
+            
+            // Create a new career path
+            const careerPath = {
               title,
-              match: Math.floor(Math.random() * 20) + 80, // Generate a random match percentage 80-99
+              match: matchPercentage,
               description: '',
               skills: [],
               resources: []
             };
             
-            // Add default timeline
-            timeToCareer[title] = "9-15 months";
+            careerPaths.push(careerPath);
+            timeToCareer[title] = timeline;
             
-            careerPaths.push(currentCareerPath);
-          }
-        }
-        
-        // If we have a current path, add details to it
-        if (currentCareerPath && line.match(/^\-\s+/)) {
-          const point = line.replace(/^\-\s+/, '').trim();
-          
-          // Add to description
-          if (currentCareerPath.description) {
-            currentCareerPath.description += ' ' + point;
-          } else {
-            currentCareerPath.description = point;
-          }
-          
-          // If it mentions skills, add to skills
-          if (point.toLowerCase().includes('skill') || 
-              point.toLowerCase().includes('knowledge')) {
-            const skillWords = point.split(/[,;]/).map(s => s.trim());
-            for (const skillWord of skillWords) {
-              if (skillWord && !currentCareerPath.skills.includes(skillWord)) {
-                currentCareerPath.skills.push(skillWord);
-                
-                // Add to skills map
-                if (!sortedSkillsMap[skillWord]) {
-                  sortedSkillsMap[skillWord] = {
-                    count: 0,
-                    careers: []
-                  };
+            // Look ahead for description lines
+            let j = i + 1;
+            let descriptionText = '';
+            
+            while (j < lines.length && 
+                   !lines[j].match(careerPathRegex) && 
+                   !lines[j].match(/^\d+[\.\)]\s+/) &&
+                   lines[j].trim() !== '') {
+              
+              const descLine = lines[j].trim();
+              
+              if (descLine.match(/^\-\s+/) && 
+                  (descLine.toLowerCase().includes('skill') || descLine.toLowerCase().includes('knowledge'))) {
+                const skill = descLine.replace(/^\-\s+/, '').trim();
+                if (skill && !careerPath.skills.includes(skill)) {
+                  careerPath.skills.push(skill);
                 }
-                sortedSkillsMap[skillWord].count++;
-                if (!sortedSkillsMap[skillWord].careers.includes(currentCareerPath.title)) {
-                  sortedSkillsMap[skillWord].careers.push(currentCareerPath.title);
+              } 
+              else if (descLine.match(/^\-\s+/) || descLine.match(/^\*\s+/)) {
+                const descPart = descLine.replace(/^[\-\*]\s+/, '').trim();
+                if (descriptionText) {
+                  descriptionText += ' ' + descPart;
+                } else {
+                  descriptionText = descPart;
                 }
               }
+              
+              j++;
             }
+            
+            careerPath.description = descriptionText;
+            i = j - 1;
           }
         }
       }
-    }
-    
-    // Check if we have enough data and set it
-    if (careerPaths.length > 0 || Object.keys(sortedSkillsMap).length > 0 || resources.length > 0) {
-      setDashboardData({
+      
+      // Sort skills by frequency
+      const sortedSkillsMap = {};
+      Object.keys(skillsMap)
+        .sort((a, b) => skillsMap[b].count - skillsMap[a].count)
+        .forEach(key => {
+          sortedSkillsMap[key] = skillsMap[key];
+        });
+      
+      // If still no career paths, create a last-resort backup
+      if (careerPaths.length === 0) {
+        // Create default career paths based on common patterns in the analysis
+        let careerMentions = [];
+        
+        // Look for career mentions in the text
+        const careerKeywords = [
+          { name: "Software Development", pattern: /software\s+dev|developer|coding|programming/i },
+          { name: "Data Analysis", pattern: /data\s+analy|data\s+scien/i },
+          { name: "UX/UI Design", pattern: /ux|ui\s+design|user\s+interface/i },
+          { name: "Product Management", pattern: /product\s+manag/i },
+          { name: "Cybersecurity", pattern: /cyber|security|secure/i },
+          { name: "DevOps", pattern: /devops|operations/i },
+          { name: "AI/Machine Learning", pattern: /ai|machine\s+learning|ml/i },
+          { name: "Bioinformatics", pattern: /bioinformatics|biology|bio/i },
+          { name: "Healthcare IT", pattern: /healthcare\s+it|medical\s+tech|health\s+system/i },
+          { name: "Life Sciences", pattern: /life\s+science|pharmaceutical|biotech/i }
+        ];
+        
+        // Count mentions of each career
+        careerKeywords.forEach(career => {
+          const matches = (analysisText.match(career.pattern) || []).length;
+          if (matches > 0) {
+            careerMentions.push({
+              name: career.name,
+              count: matches
+            });
+          }
+        });
+        
+        // Sort by mention count
+        careerMentions.sort((a, b) => b.count - a.count);
+        
+        // Create career paths from the top mentions
+        careerMentions.slice(0, 3).forEach((career, index) => {
+          careerPaths.push({
+            title: career.name,
+            match: 95 - (index * 5), // 95%, 90%, 85%
+            description: `Career path based on your background and interests in ${career.name.toLowerCase()}`,
+            skills: [],
+            resources: []
+          });
+          
+          timeToCareer[career.name] = "9-15 months";
+        });
+      }
+      
+      // Ensure we have an adequate number of skills per career path
+      const commonSkills = [
+        "Programming fundamentals", 
+        "Problem solving", 
+        "Communication skills", 
+        "Data analysis", 
+        "Project management"
+      ];
+      
+      careerPaths.forEach(path => {
+        // If the path has fewer than 3 skills, add some from the common skills
+        if (path.skills.length < 3) {
+          commonSkills.forEach(skill => {
+            if (!path.skills.includes(skill)) {
+              path.skills.push(skill);
+              
+              // Add to skills map if needed
+              if (!sortedSkillsMap[skill]) {
+                sortedSkillsMap[skill] = {
+                  count: 0,
+                  careers: []
+                };
+              }
+              sortedSkillsMap[skill].count++;
+              if (!sortedSkillsMap[skill].careers.includes(path.title)) {
+                sortedSkillsMap[skill].careers.push(path.title);
+              }
+            }
+            
+            // Stop once we have at least 3 skills
+            if (path.skills.length >= 3) return;
+          });
+        }
+      });
+      
+      // Return the parsed data
+      return {
         careerPaths,
         skillsMap: sortedSkillsMap,
         resources,
         strengthsWeaknesses: { strengths, weaknesses },
         timeToCareer
-      });
-    } else {
-      // If no meaningful data was parsed, create defaults
-      createDefaultDashboardData();
+      };
+    } catch (error) {
+      console.error('Error parsing analysis data:', error);
+      
+      // Return a basic default structure that won't break the UI
+      return {
+        careerPaths: [
+          {
+            title: "Software Development",
+            match: 85,
+            description: "A versatile career path with opportunities in many industries.",
+            skills: ["Programming", "Problem Solving", "Communication"],
+            resources: []
+          }
+        ],
+        skillsMap: {
+          "Programming": { count: 3, careers: ["Software Development"] },
+          "Problem Solving": { count: 2, careers: ["Software Development"] },
+          "Communication": { count: 1, careers: ["Software Development"] }
+        },
+        resources: ["freeCodeCamp", "The Odin Project", "Codecademy"],
+        strengthsWeaknesses: { 
+          strengths: ["Analytical thinking", "Attention to detail"], 
+          weaknesses: ["Technical experience", "Portfolio projects"] 
+        },
+        timeToCareer: { "Software Development": "9-15 months" }
+      };
     }
   };
 
@@ -597,7 +743,7 @@ const CareerDashboard = () => {
                       >
                         <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
                           <span className="text-blue-600 font-bold">{path.match}%</span>
-                        </div>
+            >
                       </div>
                       <div>
                         <h3 className="font-semibold text-lg">{path.title}</h3>
@@ -608,161 +754,317 @@ const CareerDashboard = () => {
                 </div>
               </div>
               
-              {/* Education and Experience Highlights - Renamed Section */}
+              {/* Skills to Develop */}
               <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-4">Education and Experience Highlights</h2>
+                <h2 className="text-xl font-bold mb-4">Priority Skills to Develop</h2>
                 <div className="space-y-4">
-                  <div>
-                    <h3 className="font-medium text-gray-800">Education Level:</h3>
-                    <p className="text-gray-600">{userData.educationLevel}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-medium text-gray-800">Field of Study:</h3>
-                    <p className="text-gray-600">{userData.studyField}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-medium text-gray-800">Current/Previous Role:</h3>
-                    <p className="text-gray-600">{userData.currentRole}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-medium text-gray-800">Key Technologies Used:</h3>
-                    <p className="text-gray-600">{userData.jobTechnologies}</p>
-                  </div>
-                  
-                  {userData.publications && userData.publications !== 'Not specified' && (
-                    <div>
-                      <h3 className="font-medium text-gray-800">Publications/Research:</h3>
-                      <p className="text-gray-600">{userData.publications}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Key Skills to Develop */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-4">Key Skills to Develop</h2>
-                <div className="grid md:grid-cols-2 gap-4">
                   {getTopSkills().map((skill, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <h3 className="font-medium">{skill}</h3>
-                      <p className="text-sm text-gray-600 mb-2">
-                        Relevant for {dashboardData.skillsMap[skill].careers.length} career paths
-                      </p>
-                      <button 
-                        onClick={() => handleStartLearning(skill)}
-                        className="text-blue-600 text-sm font-medium hover:underline"
-                      >
-                        Find learning resources →
-                      </button>
+                    <div key={index}>
+                      <div className="flex justify-between mb-1">
+                        <span className="font-medium">{skill}</span>
+                        <span className="text-sm text-gray-500">
+                          {dashboardData.skillsMap[skill].careers.length} career paths
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                          className="bg-blue-600 h-2.5 rounded-full" 
+                          style={{ width: `${Math.min(100, dashboardData.skillsMap[skill].count * 20)}%` }}
+                        ></div>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-            
-            {/* Right Column - Sidebar */}
-            <div className="space-y-6">
-              {/* Profile Card */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-2">Your Profile</h2>
-                <div className="space-y-2">
-                  <p><span className="font-medium">Experience:</span> {userData.experienceLevel || 'Not specified'}</p>
-                  <p><span className="font-medium">Education:</span> {userData.educationLevel || 'Not specified'}</p>
-                  <p><span className="font-medium">Study Field:</span> {userData.studyField || 'Not specified'}</p>
-                  <div>
-                    <p className="font-medium mb-1">Interests:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {userData.interests && userData.interests.length > 0 ? (
-                        userData.interests.map((interest, index) => (
-                          <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
-                            {interest}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-gray-500 text-sm">No interests specified</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Transferable Skills - Modified Section */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-4">Transferable Skills</h2>
-                <p className="text-gray-600 mb-3">
-                  Based on your background in {userData.studyField}:
-                </p>
-                <div className="mt-2">
-                  <p className="text-gray-700">{userData.transferableSkills}</p>
-                </div>
-              </div>
-              
-              {/* Strengths & Weaknesses */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-4">Your Profile Analysis</h2>
-                
-                <div className="mb-4">
-                  <h3 className="font-medium text-green-600 mb-2">Strengths</h3>
-                  <ul className="list-disc list-inside space-y-1">
-                    {dashboardData.strengthsWeaknesses.strengths.length > 0 ? (
-                      dashboardData.strengthsWeaknesses.strengths.map((strength, index) => (
-                        <li key={index} className="text-sm">{strength}</li>
-                      ))
-                    ) : (
-                      <li className="text-sm text-gray-500">No specific strengths identified</li>
-                    )}
-                  </ul>
-                </div>
-                
-                <div>
-                  <h3 className="font-medium text-amber-600 mb-2">Areas to Improve</h3>
-                  <ul className="list-disc list-inside space-y-1">
-                    {dashboardData.strengthsWeaknesses.weaknesses.length > 0 ? (
-                      dashboardData.strengthsWeaknesses.weaknesses.map((weakness, index) => (
-                        <li key={index} className="text-sm">{weakness}</li>
-                      ))
-                    ) : (
-                      <li className="text-sm text-gray-500">No specific areas identified</li>
-                    )}
-                  </ul>
-                </div>
+                <button 
+                  onClick={() => setActiveTab('skills')}
+                  className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none transition"
+                >
+                  View All Skills
+                </button>
               </div>
               
               {/* Quick Actions */}
               <div className="bg-white rounded-lg shadow p-6">
                 <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-                <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-4">
                   <button 
-                    onClick={() => {
-                      const blob = new Blob([analysis], { type: 'text/plain' });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = url;
-                      a.download = 'career-analysis.txt';
-                      document.body.appendChild(a);
-                      a.click();
-                      document.body.removeChild(a);
-                      URL.revokeObjectURL(url);
-                    }}
-                    className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition"
+                    onClick={() => handleStartLearning(getTopSkills()[0])}
+                    className="p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition"
                   >
-                    Export Results
+                    <span className="block font-medium text-green-700 mb-1">Start Learning</span>
+                    <span className="text-sm text-green-600">Begin with top skill: {getTopSkills()[0]}</span>
                   </button>
                   <button 
-                    onClick={() => navigate('/career/test')}
-                    className="w-full bg-white border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition"
+                    onClick={() => handleFindProjects(dashboardData.careerPaths[0]?.title || 'Software Development')}
+                    className="p-4 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition"
                   >
-                    Retake Assessment
+                    <span className="block font-medium text-purple-700 mb-1">Find Projects</span>
+                    <span className="text-sm text-purple-600">Build portfolio for: {dashboardData.careerPaths[0]?.title || 'Software Development'}</span>
                   </button>
                   <button 
-                    onClick={() => window.open('https://www.techtalentscity.com/mentorship', '_blank')}
-                    className="w-full bg-white border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition"
+                    onClick={() => setActiveTab('resources')}
+                    className="p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
                   >
-                    Find a Mentor
+                    <span className="block font-medium text-blue-700 mb-1">Learning Resources</span>
+                    <span className="text-sm text-blue-600">View recommended courses and tutorials</span>
                   </button>
+                  <button 
+                    onClick={() => setActiveTab('analysis')}
+                    className="p-4 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition"
+                  >
+                    <span className="block font-medium text-amber-700 mb-1">Full Analysis</span>
+                    <span className="text-sm text-amber-600">See your complete career analysis</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Right Column - Profile Summary */}
+            <div className="space-y-6">
+              {/* Profile Card */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-bold mb-4">Profile Summary</h2>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium text-gray-500">Experience Level</h3>
+                    <p>{userData.experienceLevel || 'Not specified'}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-500">Current Role</h3>
+                    <p>{userData.currentRole}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-500">Educational Background</h3>
+                    <p>{userData.educationLevel} in {userData.studyField}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-500">Years of Experience</h3>
+                    <p>{userData.yearsExperience}</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Strengths and Areas to Improve */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-bold mb-4">Profile Balance</h2>
+                <div className="flex mb-4 rounded-md overflow-hidden text-sm font-medium">
+                  <div 
+                    className="py-2 text-center bg-green-500 text-white"
+                    style={{ width: `${Math.min(100, dashboardData.strengthsWeaknesses.strengths.length * 10)}%` }}
+                  >
+                    {dashboardData.strengthsWeaknesses.strengths.length} Strengths
+                  </div>
+                  <div 
+                    className="py-2 text-center bg-amber-500 text-white"
+                    style={{ width: `${Math.min(100, dashboardData.strengthsWeaknesses.weaknesses.length * 10)}%` }}
+                  >
+                    {dashboardData.strengthsWeaknesses.weaknesses.length} Areas to Improve
+                  </div>
+                </div>
+                <div className="space-y-2 text-sm">
+                  {dashboardData.strengthsWeaknesses.strengths.slice(0, 3).map((strength, index) => (
+                    <div key={index} className="flex items-start">
+                      <span className="text-green-500 mr-2">•</span>
+                      <p>{strength}</p>
+                    </div>
+                  ))}
+                  {dashboardData.strengthsWeaknesses.weaknesses.slice(0, 3).map((weakness, index) => (
+                    <div key={index} className="flex items-start">
+                      <span className="text-amber-500 mr-2">•</span>
+                      <p>{weakness}</p>
+                    </div>
+                  ))}
+                </div>
+                <button 
+                  onClick={() => setActiveTab('analysis')}
+                  className="mt-4 w-full px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 focus:outline-none transition text-sm"
+                >
+                  View Full Analysis
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Full Analysis Tab */}
+        {activeTab === 'analysis' && (
+          <div>
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <h2 className="text-2xl font-bold mb-6">Full Analysis</h2>
+              
+              {/* Education and Experience Summary - Updated Section */}
+              <div className="mb-8 bg-blue-50 p-6 rounded-lg">
+                <h3 className="text-xl font-bold mb-4">Education and Experience Summary</h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold text-blue-700 mb-2">Educational Background</h4>
+                    <p className="mb-4">{userData.educationLevel} in {userData.studyField}</p>
+                    
+                    <h4 className="font-semibold text-blue-700 mb-2">Current/Previous Role</h4>
+                    <p className="mb-4">{userData.currentRole} with {userData.yearsExperience} experience</p>
+                    
+                    <h4 className="font-semibold text-blue-700 mb-2">Key Responsibilities</h4>
+                    <p className="mb-4">{userData.jobResponsibilities}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold text-blue-700 mb-2">Notable Projects/Achievements</h4>
+                    <p className="mb-4">{userData.jobProjects}</p>
+                    
+                    <h4 className="font-semibold text-blue-700 mb-2">Technologies Used</h4>
+                    <p className="mb-4">{userData.jobTechnologies}</p>
+                    
+                    {userData.publications && userData.publications !== 'Not specified' && (
+                      <>
+                        <h4 className="font-semibold text-blue-700 mb-2">Publications/Research</h4>
+                        <p>{userData.publications}</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Data Visualizations */}
+              <div className="mb-8">
+                <h3 className="text-xl font-bold mb-4">Data Visualizations</h3>
+                
+                {/* Career Match Comparison */}
+                <div className="my-8">
+                  <h3 className="text-xl font-bold mb-4">Career Match Comparison</h3>
+                  <div className="mt-6 mb-6 py-10">
+                    <div className="flex justify-between">
+                      {dashboardData.careerPaths.map((path, index) => (
+                        <div key={index} className="text-center">
+                          <div className="text-blue-600 font-bold text-2xl mb-2">{path.match}%</div>
+                          <div className="max-w-[180px] text-gray-800">{path.title}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Top Skills Importance */}
+                <div className="my-10">
+                  <h3 className="text-xl font-bold mb-6">Top Skills Importance</h3>
+                  <div className="space-y-4">
+                    {Object.keys(dashboardData.skillsMap).slice(0, 5).map((skill, index) => (
+                      <div key={index}>
+                        <div className="flex justify-between mb-2">
+                          <span className="font-medium">{skill}</span>
+                          <span className="text-sm text-gray-600">
+                            {dashboardData.skillsMap[skill].careers.length} career paths
+                          </span>
+                        </div>
+                        <div className="h-8 w-full bg-gray-200 rounded">
+                          <div 
+                            className="h-8 bg-blue-600 rounded"
+                            style={{ width: `${Math.min(100, dashboardData.skillsMap[skill].count * 25)}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Career Timeline Comparison */}
+                <div className="my-10">
+                  <h3 className="text-xl font-bold mb-6">Career Timeline Comparison</h3>
+                  
+                  {/* Timeline scale */}
+                  <div className="relative mb-6">
+                    <div className="flex justify-between">
+                      {[0, 6, 12, 18, 24, 30, 36].map((month, index) => (
+                        <div key={index} className="text-sm text-gray-500">{month}m</div>
+                      ))}
+                    </div>
+                    <div className="h-px bg-gray-300 w-full mt-2"></div>
+                  </div>
+                  
+                  {/* Career timelines */}
+                  <div className="space-y-8">
+                    {dashboardData.careerPaths.map((path, index) => {
+                      const timeline = dashboardData.timeToCareer[path.title] || '2-3 year timeline';
+                      const matches = timeline.match(/(\d+)-(\d+)/);
+                      let minMonths = 12, maxMonths = 24;
+                      
+                      if (matches && matches.length >= 3) {
+                        const min = parseInt(matches[1], 10);
+                        const max = parseInt(matches[2], 10);
+                        const unit = timeline.includes('year') ? 12 : 1;
+                        minMonths = min * unit;
+                        maxMonths = max * unit;
+                      }
+                      
+                      return (
+                        <div key={index} className="mb-4">
+                          <div className="flex justify-between mb-2">
+                            <span className="font-medium">{path.title}</span>
+                            <span className="text-sm text-gray-600">{timeline}</span>
+                          </div>
+                          <div className="relative h-6 bg-gray-100 rounded-full w-full">
+                            <div 
+                              className="absolute h-6 bg-green-200 rounded-full"
+                              style={{ 
+                                left: `${Math.max(0, (minMonths / 36) * 100)}%`,
+                                width: `${((maxMonths - minMonths) / 36) * 100}%`
+                              }}
+                            >
+                              <div className="absolute -left-1 top-0 w-2 h-6 bg-green-500 rounded-full"></div>
+                              <div className="absolute -right-1 top-0 w-2 h-6 bg-green-500 rounded-full"></div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                
+                {/* Profile Balance */}
+                <div className="my-10">
+                  <h3 className="text-xl font-bold mb-6">Profile Balance</h3>
+                  <div className="flex rounded-md overflow-hidden h-12">
+                    <div 
+                      className="bg-green-500 text-white flex items-center justify-center font-bold"
+                      style={{ width: '50%' }}
+                    >
+                      {dashboardData.strengthsWeaknesses.strengths.length} Strengths
+                    </div>
+                    <div 
+                      className="bg-yellow-500 text-white flex items-center justify-center font-bold"
+                      style={{ width: '50%' }}
+                    >
+                      {dashboardData.strengthsWeaknesses.weaknesses.length} Areas to Improve
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Complete Analysis Text */}
+              <div className="border-t pt-8 mt-8">
+                <h3 className="text-xl font-bold mb-4">Complete Analysis</h3>
+                <div className="prose max-w-none">
+                  {analysis.split('\n').map((line, index) => {
+                    // Format section headers
+                    if (line.trim().match(/^\d+\.\s+/) && line.match(/recommendations|plan|resources|strengths|improvement/i)) {
+                      return <h3 key={index} className="text-lg font-bold mt-6 mb-3">{line}</h3>;
+                    }
+                    // Format career path headings
+                    else if (line.trim().match(/^[a-z]\)\s+.*?\(\d+%.*?\)/i)) {
+                      return <h4 key={index} className="font-bold mt-4 mb-2">{line}</h4>;
+                    }
+                    // Format list items
+                    else if (line.trim().startsWith('-') || line.trim().match(/^\d+\.\s+/)) {
+                      return <p key={index} className="ml-4 mb-2">{line}</p>;
+                    }
+                    // Empty lines
+                    else if (line.trim() === '') {
+                      return <br key={index} />;
+                    }
+                    // Regular paragraphs
+                    else {
+                      return <p key={index} className="mb-3">{line}</p>;
+                    }
+                  })}
                 </div>
               </div>
             </div>
@@ -771,238 +1073,247 @@ const CareerDashboard = () => {
         
         {/* Career Paths Tab */}
         {activeTab === 'careerPaths' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold mb-6">Recommended Career Paths</h2>
+          <div>
+            <h2 className="text-2xl font-bold mb-6">Career Path Recommendations</h2>
             
-            {dashboardData.careerPaths.map((path, index) => (
-              <div key={index} className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div 
-                        className="w-12 h-12 rounded-full flex items-center justify-center mr-4 flex-shrink-0" 
-                        style={{ 
-                          background: `conic-gradient(#3b82f6 ${path.match}%, #e5e7eb 0)`,
-                          position: 'relative'
-                        }}
-                      >
-                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-                          <span className="text-blue-600 font-bold text-sm">{path.match}%</span>
-                        </div>
+            <div className="space-y-6">
+              {dashboardData.careerPaths.map((path, index) => (
+                <div key={index} className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-center mb-4">
+                    <div 
+                      className="w-16 h-16 rounded-full flex items-center justify-center mr-4 flex-shrink-0" 
+                      style={{ 
+                        background: `conic-gradient(#3b82f6 ${path.match}%, #e5e7eb 0)`,
+                        position: 'relative'
+                      }}
+                    >
+                      <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
+                        <span className="text-blue-600 font-bold">{path.match}%</span>
                       </div>
-                      <h3 className="text-xl font-bold">{path.title}</h3>
                     </div>
-                    <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                      {dashboardData.timeToCareer[path.title] || '9-15 months'}
-                    </span>
+                    <div>
+                      <h3 className="text-xl font-bold">{path.title}</h3>
+                      <p className="text-gray-600">Est. timeline: {dashboardData.timeToCareer[path.title] || '9-15 months'}</p>
+                    </div>
                   </div>
                   
-                  <p className="mt-4 text-gray-600">{path.description}</p>
+                  <p className="mb-6">{path.description || `Career path in ${path.title} based on your background and interests.`}</p>
                   
-                  <div className="mt-6 grid md:grid-cols-2 gap-6">
+                  <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-semibold mb-2">Required Skills</h4>
-                      <ul className="space-y-1">
-                        {path.skills.map((skill, skillIndex) => (
-                          <li key={skillIndex} className="flex items-center">
-                            <span className="text-green-500 mr-2">•</span>
-                            {skill}
+                      <h4 className="font-semibold mb-3">Key Skills Required</h4>
+                      <ul className="space-y-2">
+                        {path.skills.slice(0, 5).map((skill, skillIndex) => (
+                          <li key={skillIndex} className="flex items-start">
+                            <span className="text-blue-500 mr-2">•</span>
+                            <p>{skill}</p>
                           </li>
                         ))}
                       </ul>
                     </div>
                     
                     <div>
-                      <h4 className="font-semibold mb-2">Recommended Resources</h4>
-                      <ul className="space-y-1">
+                      <h4 className="font-semibold mb-3">Recommended Resources</h4>
+                      <ul className="space-y-2">
                         {path.resources.length > 0 ? (
-                          path.resources.map((resource, resourceIndex) => (
+                          path.resources.slice(0, 3).map((resource, resourceIndex) => (
                             <li key={resourceIndex} className="flex items-start">
-                              <span className="text-blue-500 mr-2">•</span>
-                              {resource}
+                              <span className="text-green-500 mr-2">•</span>
+                              <p>{resource}</p>
                             </li>
                           ))
                         ) : (
-                          <li className="text-gray-500">See the Resources tab for learning materials</li>
+                          dashboardData.resources.slice(0, 3).map((resource, resourceIndex) => (
+                            <li key={resourceIndex} className="flex items-start">
+                              <span className="text-green-500 mr-2">•</span>
+                              <p>{resource}</p>
+                            </li>
+                          ))
                         )}
                       </ul>
                     </div>
                   </div>
                   
-                  {/* Education and Experience Section - Updated */}
-                  <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold mb-2">How Your Background Relates</h4>
-                    <p className="text-gray-700">
-                      Your {userData.educationLevel} education in {userData.studyField} and experience as a {userData.currentRole} provides valuable transferable skills. 
-                      {userData.jobProjects !== 'Not specified' && userData.jobProjects ? 
-                        ` Your work on ${userData.jobProjects.split('.')[0]} demonstrates skills applicable to this path.` : ''}
-                      {userData.publications !== 'Not specified' && userData.publications ? 
-                        ` Your publications in "${userData.publications.split('.')[0]}" are also valuable for this career path.` : ''}
-                      {userData.jobTechnologies !== 'Not specified' && userData.jobTechnologies ? 
-                        ` Your familiarity with ${userData.jobTechnologies.split(',')[0]} is also relevant.` : ''}
-                    </p>
+                  <div className="mt-6 flex gap-3">
+                    <button 
+                      onClick={() => handleStartLearning(path.skills[0] || getTopSkills()[0])}
+                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none transition flex-grow"
+                    >
+                      Start Learning Key Skills
+                    </button>
+                    <button 
+                      onClick={() => handleFindProjects(path.title)}
+                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 focus:outline-none transition flex-grow"
+                    >
+                      Find Project Ideas
+                    </button>
                   </div>
                 </div>
-                
-                <div className="bg-gray-50 px-6 py-4 flex justify-end">
-                  <button 
-                    onClick={() => handleFindProjects(path.title)}
-                    className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
-                  >
-                    Find Projects in This Field
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
         
-        {/* Skills Tab */}
+        {/* Skills to Develop Tab */}
         {activeTab === 'skills' && (
           <div>
-            <h2 className="text-2xl font-bold mb-6">Skills Development Plan</h2>
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <h3 className="text-lg font-semibold mb-4">Top Skills by Importance</h3>
-              <div className="space-y-4">
-                {Object.keys(dashboardData.skillsMap).map((skill, index) => (
-                  <div key={index} className="border-b pb-4 last:border-b-0 last:pb-0">
-                    <div className="flex justify-between mb-2">
-                      <h4 className="font-medium">{skill}</h4>
-                      <span className="text-sm text-gray-500">
-                        Relevant for {dashboardData.skillsMap[skill].careers.length} career paths
-                      </span>
-                    </div>
-                    <div className="relative pt-1">
-                      <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
-                        <div 
-                          style={{ width: `${Math.min(100, dashboardData.skillsMap[skill].count * 20)}%` }} 
-                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500">
+            <h2 className="text-2xl font-bold mb-6">Skills to Develop</h2>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4">Priority Skills</h3>
+                <div className="space-y-6">
+                  {Object.keys(dashboardData.skillsMap).slice(0, 8).map((skill, index) => (
+                    <div key={index}>
+                      <div className="flex justify-between mb-2">
+                        <div>
+                          <span className="font-medium">{skill}</span>
+                          <span className="text-xs text-gray-500 ml-2">
+                            ({dashboardData.skillsMap[skill].careers.length} career paths)
+                          </span>
                         </div>
+                        <button 
+                          onClick={() => handleStartLearning(skill)}
+                          className="text-sm text-blue-600 hover:text-blue-800 focus:outline-none"
+                        >
+                          Learn
+                        </button>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                          className="bg-blue-600 h-2.5 rounded-full" 
+                          style={{ width: `${Math.min(100, dashboardData.skillsMap[skill].count * 20)}%` }}
+                        ></div>
+                      </div>
+                      <div className="mt-1">
+                        <p className="text-xs text-gray-500">
+                          Relevant for: {dashboardData.skillsMap[skill].careers.slice(0, 2).join(', ')}
+                          {dashboardData.skillsMap[skill].careers.length > 2 && ` and ${dashboardData.skillsMap[skill].careers.length - 2} more`}
+                        </p>
                       </div>
                     </div>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {dashboardData.skillsMap[skill].careers.map((career, careerIndex) => (
-                        <span key={careerIndex} className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
-                          {career}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="mt-3">
-                      <button 
-                        onClick={() => handleStartLearning(skill)}
-                        className="text-blue-600 text-sm font-medium hover:underline"
-                      >
-                        Learn this skill →
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {/* New Section - Existing Skills */}
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <h3 className="text-lg font-semibold mb-4">Your Existing Skills</h3>
-              <p className="mb-4">From your education and work experience:</p>
-              
-              {/* Academic Skills */}
-              <div className="mb-4">
-                <h4 className="font-medium text-gray-700 mb-2">Academic Skills ({userData.educationLevel} in {userData.studyField})</h4>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {userData.studyField.split(/[,;]/).map((field, index) => (
-                    <span key={index} className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">
-                      {field.trim()}
-                    </span>
                   ))}
-                  
-                  {/* Add some generic academic skills based on education level */}
-                  {userData.educationLevel && userData.educationLevel.includes("Bachelor") && (
-                    <>
-                      <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">Research Methods</span>
-                      <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">Critical Thinking</span>
-                    </>
-                  )}
-                  
-                  {userData.educationLevel && (userData.educationLevel.includes("Master") || userData.educationLevel.includes("PhD")) && (
-                    <>
-                      <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">Advanced Research</span>
-                      <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">Data Analysis</span>
-                      <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">Academic Writing</span>
-                    </>
-                  )}
                 </div>
               </div>
               
-              {/* Work Experience Skills */}
               <div>
-                <h4 className="font-medium text-gray-700 mb-2">Professional Skills</h4>
-                {userData.jobTechnologies !== 'Not specified' && userData.jobTechnologies ? (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {userData.jobTechnologies.split(/[,;]/).map((tech, index) => (
-                      <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                        {tech.trim()}
-                      </span>
+                <div className="bg-white rounded-lg shadow p-6 mb-6">
+                  <h3 className="text-lg font-semibold mb-4">Your Strengths</h3>
+                  <ul className="space-y-2">
+                    {dashboardData.strengthsWeaknesses.strengths.map((strength, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-green-500 mr-2">•</span>
+                        <p>{strength}</p>
+                      </li>
                     ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 italic mb-4">No specific technologies mentioned</p>
-                )}
-              </div>
-              
-              {/* Publications if available */}
-              {userData.publications && userData.publications !== 'Not specified' && (
-                <div className="mt-4">
-                  <h4 className="font-medium text-gray-700 mb-2">Research & Publications</h4>
-                  <p className="text-gray-600 mb-2">{userData.publications}</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                      Academic Writing
-                    </span>
-                    <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                      Research
-                    </span>
-                    <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                      Technical Communication
-                    </span>
-                  </div>
+                  </ul>
                 </div>
-              )}
-              
-              <p className="text-sm text-gray-600 mt-4">
-                These skills from your {userData.educationLevel} education in {userData.studyField} and your work as a {userData.currentRole} can be leveraged in your tech career transition.
-              </p>
+                
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h3 className="text-lg font-semibold mb-4">Areas to Improve</h3>
+                  <ul className="space-y-2">
+                    {dashboardData.strengthsWeaknesses.weaknesses.map((weakness, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-amber-500 mr-2">•</span>
+                        <p>{weakness}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
             
-            <div className="bg-indigo-50 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-2">Skill Development Tips</h3>
-              <ul className="space-y-2">
-                <li className="flex items-start">
-                  <span className="text-indigo-600 mr-2">•</span>
-                  <p>Focus on the top 3-5 skills that are common across multiple career paths</p>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-indigo-600 mr-2">•</span>
-                  <p>Create small projects to practice each skill in real-world scenarios</p>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-indigo-600 mr-2">•</span>
-                  <p>Join online communities like Stack Overflow or GitHub to collaborate with others</p>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-indigo-600 mr-2">•</span>
-                  <p>Track your progress by keeping a learning journal or portfolio</p>
-                </li>
-                {userData.educationLevel && (userData.educationLevel.includes("Master") || userData.educationLevel.includes("PhD")) && (
-                  <li className="flex items-start">
-                    <span className="text-indigo-600 mr-2">•</span>
-                    <p>Leverage your advanced research skills from your {userData.educationLevel} to quickly master new technical concepts</p>
-                  </li>
-                )}
-                <li className="flex items-start">
-                  <span className="text-indigo-600 mr-2">•</span>
-                  <p>Look for ways to apply your academic knowledge in {userData.studyField} to technical problems in related domains</p>
-                </li>
-              </ul>
+            <div className="mt-8 bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold mb-4">Learning Strategy</h3>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <div className="flex items-center mb-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold mr-3">
+                      1
+                    </div>
+                    <h4 className="font-semibold">Foundational Skills</h4>
+                  </div>
+                  <p className="text-sm text-gray-600">Start with the essential skills that apply across multiple career paths.</p>
+                  <ul className="mt-3 space-y-2 text-sm">
+                    {Object.keys(dashboardData.skillsMap).slice(0, 3).map((skill, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-blue-500 mr-2">•</span>
+                        <p>{skill}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <div className="flex items-center mb-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold mr-3">
+                      2
+                    </div>
+                    <h4 className="font-semibold">Specialization</h4>
+                  </div>
+                  <p className="text-sm text-gray-600">Focus on skills specific to your top career path choice.</p>
+                  <ul className="mt-3 space-y-2 text-sm">
+                    {dashboardData.careerPaths[0]?.skills.slice(0, 3).map((skill, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-blue-500 mr-2">•</span>
+                        <p>{skill}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <div className="flex items-center mb-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold mr-3">
+                      3
+                    </div>
+                    <h4 className="font-semibold">Portfolio Building</h4>
+                  </div>
+                  <p className="text-sm text-gray-600">Create projects that demonstrate your skills to potential employers.</p>
+                  <button 
+                    onClick={() => handleFindProjects(dashboardData.careerPaths[0]?.title || 'Software Development')}
+                    className="mt-3 w-full px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 focus:outline-none transition"
+                  >
+                    Find Project Ideas
+                  </button>
+                </div>
+              </div>
+            </div>
+                
+                <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <div className="flex items-center mb-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold mr-3">
+                      2
+                    </div>
+                    <h4 className="font-semibold">Specialization</h4>
+                  </div>
+                  <p className="text-sm text-gray-600">Focus on skills specific to your top career path choice.</p>
+                  <ul className="mt-3 space-y-2 text-sm">
+                    {dashboardData.careerPaths[0]?.skills.slice(0, 3).map((skill, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-blue-500 mr-2">•</span>
+                        <p>{skill}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <div className="flex items-center mb-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold mr-3">
+                      3
+                    </div>
+                    <h4 className="font-semibold">Portfolio Building</h4>
+                  </div>
+                  <p className="text-sm text-gray-600">Create projects that demonstrate your skills to potential employers.</p>
+                  <button 
+                    onClick={() => handleFindProjects(dashboardData.careerPaths[0]?.title || 'Software Development')}
+                    className="mt-3 w-full px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 focus:outline-none transition"
+                  >
+                    Find Project Ideas
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -1032,6 +1343,13 @@ const CareerDashboard = () => {
                     <li className="flex items-start">
                       <span className="text-green-500 mr-2">•</span>
                       <div>
+                        <p className="font-medium">Codecademy</p>
+                        <p className="text-sm text-gray-600">Interactive coding lessons</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2">•</span>
+                      <div>
                         <p className="font-medium">freeCodeCamp</p>
                         <p className="text-sm text-gray-600">Comprehensive web development curriculum</p>
                       </div>
@@ -1046,8 +1364,135 @@ const CareerDashboard = () => {
                     <li className="flex items-start">
                       <span className="text-green-500 mr-2">•</span>
                       <div>
+                        <p className="font-medium">Khan Academy</p>
+                        <p className="text-sm text-gray-600">Computer programming and computer science</p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                
+                {/* Education-Specific Resources - Updated Section */}
+                <div className="bg-white rounded-lg shadow p-6 mb-6">
+                  <h3 className="text-lg font-semibold mb-4">Resources for {userData.educationLevel} Graduates in {userData.studyField}</h3>
+                  <p className="mb-4">Specialized resources for professionals with your educational background:</p>
+                  <ul className="space-y-3">
+                    <li className="flex items-start">
+                      <span className="text-purple-500 mr-2">•</span>
+                      <div>
+                        <p className="font-medium">{userData.studyField} to Tech Communities</p>
+                        <p className="text-sm text-gray-600">Connect with others making similar transitions</p>
+                      </div>
+                    </li>
+                    {userData.educationLevel && (userData.educationLevel.includes("Master") || userData.educationLevel.includes("PhD")) && (
+                      <li className="flex items-start">
+                        <span className="text-purple-500 mr-2">•</span>
+                        <div>
+                          <p className="font-medium">Advanced Research Skills Workshops</p>
+                          <p className="text-sm text-gray-600">Leverage your research expertise in tech projects</p>
+                        </div>
+                      </li>
+                    )}
+                    <li className="flex items-start">
+                      <span className="text-purple-500 mr-2">•</span>
+                      <div>
+                        <p className="font-medium">Domain-Specific Tech Projects</p>
+                        <p className="text-sm text-gray-600">Build projects that leverage your {userData.studyField} expertise</p>
+                      </div>
+                    </li>
+                    {userData.publications && userData.publications !== 'Not specified' && (
+                      <li className="flex items-start">
+                        <span className="text-purple-500 mr-2">•</span>
+                        <div>
+                          <p className="font-medium">Technical Writing & Documentation</p>
+                          <p className="text-sm text-gray-600">Use your publication experience for technical documentation</p>
+                        </div>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+                
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h3 className="text-lg font-semibold mb-4">Project Ideas</h3>
+                  <p className="mb-4">Building projects is crucial for skill development. Here are some ideas to get started:</p>
+                  <ul className="space-y-2">
+                    <li className="flex items-start">
+                      <span className="text-indigo-500 mr-2">•</span>
+                      <p>Portfolio website to showcase your work</p>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-indigo-500 mr-2">•</span>
+                      <p>Task management application</p>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-indigo-500 mr-2">•</span>
+                      <p>Weather app using a public API</p>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-indigo-500 mr-2">•</span>
+                      <p>Blog or content management system</p>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-indigo-500 mr-2">•</span>
+                      <p>E-commerce store or product catalog</p>
+                    </li>
+                    {userData.studyField !== 'Not specified' && (
+                      <li className="flex items-start">
+                        <span className="text-indigo-500 mr-2">•</span>
+                        <p>A tech solution for a common problem in {userData.studyField}</p>
+                      </li>
+                    )}
+                    {userData.educationLevel && userData.educationLevel.includes("PhD") && (
+                      <li className="flex items-start">
+                        <span className="text-indigo-500 mr-2">•</span>
+                        <p>Research data visualization dashboard</p>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {activeTab === 'resources' && (
+          <div>
+            <h2 className="text-2xl font-bold mb-6">Learning Resources</h2>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4">Recommended Resources</h3>
+                <ul className="space-y-3">
+                  {dashboardData.resources.map((resource, index) => (
+                    <li key={index} className="flex items-start pb-3 border-b last:border-b-0 last:pb-0">
+                      <span className="text-blue-500 mr-2">•</span>
+                      <p>{resource}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div>
+                <div className="bg-white rounded-lg shadow p-6 mb-6">
+                  <h3 className="text-lg font-semibold mb-4">Free Learning Platforms</h3>
+                  <ul className="space-y-3">
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2">•</span>
+                      <div>
                         <p className="font-medium">Codecademy</p>
                         <p className="text-sm text-gray-600">Interactive coding lessons</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2">•</span>
+                      <div>
+                        <p className="font-medium">freeCodeCamp</p>
+                        <p className="text-sm text-gray-600">Comprehensive web development curriculum</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2">•</span>
+                      <div>
+                        <p className="font-medium">The Odin Project</p>
+                        <p className="text-sm text-gray-600">Full-stack web development curriculum</p>
                       </div>
                     </li>
                     <li className="flex items-start">

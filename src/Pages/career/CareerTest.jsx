@@ -385,11 +385,11 @@ const CareerTest = () => {
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Career Transition to Tech</h1>
       <p className="mb-8">Help us understand your background and tech interests to recommend the best career path</p>
-      
+
+  
       <div className="flex justify-between items-center mb-6">
         <div>
-          <a href="#" onClick={() => navigate('/career')} className="text-blue-600 flex items-center">
-            <span className="material-icons mr-2">arrow_back</span>
+          <a href="#" onClick={() => navigate('/career')} className="text-blue-600">
             Back to Home
           </a>
         </div>

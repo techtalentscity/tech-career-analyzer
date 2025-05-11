@@ -268,6 +268,7 @@ const CareerDashboard = () => {
 
   // Get career paths for visualization
   const careerPaths = React.useMemo(() => {
+    if (!analysis) return [];
     return extractCareerPaths(analysis);
   }, [analysis]);
 

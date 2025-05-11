@@ -213,27 +213,29 @@ const CareerDashboard = () => {
       }
       // Format skills gap numbered items (e.g., "1. Programming: Focus on Python...")
       else if (line.match(/^\d+\.\s+/) && isInSkillsGapSection(index)) {
-        // Extract the skill name and description
-        const match = line.match(/^\d+\.\s+([\w\s]+):\s+(.+)/);
+        // Split at the first colon to separate the skill title from description
+        const colonIndex = line.indexOf(':');
         
-        if (match) {
-          const [, skillName, description] = match;
+        if (colonIndex > -1) {
+          const titlePart = line.substring(0, colonIndex + 1);
+          const descriptionPart = line.substring(colonIndex + 1).trim();
+          
           formattedContent.push(
-            <div key={`skill-gap-${index}`} className="mb-3">
-              <div className="flex items-start">
-                <span className="text-blue-600 mr-2">•</span>
-                <p className="font-semibold">{skillName}:</p>
-              </div>
-              <p className="ml-5" dangerouslySetInnerHTML={processContent(description)} />
+            <div key={`skill-gap-${index}`} className="mb-4">
+              <h4 className="text-lg font-semibold text-blue-600 mb-1">
+                {titlePart}
+              </h4>
+              <p className="text-gray-800">
+                {descriptionPart}
+              </p>
             </div>
           );
         } else {
-          // Fallback for other numbered items in the skills gap section
+          // If no colon, format as a regular numbered item
           formattedContent.push(
-            <div key={`skill-gap-${index}`} className="flex items-start mb-3">
-              <span className="text-blue-600 mr-2">•</span>
-              <p dangerouslySetInnerHTML={processContent(line.replace(/^\d+\.\s+/, ''))} />
-            </div>
+            <p key={`skill-gap-${index}`} className="mb-3 text-gray-800">
+              {line}
+            </p>
           );
         }
       }
@@ -434,7 +436,7 @@ const CareerDashboard = () => {
           {/* Complete Analysis Text */}
           <div>
             <h2 className="text-2xl font-bold mb-6">Complete Analysis</h2>
-            <div className="prose max-w-none">
+            <div className="text-base leading-relaxed">
               {formatAnalysisText(analysis)}
             </div>
           </div>

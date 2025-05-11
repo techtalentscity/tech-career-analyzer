@@ -3,6 +3,7 @@
 // Storage keys
 const SUBMISSIONS_KEY = 'tech_talents_submissions';
 const ANALYSES_KEY = 'tech_talents_analyses';
+const FORMATTED_ANALYSES_PREFIX = 'tech_talents_formatted_analysis_';
 
 class StorageService {
   constructor() {
@@ -114,6 +115,126 @@ class StorageService {
     } catch (error) {
       console.error('Error getting submission by ID:', error);
       return null;
+    }
+  }
+
+  /**
+   * Save formatted analysis to localStorage for faster rendering
+   * @param {string} userId - User email or ID 
+   * @param {string} formattedAnalysis - Raw analysis text
+   * @returns {boolean} - Success status
+   */
+  saveFormattedAnalysis(userId, formattedAnalysis) {
+    try {
+      if (!userId || !formattedAnalysis) {
+        return false;
+      }
+      
+      // Create a storage key based on the user's email/ID
+      const storageKey = `${FORMATTED_ANALYSES_PREFIX}${userId}`;
+      
+      // Create a storage object with timestamp to handle cache invalidation
+      const storageObject = {
+        timestamp: new Date().getTime(),
+        content: formattedAnalysis
+      };
+      
+      // Save to localStorage
+      localStorage.setItem(storageKey, JSON.stringify(storageObject));
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving formatted analysis:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get formatted analysis from localStorage
+   * @param {string} userId - User email or ID
+   * @returns {string|null} - Formatted analysis or null if not found/expired
+   */
+  getFormattedAnalysis(userId) {
+    try {
+      if (!userId) {
+        return null;
+      }
+      
+      // Create the storage key
+      const storageKey = `${FORMATTED_ANALYSES_PREFIX}${userId}`;
+      
+      // Get the stored item
+      const storedData = localStorage.getItem(storageKey);
+      
+      if (!storedData) {
+        return null;
+      }
+      
+      // Parse the stored data
+      const parsedData = JSON.parse(storedData);
+      
+      // Check if the data is still fresh (less than 24 hours old)
+      const currentTime = new Date().getTime();
+      const dataAge = currentTime - parsedData.timestamp;
+      const maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+      
+      if (dataAge > maxAge) {
+        // Data is stale, remove it and return null
+        localStorage.removeItem(storageKey);
+        return null;
+      }
+      
+      // Return the content
+      return parsedData.content;
+    } catch (error) {
+      console.error('Error retrieving formatted analysis:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Clear formatted analysis cache
+   * @param {string} userId - User email or ID
+   * @returns {boolean} - Success status
+   */
+  clearFormattedAnalysis(userId) {
+    try {
+      if (!userId) {
+        return false;
+      }
+      
+      const storageKey = `${FORMATTED_ANALYSES_PREFIX}${userId}`;
+      localStorage.removeItem(storageKey);
+      return true;
+    } catch (error) {
+      console.error('Error clearing formatted analysis:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Clear all formatted analyses caches (useful when upgrading app version)
+   * @returns {number} - Number of cache entries cleared
+   */
+  clearAllFormattedAnalyses() {
+    try {
+      const keysToRemove = [];
+      
+      // Find all keys with the formatted analyses prefix
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(FORMATTED_ANALYSES_PREFIX)) {
+          keysToRemove.push(key);
+        }
+      }
+      
+      // Remove all found keys
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
+      return keysToRemove.length;
+    } catch (error) {
+      console.error('Error clearing all formatted analyses:', error);
+      return 0;
     }
   }
 

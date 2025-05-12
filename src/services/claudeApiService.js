@@ -111,8 +111,32 @@ class ClaudeApiService {
       const data = await response.json();
       console.log("Received successful response from Claude API");
       
-      // Verify that the response includes relevant content about education and publications
+      // DEBUGGING: Log the actual response text
       const responseText = data.content[0].text;
+      console.log("=== CLAUDE RESPONSE START ===");
+      console.log(responseText);
+      console.log("=== CLAUDE RESPONSE END ===");
+      
+      // Log first 500 characters to see format
+      console.log("First 500 chars:", responseText.substring(0, 500));
+      
+      // Check if Skills Gap section exists
+      const hasSkillsGap = responseText.includes("SKILLS GAP ANALYSIS");
+      console.log("Has Skills Gap section:", hasSkillsGap);
+      
+      if (hasSkillsGap) {
+        // Extract just the Skills Gap section for debugging
+        const skillsGapStart = responseText.indexOf("SKILLS GAP ANALYSIS");
+        const skillsGapEnd = responseText.indexOf("LEARNING ROADMAP") || responseText.indexOf("TRANSITION STRATEGY");
+        if (skillsGapEnd > skillsGapStart) {
+          const skillsGapSection = responseText.substring(skillsGapStart, skillsGapEnd);
+          console.log("=== SKILLS GAP SECTION ===");
+          console.log(skillsGapSection);
+          console.log("=== END SKILLS GAP ===");
+        }
+      }
+      
+      // Verify that the response includes relevant content about education and publications
       const containsEducationRef = responseText.toLowerCase().includes('education') || 
                                   responseText.toLowerCase().includes('degree') ||
                                   responseText.toLowerCase().includes('study');

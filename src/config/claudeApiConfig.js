@@ -17,9 +17,9 @@ const CLAUDE_PROMPTS = {
   formSuggestions: 
     "I'm filling out a tech career assessment form for someone transitioning into tech. " +
     "Based on a typical career changer profile, suggest realistic answers for a form with these fields: " +
-    "Education Level, Field of Study, Years of Experience, Current/Previous Role, " +  // Updated to include Education Level and Field of Study
+    "Education Level, Field of Study, Years of Experience, Current/Previous Role, " +
     "Job Responsibilities, Notable Projects or Achievements, Software or Technologies Used, Internships or Relevant Experience, " +
-    "Publications or Research, " +  // Added Publications field
+    "Publications or Research, " +
     "What they like doing best, Biggest motivation for tech career, " +
     "What they're passionate about, Primary reason for transition, Transferable skills from previous career, " +
     "Previous tech exposure, Anticipated challenges in transition, Tech areas they're curious about, " +
@@ -86,31 +86,52 @@ const CLAUDE_PROMPTS = {
     - Guidance needed: ${formData.guidanceNeeded || 'Not specified'}
     - 12-month goal: ${formData.futureGoal || 'Not specified'}
     
-    Based on this comprehensive assessment, provide a detailed analysis with the following sections:
+    Based on this comprehensive assessment, provide a detailed analysis with the following sections.
+    
+    IMPORTANT: Format your response EXACTLY as shown below, maintaining the exact structure and numbering:
     
     1. CAREER PATH RECOMMENDATIONS:
-       Suggest 2-3 specific tech roles that would be ideal fits based on their educational background, prior experience, interests, 
-       and strengths. For each role, include a match percentage, explanation of why it's a good fit,
-       and realistic timeline for transition. Consider how their field of study can be leveraged in tech roles.
+       a) [Role Name] ([X]% match)
+       - Why: [Detailed explanation]
+       - Timeline: [Specific timeline]
+       
+       b) [Role Name] ([X]% match)
+       - Why: [Detailed explanation]
+       - Timeline: [Specific timeline]
     
     2. STRENGTHS ANALYSIS:
-       Identify their key strengths and explain how these will transfer to their tech career.
-       Focus on both technical aptitudes and soft skills from their education and previous experience.
-       For candidates with publications or research, highlight how these academic skills transfer to tech.
+       - [Strength Category]: [Detailed explanation]
+       - [Strength Category]: [Detailed explanation]
+       (Use bullet points with "-" for this section)
     
     3. SKILLS GAP ANALYSIS:
-       Create a prioritized list of skills they need to develop for their recommended paths.
-       Be specific about which skills are most critical to focus on first, taking into account their educational background.
+       FORMAT EACH SKILL AS A NUMBERED ITEM WITH TITLE AND DESCRIPTION ON SEPARATE LINES:
+       
+       1. [Skill Name]: [Brief description of the gap and what needs to be learned]
+       
+       2. [Skill Name]: [Brief description of the gap and what needs to be learned]
+       
+       3. [Skill Name]: [Brief description of the gap and what needs to be learned]
+       
+       (Continue numbering for all skills. Each skill should have the format "N. Skill Name: Description")
     
     4. LEARNING ROADMAP:
-       Design a 6-month learning plan with specific resources, milestones and approximate timelines.
-       Include specific courses, practice projects, and other learning resources.
-       For advanced degree holders, suggest more accelerated learning pathways where appropriate.
+       Month 1-2:
+       - [Specific tasks and resources]
+       - [More tasks]
+       
+       Month 3-4:
+       - [Specific tasks and resources]
+       - [More tasks]
+       
+       Month 5-6:
+       - [Specific tasks and resources]
+       - [More tasks]
     
     5. TRANSITION STRATEGY:
-       Provide practical advice on managing their career transition based on their timeline,
-       commitments, education level, and whether they're continuing in their current role.
-       Include strategies for leveraging their academic credentials and publications if applicable.
+       - [Strategy point]
+       - [Strategy point]
+       - [Strategy point]
     
     Make your analysis practical, personalized, and actionable. Focus on leveraging their specific educational background,
     field of study, strengths, and interests to create a realistic path into tech.

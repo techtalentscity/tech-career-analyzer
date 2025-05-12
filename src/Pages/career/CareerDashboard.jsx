@@ -142,12 +142,108 @@ const CareerDashboard = () => {
     return careerPaths;
   };
 
+  // Extract skills gap data from analysis text
+  const extractSkillsGap = (text) => {
+    if (!text) return [];
+    
+    const lines = text.split('\n');
+    const skills = [];
+    let inSkillsGapSection = false;
+    let currentCareerPath = '';
+    
+    lines.forEach((line, index) => {
+      // Check if we're in the skills gap section
+      if (line.includes("SKILLS GAP ANALYSIS")) {
+        inSkillsGapSection = true;
+        return;
+      }
+      
+      // Exit skills gap section if we reach another major section
+      if (line.includes("LEARNING ROADMAP") || line.includes("TRANSITION STRATEGY")) {
+        inSkillsGapSection = false;
+        return;
+      }
+      
+      // Track current career path
+      if (line.match(/^[a-z]\)\s+.*?\(\d+%\s+match/i)) {
+        const pathMatch = line.match(/^[a-z]\)\s+(.*?)\s+\(/);
+        if (pathMatch) {
+          currentCareerPath = pathMatch[1].trim();
+        }
+      }
+      
+      // Extract skills if we're in the skills gap section
+      if (inSkillsGapSection && line.match(/^\d+\.\s+/)) {
+        const colonIndex = line.indexOf(':');
+        
+        if (colonIndex > -1) {
+          const skillMatch = line.match(/^\d+\.\s+([^:]+):\s*(.+)/);
+          
+          if (skillMatch) {
+            const skillName = skillMatch[1].trim();
+            const description = skillMatch[2].trim();
+            
+            // Parse level information from the description text if available
+            let currentLevel = 3; // Default intermediate
+            let requiredLevel = 5; // Default expert
+            
+            // Look for skill level patterns in the description
+            const descLower = description.toLowerCase();
+            
+            // Extract current level
+            if (descLower.includes('no experience') || descLower.includes('need to learn')) {
+              currentLevel = 1;
+            } else if (descLower.includes('basic knowledge') || descLower.includes('basic understanding')) {
+              currentLevel = 2;
+            } else if (descLower.includes('intermediate') || descLower.includes('some experience')) {
+              currentLevel = 3;
+            } else if (descLower.includes('advanced') || descLower.includes('strong understanding')) {
+              currentLevel = 4;
+            } else if (descLower.includes('expert') || descLower.includes('mastery')) {
+              currentLevel = 5;
+            }
+            
+            // Extract required level
+            if (descLower.includes('basic proficiency required') || descLower.includes('basic level')) {
+              requiredLevel = 2;
+            } else if (descLower.includes('intermediate proficiency') || descLower.includes('solid understanding')) {
+              requiredLevel = 3;
+            } else if (descLower.includes('advanced proficiency') || descLower.includes('deep understanding')) {
+              requiredLevel = 4;
+            } else if (descLower.includes('expert level') || descLower.includes('mastery required')) {
+              requiredLevel = 5;
+            }
+            
+            // Check for gap indicators in the text
+            const gapMatch = description.match(/(\d+)\s*level/i);
+            if (gapMatch) {
+              const gap = parseInt(gapMatch[1]);
+              requiredLevel = Math.min(currentLevel + gap, 5);
+            }
+            
+            skills.push({
+              name: skillName,
+              description: description,
+              currentLevel: currentLevel,
+              requiredLevel: requiredLevel,
+              careerPath: currentCareerPath,
+              gap: requiredLevel - currentLevel
+            });
+          }
+        }
+      }
+    });
+    
+    return skills;
+  };
+
   // Format analysis text for display with emphasis on important elements
   const formatAnalysisText = (text) => {
     if (!text) return [];
     
     const lines = text.split('\n');
     let formattedContent = [];
+    let inSkillsGapSection = false;
 
     // Helper function to highlight important keywords and fix pronouns
     const processContent = (content) => {
@@ -184,17 +280,27 @@ const CareerDashboard = () => {
       return { __html: content };
     };
 
-    // Helper to check if line is in Skills Gap Analysis section
-    const isInSkillsGapSection = (index) => {
-      // Look for "SKILLS GAP ANALYSIS" in previous lines
-      return index > 0 && lines.slice(Math.max(0, index-10), index).some(l => 
-        l.includes("SKILLS GAP ANALYSIS")
-      ) && !lines.slice(Math.max(0, index-10), index).some(l => 
-        l.includes("LEARNING ROADMAP") || l.includes("TRANSITION STRATEGY")
-      );
-    };
-
     lines.forEach((line, index) => {
+      // Check if we're entering or leaving the skills gap section
+      if (line.includes("SKILLS GAP ANALYSIS")) {
+        inSkillsGapSection = true;
+        formattedContent.push(
+          <h3 key={`header-${index}`} className="text-xl font-bold mt-8 mb-4 text-blue-800">
+            {line}
+          </h3>
+        );
+        return;
+      }
+      
+      if (line.includes("LEARNING ROADMAP") || line.includes("TRANSITION STRATEGY")) {
+        inSkillsGapSection = false;
+      }
+
+      // Skip skills gap numbered items since we're showing them in charts
+      if (inSkillsGapSection && line.match(/^\d+\.\s+/) && line.includes(':')) {
+        return;
+      }
+
       // Format section headers (e.g., "1. CAREER PATH RECOMMENDATIONS")
       if (line.match(/^\d+\.\s+[A-Z]/)) {
         formattedContent.push(
@@ -210,34 +316,6 @@ const CareerDashboard = () => {
             {line}
           </h4>
         );
-      }
-      // Format skills gap numbered items (e.g., "1. Programming: Focus on Python...")
-      else if (line.match(/^\d+\.\s+/) && isInSkillsGapSection(index)) {
-        // Split at the first colon to separate the skill title from description
-        const colonIndex = line.indexOf(':');
-        
-        if (colonIndex > -1) {
-          const titlePart = line.substring(0, colonIndex + 1);
-          const descriptionPart = line.substring(colonIndex + 1).trim();
-          
-          formattedContent.push(
-            <div key={`skill-gap-${index}`} className="mb-4">
-              <p className="font-semibold text-blue-600 mb-1">
-                {titlePart}
-              </p>
-              <p className="text-gray-900">
-                {descriptionPart}
-              </p>
-            </div>
-          );
-        } else {
-          // If no colon, format as a regular numbered item
-          formattedContent.push(
-            <p key={`skill-gap-${index}`} className="mb-3 text-gray-900">
-              {line}
-            </p>
-          );
-        }
       }
       // Format list items starting with "-"
       else if (line.trim().startsWith('-')) {
@@ -291,12 +369,62 @@ const CareerDashboard = () => {
     return formattedContent;
   };
 
+  // Component to render skill gap chart
+  const SkillGapChart = ({ skill }) => {
+    const levels = ['Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert'];
+    const levelColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
+    
+    return (
+      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+        <div className="flex justify-between items-start mb-3">
+          <h4 className="font-semibold text-lg">{skill.name}</h4>
+          {skill.gap > 0 && (
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              skill.gap > 2 ? 'bg-red-100 text-red-700' : 
+              skill.gap === 2 ? 'bg-yellow-100 text-yellow-700' : 
+              'bg-green-100 text-green-700'
+            }`}>
+              Gap: {skill.gap} {skill.gap === 1 ? 'level' : 'levels'}
+            </span>
+          )}
+        </div>
+        
+        <div className="grid grid-cols-5 gap-1 mb-3">
+          {levels.map((level, index) => (
+            <div key={index} className="relative">
+              <div className={`h-8 rounded ${
+                index < skill.currentLevel ? levelColors[index] : 'bg-gray-300'
+              } ${index < skill.requiredLevel ? 'opacity-100' : 'opacity-30'}`}>
+                {index < skill.requiredLevel && index >= skill.currentLevel && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">Need</span>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-center mt-1">{level}</p>
+            </div>
+          ))}
+        </div>
+        
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-gray-600">Current: {levels[Math.max(0, skill.currentLevel - 1)]}</span>
+          <span className="text-blue-600 font-medium">Target: {levels[Math.max(0, skill.requiredLevel - 1)]}</span>
+        </div>
+        
+        {skill.description && (
+          <p className="text-sm text-gray-700 mt-3">{skill.description}</p>
+        )}
+      </div>
+    );
+  };
+
   if (loading) {
     return <LoadingSpinner message="Loading your career analysis..." />;
   }
 
   // The career paths data
   const careerPaths = extractCareerPaths(analysis);
+  const skillsGap = extractSkillsGap(analysis);
 
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
@@ -382,6 +510,21 @@ const CareerDashboard = () => {
                     <div className="text-right">100%</div>
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Skills Gap Analysis Charts */}
+        {skillsGap.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold mb-6">Skills Gap Analysis</h2>
+            <p className="text-gray-600 mb-6">
+              Visual representation of your current skill levels versus required levels for your target career paths.
+            </p>
+            <div className="grid md:grid-cols-2 gap-4">
+              {skillsGap.map((skill, index) => (
+                <SkillGapChart key={index} skill={skill} />
               ))}
             </div>
           </div>

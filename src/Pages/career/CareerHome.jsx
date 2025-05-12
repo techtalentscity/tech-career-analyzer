@@ -39,9 +39,6 @@ const CareerHome = () => {
                   Start Your Assessment
                   <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
                 </button>
-                <button className="border-2 border-white/30 text-white px-8 py-5 rounded-full font-medium text-lg hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
-                  View Sample Report
-                </button>
               </div>
             </div>
           </div>
@@ -170,39 +167,6 @@ const CareerHome = () => {
                 </ul>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Success Stories */}
-        <div className="mb-20">
-          <h2 className="text-4xl font-bold text-center mb-12 text-gray-800">Success Stories</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Alex Thompson",
-                transition: "Marketing → Data Analyst",
-                quote: "The assessment gave me a clear roadmap. Within 8 months, I successfully transitioned to a data analyst role."
-              },
-              {
-                name: "Maria Garcia",
-                transition: "Teacher → UX Designer",
-                quote: "The skills gap analysis showed exactly what I needed to learn. Now I'm designing products I love."
-              },
-              {
-                name: "David Kim",
-                transition: "Finance → Software Engineer",
-                quote: "The learning roadmap was invaluable. It helped me focus on the right skills for my career change."
-              }
-            ].map((story, index) => (
-              <div key={index} className="bg-gradient-to-br from-white to-indigo-50 rounded-2xl p-8 shadow-lg">
-                <div className="text-4xl text-indigo-400 mb-4">"</div>
-                <p className="text-gray-700 mb-6 italic">{story.quote}</p>
-                <div className="border-t pt-4">
-                  <div className="font-bold text-gray-800">{story.name}</div>
-                  <div className="text-sm text-indigo-600">{story.transition}</div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
 

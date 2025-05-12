@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import storageService from '../../services/storageService';
+import { toast } from 'react-toastify';
 
 const CareerDashboard = () => {
   const location = useLocation();
@@ -33,8 +34,18 @@ const CareerDashboard = () => {
   });
   const [activeTab, setActiveTab] = useState('analysis');
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  
+  // Feedback form state
+  const [feedbackData, setFeedbackData] = useState({
+    rating: '',
+    experience: '',
+    improvements: '',
+    recommend: '',
+    additionalComments: ''
+  });
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
 
-  const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeX9C7YtHTSBy4COsV6KaogdEvrjXoVQ0O2psoyfs1xqrySNg/viewform';
+  const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeX9C7YtHTSBy4COsV6KaogdEvrjXoVQ0O2psoyfs1xqrySNg/formResponse';
 
   useEffect(() => {
     const loadData = async () => {
@@ -121,6 +132,57 @@ const CareerDashboard = () => {
     
     loadData();
   }, [location, navigate]);
+
+  // Handle feedback form changes
+  const handleFeedbackChange = (e) => {
+    const { name, value } = e.target;
+    setFeedbackData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Submit feedback to Google Form
+  const submitFeedback = async (e) => {
+    e.preventDefault();
+    setSubmittingFeedback(true);
+    
+    try {
+      // Create FormData and append the feedback entries
+      const formData = new FormData();
+      
+      // You need to replace these entry IDs with your actual Google Form entry IDs
+      formData.append('entry.123456789', feedbackData.rating); // Replace with actual entry ID
+      formData.append('entry.987654321', feedbackData.experience); // Replace with actual entry ID
+      formData.append('entry.111111111', feedbackData.improvements); // Replace with actual entry ID
+      formData.append('entry.222222222', feedbackData.recommend); // Replace with actual entry ID
+      formData.append('entry.333333333', feedbackData.additionalComments); // Replace with actual entry ID
+      
+      // Submit to Google Form
+      await fetch(GOOGLE_FORM_URL, {
+        method: 'POST',
+        body: formData,
+        mode: 'no-cors' // Google Forms requires no-cors
+      });
+      
+      // Show success message
+      toast.success('Thank you for your feedback!');
+      setShowFeedbackForm(false);
+      setFeedbackData({
+        rating: '',
+        experience: '',
+        improvements: '',
+        recommend: '',
+        additionalComments: ''
+      });
+      
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      toast.error('Failed to submit feedback. Please try again.');
+    } finally {
+      setSubmittingFeedback(false);
+    }
+  };
 
   // Extract career paths and their match percentages from analysis text
   const extractCareerPaths = (text) => {
@@ -597,21 +659,325 @@ const CareerDashboard = () => {
           <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button 
-              onClick={() => window.print()}
-              className="flex items-center justify-center py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Export Results (PDF)
-            </button>
-            
-            <button 
               onClick={() => navigate('/career/test')}
-              className="flex items-center justify-center py-3 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+              className="flex items-center justify-center py-3 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              Join Real Projects
+            </a>
+          </div>
+        </div>
+
+        {/* User Profile Summary */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-2xl font-bold mb-6">Profile Overview</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Education Background</h3>
+                <p className="text-lg font-semibold">{userData.educationLevel}</p>
+                <p className="text-md text-gray-700">{userData.studyField}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Current Role</h3>
+                <p className="text-lg font-semibold">{userData.currentRole}</p>
+                <p className="text-md text-gray-700">{userData.yearsExperience}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Tech Experience</h3>
+                <p className="text-lg font-semibold">{userData.experienceLevel}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Career Interests</h3>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {userData.careerPathsInterest.slice(0, 3).map((interest, index) => (
+                    <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Transition Timeline</h3>
+                <p className="text-lg font-semibold">{userData.transitionTimeline}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Time Commitment</h3>
+                <p className="text-lg font-semibold">{userData.timeCommitment} per week</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Career Path Matches Visualization */}
+        {careerPaths.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold mb-6">Career Path Compatibility</h2>
+            <SimpleBarChart data={chartData} title="Match Percentage by Career Path" />
+          </div>
+        )}
+        
+        {/* Skills Gap Analysis */}
+        {skillsGap.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold mb-6">Skills Gap Analysis</h2>
+            <p className="text-gray-600 mb-6">
+              Visual representation of your current skill levels versus required levels for your target career paths.
+            </p>
+            <div className="grid md:grid-cols-2 gap-4">
+              {skillsGap.slice(0, 6).map((skill, index) => (
+                <SkillLevelChart key={index} skill={skill} />
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Current Tools Proficiency */}
+        {userData.toolsUsed && userData.toolsUsed.length > 0 && userData.toolsUsed[0] !== 'None' && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold mb-6">Technical Proficiency</h2>
+            <ToolsProficiency tools={userData.toolsUsed} />
+          </div>
+        )}
+        
+        {/* Transition Timeline */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-xl font-bold mb-6">Your Transition Roadmap</h2>
+          <div className="mb-4">
+            <p className="text-gray-600">
+              Based on your {userData.transitionTimeline} timeline and {userData.timeCommitment} weekly commitment
+            </p>
+          </div>
+          <TimelineChart milestones={timelineMilestones} />
+        </div>
+        
+        {/* Complete Analysis */}
+        <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
+          <h2 className="text-2xl font-bold mb-6">Detailed Analysis</h2>
+          <div>
+            {formatAnalysisText(analysis)}
+          </div>
+        </div>
+
+        {/* Next Steps */}
+        <div className="bg-blue-50 rounded-lg p-6 mt-8">
+          <h2 className="text-xl font-bold mb-4">Recommended Next Steps</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <div className="text-blue-600 mb-2">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <h3 className="font-semibold mb-2">Start Learning</h3>
+              <p className="text-sm text-gray-600">Begin with fundamentals in your chosen path</p>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <div className="text-green-600 mb-2">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold mb-2">Build Portfolio</h3>
+              <p className="text-sm text-gray-600">Create projects to showcase your skills</p>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <div className="text-purple-600 mb-2">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold mb-2">Network</h3>
+              <p className="text-sm text-gray-600">Connect with professionals in your target field</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating Feedback Button */}
+      <button
+        onClick={() => setShowFeedbackForm(true)}
+        className="fixed bottom-8 right-8 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-all transform hover:scale-110 group"
+        aria-label="Give Feedback"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+        </svg>
+        <span className="absolute right-14 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-3 py-1 rounded-md text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+          Share Feedback
+        </span>
+      </button>
+
+      {/* Custom Feedback Form Modal */}
+      {showFeedbackForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">Your Feedback</h2>
+                <button
+                  onClick={() => setShowFeedbackForm(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <form onSubmit={submitFeedback} className="space-y-4">
+                {/* Rating */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    How would you rate your experience?
+                  </label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => handleFeedbackChange({ target: { name: 'rating', value: value.toString() } })}
+                        className={`w-12 h-12 rounded-full border-2 transition-all ${
+                          feedbackData.rating === value.toString()
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'border-gray-300 hover:border-blue-500'
+                        }`}
+                      >
+                        {value}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Experience */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    How was your overall experience with the career test?
+                  </label>
+                  <select
+                    name="experience"
+                    value={feedbackData.experience}
+                    onChange={handleFeedbackChange}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  >
+                    <option value="">Select an option</option>
+                    <option value="Excellent">Excellent</option>
+                    <option value="Good">Good</option>
+                    <option value="Average">Average</option>
+                    <option value="Poor">Poor</option>
+                  </select>
+                </div>
+                
+                {/* Improvements */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    What could we improve?
+                  </label>
+                  <textarea
+                    name="improvements"
+                    value={feedbackData.improvements}
+                    onChange={handleFeedbackChange}
+                    rows="3"
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Tell us how we can make this better..."
+                  />
+                </div>
+                
+                {/* Recommend */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Would you recommend this to others?
+                  </label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="recommend"
+                        value="Yes"
+                        checked={feedbackData.recommend === 'Yes'}
+                        onChange={handleFeedbackChange}
+                        className="mr-2"
+                      />
+                      Yes
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="recommend"
+                        value="No"
+                        checked={feedbackData.recommend === 'No'}
+                        onChange={handleFeedbackChange}
+                        className="mr-2"
+                      />
+                      No
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="recommend"
+                        value="Maybe"
+                        checked={feedbackData.recommend === 'Maybe'}
+                        onChange={handleFeedbackChange}
+                        className="mr-2"
+                      />
+                      Maybe
+                    </label>
+                  </div>
+                </div>
+                
+                {/* Additional Comments */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Any additional comments?
+                  </label>
+                  <textarea
+                    name="additionalComments"
+                    value={feedbackData.additionalComments}
+                    onChange={handleFeedbackChange}
+                    rows="4"
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Share any other thoughts..."
+                  />
+                </div>
+                
+                {/* Submit Button */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="submit"
+                    disabled={submittingFeedback}
+                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition disabled:bg-gray-400"
+                  >
+                    {submittingFeedback ? 'Submitting...' : 'Submit Feedback'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowFeedbackForm(false)}
+                    className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CareerDashboard; d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               Retake Assessment
             </button>
@@ -778,33 +1144,157 @@ const CareerDashboard = () => {
         </span>
       </button>
 
-      {/* Feedback Form Modal */}
+      {/* Custom Feedback Form Modal */}
       {showFeedbackForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] relative">
-            <div className="p-4 border-b flex justify-between items-center">
-              <h2 className="text-xl font-bold">TTC-CareerTest Feedback Form</h2>
-              <button
-                onClick={() => setShowFeedbackForm(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="h-[calc(90vh-5rem)] overflow-hidden">
-              <iframe
-                src={`${GOOGLE_FORM_URL}?embedded=true`}
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                marginHeight="0"
-                marginWidth="0"
-                title="TTC-CareerTest Feedback Form"
-              >
-                Loading...
-              </iframe>
+          <div className="bg-white rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">Your Feedback</h2>
+                <button
+                  onClick={() => setShowFeedbackForm(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <form onSubmit={submitFeedback} className="space-y-4">
+                {/* Rating */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    How would you rate your experience?
+                  </label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => handleFeedbackChange({ target: { name: 'rating', value: value.toString() } })}
+                        className={`w-12 h-12 rounded-full border-2 transition-all ${
+                          feedbackData.rating === value.toString()
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'border-gray-300 hover:border-blue-500'
+                        }`}
+                      >
+                        {value}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Experience */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    How was your overall experience with the career test?
+                  </label>
+                  <select
+                    name="experience"
+                    value={feedbackData.experience}
+                    onChange={handleFeedbackChange}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  >
+                    <option value="">Select an option</option>
+                    <option value="Excellent">Excellent</option>
+                    <option value="Good">Good</option>
+                    <option value="Average">Average</option>
+                    <option value="Poor">Poor</option>
+                  </select>
+                </div>
+                
+                {/* Improvements */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    What could we improve?
+                  </label>
+                  <textarea
+                    name="improvements"
+                    value={feedbackData.improvements}
+                    onChange={handleFeedbackChange}
+                    rows="3"
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Tell us how we can make this better..."
+                  />
+                </div>
+                
+                {/* Recommend */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Would you recommend this to others?
+                  </label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="recommend"
+                        value="Yes"
+                        checked={feedbackData.recommend === 'Yes'}
+                        onChange={handleFeedbackChange}
+                        className="mr-2"
+                      />
+                      Yes
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="recommend"
+                        value="No"
+                        checked={feedbackData.recommend === 'No'}
+                        onChange={handleFeedbackChange}
+                        className="mr-2"
+                      />
+                      No
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="recommend"
+                        value="Maybe"
+                        checked={feedbackData.recommend === 'Maybe'}
+                        onChange={handleFeedbackChange}
+                        className="mr-2"
+                      />
+                      Maybe
+                    </label>
+                  </div>
+                </div>
+                
+                {/* Additional Comments */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Any additional comments?
+                  </label>
+                  <textarea
+                    name="additionalComments"
+                    value={feedbackData.additionalComments}
+                    onChange={handleFeedbackChange}
+                    rows="4"
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Share any other thoughts..."
+                  />
+                </div>
+                
+                {/* Submit Button */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="submit"
+                    disabled={submittingFeedback}
+                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition disabled:bg-gray-400"
+                  >
+                    {submittingFeedback ? 'Submitting...' : 'Submit Feedback'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowFeedbackForm(false)}
+                    className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

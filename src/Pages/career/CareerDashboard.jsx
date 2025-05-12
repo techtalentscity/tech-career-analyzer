@@ -25,6 +25,9 @@ const CareerDashboard = () => {
     interests: []
   });
   const [activeTab, setActiveTab] = useState('analysis');
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+
+  const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeX9C7YtHTSBy4COsV6KaogdEvrjXoVQ0O2psoyfs1xqrySNg/viewform';
 
   useEffect(() => {
     const loadData = async () => {
@@ -585,6 +588,52 @@ const CareerDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating Feedback Button */}
+      <button
+        onClick={() => setShowFeedbackForm(true)}
+        className="fixed bottom-8 right-8 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-all transform hover:scale-110 group"
+        aria-label="Give Feedback"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+        </svg>
+        <span className="absolute right-14 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-3 py-1 rounded-md text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+          Share Feedback
+        </span>
+      </button>
+
+      {/* Feedback Form Modal */}
+      {showFeedbackForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] relative">
+            <div className="p-4 border-b flex justify-between items-center">
+              <h2 className="text-xl font-bold">TTC-CareerTest Feedback Form</h2>
+              <button
+                onClick={() => setShowFeedbackForm(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="h-[calc(90vh-5rem)] overflow-hidden">
+              <iframe
+                src={`${GOOGLE_FORM_URL}?embedded=true`}
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                marginHeight="0"
+                marginWidth="0"
+                title="TTC-CareerTest Feedback Form"
+              >
+                Loading...
+              </iframe>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

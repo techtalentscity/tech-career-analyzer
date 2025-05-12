@@ -618,6 +618,152 @@ const CareerDashboard = () => {
     );
   };
 
+  // Generate dynamic next steps based on user data and analysis
+  const generateNextSteps = () => {
+    const steps = [];
+    
+    // Based on experience level
+    if (userData.experienceLevel === 'Complete beginner' || userData.experienceLevel === 'Some exposure') {
+      steps.push({
+        icon: (
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        ),
+        color: 'text-blue-600',
+        title: 'Start with Fundamentals',
+        description: getBeginnerLearningPath()
+      });
+    }
+    
+    // Based on career path interests
+    if (userData.careerPathsInterest.includes('Software Development')) {
+      steps.push({
+        icon: (
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          </svg>
+        ),
+        color: 'text-indigo-600',
+        title: 'Practice Coding Daily',
+        description: 'Start with LeetCode or HackerRank exercises'
+      });
+    }
+    
+    if (userData.careerPathsInterest.includes('Data Analysis/Science')) {
+      steps.push({
+        icon: (
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        ),
+        color: 'text-green-600',
+        title: 'Learn Data Visualization',
+        description: 'Master Python libraries like Pandas and Matplotlib'
+      });
+    }
+    
+    // Based on timeline
+    if (userData.transitionTimeline === 'Less than 6 months') {
+      steps.push({
+        icon: (
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        ),
+        color: 'text-yellow-600',
+        title: 'Accelerated Learning Plan',
+        description: 'Focus on bootcamps or intensive courses'
+      });
+    }
+    
+    // Based on skills gap
+    const hasLargeSkillGap = skillsGap.some(skill => skill.gap > 2);
+    if (hasLargeSkillGap) {
+      steps.push({
+        icon: (
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+        ),
+        color: 'text-red-600',
+        title: 'Bridge Skill Gaps',
+        description: `Focus on: ${getTopSkillGaps()}`
+      });
+    }
+    
+    // Based on current role
+    if (userData.currentRole && userData.currentRole !== 'Not specified') {
+      steps.push({
+        icon: (
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        ),
+        color: 'text-purple-600',
+        title: 'Leverage Current Experience',
+        description: `Apply your ${userData.currentRole} skills to tech projects`
+      });
+    }
+    
+    // Based on time commitment
+    if (userData.timeCommitment === '1-5 hours' || userData.timeCommitment === '5-10 hours') {
+      steps.push({
+        icon: (
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        ),
+        color: 'text-cyan-600',
+        title: 'Micro-Learning Strategy',
+        description: 'Use lunch breaks and commute time for learning'
+      });
+    }
+    
+    // Always include networking if not already added
+    const hasNetworking = steps.some(step => step.title.includes('Network'));
+    if (!hasNetworking) {
+      steps.push({
+        icon: (
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        ),
+        color: 'text-gray-600',
+        title: 'Build Professional Network',
+        description: 'Join tech meetups and online communities'
+      });
+    }
+    
+    // Return top 3-4 most relevant steps
+    return steps.slice(0, 4);
+  };
+
+  // Helper functions for generating specific content
+  const getBeginnerLearningPath = () => {
+    const paths = userData.careerPathsInterest;
+    if (paths.includes('Software Development')) {
+      return 'Start with HTML, CSS, and JavaScript basics';
+    } else if (paths.includes('Data Analysis/Science')) {
+      return 'Begin with Python fundamentals and statistics';
+    } else if (paths.includes('UX/UI Design')) {
+      return 'Learn design principles and Figma basics';
+    } else if (paths.includes('Cybersecurity')) {
+      return 'Start with networking and security fundamentals';
+    }
+    return 'Begin with computer science fundamentals';
+  };
+
+  const getTopSkillGaps = () => {
+    const topGaps = skillsGap
+      .filter(skill => skill.gap > 2)
+      .sort((a, b) => b.gap - a.gap)
+      .slice(0, 3)
+      .map(skill => skill.name);
+    
+    return topGaps.join(', ') || 'Key technical skills';
+  };
+
   if (loading) {
     return <LoadingSpinner message="Loading your career analysis..." />;
   }
@@ -780,39 +926,19 @@ const CareerDashboard = () => {
           </div>
         </div>
 
-        {/* Next Steps */}
+        {/* Next Steps - Dynamic based on user analysis */}
         <div className="bg-blue-50 rounded-lg p-6 mt-8">
           <h2 className="text-xl font-bold mb-4">Recommended Next Steps</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-blue-600 mb-2">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {generateNextSteps().map((step, index) => (
+              <div key={index} className="bg-white p-4 rounded-lg shadow-sm">
+                <div className={`${step.color} mb-2`}>
+                  {step.icon}
+                </div>
+                <h3 className="font-semibold mb-2">{step.title}</h3>
+                <p className="text-sm text-gray-600">{step.description}</p>
               </div>
-              <h3 className="font-semibold mb-2">Start Learning</h3>
-              <p className="text-sm text-gray-600">Begin with fundamentals in your chosen path</p>
-            </div>
-            
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-green-600 mb-2">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                </svg>
-              </div>
-              <h3 className="font-semibold mb-2">Build Portfolio</h3>
-              <p className="text-sm text-gray-600">Create projects to showcase your skills</p>
-            </div>
-            
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-purple-600 mb-2">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h3 className="font-semibold mb-2">Network</h3>
-              <p className="text-sm text-gray-600">Connect with professionals in your target field</p>
-            </div>
+            ))}
           </div>
         </div>
       </div>

@@ -35,13 +35,10 @@ const CareerDashboard = () => {
   const [activeTab, setActiveTab] = useState('analysis');
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   
-  // Feedback form state
+  // Feedback form state - Updated to match Google Form
   const [feedbackData, setFeedbackData] = useState({
     rating: '',
-    experience: '',
-    improvements: '',
-    recommend: '',
-    additionalComments: ''
+    improvements: ''
   });
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
 
@@ -142,7 +139,7 @@ const CareerDashboard = () => {
     }));
   };
 
-  // Submit feedback to Google Form
+  // Submit feedback to Google Form - Updated with actual entry IDs
   const submitFeedback = async (e) => {
     e.preventDefault();
     setSubmittingFeedback(true);
@@ -151,12 +148,9 @@ const CareerDashboard = () => {
       // Create FormData and append the feedback entries
       const formData = new FormData();
       
-      // You need to replace these entry IDs with your actual Google Form entry IDs
-      formData.append('entry.123456789', feedbackData.rating); // Replace with actual entry ID
-      formData.append('entry.987654321', feedbackData.experience); // Replace with actual entry ID
-      formData.append('entry.111111111', feedbackData.improvements); // Replace with actual entry ID
-      formData.append('entry.222222222', feedbackData.recommend); // Replace with actual entry ID
-      formData.append('entry.333333333', feedbackData.additionalComments); // Replace with actual entry ID
+      // Use the actual entry IDs from your Google Form
+      formData.append('entry.162050771', feedbackData.rating); // Rating question
+      formData.append('entry.2083196363', feedbackData.improvements); // Improvement suggestions
       
       // Submit to Google Form
       await fetch(GOOGLE_FORM_URL, {
@@ -170,10 +164,7 @@ const CareerDashboard = () => {
       setShowFeedbackForm(false);
       setFeedbackData({
         rating: '',
-        experience: '',
-        improvements: '',
-        recommend: '',
-        additionalComments: ''
+        improvements: ''
       });
       
     } catch (error) {
@@ -840,7 +831,7 @@ const CareerDashboard = () => {
         </span>
       </button>
 
-      {/* Custom Feedback Form Modal */}
+      {/* Custom Feedback Form Modal - Updated to match Google Form */}
       {showFeedbackForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
@@ -861,7 +852,7 @@ const CareerDashboard = () => {
                 {/* Rating */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    How would you rate your experience?
+                    How would you rate your experience on our platform on a scale of 1 to 5, with 5 being excellent and 1 being poor?
                   </label>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((value) => (
@@ -881,95 +872,19 @@ const CareerDashboard = () => {
                   </div>
                 </div>
                 
-                {/* Experience */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    How was your overall experience with the career test?
-                  </label>
-                  <select
-                    name="experience"
-                    value={feedbackData.experience}
-                    onChange={handleFeedbackChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  >
-                    <option value="">Select an option</option>
-                    <option value="Excellent">Excellent</option>
-                    <option value="Good">Good</option>
-                    <option value="Average">Average</option>
-                    <option value="Poor">Poor</option>
-                  </select>
-                </div>
-                
                 {/* Improvements */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    What could we improve?
+                    Share any improvement suggestions you have
                   </label>
                   <textarea
                     name="improvements"
                     value={feedbackData.improvements}
                     onChange={handleFeedbackChange}
-                    rows="3"
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Tell us how we can make this better..."
-                  />
-                </div>
-                
-                {/* Recommend */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Would you recommend this to others?
-                  </label>
-                  <div className="flex gap-4">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="recommend"
-                        value="Yes"
-                        checked={feedbackData.recommend === 'Yes'}
-                        onChange={handleFeedbackChange}
-                        className="mr-2"
-                      />
-                      Yes
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="recommend"
-                        value="No"
-                        checked={feedbackData.recommend === 'No'}
-                        onChange={handleFeedbackChange}
-                        className="mr-2"
-                      />
-                      No
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="recommend"
-                        value="Maybe"
-                        checked={feedbackData.recommend === 'Maybe'}
-                        onChange={handleFeedbackChange}
-                        className="mr-2"
-                      />
-                      Maybe
-                    </label>
-                  </div>
-                </div>
-                
-                {/* Additional Comments */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Any additional comments?
-                  </label>
-                  <textarea
-                    name="additionalComments"
-                    value={feedbackData.additionalComments}
-                    onChange={handleFeedbackChange}
                     rows="4"
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Share any other thoughts..."
+                    placeholder="Tell us how we can make this better..."
+                    required
                   />
                 </div>
                 
@@ -977,7 +892,7 @@ const CareerDashboard = () => {
                 <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
-                    disabled={submittingFeedback}
+                    disabled={submittingFeedback || !feedbackData.rating || !feedbackData.improvements}
                     className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition disabled:bg-gray-400"
                   >
                     {submittingFeedback ? 'Submitting...' : 'Submit Feedback'}

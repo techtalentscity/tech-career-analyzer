@@ -3,6 +3,34 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import storageService from '../../services/storageService';
+import { Radar, Bar, Doughnut, Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+} from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement
+);
 
 const CareerDashboard = () => {
   const location = useLocation();
@@ -22,7 +50,14 @@ const CareerDashboard = () => {
     jobTechnologies: '',
     publications: '',
     transferableSkills: '',
-    interests: []
+    interests: [],
+    careerPathsInterest: [],
+    toolsUsed: [],
+    techInterests: '',
+    timeCommitment: '',
+    targetSalary: '',
+    workPreference: '',
+    transitionTimeline: ''
   });
   const [activeTab, setActiveTab] = useState('analysis');
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
@@ -38,40 +73,31 @@ const CareerDashboard = () => {
           
           // If form data is available, set user data
           if (location.state.formData) {
-            const { 
-              fullName, 
-              email, 
-              experienceLevel, 
-              techInterests,
-              techMotivation,
-              techPassion,
-              studyField,
-              educationLevel,
-              currentRole,
-              yearsExperience,
-              jobResponsibilities,
-              jobProjects,
-              jobTechnologies,
-              publications,
-              transferableSkills
-            } = location.state.formData;
+            const formData = location.state.formData;
             
             setUserData({
-              name: fullName,
-              email: email,
-              experienceLevel: experienceLevel,
-              studyField: studyField || 'Not specified',
-              educationLevel: educationLevel || 'Not specified',
-              currentRole: currentRole || 'Not specified',
-              yearsExperience: yearsExperience || 'Not specified',
-              jobResponsibilities: jobResponsibilities || 'Not specified',
-              jobProjects: jobProjects || 'Not specified',
-              jobTechnologies: jobTechnologies || 'Not specified',
-              publications: publications || 'Not specified',
-              transferableSkills: transferableSkills || 'Not specified',
-              interests: typeof techInterests === 'string' 
-                ? techInterests.split(',').map(i => i.trim()) 
-                : (Array.isArray(techInterests) ? techInterests : [])
+              name: formData.fullName,
+              email: formData.email,
+              experienceLevel: formData.experienceLevel,
+              studyField: formData.studyField || 'Not specified',
+              educationLevel: formData.educationLevel || 'Not specified',
+              currentRole: formData.currentRole || 'Not specified',
+              yearsExperience: formData.yearsExperience || 'Not specified',
+              jobResponsibilities: formData.jobResponsibilities || 'Not specified',
+              jobProjects: formData.jobProjects || 'Not specified',
+              jobTechnologies: formData.jobTechnologies || 'Not specified',
+              publications: formData.publications || 'Not specified',
+              transferableSkills: formData.transferableSkills || 'Not specified',
+              interests: typeof formData.techInterests === 'string' 
+                ? formData.techInterests.split(',').map(i => i.trim()) 
+                : (Array.isArray(formData.techInterests) ? formData.techInterests : []),
+              careerPathsInterest: formData.careerPathsInterest || [],
+              toolsUsed: formData.toolsUsed || [],
+              techInterests: formData.techInterests || '',
+              timeCommitment: formData.timeCommitment || '',
+              targetSalary: formData.targetSalary || '',
+              workPreference: formData.workPreference || '',
+              transitionTimeline: formData.transitionTimeline || ''
             });
           }
         } else {
@@ -98,7 +124,14 @@ const CareerDashboard = () => {
                 transferableSkills: submission.transferableSkills || 'Not specified',
                 interests: typeof submission.techInterests === 'string' 
                   ? submission.techInterests.split(',').map(i => i.trim()) 
-                  : (Array.isArray(submission.techInterests) ? submission.techInterests : [])
+                  : (Array.isArray(submission.techInterests) ? submission.techInterests : []),
+                careerPathsInterest: submission.careerPathsInterest || [],
+                toolsUsed: submission.toolsUsed || [],
+                techInterests: submission.techInterests || '',
+                timeCommitment: submission.timeCommitment || '',
+                targetSalary: submission.targetSalary || '',
+                workPreference: submission.workPreference || '',
+                transitionTimeline: submission.transitionTimeline || ''
               });
             }
           } else {
@@ -145,102 +178,338 @@ const CareerDashboard = () => {
     return careerPaths;
   };
 
-  // Extract skills gap data from analysis text
+  // Extract skills gap data from analysis text and user data
   const extractSkillsGap = (text) => {
     if (!text) return [];
     
-    const lines = text.split('\n');
     const skills = [];
-    let inSkillsGapSection = false;
-    let currentCareerPath = '';
+    const userToolsUsed = userData.toolsUsed || [];
     
-    lines.forEach((line, index) => {
-      // Check if we're in the skills gap section
+    // Create skill map based on user's current tools
+    const toolSkillMapping = {
+      'VS Code': { name: 'IDE Proficiency', category: 'Development Tools' },
+      'GitHub': { name: 'Version Control', category: 'Collaboration Tools' },
+      'JavaScript': { name: 'JavaScript Programming', category: 'Programming Languages' },
+      'Python': { name: 'Python Programming', category: 'Programming Languages' },
+      'React': { name: 'React Framework', category: 'Frontend Frameworks' },
+      'Node.js': { name: 'Node.js Runtime', category: 'Backend Technologies' },
+      'SQL': { name: 'Database Management', category: 'Database' },
+      'AWS': { name: 'Cloud Computing', category: 'Cloud Services' },
+      'Docker': { name: 'Containerization', category: 'DevOps' }
+    };
+
+    // Map user's current skill levels based on their experience
+    const experienceLevelMap = {
+      'Complete beginner': 1,
+      'Some exposure': 2,
+      'Beginner': 2,
+      'Intermediate': 3,
+      'Advanced': 4
+    };
+
+    const currentLevel = experienceLevelMap[userData.experienceLevel] || 1;
+
+    // Extract required skills from analysis
+    const lines = text.split('\n');
+    let inSkillsGapSection = false;
+    
+    lines.forEach((line) => {
       if (line.includes("SKILLS GAP ANALYSIS")) {
         inSkillsGapSection = true;
         return;
       }
       
-      // Exit skills gap section if we reach another major section
       if (line.includes("LEARNING ROADMAP") || line.includes("TRANSITION STRATEGY")) {
         inSkillsGapSection = false;
         return;
       }
       
-      // Track current career path
-      if (line.match(/^[a-z]\)\s+.*?\(\d+%\s+match/i)) {
-        const pathMatch = line.match(/^[a-z]\)\s+(.*?)\s+\(/);
-        if (pathMatch) {
-          currentCareerPath = pathMatch[1].trim();
-        }
-      }
-      
-      // Extract skills if we're in the skills gap section
       if (inSkillsGapSection && line.match(/^\d+\.\s+/)) {
-        const colonIndex = line.indexOf(':');
+        const skillMatch = line.match(/^\d+\.\s+([^:]+):\s*(.+)/);
         
-        if (colonIndex > -1) {
-          const skillMatch = line.match(/^\d+\.\s+([^:]+):\s*(.+)/);
+        if (skillMatch) {
+          const skillName = skillMatch[1].trim();
+          const description = skillMatch[2].trim();
           
-          if (skillMatch) {
-            const skillName = skillMatch[1].trim();
-            const description = skillMatch[2].trim();
-            
-            // Parse level information from the description text if available
-            let currentLevel = 3; // Default intermediate
-            let requiredLevel = 5; // Default expert
-            
-            // Look for skill level patterns in the description
-            const descLower = description.toLowerCase();
-            
-            // Extract current level
-            if (descLower.includes('no experience') || descLower.includes('need to learn')) {
-              currentLevel = 1;
-            } else if (descLower.includes('basic knowledge') || descLower.includes('basic understanding')) {
-              currentLevel = 2;
-            } else if (descLower.includes('intermediate') || descLower.includes('some experience')) {
-              currentLevel = 3;
-            } else if (descLower.includes('advanced') || descLower.includes('strong understanding')) {
-              currentLevel = 4;
-            } else if (descLower.includes('expert') || descLower.includes('mastery')) {
-              currentLevel = 5;
+          // Determine current level based on user's tools
+          let userCurrentLevel = currentLevel;
+          
+          // Check if user has related tool experience
+          userToolsUsed.forEach(tool => {
+            const mapping = toolSkillMapping[tool];
+            if (mapping && skillName.toLowerCase().includes(mapping.name.toLowerCase())) {
+              userCurrentLevel = Math.min(currentLevel + 1, 5);
             }
-            
-            // Extract required level
-            if (descLower.includes('basic proficiency required') || descLower.includes('basic level')) {
-              requiredLevel = 2;
-            } else if (descLower.includes('intermediate proficiency') || descLower.includes('solid understanding')) {
-              requiredLevel = 3;
-            } else if (descLower.includes('advanced proficiency') || descLower.includes('deep understanding')) {
-              requiredLevel = 4;
-            } else if (descLower.includes('expert level') || descLower.includes('mastery required')) {
-              requiredLevel = 5;
-            }
-            
-            // Check for gap indicators in the text
-            const gapMatch = description.match(/(\d+)\s*level/i);
-            if (gapMatch) {
-              const gap = parseInt(gapMatch[1]);
-              requiredLevel = Math.min(currentLevel + gap, 5);
-            }
-            
-            skills.push({
-              name: skillName,
-              description: description,
-              currentLevel: currentLevel,
-              requiredLevel: requiredLevel,
-              careerPath: currentCareerPath,
-              gap: requiredLevel - currentLevel
-            });
+          });
+          
+          // Extract required level from description
+          let requiredLevel = 4; // Default
+          const descLower = description.toLowerCase();
+          
+          if (descLower.includes('basic') || descLower.includes('fundamental')) {
+            requiredLevel = 2;
+          } else if (descLower.includes('intermediate') || descLower.includes('solid')) {
+            requiredLevel = 3;
+          } else if (descLower.includes('advanced') || descLower.includes('deep')) {
+            requiredLevel = 4;
+          } else if (descLower.includes('expert') || descLower.includes('mastery')) {
+            requiredLevel = 5;
           }
+          
+          skills.push({
+            name: skillName,
+            description: description,
+            currentLevel: userCurrentLevel,
+            requiredLevel: requiredLevel,
+            gap: requiredLevel - userCurrentLevel
+          });
         }
       }
     });
     
+    // If no skills found in analysis, create based on user's career interests
+    if (skills.length === 0 && userData.careerPathsInterest.length > 0) {
+      const defaultSkillsByPath = {
+        'Software Development': ['Programming', 'Problem Solving', 'System Design', 'Testing'],
+        'Data Analysis/Science': ['Statistics', 'Data Visualization', 'SQL', 'Python'],
+        'UX/UI Design': ['Design Principles', 'Prototyping', 'User Research', 'Design Tools'],
+        'Product Management': ['Product Strategy', 'Analytics', 'Communication', 'Agile Methods'],
+        'Cybersecurity': ['Network Security', 'Ethical Hacking', 'Security Tools', 'Compliance'],
+        'Cloud Engineering': ['Cloud Platforms', 'Infrastructure', 'Automation', 'Monitoring'],
+        'DevOps': ['CI/CD', 'Automation', 'Infrastructure as Code', 'Containerization'],
+        'AI/Machine Learning': ['Mathematics', 'ML Algorithms', 'Data Processing', 'Deep Learning']
+      };
+      
+      userData.careerPathsInterest.forEach(path => {
+        const pathSkills = defaultSkillsByPath[path] || [];
+        pathSkills.forEach(skill => {
+          skills.push({
+            name: skill,
+            currentLevel: currentLevel,
+            requiredLevel: 4,
+            gap: 4 - currentLevel,
+            careerPath: path
+          });
+        });
+      });
+    }
+    
     return skills;
   };
 
-  // Format analysis text for display with emphasis on important elements
+  // Create skills radar chart data
+  const createSkillsRadarData = () => {
+    const skillsGap = extractSkillsGap(analysis);
+    const skillCategories = {};
+    
+    // Group skills by category
+    skillsGap.forEach(skill => {
+      const category = skill.careerPath || 'General Skills';
+      if (!skillCategories[category]) {
+        skillCategories[category] = [];
+      }
+      skillCategories[category].push(skill);
+    });
+    
+    // Create data for the most relevant career path
+    const primaryPath = userData.careerPathsInterest[0] || 'General Skills';
+    const primarySkills = skillCategories[primaryPath] || skillsGap.slice(0, 6);
+    
+    return {
+      labels: primarySkills.map(skill => skill.name),
+      datasets: [
+        {
+          label: 'Current Level',
+          data: primarySkills.map(skill => skill.currentLevel),
+          backgroundColor: 'rgba(59, 130, 246, 0.2)',
+          borderColor: 'rgba(59, 130, 246, 1)',
+          borderWidth: 2,
+        },
+        {
+          label: 'Required Level',
+          data: primarySkills.map(skill => skill.requiredLevel),
+          backgroundColor: 'rgba(34, 197, 94, 0.2)',
+          borderColor: 'rgba(34, 197, 94, 1)',
+          borderWidth: 2,
+        }
+      ]
+    };
+  };
+
+  // Create tools proficiency chart
+  const createToolsProficiencyData = () => {
+    const toolsData = userData.toolsUsed.filter(tool => tool !== 'None');
+    
+    if (toolsData.length === 0) {
+      return null;
+    }
+
+    const toolProficiencyMap = {
+      'VS Code': 3,
+      'GitHub': 3,
+      'JavaScript': 4,
+      'Python': 4,
+      'React': 4,
+      'Node.js': 4,
+      'SQL': 3,
+      'AWS': 5,
+      'Docker': 4
+    };
+
+    // Adjust proficiency based on user's experience level
+    const experienceMultiplier = {
+      'Complete beginner': 0.5,
+      'Some exposure': 0.7,
+      'Beginner': 0.8,
+      'Intermediate': 1,
+      'Advanced': 1.2
+    };
+
+    const multiplier = experienceMultiplier[userData.experienceLevel] || 1;
+
+    return {
+      labels: toolsData,
+      datasets: [{
+        label: 'Proficiency Level',
+        data: toolsData.map(tool => Math.round((toolProficiencyMap[tool] || 3) * multiplier)),
+        backgroundColor: [
+          'rgba(59, 130, 246, 0.6)',
+          'rgba(34, 197, 94, 0.6)',
+          'rgba(251, 146, 60, 0.6)',
+          'rgba(168, 85, 247, 0.6)',
+          'rgba(236, 72, 153, 0.6)',
+          'rgba(250, 204, 21, 0.6)',
+          'rgba(99, 102, 241, 0.6)',
+          'rgba(14, 165, 233, 0.6)',
+          'rgba(220, 38, 38, 0.6)'
+        ],
+        borderColor: [
+          'rgba(59, 130, 246, 1)',
+          'rgba(34, 197, 94, 1)',
+          'rgba(251, 146, 60, 1)',
+          'rgba(168, 85, 247, 1)',
+          'rgba(236, 72, 153, 1)',
+          'rgba(250, 204, 21, 1)',
+          'rgba(99, 102, 241, 1)',
+          'rgba(14, 165, 233, 1)',
+          'rgba(220, 38, 38, 1)'
+        ],
+        borderWidth: 1,
+      }]
+    };
+  };
+
+  // Create career path interest distribution
+  const createCareerInterestData = () => {
+    const pathsWithMatches = extractCareerPaths(analysis);
+    
+    if (pathsWithMatches.length > 0) {
+      return {
+        labels: pathsWithMatches.map(path => path.title),
+        datasets: [{
+          label: 'Match Percentage',
+          data: pathsWithMatches.map(path => path.match),
+          backgroundColor: [
+            'rgba(59, 130, 246, 0.8)',
+            'rgba(34, 197, 94, 0.8)',
+            'rgba(251, 146, 60, 0.8)',
+            'rgba(168, 85, 247, 0.8)',
+            'rgba(236, 72, 153, 0.8)'
+          ],
+          borderColor: [
+            'rgba(59, 130, 246, 1)',
+            'rgba(34, 197, 94, 1)',
+            'rgba(251, 146, 60, 1)',
+            'rgba(168, 85, 247, 1)',
+            'rgba(236, 72, 153, 1)'
+          ],
+          borderWidth: 2,
+        }]
+      };
+    }
+    
+    // Fallback to user's selected interests
+    const interestCounts = {};
+    userData.careerPathsInterest.forEach(interest => {
+      interestCounts[interest] = (interestCounts[interest] || 0) + 1;
+    });
+    
+    return {
+      labels: Object.keys(interestCounts),
+      datasets: [{
+        label: 'Interest Level',
+        data: Object.values(interestCounts),
+        backgroundColor: [
+          'rgba(59, 130, 246, 0.8)',
+          'rgba(34, 197, 94, 0.8)',
+          'rgba(251, 146, 60, 0.8)',
+          'rgba(168, 85, 247, 0.8)',
+          'rgba(236, 72, 153, 0.8)'
+        ],
+        borderColor: [
+          'rgba(59, 130, 246, 1)',
+          'rgba(34, 197, 94, 1)',
+          'rgba(251, 146, 60, 1)',
+          'rgba(168, 85, 247, 1)',
+          'rgba(236, 72, 153, 1)'
+        ],
+        borderWidth: 2,
+      }]
+    };
+  };
+
+  // Create timeline visualization
+  const createTimelineData = () => {
+    const timelineMap = {
+      'Less than 6 months': 6,
+      '6-12 months': 12,
+      '1-2 years': 18,
+      '2+ years': 24,
+      'Already transitioning': 3
+    };
+    
+    const months = timelineMap[userData.transitionTimeline] || 12;
+    const milestones = [];
+    
+    // Create milestones based on timeline
+    if (months <= 6) {
+      milestones.push(
+        { month: 1, label: 'Start Learning', value: 20 },
+        { month: 3, label: 'Complete Basics', value: 50 },
+        { month: 6, label: 'Job Ready', value: 100 }
+      );
+    } else if (months <= 12) {
+      milestones.push(
+        { month: 2, label: 'Foundation', value: 20 },
+        { month: 4, label: 'Core Skills', value: 40 },
+        { month: 6, label: 'Projects', value: 60 },
+        { month: 9, label: 'Portfolio', value: 80 },
+        { month: 12, label: 'Job Ready', value: 100 }
+      );
+    } else {
+      milestones.push(
+        { month: 3, label: 'Foundation', value: 15 },
+        { month: 6, label: 'Core Skills', value: 30 },
+        { month: 9, label: 'Specialization', value: 45 },
+        { month: 12, label: 'Projects', value: 60 },
+        { month: 15, label: 'Portfolio', value: 80 },
+        { month: 18, label: 'Job Ready', value: 100 }
+      );
+    }
+    
+    return {
+      labels: milestones.map(m => m.label),
+      datasets: [{
+        label: 'Progress Timeline',
+        data: milestones.map(m => m.value),
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        tension: 0.1
+      }]
+    };
+  };
+
+  // Format analysis text for display
   const formatAnalysisText = (text) => {
     if (!text) return [];
     
@@ -256,28 +525,20 @@ const CareerDashboard = () => {
       content = content.replace(/\bthem\b/gi, 'you');
       content = content.replace(/\bthemselves\b/gi, 'yourself');
       
-      // Check if we need to highlight educational terms
+      // Highlight important user data
       if (userData.educationLevel && userData.educationLevel !== 'Not specified') {
         const educationTerms = [userData.educationLevel, userData.studyField].filter(Boolean);
-        
-        // Create regex patterns for education terms to highlight
         educationTerms.forEach(term => {
-          if (term && term.length > 3) { // Only highlight meaningful terms
+          if (term && term.length > 3) {
             const regex = new RegExp(`(${term})`, 'gi');
             content = content.replace(regex, '<strong class="text-blue-700">$1</strong>');
           }
         });
       }
       
-      // Check if we need to highlight publication/research terms
-      if (userData.publications && userData.publications !== 'Not specified') {
-        const researchTerms = ['publication', 'research', 'academic', 'paper', 'journal'];
-        
-        // Create regex for research terms
-        researchTerms.forEach(term => {
-          const regex = new RegExp(`(${term})`, 'gi');
-          content = content.replace(regex, '<strong class="text-purple-700">$1</strong>');
-        });
+      if (userData.currentRole && userData.currentRole !== 'Not specified') {
+        const regex = new RegExp(`(${userData.currentRole})`, 'gi');
+        content = content.replace(regex, '<strong class="text-purple-700">$1</strong>');
       }
       
       return { __html: content };
@@ -304,7 +565,7 @@ const CareerDashboard = () => {
         return;
       }
 
-      // Format section headers (e.g., "1. CAREER PATH RECOMMENDATIONS")
+      // Format section headers
       if (line.match(/^\d+\.\s+[A-Z]/)) {
         formattedContent.push(
           <h3 key={`header-${index}`} className="text-xl font-bold mt-8 mb-4 text-blue-800">
@@ -312,7 +573,7 @@ const CareerDashboard = () => {
           </h3>
         );
       }
-      // Format subsection headers (e.g., "a) AI/Machine Learning Engineer (95% match)")
+      // Format subsection headers
       else if (line.match(/^[a-z]\)\s+.*?\(\d+%\s+match/i)) {
         formattedContent.push(
           <h4 key={`subheader-${index}`} className="text-lg font-semibold mt-6 mb-2 text-blue-700">
@@ -320,7 +581,7 @@ const CareerDashboard = () => {
           </h4>
         );
       }
-      // Format list items starting with "-"
+      // Format list items
       else if (line.trim().startsWith('-')) {
         const content = line.replace(/^-\s+/, '');
         formattedContent.push(
@@ -330,10 +591,9 @@ const CareerDashboard = () => {
           </div>
         );
       }
-      // Format list items starting with numbers (e.g., "1. Item") - standard numbered items
+      // Format numbered list items
       else if (line.trim().match(/^\d+\.\s+/)) {
         const content = line.replace(/^\d+\.\s+/, '');
-        
         formattedContent.push(
           <div key={`numbered-${index}`} className="flex items-start mb-3">
             <span className="text-blue-600 mr-2">•</span>
@@ -341,7 +601,7 @@ const CareerDashboard = () => {
           </div>
         );
       }
-      // Format monthly sections (e.g., "Month 1-2:")
+      // Format monthly sections
       else if (line.trim().match(/^Month\s+\d+-?\d*:/i)) {
         formattedContent.push(
           <h5 key={`month-${index}`} className="font-semibold mt-4 mb-2 text-blue-600 ml-4">
@@ -349,15 +609,7 @@ const CareerDashboard = () => {
           </h5>
         );
       }
-      // Format section labeled "Throughout:"
-      else if (line.trim() === "Throughout:") {
-        formattedContent.push(
-          <h5 key={`throughout-${index}`} className="font-semibold mt-4 mb-2 text-blue-600 ml-4">
-            {line}
-          </h5>
-        );
-      }
-      // Format empty lines as breaks
+      // Format empty lines
       else if (line.trim() === '') {
         formattedContent.push(<br key={`break-${index}`} />);
       }
@@ -425,9 +677,11 @@ const CareerDashboard = () => {
     return <LoadingSpinner message="Loading your career analysis..." />;
   }
 
-  // The career paths data
+  // Extract data for visualizations
   const careerPaths = extractCareerPaths(analysis);
   const skillsGap = extractSkillsGap(analysis);
+  const toolsData = createToolsProficiencyData();
+  const timelineData = createTimelineData();
 
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
@@ -436,7 +690,7 @@ const CareerDashboard = () => {
         <div className="container mx-auto">
           <h1 className="text-3xl font-bold">Your Career Analysis</h1>
           <p className="text-lg mt-2 opacity-90">
-            Comprehensive assessment based on your profile
+            Personalized assessment for {userData.name}
           </p>
         </div>
       </div>
@@ -448,10 +702,7 @@ const CareerDashboard = () => {
           <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button 
-              onClick={() => {
-                // Export PDF functionality will be implemented with a library like jsPDF or html2pdf
-                window.print(); // Simple print function as a placeholder
-              }}
+              onClick={() => window.print()}
               className="flex items-center justify-center py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -483,34 +734,109 @@ const CareerDashboard = () => {
             </a>
           </div>
         </div>
+
+        {/* User Profile Summary with Enhanced Details */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-2xl font-bold mb-6">Profile Overview</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Education Background</h3>
+                <p className="text-lg font-semibold">{userData.educationLevel}</p>
+                <p className="text-md text-gray-700">{userData.studyField}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Current Role</h3>
+                <p className="text-lg font-semibold">{userData.currentRole}</p>
+                <p className="text-md text-gray-700">{userData.yearsExperience}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Tech Experience</h3>
+                <p className="text-lg font-semibold">{userData.experienceLevel}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Career Interests</h3>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {userData.careerPathsInterest.slice(0, 3).map((interest, index) => (
+                    <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Transition Timeline</h3>
+                <p className="text-lg font-semibold">{userData.transitionTimeline}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Time Commitment</h3>
+                <p className="text-lg font-semibold">{userData.timeCommitment} per week</p>
+              </div>
+            </div>
+          </div>
+        </div>
         
         {/* Career Path Matches Visualization */}
         {careerPaths.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6">Career Path Matches</h2>
+            <h2 className="text-xl font-bold mb-6">Career Path Compatibility</h2>
             
-            {/* Bar Chart Visualization */}
+            <div className="mb-8">
+              <Bar 
+                data={createCareerInterestData()}
+                options={{
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      display: false
+                    },
+                    title: {
+                      display: true,
+                      text: 'Match Percentage by Career Path'
+                    }
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      max: 100,
+                      ticks: {
+                        callback: function(value) {
+                          return value + '%';
+                        }
+                      }
+                    }
+                  }
+                }}
+              />
+            </div>
+            
+            {/* Detailed Path Analysis */}
             <div className="space-y-6">
               {careerPaths.map((path, index) => (
-                <div key={index} className="mb-4">
-                  <div className="flex justify-between mb-2">
-                    <span className="font-medium text-lg">{path.title}</span>
-                    <span className="font-bold text-blue-600">{path.match}%</span>
+                <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-semibold text-lg">{path.title}</h3>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      path.match >= 80 ? 'bg-green-100 text-green-700' :
+                      path.match >= 60 ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-orange-100 text-orange-700'
+                    }`}>
+                      {path.match}% Match
+                    </span>
                   </div>
-                  <div className="relative h-8 w-full bg-gray-200 rounded-full overflow-hidden">
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
                     <div 
-                      className={`absolute top-0 left-0 h-full rounded-full ${
+                      className={`h-2.5 rounded-full ${
                         index === 0 ? 'bg-blue-600' : index === 1 ? 'bg-green-500' : 'bg-purple-500'
                       }`}
                       style={{ width: `${path.match}%` }}
                     ></div>
-                  </div>
-                  <div className="grid grid-cols-5 text-xs text-gray-500 mt-1">
-                    <div>0%</div>
-                    <div className="text-center">25%</div>
-                    <div className="text-center">50%</div>
-                    <div className="text-center">75%</div>
-                    <div className="text-right">100%</div>
                   </div>
                 </div>
               ))}
@@ -518,72 +844,178 @@ const CareerDashboard = () => {
           </div>
         )}
         
-        {/* Skills Gap Analysis Charts */}
+        {/* Skills Analysis with User Data */}
         {skillsGap.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-bold mb-6">Skills Gap Analysis</h2>
-            <p className="text-gray-600 mb-6">
-              Visual representation of your current skill levels versus required levels for your target career paths.
-            </p>
+            
+            {/* Skills Radar Chart */}
+            <div className="mb-8" style={{ height: '400px' }}>
+              <Radar 
+                data={createSkillsRadarData()}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'top',
+                    },
+                    title: {
+                      display: true,
+                      text: 'Current vs Required Skills'
+                    }
+                  },
+                  scales: {
+                    r: {
+                      beginAtZero: true,
+                      max: 5,
+                      ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                          const labels = ['', 'Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert'];
+                          return labels[value] || '';
+                        }
+                      }
+                    }
+                  }
+                }}
+              />
+            </div>
+            
+            {/* Individual Skill Gap Charts */}
             <div className="grid md:grid-cols-2 gap-4">
-              {skillsGap.map((skill, index) => (
+              {skillsGap.slice(0, 6).map((skill, index) => (
                 <SkillGapChart key={index} skill={skill} />
               ))}
             </div>
           </div>
         )}
         
-        <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
-          {/* User Profile Summary */}
-          <div className="mb-8 p-6 bg-blue-50 rounded-lg">
-            <h2 className="text-2xl font-bold mb-4">Profile Summary</h2>
+        {/* Current Tools Proficiency */}
+        {toolsData && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold mb-6">Current Tools & Technologies</h2>
             <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <div className="mb-4">
-                  <h3 className="text-sm font-medium text-gray-500">Education</h3>
-                  <p className="text-lg">{userData.educationLevel} in {userData.studyField}</p>
-                </div>
-                <div className="mb-4">
-                  <h3 className="text-sm font-medium text-gray-500">Current Role</h3>
-                  <p className="text-lg">{userData.currentRole}</p>
-                </div>
-                <div className="mb-4">
-                  <h3 className="text-sm font-medium text-gray-500">Experience Level</h3>
-                  <p className="text-lg">{userData.experienceLevel}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Years of Experience</h3>
-                  <p className="text-lg">{userData.yearsExperience}</p>
-                </div>
+              <div style={{ height: '300px' }}>
+                <Doughnut 
+                  data={toolsData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'right',
+                      },
+                      title: {
+                        display: true,
+                        text: 'Tool Proficiency Distribution'
+                      }
+                    }
+                  }}
+                />
               </div>
               <div>
-                {userData.publications && userData.publications !== 'Not specified' && (
-                  <div className="mb-4">
-                    <h3 className="text-sm font-medium text-gray-500">Publications/Research</h3>
-                    <p className="text-lg">{userData.publications}</p>
-                  </div>
-                )}
-                {userData.jobProjects && userData.jobProjects !== 'Not specified' && (
-                  <div className="mb-4">
-                    <h3 className="text-sm font-medium text-gray-500">Notable Projects</h3>
-                    <p className="text-lg">{userData.jobProjects}</p>
-                  </div>
-                )}
-                {userData.transferableSkills && userData.transferableSkills !== 'Not specified' && (
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Transferable Skills</h3>
-                    <p className="text-lg">{userData.transferableSkills}</p>
-                  </div>
-                )}
+                <h3 className="font-semibold mb-3">Technology Stack</h3>
+                <div className="space-y-3">
+                  {userData.toolsUsed.filter(tool => tool !== 'None').map((tool, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="font-medium">{tool}</span>
+                      <div className="flex items-center">
+                        <div className="w-24 bg-gray-200 rounded-full h-2 mr-3">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full"
+                            style={{ 
+                              width: `${(toolsData.datasets[0].data[index] / 5) * 100}%` 
+                            }}
+                          ></div>
+                        </div>
+                        <span className="text-sm text-gray-600">
+                          {['Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert'][toolsData.datasets[0].data[index] - 1]}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-          
-          {/* Complete Analysis Text */}
+        )}
+        
+        {/* Transition Timeline */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-xl font-bold mb-6">Your Transition Roadmap</h2>
+          <div className="mb-4">
+            <p className="text-gray-600">
+              Based on your {userData.transitionTimeline} timeline and {userData.timeCommitment} weekly commitment
+            </p>
+          </div>
+          <div style={{ height: '300px' }}>
+            <Line 
+              data={timelineData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: false
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                      callback: function(value) {
+                        return value + '%';
+                      }
+                    }
+                  }
+                }
+              }}
+            />
+          </div>
+        </div>
+        
+        {/* Complete Analysis */}
+        <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
+          <h2 className="text-2xl font-bold mb-6">Detailed Analysis</h2>
           <div>
-            <h2 className="text-2xl font-bold mb-6">Complete Analysis</h2>
-            <div>
-              {formatAnalysisText(analysis)}
+            {formatAnalysisText(analysis)}
+          </div>
+        </div>
+
+        {/* Next Steps */}
+        <div className="bg-blue-50 rounded-lg p-6 mt-8">
+          <h2 className="text-xl font-bold mb-4">Recommended Next Steps</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <div className="text-blue-600 mb-2">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <h3 className="font-semibold mb-2">Start Learning</h3>
+              <p className="text-sm text-gray-600">Begin with fundamentals in your chosen path</p>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <div className="text-green-600 mb-2">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold mb-2">Build Portfolio</h3>
+              <p className="text-sm text-gray-600">Create projects to showcase your skills</p>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <div className="text-purple-600 mb-2">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold mb-2">Network</h3>
+              <p className="text-sm text-gray-600">Connect with professionals in your target field</p>
             </div>
           </div>
         </div>

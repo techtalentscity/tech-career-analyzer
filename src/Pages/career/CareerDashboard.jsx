@@ -3,34 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import storageService from '../../services/storageService';
-import { Radar, Bar, Doughnut, Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-} from 'chart.js';
-
-// Register Chart.js components
-ChartJS.register(
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement
-);
 
 const CareerDashboard = () => {
   const location = useLocation();
@@ -67,11 +39,9 @@ const CareerDashboard = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // First check if analysis was passed via location state
         if (location.state?.analysis) {
           setAnalysis(location.state.analysis);
           
-          // If form data is available, set user data
           if (location.state.formData) {
             const formData = location.state.formData;
             
@@ -101,12 +71,10 @@ const CareerDashboard = () => {
             });
           }
         } else {
-          // If not in location state, try to retrieve from storage
           const storedAnalysis = storageService.getLatestAnalysis();
           if (storedAnalysis) {
             setAnalysis(storedAnalysis.analysis);
             
-            // Try to get the corresponding form submission
             const submission = storageService.getSubmissionById(storedAnalysis.submissionId);
             if (submission) {
               setUserData({
@@ -135,7 +103,6 @@ const CareerDashboard = () => {
               });
             }
           } else {
-            // No analysis found, redirect to career test
             navigate('/career/test', { 
               state: { message: 'Please complete the assessment to view your dashboard' } 
             });
@@ -162,7 +129,6 @@ const CareerDashboard = () => {
     const lines = text.split('\n');
     const careerPaths = [];
     
-    // Regular expression to match career path lines with percentages
     const careerPathRegex = /^[a-z]\)\s+(.*?)\s+\((\d+)%\s+match/i;
     
     lines.forEach(line => {
@@ -178,14 +144,13 @@ const CareerDashboard = () => {
     return careerPaths;
   };
 
-  // Extract skills gap data from analysis text and user data
+  // Extract skills gap data from analysis text
   const extractSkillsGap = (text) => {
     if (!text) return [];
     
     const skills = [];
     const userToolsUsed = userData.toolsUsed || [];
     
-    // Create skill map based on user's current tools
     const toolSkillMapping = {
       'VS Code': { name: 'IDE Proficiency', category: 'Development Tools' },
       'GitHub': { name: 'Version Control', category: 'Collaboration Tools' },
@@ -198,7 +163,6 @@ const CareerDashboard = () => {
       'Docker': { name: 'Containerization', category: 'DevOps' }
     };
 
-    // Map user's current skill levels based on their experience
     const experienceLevelMap = {
       'Complete beginner': 1,
       'Some exposure': 2,
@@ -209,7 +173,6 @@ const CareerDashboard = () => {
 
     const currentLevel = experienceLevelMap[userData.experienceLevel] || 1;
 
-    // Extract required skills from analysis
     const lines = text.split('\n');
     let inSkillsGapSection = false;
     
@@ -231,10 +194,8 @@ const CareerDashboard = () => {
           const skillName = skillMatch[1].trim();
           const description = skillMatch[2].trim();
           
-          // Determine current level based on user's tools
           let userCurrentLevel = currentLevel;
           
-          // Check if user has related tool experience
           userToolsUsed.forEach(tool => {
             const mapping = toolSkillMapping[tool];
             if (mapping && skillName.toLowerCase().includes(mapping.name.toLowerCase())) {
@@ -242,8 +203,7 @@ const CareerDashboard = () => {
             }
           });
           
-          // Extract required level from description
-          let requiredLevel = 4; // Default
+          let requiredLevel = 4;
           const descLower = description.toLowerCase();
           
           if (descLower.includes('basic') || descLower.includes('fundamental')) {
@@ -267,7 +227,6 @@ const CareerDashboard = () => {
       }
     });
     
-    // If no skills found in analysis, create based on user's career interests
     if (skills.length === 0 && userData.careerPathsInterest.length > 0) {
       const defaultSkillsByPath = {
         'Software Development': ['Programming', 'Problem Solving', 'System Design', 'Testing'],
@@ -297,218 +256,6 @@ const CareerDashboard = () => {
     return skills;
   };
 
-  // Create skills radar chart data
-  const createSkillsRadarData = () => {
-    const skillsGap = extractSkillsGap(analysis);
-    const skillCategories = {};
-    
-    // Group skills by category
-    skillsGap.forEach(skill => {
-      const category = skill.careerPath || 'General Skills';
-      if (!skillCategories[category]) {
-        skillCategories[category] = [];
-      }
-      skillCategories[category].push(skill);
-    });
-    
-    // Create data for the most relevant career path
-    const primaryPath = userData.careerPathsInterest[0] || 'General Skills';
-    const primarySkills = skillCategories[primaryPath] || skillsGap.slice(0, 6);
-    
-    return {
-      labels: primarySkills.map(skill => skill.name),
-      datasets: [
-        {
-          label: 'Current Level',
-          data: primarySkills.map(skill => skill.currentLevel),
-          backgroundColor: 'rgba(59, 130, 246, 0.2)',
-          borderColor: 'rgba(59, 130, 246, 1)',
-          borderWidth: 2,
-        },
-        {
-          label: 'Required Level',
-          data: primarySkills.map(skill => skill.requiredLevel),
-          backgroundColor: 'rgba(34, 197, 94, 0.2)',
-          borderColor: 'rgba(34, 197, 94, 1)',
-          borderWidth: 2,
-        }
-      ]
-    };
-  };
-
-  // Create tools proficiency chart
-  const createToolsProficiencyData = () => {
-    const toolsData = userData.toolsUsed.filter(tool => tool !== 'None');
-    
-    if (toolsData.length === 0) {
-      return null;
-    }
-
-    const toolProficiencyMap = {
-      'VS Code': 3,
-      'GitHub': 3,
-      'JavaScript': 4,
-      'Python': 4,
-      'React': 4,
-      'Node.js': 4,
-      'SQL': 3,
-      'AWS': 5,
-      'Docker': 4
-    };
-
-    // Adjust proficiency based on user's experience level
-    const experienceMultiplier = {
-      'Complete beginner': 0.5,
-      'Some exposure': 0.7,
-      'Beginner': 0.8,
-      'Intermediate': 1,
-      'Advanced': 1.2
-    };
-
-    const multiplier = experienceMultiplier[userData.experienceLevel] || 1;
-
-    return {
-      labels: toolsData,
-      datasets: [{
-        label: 'Proficiency Level',
-        data: toolsData.map(tool => Math.round((toolProficiencyMap[tool] || 3) * multiplier)),
-        backgroundColor: [
-          'rgba(59, 130, 246, 0.6)',
-          'rgba(34, 197, 94, 0.6)',
-          'rgba(251, 146, 60, 0.6)',
-          'rgba(168, 85, 247, 0.6)',
-          'rgba(236, 72, 153, 0.6)',
-          'rgba(250, 204, 21, 0.6)',
-          'rgba(99, 102, 241, 0.6)',
-          'rgba(14, 165, 233, 0.6)',
-          'rgba(220, 38, 38, 0.6)'
-        ],
-        borderColor: [
-          'rgba(59, 130, 246, 1)',
-          'rgba(34, 197, 94, 1)',
-          'rgba(251, 146, 60, 1)',
-          'rgba(168, 85, 247, 1)',
-          'rgba(236, 72, 153, 1)',
-          'rgba(250, 204, 21, 1)',
-          'rgba(99, 102, 241, 1)',
-          'rgba(14, 165, 233, 1)',
-          'rgba(220, 38, 38, 1)'
-        ],
-        borderWidth: 1,
-      }]
-    };
-  };
-
-  // Create career path interest distribution
-  const createCareerInterestData = () => {
-    const pathsWithMatches = extractCareerPaths(analysis);
-    
-    if (pathsWithMatches.length > 0) {
-      return {
-        labels: pathsWithMatches.map(path => path.title),
-        datasets: [{
-          label: 'Match Percentage',
-          data: pathsWithMatches.map(path => path.match),
-          backgroundColor: [
-            'rgba(59, 130, 246, 0.8)',
-            'rgba(34, 197, 94, 0.8)',
-            'rgba(251, 146, 60, 0.8)',
-            'rgba(168, 85, 247, 0.8)',
-            'rgba(236, 72, 153, 0.8)'
-          ],
-          borderColor: [
-            'rgba(59, 130, 246, 1)',
-            'rgba(34, 197, 94, 1)',
-            'rgba(251, 146, 60, 1)',
-            'rgba(168, 85, 247, 1)',
-            'rgba(236, 72, 153, 1)'
-          ],
-          borderWidth: 2,
-        }]
-      };
-    }
-    
-    // Fallback to user's selected interests
-    const interestCounts = {};
-    userData.careerPathsInterest.forEach(interest => {
-      interestCounts[interest] = (interestCounts[interest] || 0) + 1;
-    });
-    
-    return {
-      labels: Object.keys(interestCounts),
-      datasets: [{
-        label: 'Interest Level',
-        data: Object.values(interestCounts),
-        backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(34, 197, 94, 0.8)',
-          'rgba(251, 146, 60, 0.8)',
-          'rgba(168, 85, 247, 0.8)',
-          'rgba(236, 72, 153, 0.8)'
-        ],
-        borderColor: [
-          'rgba(59, 130, 246, 1)',
-          'rgba(34, 197, 94, 1)',
-          'rgba(251, 146, 60, 1)',
-          'rgba(168, 85, 247, 1)',
-          'rgba(236, 72, 153, 1)'
-        ],
-        borderWidth: 2,
-      }]
-    };
-  };
-
-  // Create timeline visualization
-  const createTimelineData = () => {
-    const timelineMap = {
-      'Less than 6 months': 6,
-      '6-12 months': 12,
-      '1-2 years': 18,
-      '2+ years': 24,
-      'Already transitioning': 3
-    };
-    
-    const months = timelineMap[userData.transitionTimeline] || 12;
-    const milestones = [];
-    
-    // Create milestones based on timeline
-    if (months <= 6) {
-      milestones.push(
-        { month: 1, label: 'Start Learning', value: 20 },
-        { month: 3, label: 'Complete Basics', value: 50 },
-        { month: 6, label: 'Job Ready', value: 100 }
-      );
-    } else if (months <= 12) {
-      milestones.push(
-        { month: 2, label: 'Foundation', value: 20 },
-        { month: 4, label: 'Core Skills', value: 40 },
-        { month: 6, label: 'Projects', value: 60 },
-        { month: 9, label: 'Portfolio', value: 80 },
-        { month: 12, label: 'Job Ready', value: 100 }
-      );
-    } else {
-      milestones.push(
-        { month: 3, label: 'Foundation', value: 15 },
-        { month: 6, label: 'Core Skills', value: 30 },
-        { month: 9, label: 'Specialization', value: 45 },
-        { month: 12, label: 'Projects', value: 60 },
-        { month: 15, label: 'Portfolio', value: 80 },
-        { month: 18, label: 'Job Ready', value: 100 }
-      );
-    }
-    
-    return {
-      labels: milestones.map(m => m.label),
-      datasets: [{
-        label: 'Progress Timeline',
-        data: milestones.map(m => m.value),
-        borderColor: 'rgb(75, 192, 192)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        tension: 0.1
-      }]
-    };
-  };
-
   // Format analysis text for display
   const formatAnalysisText = (text) => {
     if (!text) return [];
@@ -517,15 +264,12 @@ const CareerDashboard = () => {
     let formattedContent = [];
     let inSkillsGapSection = false;
 
-    // Helper function to highlight important keywords and fix pronouns
     const processContent = (content) => {
-      // First, replace third-person pronouns with second-person
       content = content.replace(/\btheir\b/gi, 'your');
       content = content.replace(/\bthey\b/gi, 'you');
       content = content.replace(/\bthem\b/gi, 'you');
       content = content.replace(/\bthemselves\b/gi, 'yourself');
       
-      // Highlight important user data
       if (userData.educationLevel && userData.educationLevel !== 'Not specified') {
         const educationTerms = [userData.educationLevel, userData.studyField].filter(Boolean);
         educationTerms.forEach(term => {
@@ -545,7 +289,6 @@ const CareerDashboard = () => {
     };
 
     lines.forEach((line, index) => {
-      // Check if we're entering or leaving the skills gap section
       if (line.includes("SKILLS GAP ANALYSIS")) {
         inSkillsGapSection = true;
         formattedContent.push(
@@ -560,12 +303,10 @@ const CareerDashboard = () => {
         inSkillsGapSection = false;
       }
 
-      // Skip skills gap numbered items since we're showing them in charts
       if (inSkillsGapSection && line.match(/^\d+\.\s+/) && line.includes(':')) {
         return;
       }
 
-      // Format section headers
       if (line.match(/^\d+\.\s+[A-Z]/)) {
         formattedContent.push(
           <h3 key={`header-${index}`} className="text-xl font-bold mt-8 mb-4 text-blue-800">
@@ -573,7 +314,6 @@ const CareerDashboard = () => {
           </h3>
         );
       }
-      // Format subsection headers
       else if (line.match(/^[a-z]\)\s+.*?\(\d+%\s+match/i)) {
         formattedContent.push(
           <h4 key={`subheader-${index}`} className="text-lg font-semibold mt-6 mb-2 text-blue-700">
@@ -581,7 +321,6 @@ const CareerDashboard = () => {
           </h4>
         );
       }
-      // Format list items
       else if (line.trim().startsWith('-')) {
         const content = line.replace(/^-\s+/, '');
         formattedContent.push(
@@ -591,7 +330,6 @@ const CareerDashboard = () => {
           </div>
         );
       }
-      // Format numbered list items
       else if (line.trim().match(/^\d+\.\s+/)) {
         const content = line.replace(/^\d+\.\s+/, '');
         formattedContent.push(
@@ -601,7 +339,6 @@ const CareerDashboard = () => {
           </div>
         );
       }
-      // Format monthly sections
       else if (line.trim().match(/^Month\s+\d+-?\d*:/i)) {
         formattedContent.push(
           <h5 key={`month-${index}`} className="font-semibold mt-4 mb-2 text-blue-600 ml-4">
@@ -609,11 +346,9 @@ const CareerDashboard = () => {
           </h5>
         );
       }
-      // Format empty lines
       else if (line.trim() === '') {
         formattedContent.push(<br key={`break-${index}`} />);
       }
-      // Format regular text
       else {
         formattedContent.push(
           <p key={`text-${index}`} className="mb-3 text-gray-900" dangerouslySetInnerHTML={processContent(line)} />
@@ -624,8 +359,41 @@ const CareerDashboard = () => {
     return formattedContent;
   };
 
-  // Component to render skill gap chart
-  const SkillGapChart = ({ skill }) => {
+  // Custom Simple Bar Chart Component
+  const SimpleBarChart = ({ data, title }) => {
+    const maxValue = Math.max(...data.map(item => item.value));
+    
+    return (
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-4">{title}</h3>
+        <div className="space-y-4">
+          {data.map((item, index) => (
+            <div key={index}>
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-medium">{item.label}</span>
+                <span className="text-sm text-gray-600">{item.value}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-8 relative">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    index === 0 ? 'bg-blue-600' : 
+                    index === 1 ? 'bg-green-500' : 
+                    index === 2 ? 'bg-purple-500' :
+                    index === 3 ? 'bg-orange-500' :
+                    'bg-pink-500'
+                  }`}
+                  style={{ width: `${(item.value / maxValue) * 100}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Custom Skill Level Chart Component
+  const SkillLevelChart = ({ skill }) => {
     const levels = ['Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert'];
     const levelColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
     
@@ -673,6 +441,130 @@ const CareerDashboard = () => {
     );
   };
 
+  // Custom Tools Proficiency Component
+  const ToolsProficiency = ({ tools }) => {
+    const experienceMultiplier = {
+      'Complete beginner': 0.5,
+      'Some exposure': 0.7,
+      'Beginner': 0.8,
+      'Intermediate': 1,
+      'Advanced': 1.2
+    };
+
+    const toolProficiencyMap = {
+      'VS Code': 3,
+      'GitHub': 3,
+      'JavaScript': 4,
+      'Python': 4,
+      'React': 4,
+      'Node.js': 4,
+      'SQL': 3,
+      'AWS': 5,
+      'Docker': 4
+    };
+
+    const multiplier = experienceMultiplier[userData.experienceLevel] || 1;
+    
+    return (
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-4">Current Tools & Technologies</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          {tools.filter(tool => tool !== 'None').map((tool, index) => {
+            const proficiency = Math.round((toolProficiencyMap[tool] || 3) * multiplier);
+            const proficiencyLabels = ['Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert'];
+            
+            return (
+              <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-medium">{tool}</span>
+                  <span className="text-sm text-gray-600">{proficiencyLabels[proficiency - 1]}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${(proficiency / 5) * 100}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Create timeline visualization data
+  const createTimelineData = () => {
+    const timelineMap = {
+      'Less than 6 months': 6,
+      '6-12 months': 12,
+      '1-2 years': 18,
+      '2+ years': 24,
+      'Already transitioning': 3
+    };
+    
+    const months = timelineMap[userData.transitionTimeline] || 12;
+    const milestones = [];
+    
+    if (months <= 6) {
+      milestones.push(
+        { month: 1, label: 'Start Learning', progress: 20 },
+        { month: 3, label: 'Complete Basics', progress: 50 },
+        { month: 6, label: 'Job Ready', progress: 100 }
+      );
+    } else if (months <= 12) {
+      milestones.push(
+        { month: 2, label: 'Foundation', progress: 20 },
+        { month: 4, label: 'Core Skills', progress: 40 },
+        { month: 6, label: 'Projects', progress: 60 },
+        { month: 9, label: 'Portfolio', progress: 80 },
+        { month: 12, label: 'Job Ready', progress: 100 }
+      );
+    } else {
+      milestones.push(
+        { month: 3, label: 'Foundation', progress: 15 },
+        { month: 6, label: 'Core Skills', progress: 30 },
+        { month: 9, label: 'Specialization', progress: 45 },
+        { month: 12, label: 'Projects', progress: 60 },
+        { month: 15, label: 'Portfolio', progress: 80 },
+        { month: 18, label: 'Job Ready', progress: 100 }
+      );
+    }
+    
+    return milestones;
+  };
+
+  // Custom Timeline Component
+  const TimelineChart = ({ milestones }) => {
+    return (
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-4">Your Transition Roadmap</h3>
+        <div className="relative">
+          <div className="absolute left-0 top-0 h-full w-1 bg-gray-300" />
+          {milestones.map((milestone, index) => (
+            <div key={index} className="relative flex items-center mb-8">
+              <div className={`absolute left-0 w-4 h-4 rounded-full ${
+                index === 0 ? 'bg-blue-600' : 'bg-gray-400'
+              } -translate-x-1.5`} />
+              <div className="ml-8">
+                <div className="flex items-center mb-1">
+                  <span className="font-semibold">{milestone.label}</span>
+                  <span className="ml-2 text-sm text-gray-600">({milestone.month} months)</span>
+                </div>
+                <div className="w-64 bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${milestone.progress}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return <LoadingSpinner message="Loading your career analysis..." />;
   }
@@ -680,8 +572,11 @@ const CareerDashboard = () => {
   // Extract data for visualizations
   const careerPaths = extractCareerPaths(analysis);
   const skillsGap = extractSkillsGap(analysis);
-  const toolsData = createToolsProficiencyData();
-  const timelineData = createTimelineData();
+  const chartData = careerPaths.map(path => ({
+    label: path.title,
+    value: path.match
+  }));
+  const timelineMilestones = createTimelineData();
 
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
@@ -735,7 +630,7 @@ const CareerDashboard = () => {
           </div>
         </div>
 
-        {/* User Profile Summary with Enhanced Details */}
+        {/* User Profile Summary */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-2xl font-bold mb-6">Profile Overview</h2>
           <div className="grid md:grid-cols-3 gap-6">
@@ -786,158 +681,30 @@ const CareerDashboard = () => {
         {careerPaths.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-bold mb-6">Career Path Compatibility</h2>
-            
-            <div className="mb-8">
-              <Bar 
-                data={createCareerInterestData()}
-                options={{
-                  responsive: true,
-                  plugins: {
-                    legend: {
-                      display: false
-                    },
-                    title: {
-                      display: true,
-                      text: 'Match Percentage by Career Path'
-                    }
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      max: 100,
-                      ticks: {
-                        callback: function(value) {
-                          return value + '%';
-                        }
-                      }
-                    }
-                  }
-                }}
-              />
-            </div>
-            
-            {/* Detailed Path Analysis */}
-            <div className="space-y-6">
-              {careerPaths.map((path, index) => (
-                <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-semibold text-lg">{path.title}</h3>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      path.match >= 80 ? 'bg-green-100 text-green-700' :
-                      path.match >= 60 ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-orange-100 text-orange-700'
-                    }`}>
-                      {path.match}% Match
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className={`h-2.5 rounded-full ${
-                        index === 0 ? 'bg-blue-600' : index === 1 ? 'bg-green-500' : 'bg-purple-500'
-                      }`}
-                      style={{ width: `${path.match}%` }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <SimpleBarChart data={chartData} title="Match Percentage by Career Path" />
           </div>
         )}
         
-        {/* Skills Analysis with User Data */}
+        {/* Skills Gap Analysis */}
         {skillsGap.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-bold mb-6">Skills Gap Analysis</h2>
-            
-            {/* Skills Radar Chart */}
-            <div className="mb-8" style={{ height: '400px' }}>
-              <Radar 
-                data={createSkillsRadarData()}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      position: 'top',
-                    },
-                    title: {
-                      display: true,
-                      text: 'Current vs Required Skills'
-                    }
-                  },
-                  scales: {
-                    r: {
-                      beginAtZero: true,
-                      max: 5,
-                      ticks: {
-                        stepSize: 1,
-                        callback: function(value) {
-                          const labels = ['', 'Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert'];
-                          return labels[value] || '';
-                        }
-                      }
-                    }
-                  }
-                }}
-              />
-            </div>
-            
-            {/* Individual Skill Gap Charts */}
+            <p className="text-gray-600 mb-6">
+              Visual representation of your current skill levels versus required levels for your target career paths.
+            </p>
             <div className="grid md:grid-cols-2 gap-4">
               {skillsGap.slice(0, 6).map((skill, index) => (
-                <SkillGapChart key={index} skill={skill} />
+                <SkillLevelChart key={index} skill={skill} />
               ))}
             </div>
           </div>
         )}
         
         {/* Current Tools Proficiency */}
-        {toolsData && (
+        {userData.toolsUsed && userData.toolsUsed.length > 0 && userData.toolsUsed[0] !== 'None' && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6">Current Tools & Technologies</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div style={{ height: '300px' }}>
-                <Doughnut 
-                  data={toolsData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: 'right',
-                      },
-                      title: {
-                        display: true,
-                        text: 'Tool Proficiency Distribution'
-                      }
-                    }
-                  }}
-                />
-              </div>
-              <div>
-                <h3 className="font-semibold mb-3">Technology Stack</h3>
-                <div className="space-y-3">
-                  {userData.toolsUsed.filter(tool => tool !== 'None').map((tool, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="font-medium">{tool}</span>
-                      <div className="flex items-center">
-                        <div className="w-24 bg-gray-200 rounded-full h-2 mr-3">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full"
-                            style={{ 
-                              width: `${(toolsData.datasets[0].data[index] / 5) * 100}%` 
-                            }}
-                          ></div>
-                        </div>
-                        <span className="text-sm text-gray-600">
-                          {['Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert'][toolsData.datasets[0].data[index] - 1]}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <h2 className="text-xl font-bold mb-6">Technical Proficiency</h2>
+            <ToolsProficiency tools={userData.toolsUsed} />
           </div>
         )}
         
@@ -949,31 +716,7 @@ const CareerDashboard = () => {
               Based on your {userData.transitionTimeline} timeline and {userData.timeCommitment} weekly commitment
             </p>
           </div>
-          <div style={{ height: '300px' }}>
-            <Line 
-              data={timelineData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    display: false
-                  }
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    max: 100,
-                    ticks: {
-                      callback: function(value) {
-                        return value + '%';
-                      }
-                    }
-                  }
-                }
-              }}
-            />
-          </div>
+          <TimelineChart milestones={timelineMilestones} />
         </div>
         
         {/* Complete Analysis */}

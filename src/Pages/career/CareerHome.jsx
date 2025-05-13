@@ -1,5 +1,5 @@
 // src/Pages/career/CareerHome.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Constants
@@ -66,30 +66,6 @@ const PROCESS_STEPS = [
   }
 ];
 
-const TESTIMONIALS = [
-  {
-    name: "Sarah Chen",
-    role: "Former Teacher → Data Scientist",
-    quote: "The skills gap analysis was spot-on. I knew exactly what to learn and landed my dream job in 8 months.",
-    rating: 5,
-    image: "/api/placeholder/60/60"
-  },
-  {
-    name: "Michael Rodriguez",
-    role: "Sales Manager → Product Manager",
-    quote: "The transition strategy gave me confidence. The roadmap was clear and actionable.",
-    rating: 5,
-    image: "/api/placeholder/60/60"
-  },
-  {
-    name: "Emily Thompson",
-    role: "Finance Analyst → UX Designer",
-    quote: "I discovered strengths I didn't know I had. The career recommendations were perfect for me.",
-    rating: 5,
-    image: "/api/placeholder/60/60"
-  }
-];
-
 const FAQs = [
   {
     question: "How long does the assessment take?",
@@ -114,6 +90,7 @@ const CareerHome = () => {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [expandedFAQ, setExpandedFAQ] = useState(null);
+  const sampleResultsRef = useRef(null);
 
   useEffect(() => {
     setIsVisible(true);
@@ -123,10 +100,8 @@ const CareerHome = () => {
     navigate('/career/test');
   };
 
-  const handleEmailSignup = (e) => {
-    e.preventDefault();
-    // Handle email signup logic
-    console.log('Email signup submitted');
+  const handleViewSampleResults = () => {
+    sampleResultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
@@ -164,21 +139,12 @@ const CareerHome = () => {
                   <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
                 </button>
                 <button
+                  onClick={handleViewSampleResults}
                   className="bg-transparent border-2 border-white text-white px-8 md:px-12 py-4 md:py-5 rounded-full font-bold text-lg hover:bg-white hover:text-indigo-600 transform hover:scale-105 transition-all duration-300 shadow-xl"
                   aria-label="View sample results"
                 >
                   See Sample Results
                 </button>
-              </div>
-              <div className="mt-8 flex items-center space-x-4">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white"></div>
-                  ))}
-                </div>
-                <p className="text-sm text-indigo-100">
-                  <strong>10,000+</strong> professionals found their tech path
-                </p>
               </div>
             </div>
           </div>
@@ -187,10 +153,6 @@ const CareerHome = () => {
         {/* Trust Indicators */}
         <section className="mb-16 text-center">
           <div className="flex flex-wrap justify-center gap-8 md:gap-16">
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl">🏆</span>
-              <span className="text-gray-600">95% Satisfaction Rate</span>
-            </div>
             <div className="flex items-center space-x-2">
               <span className="text-2xl">🔒</span>
               <span className="text-gray-600">Privacy Protected</span>
@@ -254,7 +216,7 @@ const CareerHome = () => {
         </section>
 
         {/* Sample Results Preview */}
-        <section className="mb-20" aria-label="Sample results">
+        <section ref={sampleResultsRef} className="mb-20" aria-label="Sample results">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">What Your Results Look Like</h2>
           <div className="bg-white rounded-3xl shadow-xl p-6 md:p-8">
             <div className="grid md:grid-cols-2 gap-8">
@@ -307,34 +269,6 @@ const CareerHome = () => {
           </div>
         </section>
 
-        {/* Testimonials */}
-        <section className="mb-20" aria-label="Testimonials">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Success Stories</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {TESTIMONIALS.map((testimonial, index) => (
-              <article key={index} className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                <div className="flex items-center mb-4">
-                  <img 
-                    src={testimonial.image} 
-                    alt={testimonial.name} 
-                    className="w-12 h-12 rounded-full mr-4 bg-gray-300"
-                  />
-                  <div>
-                    <h4 className="font-bold text-gray-800">{testimonial.name}</h4>
-                    <p className="text-sm text-gray-600">{testimonial.role}</p>
-                  </div>
-                </div>
-                <div className="flex mb-3">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <span key={i} className="text-yellow-400">★</span>
-                  ))}
-                </div>
-                <p className="text-gray-700 italic">"{testimonial.quote}"</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
         {/* FAQ Section */}
         <section className="mb-20" aria-label="Frequently asked questions">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Frequently Asked Questions</h2>
@@ -376,24 +310,8 @@ const CareerHome = () => {
             >
               Begin Your Assessment
             </button>
-            <form onSubmit={handleEmailSignup} className="mt-8 max-w-md mx-auto">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="email"
-                  placeholder="Enter your email for updates"
-                  className="flex-1 px-6 py-3 rounded-full text-gray-700 focus:outline-none focus:ring-4 focus:ring-white/30"
-                  aria-label="Email address"
-                />
-                <button
-                  type="submit"
-                  className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-full font-medium hover:bg-white/30 transition-colors"
-                >
-                  Subscribe
-                </button>
-              </div>
-            </form>
             <p className="mt-8 text-sm text-purple-200">
-              Join thousands who've successfully transitioned to tech careers
+              Join the professionals who've successfully transitioned to tech careers
             </p>
           </div>
         </section>

@@ -2,12 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import FormSection from '../../components/FormSection';
 import claudeApiService from '../../services/claudeApiService';
 import storageService from '../../services/storageService';
 import googleFormService from '../../services/googleFormService';
 import { toast } from 'react-toastify';
-import { User, BookOpen, Briefcase, Heart, ChevronRight, Lightbulb, Target, Clock, CheckCircle, Code } from 'lucide-react';
+
+// No more dependency on FormSection component
 
 const CareerTest = () => {
   const navigate = useNavigate();
@@ -69,16 +69,58 @@ const CareerTest = () => {
 
   const [careerAnalysis, setCareerAnalysis] = useState(null);
   
-  // Define section icons for enhanced UI
+  // Define section icons for enhanced UI - using SVG instead of lucide-react
   const sectionIcons = {
-    personal: <User size={20} className="text-blue-600 mr-2" />,
-    education: <BookOpen size={20} className="text-blue-600 mr-2" />,
-    experience: <Briefcase size={20} className="text-blue-600 mr-2" />,
-    motivation: <Heart size={20} className="text-blue-600 mr-2" />,
-    transition: <ChevronRight size={20} className="text-blue-600 mr-2" />,
-    preferences: <Lightbulb size={20} className="text-blue-600 mr-2" />,
-    aspirations: <Target size={20} className="text-blue-600 mr-2" />,
-    goals: <Clock size={20} className="text-blue-600 mr-2" />
+    personal: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+    ),
+    education: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      </svg>
+    ),
+    experience: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+    ),
+    motivation: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+      </svg>
+    ),
+    transition: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+      </svg>
+    ),
+    preferences: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+      </svg>
+    ),
+    aspirations: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+    ),
+    goals: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+    code: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+      </svg>
+    ),
+    check: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    )
   };
 
   useEffect(() => {
@@ -408,8 +450,8 @@ const CareerTest = () => {
     return <LoadingSpinner message={aiAnalyzing ? "AI is analyzing your results..." : "Loading..."} />;
   }
 
-  // Enhanced FormSection component wrapper
-  const EnhancedFormSection = ({ title, children, icon }) => {
+  // Custom form section component that replaces the imported FormSection
+  const CustomFormSection = ({ title, children, icon }) => {
     return (
       <div className="mb-8 bg-white rounded-lg p-6 shadow-sm border border-gray-100">
         <div className="border-b border-gray-200 pb-3 mb-6 flex items-center">
@@ -461,7 +503,7 @@ const CareerTest = () => {
           {showAiAssistant && (
             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg mb-6 border border-blue-100 shadow-sm">
               <h3 className="text-xl font-semibold text-blue-700 mb-2 flex items-center">
-                <Code size={20} className="mr-2" />
+                {sectionIcons.code}
                 AI Assistant
               </h3>
               <p className="mb-4 text-gray-600">Let our AI help you fill out the form or analyze your results.</p>
@@ -513,7 +555,7 @@ const CareerTest = () => {
           
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-8">
-            <EnhancedFormSection title="Personal Information" icon={sectionIcons.personal}>
+            <CustomFormSection title="Personal Information" icon={sectionIcons.personal}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <span className="text-red-500 mr-1">*</span>Full Name
@@ -572,9 +614,9 @@ const CareerTest = () => {
                   </div>
                 </div>
               </div>
-            </EnhancedFormSection>
+            </CustomFormSection>
             
-            <EnhancedFormSection title="Educational Background" icon={sectionIcons.education}>
+            <CustomFormSection title="Educational Background" icon={sectionIcons.education}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <span className="text-red-500 mr-1">*</span>Most Recent Course of Study
@@ -631,10 +673,10 @@ const CareerTest = () => {
                   </div>
                 </div>
               </div>
-            </EnhancedFormSection>
+            </CustomFormSection>
             
             {/* Job Experience Section */}
-            <EnhancedFormSection title="Experience Details" icon={sectionIcons.experience}>
+            <CustomFormSection title="Experience Details" icon={sectionIcons.experience}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <span className="text-red-500 mr-1">*</span>Key Job Responsibilities
@@ -713,9 +755,9 @@ const CareerTest = () => {
                 />
                 <p className="text-sm text-gray-500 mt-1">Include titles, publications, dates, and brief descriptions if applicable</p>
               </div>
-            </EnhancedFormSection>
+            </CustomFormSection>
             
-            <EnhancedFormSection title="Motivation & Personal Strengths" icon={sectionIcons.motivation}>
+            <CustomFormSection title="Motivation & Personal Strengths" icon={sectionIcons.motivation}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <span className="text-red-500 mr-1">*</span>What is your biggest motivation for pursuing a tech career?
@@ -745,9 +787,9 @@ const CareerTest = () => {
                   required
                 />
               </div>
-            </EnhancedFormSection>
+            </CustomFormSection>
             
-            <EnhancedFormSection title="Transition Information" icon={sectionIcons.transition}>
+            <CustomFormSection title="Transition Information" icon={sectionIcons.transition}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <span className="text-red-500 mr-1">*</span>What is your primary reason for transitioning to tech?
@@ -807,9 +849,9 @@ const CareerTest = () => {
                   required
                 />
               </div>
-            </EnhancedFormSection>
+            </CustomFormSection>
             
-            <EnhancedFormSection title="Tech Preferences & Experience" icon={sectionIcons.preferences}>
+            <CustomFormSection title="Tech Preferences & Experience" icon={sectionIcons.preferences}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <span className="text-red-500 mr-1">*</span>Which tech areas are you most curious about or interested in learning?
@@ -970,9 +1012,9 @@ const CareerTest = () => {
                   required
                 />
               </div>
-            </EnhancedFormSection>
+            </CustomFormSection>
             
-            <EnhancedFormSection title="Tech Career Aspirations" icon={sectionIcons.aspirations}>
+            <CustomFormSection title="Tech Career Aspirations" icon={sectionIcons.aspirations}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <span className="text-red-500 mr-1">*</span>Which tech career paths are you most interested in exploring?
@@ -1081,9 +1123,9 @@ const CareerTest = () => {
                   </div>
                 </div>
               </div>
-            </EnhancedFormSection>
+            </CustomFormSection>
             
-            <EnhancedFormSection title="Commitment & Goals" icon={sectionIcons.goals}>
+            <CustomFormSection title="Commitment & Goals" icon={sectionIcons.goals}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <span className="text-red-500 mr-1">*</span>How much time can you realistically commit to learning or working on a project each week?
@@ -1193,7 +1235,7 @@ const CareerTest = () => {
                   required
                 />
               </div>
-            </EnhancedFormSection>
+            </CustomFormSection>
             
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
               <div className="text-sm text-gray-600 mb-6">

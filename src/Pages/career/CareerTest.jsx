@@ -132,13 +132,19 @@ const CareerTest = () => {
 
   // Fixed event handlers to solve the text cursor and vibration issues
   
-  // For text inputs - don't prevent default
+  // For text inputs - FIXED: now preserves scroll position
   const handleChange = (e) => {
+    // Capture the scroll position before changing state
+    const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+    
     const { name, value } = e.target;
     setFormData(prevState => ({
       ...prevState,
       [name]: value
     }));
+    
+    // Immediately restore scroll position
+    window.scrollTo(0, scrollPosition);
   };
 
   // For select elements - handle scroll position carefully

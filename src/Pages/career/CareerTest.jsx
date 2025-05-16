@@ -130,23 +130,37 @@ const CareerTest = () => {
     }
   }, [location]);
 
+  // Fixed event handlers to solve the text cursor and vibration issues
+  
+  // For text inputs - don't prevent default
   const handleChange = (e) => {
-    e.preventDefault(); // Prevent default form behavior
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+
+  // For select elements - handle scroll position carefully
+  const handleSelectChange = (e) => {
+    // Capture the scroll position before changing state
+    const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+    
     const { name, value } = e.target;
     setFormData(prevState => ({
       ...prevState,
       [name]: value
     }));
     
-    // Prevent scrolling to bottom
-    const currentPosition = window.pageYOffset || document.documentElement.scrollTop;
-    setTimeout(() => {
-      window.scrollTo(0, currentPosition);
-    }, 1);
+    // Immediately restore scroll position
+    window.scrollTo(0, scrollPosition);
   };
 
-  // New checkbox handler
+  // For checkboxes - special handler with scroll position management
   const handleCheckboxChange = (e) => {
+    // Capture the scroll position before changing state
+    const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+    
     const { name, value, checked } = e.target;
     
     setFormData(prevState => {
@@ -188,22 +202,13 @@ const CareerTest = () => {
       }
     });
     
-    // Prevent scrolling
-    const currentPosition = window.pageYOffset || document.documentElement.scrollTop;
-    setTimeout(() => {
-      window.scrollTo(0, currentPosition);
-    }, 1);
+    // Immediately restore scroll position
+    window.scrollTo(0, scrollPosition);
   };
 
   const toggleAiAssistant = (e) => {
     e.preventDefault(); // Prevent default behavior
     setShowAiAssistant(!showAiAssistant);
-    
-    // Prevent scrolling
-    const currentPosition = window.pageYOffset || document.documentElement.scrollTop;
-    setTimeout(() => {
-      window.scrollTo(0, currentPosition);
-    }, 1);
   };
 
   const handleAiFillForm = async (e) => {
@@ -504,17 +509,6 @@ const CareerTest = () => {
     return <LoadingSpinner message={aiAnalyzing ? "AI is analyzing your results..." : "Loading..."} />;
   }
 
-  // Prevent default behavior for select elements
-  const handleSelectClick = (e) => {
-    // Store the current scroll position
-    const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-    
-    // Set a timeout to restore the scroll position after the dropdown opens
-    setTimeout(() => {
-      window.scrollTo(0, currentScrollPosition);
-    }, 10);
-  };
-
   // Link handler with preventDefault
   const handleBackClick = (e) => {
     e.preventDefault();
@@ -666,8 +660,7 @@ const CareerTest = () => {
                   <select
                     name="educationLevel"
                     value={formData.educationLevel}
-                    onChange={handleChange}
-                    onClick={handleSelectClick}
+                    onChange={handleSelectChange}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -727,8 +720,7 @@ const CareerTest = () => {
                   <select
                     name="yearsExperience"
                     value={formData.yearsExperience}
-                    onChange={handleChange}
-                    onClick={handleSelectClick}
+                    onChange={handleSelectChange}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -871,8 +863,7 @@ const CareerTest = () => {
                   <select
                     name="transitionReason"
                     value={formData.transitionReason}
-                    onChange={handleChange}
-                    onClick={handleSelectClick}
+                    onChange={handleSelectChange}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -949,8 +940,7 @@ const CareerTest = () => {
                   <select
                     name="learningComfort"
                     value={formData.learningComfort}
-                    onChange={handleChange}
-                    onClick={handleSelectClick}
+                    onChange={handleSelectChange}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -976,8 +966,7 @@ const CareerTest = () => {
                   <select
                     name="workPreference"
                     value={formData.workPreference}
-                    onChange={handleChange}
-                    onClick={handleSelectClick}
+                    onChange={handleSelectChange}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -1003,8 +992,7 @@ const CareerTest = () => {
                   <select
                     name="experienceLevel"
                     value={formData.experienceLevel}
-                    onChange={handleChange}
-                    onClick={handleSelectClick}
+                    onChange={handleSelectChange}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -1071,8 +1059,7 @@ const CareerTest = () => {
                   <select
                     name="certifications"
                     value={formData.certifications}
-                    onChange={handleChange}
-                    onClick={handleSelectClick}
+                    onChange={handleSelectChange}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -1195,8 +1182,7 @@ const CareerTest = () => {
                   <select
                     name="leverageDomainExpertise"
                     value={formData.leverageDomainExpertise}
-                    onChange={handleChange}
-                    onClick={handleSelectClick}
+                    onChange={handleSelectChange}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -1222,8 +1208,7 @@ const CareerTest = () => {
                   <select
                     name="targetSalary"
                     value={formData.targetSalary}
-                    onChange={handleChange}
-                    onClick={handleSelectClick}
+                    onChange={handleSelectChange}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -1253,8 +1238,7 @@ const CareerTest = () => {
                   <select
                     name="timeCommitment"
                     value={formData.timeCommitment}
-                    onChange={handleChange}
-                    onClick={handleSelectClick}
+                    onChange={handleSelectChange}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -1281,8 +1265,7 @@ const CareerTest = () => {
                   <select
                     name="transitionTimeline"
                     value={formData.transitionTimeline}
-                    onChange={handleChange}
-                    onClick={handleSelectClick}
+                    onChange={handleSelectChange}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -1309,8 +1292,7 @@ const CareerTest = () => {
                   <select
                     name="continueCurrent"
                     value={formData.continueCurrent}
-                    onChange={handleChange}
-                    onClick={handleSelectClick}
+                    onChange={handleSelectChange}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >

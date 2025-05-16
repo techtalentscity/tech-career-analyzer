@@ -145,19 +145,50 @@ const CareerTest = () => {
     }, 1);
   };
 
-  const handleMultiSelect = (e) => {
-    e.preventDefault(); // Prevent default form behavior
-    const { name, options } = e.target;
-    const selectedValues = Array.from(options)
-      .filter(option => option.selected)
-      .map(option => option.value);
+  // New checkbox handler
+  const handleCheckboxChange = (e) => {
+    const { name, value, checked } = e.target;
     
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: selectedValues
-    }));
+    setFormData(prevState => {
+      const currentValues = [...prevState[name]];
+      
+      if (checked) {
+        // If "None" is selected, deselect all other options
+        if (value === 'None') {
+          return {
+            ...prevState,
+            [name]: ['None']
+          };
+        }
+        
+        // If another option is selected, remove "None" if it exists
+        const newValues = currentValues.filter(item => item !== 'None');
+        
+        // Add the new value to the array
+        return {
+          ...prevState,
+          [name]: [...newValues, value]
+        };
+      } else {
+        // Remove the value from the array if unchecked
+        const newValues = currentValues.filter(item => item !== value);
+        
+        // If no options are selected, default to "None"
+        if (newValues.length === 0) {
+          return {
+            ...prevState,
+            [name]: ['None']
+          };
+        }
+        
+        return {
+          ...prevState,
+          [name]: newValues
+        };
+      }
+    });
     
-    // Prevent scrolling to bottom
+    // Prevent scrolling
     const currentPosition = window.pageYOffset || document.documentElement.scrollTop;
     setTimeout(() => {
       window.scrollTo(0, currentPosition);
@@ -473,21 +504,6 @@ const CareerTest = () => {
     return <LoadingSpinner message={aiAnalyzing ? "AI is analyzing your results..." : "Loading..."} />;
   }
 
-  // Custom form section component that replaces the imported FormSection
-  const CustomFormSection = ({ title, children, icon }) => {
-    return (
-      <div className="mb-8 bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-        <div className="border-b border-gray-200 pb-3 mb-6 flex items-center">
-          {icon}
-          <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
-        </div>
-        <div className="space-y-6">
-          {children}
-        </div>
-      </div>
-    );
-  };
-
   // Prevent default behavior for select elements
   const handleSelectClick = (e) => {
     // Store the current scroll position
@@ -503,6 +519,21 @@ const CareerTest = () => {
   const handleBackClick = (e) => {
     e.preventDefault();
     navigate('/career');
+  };
+
+  // Custom form section component that replaces the imported FormSection
+  const CustomFormSection = ({ title, children, icon }) => {
+    return (
+      <div className="mb-8 bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+        <div className="border-b border-gray-200 pb-3 mb-6 flex items-center">
+          {icon}
+          <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+        </div>
+        <div className="space-y-6">
+          {children}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -992,32 +1023,44 @@ const CareerTest = () => {
                 </div>
               </div>
               
+              {/* CONVERTED TO CHECKBOXES: Tools Used */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <span className="text-red-500 mr-1">*</span>Which of the following tools or platforms have you used before?
                 </label>
-                <select
-                  name="toolsUsed"
-                  value={formData.toolsUsed}
-                  onChange={handleMultiSelect}
-                  onClick={handleSelectClick}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  multiple
-                  required
-                  size="5"
-                >
-                  <option value="VS Code">VS Code</option>
-                  <option value="GitHub">GitHub</option>
-                  <option value="JavaScript">JavaScript</option>
-                  <option value="Python">Python</option>
-                  <option value="React">React</option>
-                  <option value="Node.js">Node.js</option>
-                  <option value="SQL">SQL</option>
-                  <option value="AWS">AWS</option>
-                  <option value="Docker">Docker</option>
-                  <option value="None">None</option>
-                </select>
-                <p className="text-sm text-gray-500 mt-1">(Hold Ctrl/Cmd to select multiple options)</p>
+                <div className="space-y-2 max-h-60 overflow-y-auto bg-white p-3 rounded-lg border border-gray-300">
+                  {[
+                    { value: 'VS Code', label: 'VS Code' },
+                    { value: 'GitHub', label: 'GitHub' },
+                    { value: 'JavaScript', label: 'JavaScript' },
+                    { value: 'Python', label: 'Python' },
+                    { value: 'React', label: 'React' },
+                    { value: 'Node.js', label: 'Node.js' },
+                    { value: 'SQL', label: 'SQL' },
+                    { value: 'AWS', label: 'AWS' },
+                    { value: 'Docker', label: 'Docker' },
+                    { value: 'None', label: 'None' }
+                  ].map((option) => (
+                    <div key={option.value} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`toolsUsed-${option.value}`}
+                        name="toolsUsed"
+                        value={option.value}
+                        checked={formData.toolsUsed.includes(option.value)}
+                        onChange={handleCheckboxChange}
+                        className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <label 
+                        htmlFor={`toolsUsed-${option.value}`}
+                        className="ml-2 block text-sm text-gray-700 cursor-pointer hover:text-blue-600"
+                      >
+                        {option.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-500 mt-1">Select all tools you have experience with</p>
               </div>
               
               <div className="mb-4">
@@ -1063,61 +1106,85 @@ const CareerTest = () => {
             </CustomFormSection>
             
             <CustomFormSection title="Tech Career Aspirations" icon={sectionIcons.aspirations}>
+              {/* CONVERTED TO CHECKBOXES: Career Paths Interest */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <span className="text-red-500 mr-1">*</span>Which tech career paths are you most interested in exploring?
                 </label>
-                <select
-                  name="careerPathsInterest"
-                  value={formData.careerPathsInterest}
-                  onChange={handleMultiSelect}
-                  onClick={handleSelectClick}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  multiple
-                  required
-                  size="8"
-                >
-                  <option value="Software Development">Software Development</option>
-                  <option value="Data Analysis/Science">Data Analysis/Science</option>
-                  <option value="UX/UI Design">UX/UI Design</option>
-                  <option value="Product Management">Product Management</option>
-                  <option value="Cybersecurity">Cybersecurity</option>
-                  <option value="Cloud Engineering">Cloud Engineering</option>
-                  <option value="DevOps">DevOps</option>
-                  <option value="AI/Machine Learning">AI/Machine Learning</option>
-                  <option value="Technical Writing">Technical Writing</option>
-                  <option value="Quality Assurance">Quality Assurance</option>
-                  <option value="Technical Support">Technical Support</option>
-                  <option value="Not Sure Yet">Not Sure Yet</option>
-                </select>
-                <p className="text-sm text-gray-500 mt-1">(Hold Ctrl/Cmd to select multiple options)</p>
+                <div className="space-y-2 max-h-60 overflow-y-auto bg-white p-3 rounded-lg border border-gray-300">
+                  {[
+                    { value: 'Software Development', label: 'Software Development' },
+                    { value: 'Data Analysis/Science', label: 'Data Analysis/Science' },
+                    { value: 'UX/UI Design', label: 'UX/UI Design' },
+                    { value: 'Product Management', label: 'Product Management' },
+                    { value: 'Cybersecurity', label: 'Cybersecurity' },
+                    { value: 'Cloud Engineering', label: 'Cloud Engineering' },
+                    { value: 'DevOps', label: 'DevOps' },
+                    { value: 'AI/Machine Learning', label: 'AI/Machine Learning' },
+                    { value: 'Technical Writing', label: 'Technical Writing' },
+                    { value: 'Quality Assurance', label: 'Quality Assurance' },
+                    { value: 'Technical Support', label: 'Technical Support' },
+                    { value: 'Not Sure Yet', label: 'Not Sure Yet' }
+                  ].map((option) => (
+                    <div key={option.value} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`careerPathsInterest-${option.value}`}
+                        name="careerPathsInterest"
+                        value={option.value}
+                        checked={formData.careerPathsInterest.includes(option.value)}
+                        onChange={handleCheckboxChange}
+                        className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <label 
+                        htmlFor={`careerPathsInterest-${option.value}`}
+                        className="ml-2 block text-sm text-gray-700 cursor-pointer hover:text-blue-600"
+                      >
+                        {option.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-500 mt-1">Select all paths that interest you</p>
               </div>
               
+              {/* CONVERTED TO CHECKBOXES: Industry Preference */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <span className="text-red-500 mr-1">*</span>Do you have a preference for working in specific industries or sectors with your tech skills?
                 </label>
-                <select
-                  name="industryPreference"
-                  value={formData.industryPreference}
-                  onChange={handleMultiSelect}
-                  onClick={handleSelectClick}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  multiple
-                  required
-                  size="5"
-                >
-                  <option value="Healthcare/Medical">Healthcare/Medical</option>
-                  <option value="Finance/Fintech">Finance/Fintech</option>
-                  <option value="Education">Education</option>
-                  <option value="E-commerce">E-commerce</option>
-                  <option value="Entertainment/Media">Entertainment/Media</option>
-                  <option value="Government">Government</option>
-                  <option value="Same as current industry">Same as current industry</option>
-                  <option value="No preference">No preference</option>
-                  <option value="Other">Other</option>
-                </select>
-                <p className="text-sm text-gray-500 mt-1">(Hold Ctrl/Cmd to select multiple options)</p>
+                <div className="space-y-2 max-h-60 overflow-y-auto bg-white p-3 rounded-lg border border-gray-300">
+                  {[
+                    { value: 'Healthcare/Medical', label: 'Healthcare/Medical' },
+                    { value: 'Finance/Fintech', label: 'Finance/Fintech' },
+                    { value: 'Education', label: 'Education' },
+                    { value: 'E-commerce', label: 'E-commerce' },
+                    { value: 'Entertainment/Media', label: 'Entertainment/Media' },
+                    { value: 'Government', label: 'Government' },
+                    { value: 'Same as current industry', label: 'Same as current industry' },
+                    { value: 'No preference', label: 'No preference' },
+                    { value: 'Other', label: 'Other' }
+                  ].map((option) => (
+                    <div key={option.value} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`industryPreference-${option.value}`}
+                        name="industryPreference"
+                        value={option.value}
+                        checked={formData.industryPreference.includes(option.value)}
+                        onChange={handleCheckboxChange}
+                        className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <label 
+                        htmlFor={`industryPreference-${option.value}`}
+                        className="ml-2 block text-sm text-gray-700 cursor-pointer hover:text-blue-600"
+                      >
+                        {option.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-500 mt-1">Select all industries that interest you</p>
               </div>
               
               <div className="mb-4">

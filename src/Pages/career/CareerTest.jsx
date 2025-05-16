@@ -131,14 +131,22 @@ const CareerTest = () => {
   }, [location]);
 
   const handleChange = (e) => {
+    e.preventDefault(); // Prevent default form behavior
     const { name, value } = e.target;
     setFormData(prevState => ({
       ...prevState,
       [name]: value
     }));
+    
+    // Prevent scrolling to bottom
+    const currentPosition = window.pageYOffset || document.documentElement.scrollTop;
+    setTimeout(() => {
+      window.scrollTo(0, currentPosition);
+    }, 1);
   };
 
   const handleMultiSelect = (e) => {
+    e.preventDefault(); // Prevent default form behavior
     const { name, options } = e.target;
     const selectedValues = Array.from(options)
       .filter(option => option.selected)
@@ -148,13 +156,28 @@ const CareerTest = () => {
       ...prevState,
       [name]: selectedValues
     }));
+    
+    // Prevent scrolling to bottom
+    const currentPosition = window.pageYOffset || document.documentElement.scrollTop;
+    setTimeout(() => {
+      window.scrollTo(0, currentPosition);
+    }, 1);
   };
 
-  const toggleAiAssistant = () => {
+  const toggleAiAssistant = (e) => {
+    e.preventDefault(); // Prevent default behavior
     setShowAiAssistant(!showAiAssistant);
+    
+    // Prevent scrolling
+    const currentPosition = window.pageYOffset || document.documentElement.scrollTop;
+    setTimeout(() => {
+      window.scrollTo(0, currentPosition);
+    }, 1);
   };
 
-  const handleAiFillForm = async () => {
+  const handleAiFillForm = async (e) => {
+    e.preventDefault(); // Prevent default behavior
+    
     try {
       setLoading(true);
       
@@ -465,6 +488,23 @@ const CareerTest = () => {
     );
   };
 
+  // Prevent default behavior for select elements
+  const handleSelectClick = (e) => {
+    // Store the current scroll position
+    const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // Set a timeout to restore the scroll position after the dropdown opens
+    setTimeout(() => {
+      window.scrollTo(0, currentScrollPosition);
+    }, 10);
+  };
+
+  // Link handler with preventDefault
+  const handleBackClick = (e) => {
+    e.preventDefault();
+    navigate('/career');
+  };
+
   return (
     <div className="bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen py-8">
       <div className="container mx-auto max-w-4xl bg-white rounded-xl shadow-lg overflow-hidden">
@@ -480,7 +520,7 @@ const CareerTest = () => {
             <div>
               <a 
                 href="#" 
-                onClick={() => navigate('/career')} 
+                onClick={handleBackClick} 
                 className="text-blue-600 hover:text-blue-800 transition flex items-center"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -596,6 +636,7 @@ const CareerTest = () => {
                     name="educationLevel"
                     value={formData.educationLevel}
                     onChange={handleChange}
+                    onClick={handleSelectClick}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -656,6 +697,7 @@ const CareerTest = () => {
                     name="yearsExperience"
                     value={formData.yearsExperience}
                     onChange={handleChange}
+                    onClick={handleSelectClick}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -799,6 +841,7 @@ const CareerTest = () => {
                     name="transitionReason"
                     value={formData.transitionReason}
                     onChange={handleChange}
+                    onClick={handleSelectClick}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -876,6 +919,7 @@ const CareerTest = () => {
                     name="learningComfort"
                     value={formData.learningComfort}
                     onChange={handleChange}
+                    onClick={handleSelectClick}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -902,6 +946,7 @@ const CareerTest = () => {
                     name="workPreference"
                     value={formData.workPreference}
                     onChange={handleChange}
+                    onClick={handleSelectClick}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -928,6 +973,7 @@ const CareerTest = () => {
                     name="experienceLevel"
                     value={formData.experienceLevel}
                     onChange={handleChange}
+                    onClick={handleSelectClick}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -954,6 +1000,7 @@ const CareerTest = () => {
                   name="toolsUsed"
                   value={formData.toolsUsed}
                   onChange={handleMultiSelect}
+                  onClick={handleSelectClick}
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                   multiple
                   required
@@ -982,6 +1029,7 @@ const CareerTest = () => {
                     name="certifications"
                     value={formData.certifications}
                     onChange={handleChange}
+                    onClick={handleSelectClick}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -1023,6 +1071,7 @@ const CareerTest = () => {
                   name="careerPathsInterest"
                   value={formData.careerPathsInterest}
                   onChange={handleMultiSelect}
+                  onClick={handleSelectClick}
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                   multiple
                   required
@@ -1052,6 +1101,7 @@ const CareerTest = () => {
                   name="industryPreference"
                   value={formData.industryPreference}
                   onChange={handleMultiSelect}
+                  onClick={handleSelectClick}
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                   multiple
                   required
@@ -1079,6 +1129,7 @@ const CareerTest = () => {
                     name="leverageDomainExpertise"
                     value={formData.leverageDomainExpertise}
                     onChange={handleChange}
+                    onClick={handleSelectClick}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -1105,6 +1156,7 @@ const CareerTest = () => {
                     name="targetSalary"
                     value={formData.targetSalary}
                     onChange={handleChange}
+                    onClick={handleSelectClick}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -1135,6 +1187,7 @@ const CareerTest = () => {
                     name="timeCommitment"
                     value={formData.timeCommitment}
                     onChange={handleChange}
+                    onClick={handleSelectClick}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -1162,6 +1215,7 @@ const CareerTest = () => {
                     name="transitionTimeline"
                     value={formData.transitionTimeline}
                     onChange={handleChange}
+                    onClick={handleSelectClick}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >
@@ -1189,6 +1243,7 @@ const CareerTest = () => {
                     name="continueCurrent"
                     value={formData.continueCurrent}
                     onChange={handleChange}
+                    onClick={handleSelectClick}
                     className="appearance-none w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
                     required
                   >

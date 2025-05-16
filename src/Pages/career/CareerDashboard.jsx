@@ -1,4 +1,3 @@
-// src/Pages/career/CareerDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -32,6 +31,8 @@ const CareerDashboard = () => {
     workPreference: '',
     transitionTimeline: ''
   });
+  
+  // Updated to include new tab options
   const [activeTab, setActiveTab] = useState('analysis');
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   
@@ -706,20 +707,6 @@ const CareerDashboard = () => {
       });
     }
     
-    // Based on time commitment
-    if (userData.timeCommitment === '1-5 hours' || userData.timeCommitment === '5-10 hours') {
-      steps.push({
-        icon: (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        ),
-        color: 'text-cyan-600',
-        title: 'Micro-Learning Strategy',
-        description: 'Use lunch breaks and commute time for learning'
-      });
-    }
-    
     // Always include networking if not already added
     const hasNetworking = steps.some(step => step.title.includes('Network'));
     if (!hasNetworking) {
@@ -764,6 +751,419 @@ const CareerDashboard = () => {
     return topGaps.join(', ') || 'Key technical skills';
   };
 
+  // NEW: Get career growth metrics based on career interests
+  const getCareerGrowthMetrics = () => {
+    const careerGrowthData = {
+      'Software Development': {
+        growthRate: '22%',
+        medianSalary: '$110,000',
+        jobPostings: '245,000+',
+        hotSkills: ['JavaScript', 'React', 'Cloud Services', 'DevOps'],
+        aiImpact: 'Medium - High',
+        futureOutlook: 'Strong positive growth despite AI advancements. Focus on understanding AI integration and tools.'
+      },
+      'Data Analysis/Science': {
+        growthRate: '36%',
+        medianSalary: '$125,000',
+        jobPostings: '165,000+',
+        hotSkills: ['Python', 'SQL', 'ML/AI', 'Data Visualization'],
+        aiImpact: 'Medium',
+        futureOutlook: 'Excellent growth as businesses rely more on data. AI tools are enhancing capabilities rather than replacing analysts.'
+      },
+      'UX/UI Design': {
+        growthRate: '13%',
+        medianSalary: '$95,000',
+        jobPostings: '85,000+',
+        hotSkills: ['Figma', 'User Research', 'Design Systems', 'Prototyping'],
+        aiImpact: 'Medium',
+        futureOutlook: 'Steady growth with emphasis on accessibility and inclusive design. AI is changing workflows but human-centered design remains essential.'
+      },
+      'Product Management': {
+        growthRate: '10%',
+        medianSalary: '$120,000',
+        jobPostings: '115,000+',
+        hotSkills: ['Agile', 'Data Analysis', 'User Research', 'Strategy'],
+        aiImpact: 'Low - Medium',
+        futureOutlook: 'Stable growth with increasing emphasis on AI product integration. Strategic thinking remains highly valued.'
+      },
+      'Cybersecurity': {
+        growthRate: '33%',
+        medianSalary: '$115,000',
+        jobPostings: '90,000+',
+        hotSkills: ['Threat Intelligence', 'Cloud Security', 'Incident Response', 'Zero Trust'],
+        aiImpact: 'Medium',
+        futureOutlook: 'Exceptional growth as security threats evolve. AI both creates new security challenges and helps address them.'
+      },
+      'Cloud Engineering': {
+        growthRate: '25%',
+        medianSalary: '$130,000',
+        jobPostings: '110,000+',
+        hotSkills: ['AWS/Azure/GCP', 'Kubernetes', 'IaC', 'Serverless'],
+        aiImpact: 'Medium',
+        futureOutlook: 'Strong continued growth as cloud adoption accelerates. AI integration is enhancing cloud capabilities.'
+      },
+      'DevOps': {
+        growthRate: '25%',
+        medianSalary: '$125,000',
+        jobPostings: '95,000+',
+        hotSkills: ['CI/CD', 'Kubernetes', 'Monitoring', 'Infrastructure as Code'],
+        aiImpact: 'Medium',
+        futureOutlook: 'Robust growth with increasing focus on security (DevSecOps). AI automating routine tasks but creating new opportunities.'
+      },
+      'AI/Machine Learning': {
+        growthRate: '40%',
+        medianSalary: '$135,000',
+        jobPostings: '75,000+',
+        hotSkills: ['Python', 'Deep Learning', 'MLOps', 'Large Language Models'],
+        aiImpact: 'High',
+        futureOutlook: 'Explosive growth expected to continue. Focus shifting from model development to integration and responsible AI.'
+      },
+      'Technical Writing': {
+        growthRate: '8%',
+        medianSalary: '$78,000',
+        jobPostings: '20,000+',
+        hotSkills: ['API Documentation', 'UX Writing', 'Developer Experience', 'Content Strategy'],
+        aiImpact: 'Medium - High',
+        futureOutlook: 'Moderate growth with emphasis on specialized technical domains. AI is changing workflow but not replacing quality content creation.'
+      },
+      'Quality Assurance': {
+        growthRate: '13%',
+        medianSalary: '$90,000',
+        jobPostings: '50,000+',
+        hotSkills: ['Test Automation', 'CI/CD', 'Security Testing', 'Performance Testing'],
+        aiImpact: 'Medium',
+        futureOutlook: 'Steady growth with focus shifting to automation and integration testing. AI automating routine testing but creating specialization opportunities.'
+      },
+      'Technical Support': {
+        growthRate: '9%',
+        medianSalary: '$65,000',
+        jobPostings: '100,000+',
+        hotSkills: ['Cloud Platforms', 'Automation', 'IT Security', 'Problem Solving'],
+        aiImpact: 'Medium - High',
+        futureOutlook: 'Moderate growth with substantial transformation. Entry-level positions increasingly automated while complex support and customer success roles grow.'
+      }
+    };
+
+    // Return data for user's selected career paths
+    return userData.careerPathsInterest.map(career => {
+      return {
+        career,
+        metrics: careerGrowthData[career] || {
+          growthRate: 'N/A',
+          medianSalary: 'N/A',
+          jobPostings: 'N/A',
+          hotSkills: [],
+          aiImpact: 'Unknown',
+          futureOutlook: 'Data not available for this career path'
+        }
+      };
+    });
+  };
+
+  // NEW: Get AI impact analysis based on user's career interests
+  const getAIImpactAnalysis = () => {
+    const aiImpactMap = {
+      'Software Development': [
+        {
+          trend: 'AI-assisted coding',
+          impact: 'Productivity boost for developers, with tools like GitHub Copilot and Claude automating routine coding tasks',
+          action: 'Learn to effectively prompt and work with AI coding assistants'
+        },
+        {
+          trend: 'Low-code/No-code platforms',
+          impact: 'Making basic development accessible to non-developers, shifting focus to complex problem-solving',
+          action: 'Focus on architecture, systems design, and integration skills'
+        }
+      ],
+      'Data Analysis/Science': [
+        {
+          trend: 'Automated data preparation',
+          impact: 'AI streamlining data cleaning and feature engineering',
+          action: 'Focus on business problem framing and result interpretation'
+        },
+        {
+          trend: 'Accessible ML platforms',
+          impact: 'Democratizing basic ML model building',
+          action: 'Develop expertise in model evaluation, ethics, and domain-specific applications'
+        }
+      ],
+      'UX/UI Design': [
+        {
+          trend: 'AI design tools',
+          impact: 'Automating aspects of wireframing and visual design',
+          action: 'Strengthen research, strategic thinking, and ethical design skills'
+        },
+        {
+          trend: 'Design system automation',
+          impact: 'Making consistent implementation easier',
+          action: 'Focus on design systems architecture and component thinking'
+        }
+      ],
+      'Product Management': [
+        {
+          trend: 'AI-powered analytics',
+          impact: 'Enhanced data-driven decision making',
+          action: 'Develop skills in AI tool selection and integration'
+        },
+        {
+          trend: 'Automated user research',
+          impact: 'Faster insights generation',
+          action: 'Focus on research design and translating insights to product strategy'
+        }
+      ],
+      'Cybersecurity': [
+        {
+          trend: 'AI threat detection',
+          impact: 'Improved identification of novel threats',
+          action: 'Develop skills in AI security system design and configuration'
+        },
+        {
+          trend: 'AI-powered attacks',
+          impact: 'More sophisticated phishing and social engineering',
+          action: 'Learn adversarial techniques and countermeasures'
+        }
+      ],
+      'Cloud Engineering': [
+        {
+          trend: 'AI-Ops',
+          impact: 'Intelligent infrastructure management and optimization',
+          action: 'Focus on integration of AI into cloud architecture'
+        },
+        {
+          trend: 'Serverless AI',
+          impact: 'Easier deployment of AI workloads',
+          action: 'Develop expertise in AI service orchestration'
+        }
+      ],
+      'DevOps': [
+        {
+          trend: 'Predictive monitoring',
+          impact: 'AI identifying potential system issues before they occur',
+          action: 'Learn to implement and tune AI monitoring systems'
+        },
+        {
+          trend: 'Automated deployment optimization',
+          impact: 'AI determining optimal deployment strategies',
+          action: 'Focus on defining business and technical constraints for AI to optimize within'
+        }
+      ],
+      'AI/Machine Learning': [
+        {
+          trend: 'AutoML and foundation models',
+          impact: 'Simplified model building for standard problems',
+          action: 'Specialize in customization, fine-tuning, and responsible AI'
+        },
+        {
+          trend: 'MLOps automation',
+          impact: 'Streamlined deployment and monitoring',
+          action: 'Develop expertise in evaluation metrics and governance'
+        }
+      ]
+    };
+
+    // Return AI impact data relevant to user's career paths
+    return userData.careerPathsInterest.map(career => {
+      return {
+        career,
+        impacts: aiImpactMap[career] || [
+          {
+            trend: 'AI automation',
+            impact: 'General impact on technical fields',
+            action: 'Focus on human-centered skills and AI collaboration'
+          }
+        ]
+      };
+    });
+  };
+
+  // NEW: Industry-specific insights based on user preferences
+  const getIndustryInsights = () => {
+    const industryInsightsMap = {
+      'Healthcare/Medical': {
+        trends: [
+          'Increased adoption of telehealth and remote monitoring',
+          'AI-powered diagnostics and treatment planning',
+          'Enhanced health data interoperability'
+        ],
+        keySkills: ['HIPAA compliance', 'Healthcare data standards', 'Clinical workflows'],
+        challenges: ['Regulatory compliance', 'Legacy system integration', 'Patient data privacy']
+      },
+      'Finance/Fintech': {
+        trends: [
+          'Expansion of blockchain and cryptocurrency applications',
+          'AI-driven financial analysis and risk assessment',
+          'Growing focus on financial inclusion through technology'
+        ],
+        keySkills: ['Financial regulations', 'Security and compliance', 'Payment systems'],
+        challenges: ['Strict regulatory environment', 'High security requirements', 'Complex legacy infrastructure']
+      },
+      'Education': {
+        trends: [
+          'Growth of personalized and adaptive learning platforms',
+          'Expanded use of VR/AR in educational experiences',
+          'Data-driven student success initiatives'
+        ],
+        keySkills: ['LMS integration', 'Accessibility standards', 'Educational technology frameworks'],
+        challenges: ['Budget constraints', 'Varied technical literacy', 'Privacy concerns with student data']
+      },
+      'E-commerce': {
+        trends: [
+          'AI-powered personalization and recommendation engines',
+          'Omnichannel retail experiences',
+          'Voice commerce and conversational shopping'
+        ],
+        keySkills: ['Payment processing', 'Inventory management', 'Consumer behavior analytics'],
+        challenges: ['High performance expectations', 'Complex logistics integration', 'Evolving consumer expectations']
+      },
+      'Entertainment/Media': {
+        trends: [
+          'Streaming platform consolidation and specialization',
+          'AI-generated and enhanced content creation',
+          'Growth of interactive and immersive experiences'
+        ],
+        keySkills: ['Content delivery networks', 'Digital rights management', 'Media formats and standards'],
+        challenges: ['High bandwidth requirements', 'Content protection', 'Platform fragmentation']
+      },
+      'Government': {
+        trends: [
+          'Digital transformation of citizen services',
+          'Focus on cybersecurity and data protection',
+          'Smart city initiatives and IoT implementation'
+        ],
+        keySkills: ['Security clearance requirements', 'Compliance frameworks', 'Procurement processes'],
+        challenges: ['Lengthy approval processes', 'Legacy system modernization', 'Strict security requirements']
+      }
+    };
+
+    // Return industry insights for user's selected industries
+    return userData.industryPreference
+      .filter(industry => industry !== 'No preference' && industry !== 'Other' && industry !== 'Same as current industry')
+      .map(industry => {
+        return {
+          industry,
+          insights: industryInsightsMap[industry] || {
+            trends: ['Technological innovation', 'Digital transformation', 'AI integration'],
+            keySkills: ['Industry-specific knowledge', 'Technical expertise', 'Business acumen'],
+            challenges: ['Keeping pace with change', 'Talent acquisition', 'Technical debt']
+          }
+        };
+      });
+  };
+
+  // Market Growth Chart Component (for Market Analysis tab)
+  const MarketGrowthChart = ({ careers }) => {
+    return (
+      <div className="mb-8">
+        <h3 className="text-xl font-bold mb-4">Career Growth Comparison</h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white rounded-lg overflow-hidden">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="py-3 px-4 text-left">Career Path</th>
+                <th className="py-3 px-4 text-left">Growth Rate</th>
+                <th className="py-3 px-4 text-left">Median Salary</th>
+                <th className="py-3 px-4 text-left">Job Postings</th>
+                <th className="py-3 px-4 text-left">AI Impact</th>
+              </tr>
+            </thead>
+            <tbody>
+              {careers.map((item, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
+                  <td className="py-3 px-4 font-medium">{item.career}</td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center">
+                      <div className={`mr-2 px-2 py-1 rounded text-xs font-semibold 
+                        ${parseFloat(item.metrics.growthRate) > 20 ? 'bg-green-100 text-green-800' : 
+                          parseFloat(item.metrics.growthRate) > 10 ? 'bg-blue-100 text-blue-800' : 
+                          'bg-yellow-100 text-yellow-800'}`}>
+                        {item.metrics.growthRate}
+                      </div>
+                      <div className="w-16 bg-gray-200 rounded-full h-1.5">
+                        <div 
+                          className={`h-1.5 rounded-full ${
+                            parseFloat(item.metrics.growthRate) > 20 ? 'bg-green-500' : 
+                            parseFloat(item.metrics.growthRate) > 10 ? 'bg-blue-500' : 
+                            'bg-yellow-500'
+                          }`}
+                          style={{ width: `${Math.min(parseFloat(item.metrics.growthRate) * 2.5, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">{item.metrics.medianSalary}</td>
+                  <td className="py-3 px-4">{item.metrics.jobPostings}</td>
+                  <td className="py-3 px-4">
+                    <span className={`px-2 py-1 rounded text-xs font-semibold 
+                      ${item.metrics.aiImpact.includes('High') ? 'bg-red-100 text-red-800' : 
+                        item.metrics.aiImpact.includes('Medium') ? 'bg-yellow-100 text-yellow-800' : 
+                        'bg-green-100 text-green-800'}`}>
+                      {item.metrics.aiImpact}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
+  // AI Impact Card Component (for Market Analysis tab)
+  const AIImpactCard = ({ trend, impact, action }) => {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
+        <h4 className="font-semibold text-blue-700 mb-2">{trend}</h4>
+        <p className="text-gray-700 mb-3"><strong>Impact:</strong> {impact}</p>
+        <p className="text-gray-800 font-medium"><strong>Recommended action:</strong> {action}</p>
+      </div>
+    );
+  };
+
+  // Industry Insights Card Component (for Market Analysis tab)
+  const IndustryInsightsCard = ({ industry, insights }) => {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-5 mb-6">
+        <h3 className="text-xl font-bold mb-4 text-indigo-700">{industry}</h3>
+        
+        <div className="mb-4">
+          <h4 className="font-semibold text-gray-700 mb-2">Key Trends</h4>
+          <ul className="space-y-1">
+            {insights.trends.map((trend, idx) => (
+              <li key={idx} className="flex items-start">
+                <span className="text-indigo-500 mr-2">•</span>
+                <span>{trend}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        
+        <div className="mb-4">
+          <h4 className="font-semibold text-gray-700 mb-2">Essential Skills</h4>
+          <div className="flex flex-wrap gap-2">
+            {insights.keySkills.map((skill, idx) => (
+              <span key={idx} className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+        
+        <div>
+          <h4 className="font-semibold text-gray-700 mb-2">Industry Challenges</h4>
+          <ul className="space-y-1">
+            {insights.challenges.map((challenge, idx) => (
+              <li key={idx} className="flex items-start">
+                <span className="text-red-500 mr-2">•</span>
+                <span>{challenge}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return <LoadingSpinner message="Loading your career analysis..." />;
   }
@@ -776,6 +1176,11 @@ const CareerDashboard = () => {
     value: path.match
   }));
   const timelineMilestones = createTimelineData();
+
+  // NEW: Extract data for Market Analysis tab
+  const careerGrowthMetrics = getCareerGrowthMetrics();
+  const aiImpactAnalysis = getAIImpactAnalysis();
+  const industryInsights = getIndustryInsights();
 
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
@@ -875,70 +1280,344 @@ const CareerDashboard = () => {
             </div>
           </div>
         </div>
-        
-        {/* Career Path Matches Visualization */}
-        {careerPaths.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6">Career Path Compatibility</h2>
-            <SimpleBarChart data={chartData} title="Match Percentage by Career Path" />
-          </div>
-        )}
-        
-        {/* Skills Gap Analysis */}
-        {skillsGap.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6">Skills Gap Analysis</h2>
-            <p className="text-gray-600 mb-6">
-              Visual representation of your current skill levels versus required levels for your target career paths.
-            </p>
-            <div className="grid md:grid-cols-2 gap-4">
-              {skillsGap.slice(0, 6).map((skill, index) => (
-                <SkillLevelChart key={index} skill={skill} />
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {/* Current Tools Proficiency */}
-        {userData.toolsUsed && userData.toolsUsed.length > 0 && userData.toolsUsed[0] !== 'None' && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6">Technical Proficiency</h2>
-            <ToolsProficiency tools={userData.toolsUsed} />
-          </div>
-        )}
-        
-        {/* Transition Timeline */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-bold mb-6">Your Transition Roadmap</h2>
-          <div className="mb-4">
-            <p className="text-gray-600">
-              Based on your {userData.transitionTimeline} timeline and {userData.timeCommitment} weekly commitment
-            </p>
-          </div>
-          <TimelineChart milestones={timelineMilestones} />
-        </div>
-        
-        {/* Complete Analysis */}
-        <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
-          <h2 className="text-2xl font-bold mb-6">Detailed Analysis</h2>
-          <div>
-            {formatAnalysisText(analysis)}
-          </div>
-        </div>
 
-        {/* Next Steps - Dynamic based on user analysis */}
-        <div className="bg-blue-50 rounded-lg p-6 mt-8">
-          <h2 className="text-xl font-bold mb-4">Recommended Next Steps</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {generateNextSteps().map((step, index) => (
-              <div key={index} className="bg-white p-4 rounded-lg shadow-sm">
-                <div className={`${step.color} mb-2`}>
-                  {step.icon}
+        {/* Tab Navigation */}
+        <div className="bg-white rounded-lg shadow-md mb-6 overflow-hidden">
+          <div className="border-b border-gray-200">
+            <nav className="flex -mb-px">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
+                  activeTab === 'overview'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveTab('analysis')}
+                className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
+                  activeTab === 'analysis'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Detailed Analysis
+              </button>
+              <button
+                onClick={() => setActiveTab('skills')}
+                className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
+                  activeTab === 'skills'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Skills Gap
+              </button>
+              <button
+                onClick={() => setActiveTab('market')}
+                className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
+                  activeTab === 'market'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Market Analysis
+              </button>
+              <button
+                onClick={() => setActiveTab('roadmap')}
+                className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
+                  activeTab === 'roadmap'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Transition Roadmap
+              </button>
+            </nav>
+          </div>
+
+          {/* Tab Content */}
+          <div className="p-6">
+            {/* Overview Tab */}
+            {activeTab === 'overview' && (
+              <div>
+                {/* Career Path Matches Visualization */}
+                {careerPaths.length > 0 && (
+                  <div className="mb-8">
+                    <h2 className="text-xl font-bold mb-4">Career Path Compatibility</h2>
+                    <SimpleBarChart data={chartData} title="Match Percentage by Career Path" />
+                  </div>
+                )}
+                
+                {/* Current Tools Proficiency */}
+                {userData.toolsUsed && userData.toolsUsed.length > 0 && userData.toolsUsed[0] !== 'None' && (
+                  <div className="mb-8">
+                    <h2 className="text-xl font-bold mb-4">Technical Proficiency</h2>
+                    <ToolsProficiency tools={userData.toolsUsed} />
+                  </div>
+                )}
+                
+                {/* Next Steps - Dynamic based on user analysis */}
+                <div className="bg-blue-50 rounded-lg p-6 mt-8">
+                  <h2 className="text-xl font-bold mb-4">Recommended Next Steps</h2>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {generateNextSteps().map((step, index) => (
+                      <div key={index} className="bg-white p-4 rounded-lg shadow-sm">
+                        <div className={`${step.color} mb-2`}>
+                          {step.icon}
+                        </div>
+                        <h3 className="font-semibold mb-2">{step.title}</h3>
+                        <p className="text-sm text-gray-600">{step.description}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <h3 className="font-semibold mb-2">{step.title}</h3>
-                <p className="text-sm text-gray-600">{step.description}</p>
               </div>
-            ))}
+            )}
+
+            {/* Detailed Analysis Tab */}
+            {activeTab === 'analysis' && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">Detailed Career Analysis</h2>
+                <div className="prose max-w-none">
+                  {formatAnalysisText(analysis)}
+                </div>
+              </div>
+            )}
+
+            {/* Skills Gap Tab */}
+            {activeTab === 'skills' && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">Skills Gap Analysis</h2>
+                <p className="text-gray-600 mb-6">
+                  This analysis compares your current skill levels with what's required for your target career paths.
+                  Focus on areas with the largest gaps for maximum impact on your transition.
+                </p>
+                
+                {skillsGap.length > 0 ? (
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {skillsGap.map((skill, index) => (
+                      <SkillLevelChart key={index} skill={skill} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-yellow-50 p-4 rounded-lg text-yellow-800">
+                    <p>Insufficient data to generate a detailed skills gap analysis. Please update your assessment with more information about your current skills and target career paths.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Market Analysis Tab */}
+            {activeTab === 'market' && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">Market Analysis & Future Outlook</h2>
+                <p className="text-gray-600 mb-8">
+                  Based on your selected career paths and industry preferences, here's an analysis of current market conditions,
+                  growth projections, and how AI is expected to impact these fields.
+                </p>
+                
+                {/* Career Growth Metrics */}
+                {careerGrowthMetrics.length > 0 && (
+                  <MarketGrowthChart careers={careerGrowthMetrics} />
+                )}
+                
+                {/* AI Impact Analysis */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold mb-4">AI Impact on Your Career Paths</h3>
+                  <p className="text-gray-600 mb-4">
+                    AI is transforming all technical fields. Here's how it's specifically impacting your chosen career paths
+                    and what you can do to stay ahead of these changes.
+                  </p>
+                  
+                  {aiImpactAnalysis.map((careerImpact, careerIndex) => (
+                    <div key={careerIndex} className="mb-6">
+                      <h4 className="text-lg font-semibold mb-3 text-indigo-700">{careerImpact.career}</h4>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {careerImpact.impacts.map((impact, impactIndex) => (
+                          <AIImpactCard 
+                            key={impactIndex} 
+                            trend={impact.trend}
+                            impact={impact.impact}
+                            action={impact.action}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Industry Insights */}
+                {industryInsights.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-xl font-bold mb-4">Industry-Specific Insights</h3>
+                    <p className="text-gray-600 mb-4">
+                      Analysis of the industries you're interested in, including key trends, required skills, and challenges.
+                    </p>
+                    
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {industryInsights.map((item, index) => (
+                        <IndustryInsightsCard 
+                          key={index}
+                          industry={item.industry}
+                          insights={item.insights}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Future Outlook Summary */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg">
+                  <h3 className="text-xl font-bold mb-3">Future Outlook Summary</h3>
+                  <p className="text-gray-700 mb-4">
+                    Based on your selected career paths in {userData.careerPathsInterest.join(', ')}, 
+                    the overall market outlook is 
+                    <span className="font-bold text-green-700 mx-1">
+                      positive
+                    </span> 
+                    with strong growth projected over the next 5 years.
+                  </p>
+                  <div className="space-y-3">
+                    <p className="text-gray-700">
+                      <span className="font-semibold">• AI Impact:</span> While AI is automating some routine tasks,
+                      it's creating more opportunities in these fields than it's eliminating. 
+                      Focus on developing skills that complement AI rather than compete with it.
+                    </p>
+                    <p className="text-gray-700">
+                      <span className="font-semibold">• Key Differentiators:</span> Domain expertise from your 
+                      background in {userData.studyField || "your field"} will be valuable in your transition, 
+                      especially combined with technical skills.
+                    </p>
+                    <p className="text-gray-700">
+                      <span className="font-semibold">• Emerging Opportunities:</span> Look for roles that bridge your 
+                      existing {userData.currentRole || "experience"} with your target tech areas, as these hybrid positions 
+                      often offer less competition and higher value.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Transition Roadmap Tab */}
+            {activeTab === 'roadmap' && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">Your Transition Roadmap</h2>
+                <p className="text-gray-600 mb-6">
+                  Based on your {userData.transitionTimeline} timeline and {userData.timeCommitment} weekly commitment,
+                  here's a personalized roadmap to guide your transition into tech.
+                </p>
+                
+                {/* Timeline Chart */}
+                <TimelineChart milestones={timelineMilestones} />
+                
+                {/* Learning Path Recommendation */}
+                <div className="mt-8 mb-6">
+                  <h3 className="text-xl font-bold mb-4">Recommended Learning Path</h3>
+                  <div className="bg-white p-5 rounded-lg border border-gray-200">
+                    <div className="space-y-6">
+                      <div>
+                        <h4 className="font-semibold text-lg text-blue-700">Phase 1: Foundation</h4>
+                        <ul className="mt-2 space-y-2">
+                          <li className="flex">
+                            <span className="text-blue-500 mr-2">•</span>
+                            <span>Core concepts in {userData.careerPathsInterest[0] || "your chosen field"}</span>
+                          </li>
+                          <li className="flex">
+                            <span className="text-blue-500 mr-2">•</span>
+                            <span>Fundamental tools and technologies</span>
+                          </li>
+                          <li className="flex">
+                            <span className="text-blue-500 mr-2">•</span>
+                            <span>Building your learning environment</span>
+                          </li>
+                        </ul>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-semibold text-lg text-blue-700">Phase 2: Skill Building</h4>
+                        <ul className="mt-2 space-y-2">
+                          <li className="flex">
+                            <span className="text-blue-500 mr-2">•</span>
+                            <span>Focused learning in your top skill gaps</span>
+                          </li>
+                          <li className="flex">
+                            <span className="text-blue-500 mr-2">•</span>
+                            <span>Hands-on projects to build portfolio</span>
+                          </li>
+                          <li className="flex">
+                            <span className="text-blue-500 mr-2">•</span>
+                            <span>Expanding your technical toolkit</span>
+                          </li>
+                        </ul>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-semibold text-lg text-blue-700">Phase 3: Career Preparation</h4>
+                        <ul className="mt-2 space-y-2">
+                          <li className="flex">
+                            <span className="text-blue-500 mr-2">•</span>
+                            <span>Building your professional brand</span>
+                          </li>
+                          <li className="flex">
+                            <span className="text-blue-500 mr-2">•</span>
+                            <span>Networking and community engagement</span>
+                          </li>
+                          <li className="flex">
+                            <span className="text-blue-500 mr-2">•</span>
+                            <span>Interview preparation and job search strategy</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Resource Recommendations */}
+                <div className="mt-8">
+                  <h3 className="text-xl font-bold mb-4">Recommended Resources</h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <h4 className="font-semibold text-blue-700 mb-2">Learning Platforms</h4>
+                      <ul className="space-y-2">
+                        <li className="flex items-center">
+                          <span className="text-blue-500 mr-2">•</span>
+                          <span>Online courses tailored to {userData.careerPathsInterest[0] || "your field"}</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="text-blue-500 mr-2">•</span>
+                          <span>Interactive coding platforms and tutorials</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="text-blue-500 mr-2">•</span>
+                          <span>Specialized learning paths for career changers</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <h4 className="font-semibold text-blue-700 mb-2">Community & Networking</h4>
+                      <ul className="space-y-2">
+                        <li className="flex items-center">
+                          <span className="text-blue-500 mr-2">•</span>
+                          <span>Professional communities in your target fields</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="text-blue-500 mr-2">•</span>
+                          <span>Mentorship opportunities for career changers</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="text-blue-500 mr-2">•</span>
+                          <span>Virtual and local tech meetups</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -1,4 +1,3 @@
-// src/Pages/career/CareerTest.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -18,19 +17,19 @@ const CareerTest = () => {
     // Personal information
     fullName: '',
     email: '',
-    educationLevel: '', // New field
+    educationLevel: '', 
     
     // Career background
-    studyField: '', // Renamed from currentField
+    studyField: '', 
     yearsExperience: '',
     currentRole: '',
     
-    // Job Experience (new section)
+    // Job Experience
     jobResponsibilities: '',
     jobProjects: '',
     jobTechnologies: '',
     internships: '',
-    publications: '', // New field
+    publications: '', 
     
     // Transition information
     transitionReason: '',
@@ -83,16 +82,20 @@ const CareerTest = () => {
     }));
   };
 
-  const handleMultiSelect = (e) => {
-    const { name, options } = e.target;
-    const selectedValues = Array.from(options)
-      .filter(option => option.selected)
-      .map(option => option.value);
-    
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: selectedValues
-    }));
+  // New handler for checkboxes
+  const handleCheckboxChange = (fieldName, value) => {
+    setFormData(prevState => {
+      // If value is already in array, remove it (unchecked)
+      // Otherwise, add it (checked)
+      const updatedArray = prevState[fieldName].includes(value)
+        ? prevState[fieldName].filter(item => item !== value)
+        : [...prevState[fieldName], value];
+      
+      return {
+        ...prevState,
+        [fieldName]: updatedArray
+      };
+    });
   };
 
   const toggleAiAssistant = () => {
@@ -391,9 +394,78 @@ const CareerTest = () => {
     }
   };
 
+  // Helper function to render a checkbox group
+  const renderCheckboxGroup = (fieldName, options, required = false) => {
+    return (
+      <div className="space-y-2">
+        {options.map(option => (
+          <div key={option.value} className="flex items-center">
+            <input
+              type="checkbox"
+              id={`${fieldName}-${option.value}`}
+              name={fieldName}
+              value={option.value}
+              checked={formData[fieldName].includes(option.value)}
+              onChange={() => handleCheckboxChange(fieldName, option.value)}
+              className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              required={required && formData[fieldName].length === 0}
+            />
+            <label 
+              htmlFor={`${fieldName}-${option.value}`}
+              className="text-sm font-medium text-gray-700"
+            >
+              {option.label}
+            </label>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   if (loading || aiAnalyzing) {
     return <LoadingSpinner message={aiAnalyzing ? "AI is analyzing your results..." : "Loading..."} />;
   }
+
+  // Define options for checkbox groups
+  const toolsOptions = [
+    { value: 'VS Code', label: 'VS Code' },
+    { value: 'GitHub', label: 'GitHub' },
+    { value: 'JavaScript', label: 'JavaScript' },
+    { value: 'Python', label: 'Python' },
+    { value: 'React', label: 'React' },
+    { value: 'Node.js', label: 'Node.js' },
+    { value: 'SQL', label: 'SQL' },
+    { value: 'AWS', label: 'AWS' },
+    { value: 'Docker', label: 'Docker' },
+    { value: 'None', label: 'None' }
+  ];
+
+  const careerPathsOptions = [
+    { value: 'Software Development', label: 'Software Development' },
+    { value: 'Data Analysis/Science', label: 'Data Analysis/Science' },
+    { value: 'UX/UI Design', label: 'UX/UI Design' },
+    { value: 'Product Management', label: 'Product Management' },
+    { value: 'Cybersecurity', label: 'Cybersecurity' },
+    { value: 'Cloud Engineering', label: 'Cloud Engineering' },
+    { value: 'DevOps', label: 'DevOps' },
+    { value: 'AI/Machine Learning', label: 'AI/Machine Learning' },
+    { value: 'Technical Writing', label: 'Technical Writing' },
+    { value: 'Quality Assurance', label: 'Quality Assurance' },
+    { value: 'Technical Support', label: 'Technical Support' },
+    { value: 'Not Sure Yet', label: 'Not Sure Yet' }
+  ];
+
+  const industryOptions = [
+    { value: 'Healthcare/Medical', label: 'Healthcare/Medical' },
+    { value: 'Finance/Fintech', label: 'Finance/Fintech' },
+    { value: 'Education', label: 'Education' },
+    { value: 'E-commerce', label: 'E-commerce' },
+    { value: 'Entertainment/Media', label: 'Entertainment/Media' },
+    { value: 'Government', label: 'Government' },
+    { value: 'Same as current industry', label: 'Same as current industry' },
+    { value: 'No preference', label: 'No preference' },
+    { value: 'Other', label: 'Other' }
+  ];
 
   return (
     <div className="container mx-auto p-6">
@@ -478,7 +550,7 @@ const CareerTest = () => {
             />
           </div>
           
-          {/* New Education Level field */}
+          {/* Education Level field */}
           <div className="mb-4">
             <label className="block mb-2">
               <span className="text-red-500">*</span> Highest Level of Education
@@ -618,7 +690,7 @@ const CareerTest = () => {
             <p className="text-sm text-gray-500 mt-1">Include any tech-related side projects, freelance work, or personal initiatives</p>
           </div>
           
-          {/* New Publications field */}
+          {/* Publications field */}
           <div className="mb-4">
             <label className="block mb-2">
               Publications, Papers, Articles, or Blogs
@@ -796,31 +868,15 @@ const CareerTest = () => {
             </select>
           </div>
           
+          {/* CONVERTED: Tools Used - From multi-select to checkboxes */}
           <div className="mb-4">
             <label className="block mb-2">
               <span className="text-red-500">*</span> Which of the following tools or platforms have you used before?
             </label>
-            <select
-              name="toolsUsed"
-              value={formData.toolsUsed}
-              onChange={handleMultiSelect}
-              className="w-full p-2 border rounded-md"
-              multiple
-              required
-              size="5"
-            >
-              <option value="VS Code">VS Code</option>
-              <option value="GitHub">GitHub</option>
-              <option value="JavaScript">JavaScript</option>
-              <option value="Python">Python</option>
-              <option value="React">React</option>
-              <option value="Node.js">Node.js</option>
-              <option value="SQL">SQL</option>
-              <option value="AWS">AWS</option>
-              <option value="Docker">Docker</option>
-              <option value="None">None</option>
-            </select>
-            <p className="text-sm text-gray-500 mt-1">(Hold Ctrl/Cmd to select multiple options)</p>
+            <div className="bg-white border rounded-md p-3">
+              {renderCheckboxGroup('toolsUsed', toolsOptions, true)}
+            </div>
+            <p className="text-sm text-gray-500 mt-1">Select all that apply</p>
           </div>
           
           <div className="mb-4">
@@ -858,59 +914,26 @@ const CareerTest = () => {
         </FormSection>
         
         <FormSection title="Tech Career Aspirations">
+          {/* CONVERTED: Career Paths - From multi-select to checkboxes */}
           <div className="mb-4">
             <label className="block mb-2">
               <span className="text-red-500">*</span> Which tech career paths are you most interested in exploring?
             </label>
-            <select
-              name="careerPathsInterest"
-              value={formData.careerPathsInterest}
-              onChange={handleMultiSelect}
-              className="w-full p-2 border rounded-md"
-              multiple
-              required
-              size="8"
-            >
-              <option value="Software Development">Software Development</option>
-              <option value="Data Analysis/Science">Data Analysis/Science</option>
-              <option value="UX/UI Design">UX/UI Design</option>
-              <option value="Product Management">Product Management</option>
-              <option value="Cybersecurity">Cybersecurity</option>
-              <option value="Cloud Engineering">Cloud Engineering</option>
-              <option value="DevOps">DevOps</option>
-              <option value="AI/Machine Learning">AI/Machine Learning</option>
-              <option value="Technical Writing">Technical Writing</option>
-              <option value="Quality Assurance">Quality Assurance</option>
-              <option value="Technical Support">Technical Support</option>
-              <option value="Not Sure Yet">Not Sure Yet</option>
-            </select>
-            <p className="text-sm text-gray-500 mt-1">(Hold Ctrl/Cmd to select multiple options)</p>
+            <div className="bg-white border rounded-md p-3 max-h-64 overflow-y-auto">
+              {renderCheckboxGroup('careerPathsInterest', careerPathsOptions, true)}
+            </div>
+            <p className="text-sm text-gray-500 mt-1">Select all that apply</p>
           </div>
           
+          {/* CONVERTED: Industry Preference - From multi-select to checkboxes */}
           <div className="mb-4">
             <label className="block mb-2">
               <span className="text-red-500">*</span> Do you have a preference for working in specific industries or sectors with your tech skills?
             </label>
-            <select
-              name="industryPreference"
-              value={formData.industryPreference}
-              onChange={handleMultiSelect}
-              className="w-full p-2 border rounded-md"
-              multiple
-              required
-              size="5"
-            >
-              <option value="Healthcare/Medical">Healthcare/Medical</option>
-              <option value="Finance/Fintech">Finance/Fintech</option>
-              <option value="Education">Education</option>
-              <option value="E-commerce">E-commerce</option>
-              <option value="Entertainment/Media">Entertainment/Media</option>
-              <option value="Government">Government</option>
-              <option value="Same as current industry">Same as current industry</option>
-              <option value="No preference">No preference</option>
-              <option value="Other">Other</option>
-            </select>
-            <p className="text-sm text-gray-500 mt-1">(Hold Ctrl/Cmd to select multiple options)</p>
+            <div className="bg-white border rounded-md p-3">
+              {renderCheckboxGroup('industryPreference', industryOptions, true)}
+            </div>
+            <p className="text-sm text-gray-500 mt-1">Select all that apply</p>
           </div>
           
           <div className="mb-4">

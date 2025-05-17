@@ -1,4 +1,5 @@
-// services/claudeApiService.js
+// src/services/claudeApiService.js - Complete Fixed Version
+
 import axios from 'axios';
 import storageService from './storageService';
 
@@ -71,6 +72,19 @@ const claudeApiService = {
       }
     } catch (error) {
       console.error('Error in analyzeCareerPath:', error);
+      
+      // Enhanced error logging for debugging
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        console.error('Error response headers:', error.response.headers);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Error request:', error.request);
+      }
+      
       throw new Error(error.message || 'Failed to analyze career data');
     }
   },
@@ -115,8 +129,14 @@ Format each response as a clear field/value pair.`;
         system: "You are a career advisor helping people transition to tech careers. Generate realistic form responses for hypothetical career changers."
       };
       
+      console.log('Sending request to Claude API for form suggestions...');
+      
       // Make API call to our Claude proxy endpoint
+      // Make sure this matches the endpoint path in your API proxy file
       const response = await axios.post('/api/claude-proxy-fetch', requestData);
+      
+      console.log('Response status:', response.status);
+      console.log('Response structure:', Object.keys(response.data));
       
       // Check if the response has the expected structure
       if (response.data && response.data.content && Array.isArray(response.data.content)) {
@@ -135,6 +155,29 @@ Format each response as a clear field/value pair.`;
       }
     } catch (error) {
       console.error('Error in getFormSuggestions:', error);
+      
+      // Enhanced error logging for debugging
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        console.error('Error response headers:', error.response.headers);
+        
+        // Provide more specific error message based on status
+        if (error.response.status === 405) {
+          throw new Error('Method not allowed: The API endpoint does not accept this type of request. Check your API configuration.');
+        } else if (error.response.status === 404) {
+          throw new Error('API endpoint not found: Check that your API routes are correctly configured.');
+        } else if (error.response.status === 401 || error.response.status === 403) {
+          throw new Error('Authentication failed: Check your API key and permissions.');
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Error request:', error.request);
+        throw new Error('No response from server: Check your network connection and API server status.');
+      }
+      
       throw new Error(error.message || 'Failed to get form suggestions');
     }
   },

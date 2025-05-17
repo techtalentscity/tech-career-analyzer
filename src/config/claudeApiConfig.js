@@ -3,8 +3,8 @@
 // Claude API configuration
 const CLAUDE_API_CONFIG = {
   models: {
-    default: 'claude-3-7-sonnet-20240229',  // Updated to Claude 3.7 Sonnet
-    faster: 'claude-3-5-haiku-20240307'     // Updated to Claude 3.5 Haiku
+    default: 'claude-3-sonnet-20240229',  // Updated to correct model name
+    faster: 'claude-3-haiku-20240307'     // This is still correct
   },
   maxTokens: {
     formSuggestions: 1024,

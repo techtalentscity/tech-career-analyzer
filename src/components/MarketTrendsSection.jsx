@@ -1,15 +1,21 @@
-// src/components/MarketTrendsSection.jsx
+// Updated MarketTrendsSection.jsx component - Remove fallback logic
+
 import React from 'react';
 
 const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
-  // If no market trends data is available, show placeholder
+  // If no market trends data is available, show a clear message
   if (!marketTrends || marketTrends.length === 0) {
     return (
       <div className="bg-blue-50 p-4 rounded-lg">
-        <p className="text-blue-700">
-          Market trends data is not available for this analysis. Consider retaking the assessment
-          to get the latest market insights.
-        </p>
+        <div className="flex items-start">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600 mt-0.5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-blue-700">
+            Market trends data is not available for this analysis. Please retake the assessment
+            to get the latest market insights or consult industry resources for current trends.
+          </p>
+        </div>
       </div>
     );
   }
@@ -147,8 +153,33 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
   
   const industries = industryTrend?.topIndustries || extractIndustries(industryTrend?.details || '');
 
+  // Display a note at the top if some sections are missing
+  const missingTrends = [];
+  if (!jobMarketTrend) missingTrends.push('Job Market Outlook');
+  if (!salaryTrend) missingTrends.push('Salary Trends');
+  if (!techTrend) missingTrends.push('Emerging Technologies');
+  if (!industryTrend) missingTrends.push('Industry Sector Analysis');
+
   return (
     <div className="space-y-6">
+      {/* Warning note if some sections are missing */}
+      {missingTrends.length > 0 && (
+        <div className="bg-yellow-50 p-4 rounded-lg mb-6">
+          <div className="flex">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div>
+              <p className="text-yellow-800 font-medium">Some market trend data may be incomplete</p>
+              <p className="text-yellow-700 text-sm mt-1">
+                The following sections are not available: {missingTrends.join(', ')}. 
+                This analysis uses only the available data.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Job Market Outlook */}
       {jobMarketTrend && (
         <div className="bg-white rounded-lg shadow-md p-6">
@@ -265,6 +296,11 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
           )}
         </div>
       )}
+
+      {/* Source Note */}
+      <div className="text-sm text-gray-500 italic mt-4">
+        Note: Market trend data is based on the latest available information as of 2025. Industry trends may change rapidly.
+      </div>
     </div>
   );
 };

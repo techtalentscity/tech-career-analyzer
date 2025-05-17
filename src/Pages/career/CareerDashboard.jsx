@@ -906,7 +906,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Networking Strategy Component
+  // Networking Strategy Component - FIXED: Removed duplicate heading
   const NetworkingStrategySection = ({ strategies }) => {
     if (!strategies || strategies.length === 0) {
       return null;
@@ -916,7 +916,6 @@ const CareerDashboard = () => {
     
     return (
       <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-4">Networking Strategy</h3>
         <div className="bg-gray-50 rounded-lg p-4">
           <ul className="space-y-3">
             {strategyItems.map((item, index) => (
@@ -931,7 +930,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Personal Branding Component
+  // Personal Branding Component - FIXED: Removed duplicate heading
   const PersonalBrandingSection = ({ tips }) => {
     if (!tips || tips.length === 0) {
       return null;
@@ -941,7 +940,6 @@ const CareerDashboard = () => {
     
     return (
       <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-4">Personal Branding</h3>
         <div className="bg-gray-50 rounded-lg p-4">
           <ul className="space-y-3">
             {brandingTips.map((tip, index) => (
@@ -956,7 +954,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Interview Preparation Component
+  // Interview Preparation Component - FIXED: Removed duplicate heading
   const InterviewPrepSection = ({ tips }) => {
     if (!tips || tips.length === 0) {
       return null;
@@ -966,7 +964,6 @@ const CareerDashboard = () => {
     
     return (
       <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-4">Interview Preparation</h3>
         <div className="bg-gray-50 rounded-lg p-4">
           <ul className="space-y-3">
             {interviewTips.map((tip, index) => (
@@ -1022,7 +1019,7 @@ const CareerDashboard = () => {
     return milestones;
   };
 
-  // Custom Timeline Component
+  // Custom Timeline Component - FIXED: Removed duplicate heading
   const TimelineChart = ({ milestones }) => {
     if (!milestones || milestones.length === 0) {
       return null;
@@ -1030,7 +1027,6 @@ const CareerDashboard = () => {
     
     return (
       <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-4">Your Transition Roadmap</h3>
         <div className="relative">
           <div className="absolute left-0 top-0 h-full w-1 bg-gray-300" />
           {milestones.map((milestone, index) => (

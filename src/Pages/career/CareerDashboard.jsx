@@ -567,6 +567,19 @@ const CareerDashboard = () => {
     const lines = text.split('\n');
     let formattedContent = [];
     let inSkillsGapSection = false;
+    
+    // Track if we should skip the current section
+    let skipCurrentSection = false;
+    let currentSkipSection = "";
+    
+    // Sections to skip - both plain names and numbered versions
+    const skipSectionKeywords = [
+      "NETWORKING STRATEGY", 
+      "PERSONAL BRANDING", 
+      "INTERVIEW PREPARATION",
+      "MARKET TRENDS",
+      "JOB MARKET ANALYSIS"
+    ];
 
     const processContent = (content) => {
       content = content.replace(/\btheir\b/gi, 'your');
@@ -593,6 +606,30 @@ const CareerDashboard = () => {
     };
 
     lines.forEach((line, index) => {
+      // Check for numbered section headers (like "7. NETWORKING STRATEGY:")
+      const numberedSectionMatch = line.match(/^\d+\.\s+([A-Z\s]+):/);
+      
+      // If this is a numbered section header that matches our skip list
+      if (numberedSectionMatch && skipSectionKeywords.some(keyword => 
+          numberedSectionMatch[1].includes(keyword))) {
+        skipCurrentSection = true;
+        currentSkipSection = numberedSectionMatch[1];
+        return;
+      }
+      
+      // Check if we're exiting a section we're skipping
+      // (When we hit another numbered section heading)
+      if (skipCurrentSection && line.match(/^\d+\.\s+[A-Z\s]+:/)) {
+        skipCurrentSection = false;
+        currentSkipSection = "";
+      }
+      
+      // Skip processing this line if we're in a section to skip
+      if (skipCurrentSection) {
+        return;
+      }
+
+      // Continue with normal processing for non-skipped sections
       if (line.includes("SKILLS GAP ANALYSIS")) {
         inSkillsGapSection = true;
         formattedContent.push(

@@ -10,6 +10,9 @@ const CareerDashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [analysis, setAnalysis] = useState('');
+  const [careerPaths, setCareerPaths] = useState([]);
+  const [skillsGap, setSkillsGap] = useState([]);
+  const [marketTrends, setMarketTrends] = useState([]);
   const [userData, setUserData] = useState({
     name: '',
     email: '',
@@ -48,7 +51,18 @@ const CareerDashboard = () => {
     const loadData = async () => {
       try {
         if (location.state?.analysis) {
-          setAnalysis(location.state.analysis);
+          const analysisText = location.state.analysis;
+          setAnalysis(analysisText);
+          
+          // Extract data from analysis
+          const paths = extractCareerPaths(analysisText);
+          const skills = extractSkillsGap(analysisText);
+          const trends = extractMarketTrends(analysisText);
+          
+          // Simply use the extracted trends without fallback
+          setCareerPaths(paths);
+          setSkillsGap(skills);
+          setMarketTrends(trends);
           
           if (location.state.formData) {
             const formData = location.state.formData;
@@ -81,7 +95,18 @@ const CareerDashboard = () => {
         } else {
           const storedAnalysis = storageService.getLatestAnalysis();
           if (storedAnalysis) {
-            setAnalysis(storedAnalysis.analysis);
+            const analysisText = storedAnalysis.analysis;
+            setAnalysis(analysisText);
+            
+            // Extract data from analysis
+            const paths = extractCareerPaths(analysisText);
+            const skills = extractSkillsGap(analysisText);
+            const trends = extractMarketTrends(analysisText);
+            
+            // Simply use the extracted trends without fallback
+            setCareerPaths(paths);
+            setSkillsGap(skills);
+            setMarketTrends(trends);
             
             const submission = storageService.getSubmissionById(storedAnalysis.submissionId);
             if (submission) {
@@ -195,6 +220,65 @@ const CareerDashboard = () => {
     });
     
     return careerPaths;
+  };
+
+  // Extract market trends data from analysis text
+  const extractMarketTrends = (text) => {
+    if (!text) return [];
+    
+    const marketTrends = [];
+    const lines = text.split('\n');
+    let inMarketTrendsSection = false;
+    
+    lines.forEach((line, index) => {
+      if (line.includes("MARKET TRENDS") || line.includes("JOB MARKET ANALYSIS")) {
+        inMarketTrendsSection = true;
+        return;
+      }
+      
+      if (line.includes("LEARNING ROADMAP") || line.includes("SKILLS GAP ANALYSIS") || line.includes("TRANSITION STRATEGY")) {
+        inMarketTrendsSection = false;
+        return;
+      }
+      
+      if (inMarketTrendsSection && line.trim() !== '') {
+        // Look for career path mentions with salary ranges
+        const salaryMatch = line.match(/(.+?)\s*:\s*\$(\d+[,\d]*)\s*-\s*\$(\d+[,\d]*)/i);
+        if (salaryMatch) {
+          marketTrends.push({
+            careerPath: salaryMatch[1].trim(),
+            minSalary: parseInt(salaryMatch[2].replace(/,/g, ''), 10),
+            maxSalary: parseInt(salaryMatch[3].replace(/,/g, ''), 10),
+            type: 'salary'
+          });
+          return;
+        }
+        
+        // Look for growth statistics
+        const growthMatch = line.match(/(.+?)\s*:?\s*(\d+)%\s*growth/i);
+        if (growthMatch) {
+          marketTrends.push({
+            careerPath: growthMatch[1].trim(),
+            growth: parseInt(growthMatch[2], 10),
+            type: 'growth'
+          });
+          return;
+        }
+        
+        // Look for general trends
+        if (line.match(/^\d+\.\s+/) || line.match(/^•\s+/) || line.match(/^-\s+/)) {
+          const trendText = line.replace(/^(\d+\.|•|-)\s+/, '').trim();
+          if (trendText) {
+            marketTrends.push({
+              trend: trendText,
+              type: 'general'
+            });
+          }
+        }
+      }
+    });
+    
+    return marketTrends;
   };
 
   // Extract skills gap data from analysis text
@@ -546,6 +630,85 @@ const CareerDashboard = () => {
     );
   };
 
+  // Market Trends Section Component
+  const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
+    const salaryTrends = marketTrends.filter(trend => trend.type === 'salary');
+    const growthTrends = marketTrends.filter(trend => trend.type === 'growth');
+    const generalTrends = marketTrends.filter(trend => trend.type === 'general');
+    
+    return (
+      <div>
+        {salaryTrends.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-4">Salary Ranges</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              {salaryTrends.map((trend, index) => (
+                <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-medium">{trend.careerPath}</span>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <span className="text-2xl font-bold text-blue-700">
+                      ${trend.minSalary.toLocaleString()} - ${trend.maxSalary.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="text-center text-sm text-gray-600 mt-2">Annual salary range</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {growthTrends.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-4">Job Growth Projections</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              {growthTrends.map((trend, index) => (
+                <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-medium">{trend.careerPath}</span>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <span className={`text-3xl font-bold ${
+                      trend.growth > 15 ? 'text-green-600' : 
+                      trend.growth > 5 ? 'text-blue-600' : 
+                      'text-orange-600'
+                    }`}>
+                      {trend.growth}%
+                    </span>
+                  </div>
+                  <div className="text-center text-sm text-gray-600 mt-2">Projected growth rate</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {generalTrends.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-4">Industry Insights</h3>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <ul className="space-y-3">
+                {generalTrends.map((trend, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="text-blue-600 mr-2 mt-1">•</span>
+                    <span>{trend.trend}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+        
+        {salaryTrends.length === 0 && growthTrends.length === 0 && generalTrends.length === 0 && (
+          <div className="text-center p-6 bg-gray-50 rounded-lg">
+            <p className="text-lg text-gray-500">No specific market trend data is available for your selected career paths.</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Create timeline visualization data
   const createTimelineData = () => {
     const timelineMap = {
@@ -769,8 +932,6 @@ const CareerDashboard = () => {
   }
 
   // Extract data for visualizations
-  const careerPaths = extractCareerPaths(analysis);
-  const skillsGap = extractSkillsGap(analysis);
   const chartData = careerPaths.map(path => ({
     label: path.title,
     value: path.match
@@ -895,6 +1056,65 @@ const CareerDashboard = () => {
               {skillsGap.slice(0, 6).map((skill, index) => (
                 <SkillLevelChart key={index} skill={skill} />
               ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Market Trends Analysis */}
+        {marketTrends.length > 0 ? (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-2xl font-bold mb-6">Market Trends Analysis</h2>
+            <p className="text-gray-600 mb-6">
+              Current job market trends and salary data for your recommended career paths as of {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.
+            </p>
+            <MarketTrendsSection 
+              marketTrends={marketTrends}
+              careerPaths={careerPaths}
+            />
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-2xl font-bold mb-6">Market Trends Analysis</h2>
+            <div className="bg-blue-50 p-6 rounded-lg">
+              <div className="flex items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600 mt-0.5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <p className="text-blue-700 font-medium mb-2">Market data not available for this analysis</p>
+                  <p className="text-gray-600">
+                    For the most current job market insights related to your career path recommendations, 
+                    consider reading industry reports or visiting job market websites focused on tech careers.
+                    You can also retake the assessment to generate a new analysis that may include market data.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <a 
+                  href="https://www.bls.gov/ooh/computer-and-information-technology/home.htm"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 border border-blue-300 bg-white text-blue-700 rounded-md hover:bg-blue-50"
+                >
+                  BLS Tech Outlook
+                </a>
+                <a 
+                  href="https://insights.dice.com/tech-job-report/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 border border-blue-300 bg-white text-blue-700 rounded-md hover:bg-blue-50"
+                >
+                  Dice Tech Jobs Report
+                </a>
+                <a 
+                  href="https://www.roberthalf.com/us/en/insights/salary-guide"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 border border-blue-300 bg-white text-blue-700 rounded-md hover:bg-blue-50"
+                >
+                  Salary Guides
+                </a>
+              </div>
             </div>
           </div>
         )}

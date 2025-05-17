@@ -3,8 +3,8 @@
 // Claude API configuration
 const CLAUDE_API_CONFIG = {
   models: {
-    default: 'claude-3-5-sonnet-20240620',
-    faster: 'claude-3-haiku-20240307'
+    default: 'claude-3-7-sonnet-20240229',  // Updated to Claude 3.7 Sonnet
+    faster: 'claude-3-5-haiku-20240307'     // Updated to Claude 3.5 Haiku
   },
   maxTokens: {
     formSuggestions: 1024,
@@ -133,8 +133,33 @@ const CLAUDE_PROMPTS = {
        - [Strategy point]
        - [Strategy point]
     
+    6. MARKET TRENDS ANALYSIS:
+       Include current (as of 2025) job market data for the recommended career paths with the following specific sections:
+       
+       1. JOB MARKET OUTLOOK: 
+          Provide detailed job growth projections, hiring rates, and demand levels for each recommended career path. 
+          Include specific percentages when possible.
+       
+       2. SALARY TRENDS: 
+          Detail current salary ranges for entry-level, mid-level, and senior positions in each recommended 
+          career path, including how these have changed in the past year. Use specific dollar ranges.
+       
+       3. REGIONAL OPPORTUNITIES: 
+          Analyze which geographic regions show the strongest demand for each career path, including remote 
+          work opportunities and emerging tech hubs.
+       
+       4. EMERGING TECHNOLOGIES: 
+          Identify the most important emerging technologies or skills within each career path that are 
+          becoming requirements for new hires in 2025.
+       
+       5. INDUSTRY SECTOR ANALYSIS: 
+          Evaluate which industry sectors are most actively hiring for each career path (e.g., healthcare, 
+          finance, retail) and their growth trajectories.
+    
     Make your analysis practical, personalized, and actionable. Focus on leveraging their specific educational background,
-    field of study, strengths, and interests to create a realistic path into tech.
+    field of study, strengths, and interests to create a realistic path into tech. The market trends analysis should be 
+    particularly relevant to their indicated interests (${formData.careerPathsInterest ? formData.careerPathsInterest.join(', ') : 'various tech roles'})
+    and include current, accurate market data for 2025.
   `
 };
 

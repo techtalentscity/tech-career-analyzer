@@ -1,244 +1,196 @@
-// src/services/claudeApiService.js
-import { CLAUDE_API_CONFIG, CLAUDE_PROMPTS } from '../config/claudeApiConfig';
+// services/claudeApiService.js
+import axios from 'axios';
+import storageService from './storageService';
 
-class ClaudeApiService {
-  /**
-   * Generate form field suggestions based on typical tech enthusiast profile
-   * @returns {Promise<string>} The suggested form responses
-   */
-  async getFormSuggestions() {
-    try {
-      console.log("Calling Claude API for form suggestions");
-      
-      const requestBody = {
-        model: CLAUDE_API_CONFIG.models.default,
-        max_tokens: CLAUDE_API_CONFIG.maxTokens.formSuggestions,
-        messages: [
-          {
-            role: "user",
-            content: CLAUDE_PROMPTS.formSuggestions
-          }
-        ]
-      };
-      
-      console.log("Request details:", {
-        model: requestBody.model,
-        max_tokens: requestBody.max_tokens
-      });
-      
-      const response = await fetch('/api/claude-proxy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      });
-      
-      console.log("Response status:", response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("API Error Response:", errorText);
-        throw new Error(`API error: ${response.status} - ${errorText}`);
-      }
-      
-      // Parse the response data
-      const data = await response.json();
-      console.log("API Response structure:", Object.keys(data));
-      
-      // Handle different possible response formats
-      let responseText = '';
-      
-      // Check for Anthropic API v1 format
-      if (data.content) {
-        console.log("Content structure:", typeof data.content);
-        
-        // If content is an array of objects with text property (newer Claude API)
-        if (Array.isArray(data.content) && data.content.length > 0 && data.content[0].text) {
-          responseText = data.content[0].text;
-        } 
-        // If content is a string (possible format)
-        else if (typeof data.content === 'string') {
-          responseText = data.content;
-        }
-        // Otherwise try to get the content in a different way
-        else {
-          console.log("Unexpected content format:", data.content);
-          // Try to parse content as JSON if it's an object
-          if (typeof data.content === 'object') {
-            responseText = JSON.stringify(data.content);
-          }
-        }
-      }
-      // Check for completion format (older Claude API)
-      else if (data.completion) {
-        responseText = data.completion;
-      }
-      // Final fallback for the standard Claude message format
-      else if (data.message && data.message.content) {
-        responseText = data.message.content;
-      }
-      // Last resort - return the entire response as a string
-      else {
-        console.warn("Unrecognized API response format, returning full response as string");
-        responseText = JSON.stringify(data);
-      }
-      
-      console.log("Received successful response from Claude API");
-      console.log("First 100 chars of response:", responseText.substring(0, 100));
-      
-      return responseText;
-    } catch (error) {
-      console.error('Error getting form suggestions from Claude API:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Analyze the submitted form data and generate career path recommendations
-   * @param {Object} formData The user's form responses
-   * @returns {Promise<string>} The career path analysis and recommendations
-   */
+const claudeApiService = {
+  // Analyze career path data
   async analyzeCareerPath(formData) {
     try {
-      console.log("Calling Claude API for career analysis");
+      console.log('Preparing career data for analysis...');
       
-      // Log important new fields to help with debugging
-      console.log("Key form data fields:", {
-        educationLevel: formData.educationLevel || 'Not provided',
-        studyField: formData.studyField || 'Not provided',
-        publications: formData.publications ? 'Provided' : 'Not provided'
-      });
+      // Create structured prompt for Claude API
+      const prompt = this.createAnalysisPrompt(formData);
       
-      // Use the updated prompt from configuration that highlights important questions
-      const requestBody = {
-        model: CLAUDE_API_CONFIG.models.default,
-        max_tokens: CLAUDE_API_CONFIG.maxTokens.careerAnalysis,
-        messages: [
-          {
-            role: "user",
-            content: CLAUDE_PROMPTS.careerAnalysis(formData)
-          }
-        ]
+      // Create messages array in Claude API format
+      const messages = [
+        { role: 'user', content: prompt }
+      ];
+      
+      // Define request parameters for Claude API
+      const requestData = {
+        model: 'claude-3-opus-20240229', // Use appropriate model version
+        messages: messages,
+        max_tokens: 4000,
+        temperature: 0.3, // Lower temperature for more consistent outputs
+        system: "You are a career advisor specializing in technology career transitions. Provide detailed, personalized analysis and recommendations based on the information provided. Format your response with clear sections and actionable advice."
       };
       
-      console.log("Request details:", {
-        model: requestBody.model,
-        max_tokens: requestBody.max_tokens
-      });
+      console.log('Sending analysis request to Claude API...');
       
-      const response = await fetch('/api/claude-proxy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      });
+      // Make API call to our Claude proxy endpoint
+      const response = await axios.post('/api/claude-proxy-fetch', requestData);
       
-      console.log("Response status:", response.status);
-      
-      if (!response.ok) {
-        let errorText;
-        try {
-          // Try to parse as JSON first
-          const errorJson = await response.json();
-          errorText = JSON.stringify(errorJson);
-        } catch {
-          // If not JSON, get as text
-          errorText = await response.text();
-        }
-        console.error("API Error Response:", errorText);
-        throw new Error(`API error: ${response.status} - ${errorText}`);
-      }
-      
-      // Parse the response data
-      const data = await response.json();
-      console.log("API Response structure:", Object.keys(data));
-      
-      // Handle different possible response formats
-      let responseText = '';
-      
-      // Check for Anthropic API v1 format
-      if (data.content) {
-        console.log("Content structure:", typeof data.content);
+      // Check if the response has the expected structure
+      if (response.data && response.data.content && Array.isArray(response.data.content)) {
+        // Extract text from the content array
+        const analysisText = response.data.content[0].text || '';
         
-        // If content is an array of objects with text property (newer Claude API)
-        if (Array.isArray(data.content) && data.content.length > 0 && data.content[0].text) {
-          responseText = data.content[0].text;
-        } 
-        // If content is a string (possible format)
-        else if (typeof data.content === 'string') {
-          responseText = data.content;
+        if (!analysisText) {
+          throw new Error('Empty analysis received from API');
         }
-        // Otherwise try to get the content in a different way
-        else {
-          console.log("Unexpected content format:", data.content);
-          // Try to parse content as JSON if it's an object
-          if (typeof data.content === 'object') {
-            responseText = JSON.stringify(data.content);
-          }
+        
+        console.log('Analysis received successfully', { length: analysisText.length });
+        
+        // Save the analysis using storageService - this was the problem area
+        try {
+          const analysisData = {
+            submissionId: new Date().getTime().toString(),
+            analysis: analysisText,
+            timestamp: new Date().toISOString()
+          };
+          
+          // Call storageService directly (not via 'vt')
+          storageService.saveAnalysis(analysisData);
+          
+          console.log('Analysis saved to local storage');
+        } catch (storageError) {
+          console.error('Error saving analysis to storage:', storageError);
+          // Continue execution even if storage fails
         }
+        
+        return analysisText;
+      } else {
+        console.error('Unexpected response format:', response.data);
+        throw new Error('Invalid response format from API');
       }
-      // Check for completion format (older Claude API)
-      else if (data.completion) {
-        responseText = data.completion;
-      }
-      // Check for standard Claude message format
-      else if (data.message && data.message.content) {
-        responseText = data.message.content;
-      }
-      // Last resort - return the entire response as a string
-      else {
-        console.warn("Unrecognized API response format, returning full response as string");
-        responseText = JSON.stringify(data);
-      }
-      
-      console.log("Received successful response from Claude API");
-      
-      // DEBUGGING: Log the actual response text (first 500 chars to avoid console flood)
-      console.log("=== CLAUDE RESPONSE START (first 500 chars) ===");
-      console.log(responseText.substring(0, 500));
-      console.log("=== CLAUDE RESPONSE PREVIEW END ===");
-      
-      // Check if Skills Gap section exists
-      const hasSkillsGap = responseText.includes("SKILLS GAP ANALYSIS");
-      console.log("Has Skills Gap section:", hasSkillsGap);
-      
-      if (hasSkillsGap) {
-        // Extract just the Skills Gap section for debugging
-        const skillsGapStart = responseText.indexOf("SKILLS GAP ANALYSIS");
-        const skillsGapEnd = responseText.indexOf("LEARNING ROADMAP") || responseText.indexOf("TRANSITION STRATEGY");
-        if (skillsGapEnd > skillsGapStart) {
-          const skillsGapSection = responseText.substring(skillsGapStart, skillsGapEnd);
-          console.log("=== SKILLS GAP SECTION PREVIEW ===");
-          console.log(skillsGapSection.substring(0, 200) + "...");
-          console.log("=== END SKILLS GAP PREVIEW ===");
-        }
-      }
-      
-      // Verify that the response includes relevant content about education and publications
-      const containsEducationRef = responseText.toLowerCase().includes('education') || 
-                                  responseText.toLowerCase().includes('degree') ||
-                                  responseText.toLowerCase().includes('study');
-      
-      const containsPublicationsRef = formData.publications ? 
-                                      responseText.toLowerCase().includes('publication') || 
-                                      responseText.toLowerCase().includes('research') : true;
-      
-      if (formData.educationLevel && !containsEducationRef) {
-        console.warn("Warning: Response does not mention education despite education level being provided");
-      }
-      
-      if (formData.publications && !containsPublicationsRef) {
-        console.warn("Warning: Response does not mention publications despite publications being provided");
-      }
-      
-      return responseText;
     } catch (error) {
-      console.error('Error getting career analysis from Claude API:', error);
-      throw error;
+      console.error('Error in analyzeCareerPath:', error);
+      throw new Error(error.message || 'Failed to analyze career data');
     }
-  }
-}
+  },
+  
+  // Get form suggestions from Claude API
+  async getFormSuggestions() {
+    try {
+      console.log('Requesting form suggestions from Claude...');
+      
+      // Create prompt for form suggestions
+      const prompt = `Generate sample responses for a tech career transition assessment form for a hypothetical person transitioning to tech.
+      
+The person should have:
+- A non-tech background (e.g., finance, healthcare, education)
+- 3-8 years of professional experience
+- Some transferable skills relevant to tech
+- Clear motivations for transitioning to tech
+      
+Please create realistic responses for these form fields:
+- Educational background (education level, field of study)
+- Current role and responsibilities
+- Experience with tech tools or concepts
+- Tech career interests and preferences
+- Motivation for career change
+- Technical skill level (beginner to intermediate)
+- Timeline and commitment level
+- Desired work environment and industry preferences
 
-export default new ClaudeApiService();
+Format each response as a clear field/value pair.`;
+      
+      // Create messages array in Claude API format
+      const messages = [
+        { role: 'user', content: prompt }
+      ];
+      
+      // Define request parameters for Claude API
+      const requestData = {
+        model: 'claude-3-haiku-20240307', // Use a faster, cheaper model for suggestions
+        messages: messages,
+        max_tokens: 2000,
+        temperature: 0.7, // Higher temperature for more creative suggestions
+        system: "You are a career advisor helping people transition to tech careers. Generate realistic form responses for hypothetical career changers."
+      };
+      
+      // Make API call to our Claude proxy endpoint
+      const response = await axios.post('/api/claude-proxy-fetch', requestData);
+      
+      // Check if the response has the expected structure
+      if (response.data && response.data.content && Array.isArray(response.data.content)) {
+        // Extract text from the content array
+        const suggestions = response.data.content[0].text || '';
+        
+        if (!suggestions) {
+          throw new Error('Empty suggestions received from API');
+        }
+        
+        console.log('Suggestions received successfully', { length: suggestions.length });
+        return suggestions;
+      } else {
+        console.error('Unexpected response format:', response.data);
+        throw new Error('Invalid response format from API');
+      }
+    } catch (error) {
+      console.error('Error in getFormSuggestions:', error);
+      throw new Error(error.message || 'Failed to get form suggestions');
+    }
+  },
+  
+  // Helper function to create a structured prompt for Claude API
+  createAnalysisPrompt(formData) {
+    // Create a detailed prompt that Claude can use to analyze career transition possibilities
+    return `
+      Based on the following career assessment data, provide a detailed analysis of suitable tech career paths:
+      
+      PERSONAL INFORMATION:
+      - Education Level: ${formData.educationLevel}
+      - Field of Study: ${formData.studyField}
+      - Current Role: ${formData.currentRole}
+      - Years of Experience: ${formData.yearsExperience}
+      
+      EXPERIENCE DETAILS:
+      - Job Responsibilities: ${formData.jobResponsibilities}
+      - Projects & Achievements: ${formData.jobProjects}
+      - Technologies Used: ${formData.jobTechnologies}
+      - Tech Experience Level: ${formData.experienceLevel}
+      
+      TECH INTERESTS & PREFERENCES:
+      - Tech Areas of Interest: ${formData.techInterests}
+      - Tools Used: ${formData.toolsUsed.join(', ')}
+      - Career Paths Interest: ${formData.careerPathsInterest.join(', ')}
+      - Industry Preference: ${formData.industryPreference.join(', ')}
+      
+      GOALS & TIMELINE:
+      - Transition Timeline: ${formData.transitionTimeline}
+      - Time Commitment: ${formData.timeCommitment}
+      - Target Salary: ${formData.targetSalary}
+      
+      TRANSITION DETAILS:
+      - Reason for Transition: ${formData.transitionReason}
+      - Transferable Skills: ${formData.transferableSkills}
+      - Anticipated Challenges: ${formData.anticipatedChallenges}
+      
+      Please provide an in-depth analysis with the following sections:
+      
+      1. TOP RECOMMENDED CAREER PATHS (in order of suitability with match percentage):
+         a) First recommended career path (X% match)
+         b) Second recommended career path (Y% match)
+         c) Third recommended career path (Z% match)
+      
+      2. SKILLS GAP ANALYSIS (what skills they need to develop for each path)
+      
+      3. MARKET TRENDS (salary ranges, job growth, current demand)
+      
+      4. NETWORKING STRATEGY (specific to their background and target roles)
+      
+      5. PERSONAL BRANDING (how to position themselves with their unique background)
+      
+      6. INTERVIEW PREPARATION (key focus areas based on their background)
+      
+      7. LEARNING ROADMAP (6-12 month timeline with specific resources and milestones)
+      
+      8. TRANSITION STRATEGY (step-by-step plan based on their timeline and current commitments)
+      
+      Please be specific, actionable, and tailor the advice to their unique background and goals.
+    `;
+  }
+};
+
+export default claudeApiService;

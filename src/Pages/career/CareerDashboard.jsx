@@ -906,7 +906,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Networking Strategy Component - FIXED: Removed duplicate heading
+  // Networking Strategy Component - Fixed to remove duplicate heading
   const NetworkingStrategySection = ({ strategies }) => {
     if (!strategies || strategies.length === 0) {
       return null;
@@ -930,7 +930,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Personal Branding Component - FIXED: Removed duplicate heading
+  // Personal Branding Component - Fixed to remove duplicate heading
   const PersonalBrandingSection = ({ tips }) => {
     if (!tips || tips.length === 0) {
       return null;
@@ -954,7 +954,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Interview Preparation Component - FIXED: Removed duplicate heading
+  // Interview Preparation Component - Fixed to remove duplicate heading
   const InterviewPrepSection = ({ tips }) => {
     if (!tips || tips.length === 0) {
       return null;
@@ -1019,7 +1019,7 @@ const CareerDashboard = () => {
     return milestones;
   };
 
-  // Custom Timeline Component - FIXED: Removed duplicate heading
+  // Custom Timeline Component - Fixed to remove duplicate heading
   const TimelineChart = ({ milestones }) => {
     if (!milestones || milestones.length === 0) {
       return null;
@@ -1284,6 +1284,19 @@ const CareerDashboard = () => {
           </div>
         )}
         
+        {/* Transition Timeline */}
+        {userData.transitionTimeline && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold mb-6">Your Transition Roadmap</h2>
+            <div className="mb-4">
+              <p className="text-gray-600">
+                Based on your {userData.transitionTimeline} timeline and {userData.timeCommitment || 'specified'} weekly commitment
+              </p>
+            </div>
+            <TimelineChart milestones={timelineMilestones} />
+          </div>
+        )}
+        
         {/* Market Trends Analysis */}
         {marketTrends.length > 0 ? (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -1340,7 +1353,7 @@ const CareerDashboard = () => {
           </div>
         )}
         
-        {/* Networking Strategy */}
+        {/* Networking Strategy - Fixed: Only render this section once */}
         {networkingStrategy.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-2xl font-bold mb-6">Networking Strategy</h2>
@@ -1348,7 +1361,7 @@ const CareerDashboard = () => {
           </div>
         )}
         
-        {/* Personal Branding */}
+        {/* Personal Branding - Fixed: Only render this section once */}
         {personalBranding.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-2xl font-bold mb-6">Personal Branding</h2>
@@ -1356,7 +1369,7 @@ const CareerDashboard = () => {
           </div>
         )}
         
-        {/* Interview Preparation */}
+        {/* Interview Preparation - Fixed: Only render this section once */}
         {interviewPrep.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-2xl font-bold mb-6">Interview Preparation</h2>
@@ -1369,19 +1382,6 @@ const CareerDashboard = () => {
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-bold mb-6">Technical Proficiency</h2>
             <ToolsProficiency tools={userData.toolsUsed} />
-          </div>
-        )}
-        
-        {/* Transition Timeline */}
-        {userData.transitionTimeline && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6">Your Transition Roadmap</h2>
-            <div className="mb-4">
-              <p className="text-gray-600">
-                Based on your {userData.transitionTimeline} timeline and {userData.timeCommitment || 'specified'} weekly commitment
-              </p>
-            </div>
-            <TimelineChart milestones={timelineMilestones} />
           </div>
         )}
         

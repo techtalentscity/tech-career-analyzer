@@ -352,6 +352,7 @@ const CareerTest = () => {
     }
   };
 
+  // FIXED: Updated handleSubmit function to use the correct API
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -406,18 +407,13 @@ const CareerTest = () => {
         
         setCareerAnalysis(analysis);
         
-        // 4. Save the analysis to storage
-        storageService.saveAnalysis({
-          submissionId: new Date().getTime().toString(),
-          analysis: analysis,
-          timestamp: new Date().toISOString()
-        });
-        
-        console.log('Analysis saved to storage');
+        // Note: Analysis is now saved inside claudeApiService.analyzeCareerPath
+        // We do NOT need to save it again here - this is the fix!
+        // The previous code was trying to call storageService.saveAnalysis() which doesn't exist
         
         setAiAnalyzing(false);
         
-        // 5. Navigate to dashboard page with analysis and form data
+        // 4. Navigate to dashboard page with analysis and form data
         navigate('/career/dashboard', { 
           state: { 
             analysis,

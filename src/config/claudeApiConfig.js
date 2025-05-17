@@ -3,8 +3,8 @@
 // Claude API configuration
 const CLAUDE_API_CONFIG = {
   models: {
-    default: 'claude-3-sonnet-20240229',  // Updated to correct model name
-    faster: 'claude-3-haiku-20240307'     // This is still correct
+    default: 'claude-3-5-sonnet-20240620',
+    faster: 'claude-3-haiku-20240307'
   },
   maxTokens: {
     formSuggestions: 1024,
@@ -50,26 +50,21 @@ const CLAUDE_PROMPTS = {
     - Publications or Research (IMPORTANT): ${formData.publications || 'Not specified'}
     
     PERSONAL STRENGTHS & MOTIVATION (IMPORTANT):
-    - What they like doing best: ${formData.bestActivity || 'Not specified'}
     - Biggest motivation for tech career: ${formData.techMotivation || 'Not specified'}
     - What they're passionate about: ${formData.techPassion || 'Not specified'}
-    - What excites them about tech: ${formData.techExcitement || 'Not specified'}
     
     TECH PREFERENCES & INTERESTS (IMPORTANT):
     - Tech areas they're interested in: ${formData.techInterests || 'Not specified'}
-    - Tech activities enjoyed: ${formData.techActivities || 'Not specified'}
     - Comfort with learning new tools: ${formData.learningComfort || 'Not specified'}
     - Work preference: ${formData.workPreference || 'Not specified'}
     - Current tech experience level: ${formData.experienceLevel || 'Not specified'}
     - Tools & platforms used: ${formData.toolsUsed ? formData.toolsUsed.join(', ') : 'None'}
-    - Interest in emerging tech: ${formData.emergingTechInterest || 'Not specified'}
     - Certifications/courses: ${formData.certifications || 'Not specified'}
     - Certification details: ${formData.certificationsDetail || 'Not specified'}
     
     TRANSITION INFORMATION:
     - Primary reason for transition: ${formData.transitionReason || 'Not specified'}
     - Transferable skills: ${formData.transferableSkills || 'Not specified'}
-    - Previous tech exposure: ${formData.previousTechExposure || 'Not specified'}
     - Anticipated challenges: ${formData.anticipatedChallenges || 'Not specified'}
     
     CAREER ASPIRATIONS:
@@ -77,7 +72,6 @@ const CLAUDE_PROMPTS = {
     - Industry preferences: ${formData.industryPreference ? formData.industryPreference.join(', ') : 'Not specified'}
     - Leverage domain expertise: ${formData.leverageDomainExpertise || 'Not specified'}
     - Target salary range: ${formData.targetSalary || 'Not specified'}
-    - Desired impact: ${formData.impactType || 'Not specified'}
     
     COMMITMENT & GOALS:
     - Weekly time commitment: ${formData.timeCommitment || 'Not specified'}
@@ -155,6 +149,27 @@ const CLAUDE_PROMPTS = {
        5. INDUSTRY SECTOR ANALYSIS: 
           Evaluate which industry sectors are most actively hiring for each career path (e.g., healthcare, 
           finance, retail) and their growth trajectories.
+          
+    7. NETWORKING STRATEGY:
+       - [Specific networking tips tailored to their background and target roles]
+       - [Industry events or communities to join]
+       - [Online platforms for tech networking]
+       - [How to leverage existing network from previous career]
+       - [Informational interview strategies]
+    
+    8. PERSONAL BRANDING:
+       - [Resume transformation recommendations]
+       - [LinkedIn profile optimization]
+       - [Portfolio development strategy]
+       - [How to highlight transferable skills]
+       - [Online presence recommendations]
+    
+    9. INTERVIEW PREPARATION:
+       - [Technical interview strategies]
+       - [Behavioral question preparation]
+       - [How to discuss career transition effectively]
+       - [Practice project recommendations]
+       - [How to address skills gaps during interviews]
     
     Make your analysis practical, personalized, and actionable. Focus on leveraging their specific educational background,
     field of study, strengths, and interests to create a realistic path into tech. The market trends analysis should be 

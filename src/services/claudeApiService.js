@@ -41,16 +41,22 @@ const claudeApiService = {
         
         console.log('Analysis received successfully', { length: analysisText.length });
         
-        // Save the analysis using storageService - this was the problem area
+        // Save the analysis using storageService - FIXED: now using saveCareerAnalysis
         try {
           const analysisData = {
-            submissionId: new Date().getTime().toString(),
+            // Use email as userId if available
+            userId: formData.email || String(new Date().getTime()),
             analysis: analysisText,
-            timestamp: new Date().toISOString()
+            raw: analysisText // Store the raw analysis text
           };
           
-          // Call storageService directly (not via 'vt')
-          storageService.saveAnalysis(analysisData);
+          // Call the CORRECT method on storageService
+          storageService.saveCareerAnalysis(analysisData);
+          
+          // Also save formatted version for faster rendering if email is available
+          if (formData.email) {
+            storageService.saveFormattedAnalysis(formData.email, analysisText);
+          }
           
           console.log('Analysis saved to local storage');
         } catch (storageError) {

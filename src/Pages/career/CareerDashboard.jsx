@@ -560,113 +560,108 @@ const CareerDashboard = () => {
     return skills;
   };
 
-  
+  // Format analysis text for display
   const formatAnalysisText = (text) => {
-  if (!text) return [];
+    if (!text) return [];
+    
+    const lines = text.split('\n');
+    let formattedContent = [];
+    let inSkillsGapSection = false;
 
-  const lines = text.split('\n');
-  let formattedContent = [];
-  let inSkippedSection = false;
+    const processContent = (content) => {
+      content = content.replace(/\btheir\b/gi, 'your');
+      content = content.replace(/\bthey\b/gi, 'you');
+      content = content.replace(/\bthem\b/gi, 'you');
+      content = content.replace(/\bthemselves\b/gi, 'yourself');
+      
+      if (userData.educationLevel && userData.educationLevel !== 'Not specified') {
+        const educationTerms = [userData.educationLevel, userData.studyField].filter(Boolean);
+        educationTerms.forEach(term => {
+          if (term && term.length > 3) {
+            const regex = new RegExp(`(${term})`, 'gi');
+            content = content.replace(regex, '<strong class="text-blue-700">$1</strong>');
+          }
+        });
+      }
+      
+      if (userData.currentRole && userData.currentRole !== 'Not specified') {
+        const regex = new RegExp(`(${userData.currentRole})`, 'gi');
+        content = content.replace(regex, '<strong class="text-purple-700">$1</strong>');
+      }
+      
+      return { __html: content };
+    };
 
-  // Sections we want to skip rendering because they're handled separately
-  const sectionsToSkip = [
-    "MARKET TRENDS ANALYSIS",
-    "MARKET TRENDS",
-    "NETWORKING STRATEGY",
-    "PERSONAL BRANDING",
-    "INTERVIEW PREPARATION"
-  ];
+    lines.forEach((line, index) => {
+      if (line.includes("SKILLS GAP ANALYSIS")) {
+        inSkillsGapSection = true;
+        formattedContent.push(
+          <h3 key={`header-${index}`} className="text-xl font-bold mt-8 mb-4 text-blue-800">
+            {line}
+          </h3>
+        );
+        return;
+      }
+      
+      if (line.includes("LEARNING ROADMAP") || line.includes("TRANSITION STRATEGY")) {
+        inSkillsGapSection = false;
+      }
 
-  const stopSkippingKeywords = [
-    "LEARNING ROADMAP",
-    "SKILLS GAP ANALYSIS",
-    "TRANSITION STRATEGY",
-    "YOUR TRANSITION ROADMAP"
-  ];
+      if (inSkillsGapSection && line.match(/^\d+\.\s+/) && line.includes(':')) {
+        return;
+      }
 
-  const processContent = (content) => {
-    content = content.replace(/\btheir\b/gi, 'your');
-    content = content.replace(/\bthey\b/gi, 'you');
-    content = content.replace(/\bthem\b/gi, 'you');
-    content = content.replace(/\bthemselves\b/gi, 'yourself');
+      if (line.match(/^\d+\.\s+[A-Z]/)) {
+        formattedContent.push(
+          <h3 key={`header-${index}`} className="text-xl font-bold mt-8 mb-4 text-blue-800">
+            {line}
+          </h3>
+        );
+      }
+      else if (line.match(/^[a-z]\)\s+.*?\(\d+%\s+match/i)) {
+        formattedContent.push(
+          <h4 key={`subheader-${index}`} className="text-lg font-semibold mt-6 mb-2 text-blue-700">
+            {line}
+          </h4>
+        );
+      }
+      else if (line.trim().startsWith('-')) {
+        const content = line.replace(/^-\s+/, '');
+        formattedContent.push(
+          <div key={`bullet-${index}`} className="flex items-start mb-3">
+            <span className="text-blue-600 mr-2">•</span>
+            <p dangerouslySetInnerHTML={processContent(content)} />
+          </div>
+        );
+      }
+      else if (line.trim().match(/^\d+\.\s+/)) {
+        const content = line.replace(/^\d+\.\s+/, '');
+        formattedContent.push(
+          <div key={`numbered-${index}`} className="flex items-start mb-3">
+            <span className="text-blue-600 mr-2">•</span>
+            <p dangerouslySetInnerHTML={processContent(content)} />
+          </div>
+        );
+      }
+      else if (line.trim().match(/^Month\s+\d+-?\d*:/i)) {
+        formattedContent.push(
+          <h5 key={`month-${index}`} className="font-semibold mt-4 mb-2 text-blue-600 ml-4">
+            {line}
+          </h5>
+        );
+      }
+      else if (line.trim() === '') {
+        formattedContent.push(<br key={`break-${index}`} />);
+      }
+      else {
+        formattedContent.push(
+          <p key={`text-${index}`} className="mb-3 text-gray-900" dangerouslySetInnerHTML={processContent(line)} />
+        );
+      }
+    });
 
-    if (userData.educationLevel && userData.educationLevel !== 'Not specified') {
-      const educationTerms = [userData.educationLevel, userData.studyField].filter(Boolean);
-      educationTerms.forEach(term => {
-        if (term && term.length > 3) {
-          const regex = new RegExp(`(${term})`, 'gi');
-          content = content.replace(regex, '<strong class="text-blue-700">$1</strong>');
-        }
-      });
-    }
-
-    if (userData.currentRole && userData.currentRole !== 'Not specified') {
-      const regex = new RegExp(`(${userData.currentRole})`, 'gi');
-      content = content.replace(regex, '<strong class="text-purple-700">$1</strong>');
-    }
-
-    return { __html: content };
+    return formattedContent;
   };
-
-  lines.forEach((line, index) => {
-    const trimmed = line.trim();
-
-    if (sectionsToSkip.some(section => trimmed.toUpperCase().startsWith(section))) {
-      inSkippedSection = true;
-      return;
-    }
-
-    if (inSkippedSection && stopSkippingKeywords.some(keyword => trimmed.toUpperCase().includes(keyword))) {
-      inSkippedSection = false;
-    }
-
-    if (inSkippedSection) return;
-
-    if (trimmed.match(/^\d+\.\s+[A-Z]/)) {
-      formattedContent.push(
-        <h3 key={`header-${index}`} className="text-xl font-bold mt-8 mb-4 text-blue-800">
-          {trimmed}
-        </h3>
-      );
-    } else if (trimmed.match(/^[a-z]\)\s+.*?\(\d+%\s+match/i)) {
-      formattedContent.push(
-        <h4 key={`subheader-${index}`} className="text-lg font-semibold mt-6 mb-2 text-blue-700">
-          {trimmed}
-        </h4>
-      );
-    } else if (trimmed.startsWith('-')) {
-      const content = trimmed.replace(/^-\s+/, '');
-      formattedContent.push(
-        <div key={`bullet-${index}`} className="flex items-start mb-3">
-          <span className="text-blue-600 mr-2">•</span>
-          <p dangerouslySetInnerHTML={processContent(content)} />
-        </div>
-      );
-    } else if (trimmed.match(/^\d+\.\s+/)) {
-      const content = trimmed.replace(/^\d+\.\s+/, '');
-      formattedContent.push(
-        <div key={`numbered-${index}`} className="flex items-start mb-3">
-          <span className="text-blue-600 mr-2">•</span>
-          <p dangerouslySetInnerHTML={processContent(content)} />
-        </div>
-      );
-    } else if (trimmed.match(/^Month\s+\d+-?\d*:/i)) {
-      formattedContent.push(
-        <h5 key={`month-${index}`} className="font-semibold mt-4 mb-2 text-blue-600 ml-4">
-          {trimmed}
-        </h5>
-      );
-    } else if (trimmed === '') {
-      formattedContent.push(<br key={`break-${index}`} />);
-    } else {
-      formattedContent.push(
-        <p key={`text-${index}`} className="mb-3 text-gray-900" dangerouslySetInnerHTML={processContent(trimmed)} />
-      );
-    }
-  });
-
-  return formattedContent;
-};
 
   // Custom Simple Bar Chart Component
   const SimpleBarChart = ({ data, title }) => {
@@ -1390,14 +1385,13 @@ const CareerDashboard = () => {
           </div>
         )}
         
-        {/* 
+        {/* Complete Analysis */}
         <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
           <h2 className="text-2xl font-bold mb-6">Detailed Analysis</h2>
           <div>
             {formatAnalysisText(analysis)}
           </div>
         </div>
-        */}
 
         {/* Next Steps - Dynamic based on user analysis */}
         <div className="bg-blue-50 rounded-lg p-6 mt-8">

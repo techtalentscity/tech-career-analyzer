@@ -13,6 +13,9 @@ const CareerDashboard = () => {
   const [careerPaths, setCareerPaths] = useState([]);
   const [skillsGap, setSkillsGap] = useState([]);
   const [marketTrends, setMarketTrends] = useState([]);
+  const [networkingStrategy, setNetworkingStrategy] = useState([]);
+  const [personalBranding, setPersonalBranding] = useState([]);
+  const [interviewPrep, setInterviewPrep] = useState([]);
   const [userData, setUserData] = useState({
     name: '',
     email: '',
@@ -38,7 +41,7 @@ const CareerDashboard = () => {
   const [activeTab, setActiveTab] = useState('analysis');
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   
-  // Feedback form state - Updated to match Google Form
+  // Feedback form state
   const [feedbackData, setFeedbackData] = useState({
     rating: '',
     improvements: ''
@@ -58,28 +61,34 @@ const CareerDashboard = () => {
           const paths = extractCareerPaths(analysisText);
           const skills = extractSkillsGap(analysisText);
           const trends = extractMarketTrends(analysisText);
+          const networking = extractNetworkingStrategy(analysisText);
+          const branding = extractPersonalBranding(analysisText);
+          const interview = extractInterviewPrep(analysisText);
           
-          // Simply use the extracted trends without fallback
+          // Set the extracted data
           setCareerPaths(paths);
           setSkillsGap(skills);
           setMarketTrends(trends);
+          setNetworkingStrategy(networking);
+          setPersonalBranding(branding);
+          setInterviewPrep(interview);
           
           if (location.state.formData) {
             const formData = location.state.formData;
             
             setUserData({
-              name: formData.fullName,
-              email: formData.email,
-              experienceLevel: formData.experienceLevel,
-              studyField: formData.studyField || 'Not specified',
-              educationLevel: formData.educationLevel || 'Not specified',
-              currentRole: formData.currentRole || 'Not specified',
-              yearsExperience: formData.yearsExperience || 'Not specified',
-              jobResponsibilities: formData.jobResponsibilities || 'Not specified',
-              jobProjects: formData.jobProjects || 'Not specified',
-              jobTechnologies: formData.jobTechnologies || 'Not specified',
-              publications: formData.publications || 'Not specified',
-              transferableSkills: formData.transferableSkills || 'Not specified',
+              name: formData.fullName || '',
+              email: formData.email || '',
+              experienceLevel: formData.experienceLevel || '',
+              studyField: formData.studyField || '',
+              educationLevel: formData.educationLevel || '',
+              currentRole: formData.currentRole || '',
+              yearsExperience: formData.yearsExperience || '',
+              jobResponsibilities: formData.jobResponsibilities || '',
+              jobProjects: formData.jobProjects || '',
+              jobTechnologies: formData.jobTechnologies || '',
+              publications: formData.publications || '',
+              transferableSkills: formData.transferableSkills || '',
               interests: typeof formData.techInterests === 'string' 
                 ? formData.techInterests.split(',').map(i => i.trim()) 
                 : (Array.isArray(formData.techInterests) ? formData.techInterests : []),
@@ -102,27 +111,33 @@ const CareerDashboard = () => {
             const paths = extractCareerPaths(analysisText);
             const skills = extractSkillsGap(analysisText);
             const trends = extractMarketTrends(analysisText);
+            const networking = extractNetworkingStrategy(analysisText);
+            const branding = extractPersonalBranding(analysisText);
+            const interview = extractInterviewPrep(analysisText);
             
-            // Simply use the extracted trends without fallback
+            // Set the extracted data
             setCareerPaths(paths);
             setSkillsGap(skills);
             setMarketTrends(trends);
+            setNetworkingStrategy(networking);
+            setPersonalBranding(branding);
+            setInterviewPrep(interview);
             
             const submission = storageService.getSubmissionById(storedAnalysis.submissionId);
             if (submission) {
               setUserData({
-                name: submission.fullName,
-                email: submission.email,
-                experienceLevel: submission.experienceLevel,
-                studyField: submission.studyField || 'Not specified',
-                educationLevel: submission.educationLevel || 'Not specified',
-                currentRole: submission.currentRole || 'Not specified',
-                yearsExperience: submission.yearsExperience || 'Not specified',
-                jobResponsibilities: submission.jobResponsibilities || 'Not specified',
-                jobProjects: submission.jobProjects || 'Not specified',
-                jobTechnologies: submission.jobTechnologies || 'Not specified',
-                publications: submission.publications || 'Not specified',
-                transferableSkills: submission.transferableSkills || 'Not specified',
+                name: submission.fullName || '',
+                email: submission.email || '',
+                experienceLevel: submission.experienceLevel || '',
+                studyField: submission.studyField || '',
+                educationLevel: submission.educationLevel || '',
+                currentRole: submission.currentRole || '',
+                yearsExperience: submission.yearsExperience || '',
+                jobResponsibilities: submission.jobResponsibilities || '',
+                jobProjects: submission.jobProjects || '',
+                jobTechnologies: submission.jobTechnologies || '',
+                publications: submission.publications || '',
+                transferableSkills: submission.transferableSkills || '',
                 interests: typeof submission.techInterests === 'string' 
                   ? submission.techInterests.split(',').map(i => i.trim()) 
                   : (Array.isArray(submission.techInterests) ? submission.techInterests : []),
@@ -164,7 +179,7 @@ const CareerDashboard = () => {
     }));
   };
 
-  // Submit feedback to Google Form - Updated with actual entry IDs
+  // Submit feedback to Google Form
   const submitFeedback = async (e) => {
     e.preventDefault();
     setSubmittingFeedback(true);
@@ -229,6 +244,7 @@ const CareerDashboard = () => {
     const marketTrends = [];
     const lines = text.split('\n');
     let inMarketTrendsSection = false;
+    let currentSubsection = "";
     
     lines.forEach((line, index) => {
       if (line.includes("MARKET TRENDS") || line.includes("JOB MARKET ANALYSIS")) {
@@ -236,8 +252,26 @@ const CareerDashboard = () => {
         return;
       }
       
-      if (line.includes("LEARNING ROADMAP") || line.includes("SKILLS GAP ANALYSIS") || line.includes("TRANSITION STRATEGY")) {
+      // Check for end of Market Trends section
+      if (inMarketTrendsSection && (
+          line.includes("NETWORKING STRATEGY") || 
+          line.includes("PERSONAL BRANDING") || 
+          line.includes("INTERVIEW PREPARATION") ||
+          line.includes("LEARNING ROADMAP") || 
+          line.includes("SKILLS GAP ANALYSIS") || 
+          line.includes("TRANSITION STRATEGY")
+        )) {
         inMarketTrendsSection = false;
+        return;
+      }
+      
+      // Check for subsections within market trends
+      if (inMarketTrendsSection && line.match(/^\d+\.\s+[A-Z]/)) {
+        currentSubsection = line.replace(/^\d+\.\s+/, '').trim();
+        marketTrends.push({
+          title: currentSubsection,
+          type: 'section_header'
+        });
         return;
       }
       
@@ -249,7 +283,8 @@ const CareerDashboard = () => {
             careerPath: salaryMatch[1].trim(),
             minSalary: parseInt(salaryMatch[2].replace(/,/g, ''), 10),
             maxSalary: parseInt(salaryMatch[3].replace(/,/g, ''), 10),
-            type: 'salary'
+            type: 'salary',
+            subsection: currentSubsection
           });
           return;
         }
@@ -260,7 +295,8 @@ const CareerDashboard = () => {
           marketTrends.push({
             careerPath: growthMatch[1].trim(),
             growth: parseInt(growthMatch[2], 10),
-            type: 'growth'
+            type: 'growth',
+            subsection: currentSubsection
           });
           return;
         }
@@ -271,7 +307,8 @@ const CareerDashboard = () => {
           if (trendText) {
             marketTrends.push({
               trend: trendText,
-              type: 'general'
+              type: 'general',
+              subsection: currentSubsection
             });
           }
         }
@@ -279,6 +316,135 @@ const CareerDashboard = () => {
     });
     
     return marketTrends;
+  };
+
+  // Extract networking strategy from analysis text
+  const extractNetworkingStrategy = (text) => {
+    if (!text) return [];
+    
+    const strategies = [];
+    const lines = text.split('\n');
+    let inNetworkingSection = false;
+    
+    lines.forEach((line, index) => {
+      if (line.includes("NETWORKING STRATEGY")) {
+        inNetworkingSection = true;
+        strategies.push({
+          title: line.trim(),
+          type: 'section_title'
+        });
+        return;
+      }
+      
+      if (inNetworkingSection && (
+        line.includes("PERSONAL BRANDING") || 
+        line.includes("INTERVIEW PREPARATION") ||
+        line.includes("LEARNING ROADMAP") || 
+        line.includes("SKILLS GAP ANALYSIS") || 
+        line.includes("TRANSITION STRATEGY")
+      )) {
+        inNetworkingSection = false;
+        return;
+      }
+      
+      if (inNetworkingSection && line.trim() !== '') {
+        if (line.trim().startsWith('-')) {
+          const strategyText = line.replace(/^-\s+/, '').trim();
+          strategies.push({
+            text: strategyText,
+            type: 'strategy'
+          });
+        }
+      }
+    });
+    
+    return strategies;
+  };
+
+  // Extract personal branding tips from analysis text
+  const extractPersonalBranding = (text) => {
+    if (!text) return [];
+    
+    const brandingTips = [];
+    const lines = text.split('\n');
+    let inBrandingSection = false;
+    
+    lines.forEach((line, index) => {
+      if (line.includes("PERSONAL BRANDING")) {
+        inBrandingSection = true;
+        brandingTips.push({
+          title: line.trim(),
+          type: 'section_title'
+        });
+        return;
+      }
+      
+      if (inBrandingSection && (
+        line.includes("NETWORKING STRATEGY") || 
+        line.includes("INTERVIEW PREPARATION") ||
+        line.includes("LEARNING ROADMAP") || 
+        line.includes("SKILLS GAP ANALYSIS") || 
+        line.includes("TRANSITION STRATEGY")
+      )) {
+        inBrandingSection = false;
+        return;
+      }
+      
+      if (inBrandingSection && line.trim() !== '') {
+        if (line.trim().startsWith('-')) {
+          const tipText = line.replace(/^-\s+/, '').trim();
+          brandingTips.push({
+            text: tipText,
+            type: 'tip'
+          });
+        }
+      }
+    });
+    
+    return brandingTips;
+  };
+
+  // Extract interview preparation advice from analysis text
+  const extractInterviewPrep = (text) => {
+    if (!text) return [];
+    
+    const interviewTips = [];
+    const lines = text.split('\n');
+    let inInterviewSection = false;
+    
+    lines.forEach((line, index) => {
+      if (line.includes("INTERVIEW PREPARATION")) {
+        inInterviewSection = true;
+        interviewTips.push({
+          title: line.trim(),
+          type: 'section_title'
+        });
+        return;
+      }
+      
+      if (inInterviewSection && (
+        line.includes("NETWORKING STRATEGY") || 
+        line.includes("PERSONAL BRANDING") ||
+        line.includes("LEARNING ROADMAP") || 
+        line.includes("SKILLS GAP ANALYSIS") || 
+        line.includes("TRANSITION STRATEGY")
+      )) {
+        inInterviewSection = false;
+        return;
+      }
+      
+      if (inInterviewSection && line.trim() !== '') {
+        if (line.trim().startsWith('-')) {
+          const tipText = line.replace(/^-\s+/, '').trim();
+          interviewTips.push({
+            text: tipText,
+            type: 'tip'
+          });
+        }
+      }
+    });
+    
+    return interviewTips;
   };
 
   // Extract skills gap data from analysis text
@@ -364,7 +530,8 @@ const CareerDashboard = () => {
       }
     });
     
-    if (skills.length === 0 && userData.careerPathsInterest.length > 0) {
+    // Only use default skills if absolutely needed
+    if (skills.length === 0 && userData.careerPathsInterest && userData.careerPathsInterest.length > 0) {
       const defaultSkillsByPath = {
         'Software Development': ['Programming', 'Problem Solving', 'System Design', 'Testing'],
         'Data Analysis/Science': ['Statistics', 'Data Visualization', 'SQL', 'Python'],
@@ -498,6 +665,8 @@ const CareerDashboard = () => {
 
   // Custom Simple Bar Chart Component
   const SimpleBarChart = ({ data, title }) => {
+    if (!data || data.length === 0) return null;
+    
     const maxValue = Math.max(...data.map(item => item.value));
     
     return (
@@ -580,6 +749,10 @@ const CareerDashboard = () => {
 
   // Custom Tools Proficiency Component
   const ToolsProficiency = ({ tools }) => {
+    if (!tools || tools.length === 0 || (tools.length === 1 && tools[0] === 'None')) {
+      return null;
+    }
+    
     const experienceMultiplier = {
       'Complete beginner': 0.5,
       'Some exposure': 0.7,
@@ -631,10 +804,15 @@ const CareerDashboard = () => {
   };
 
   // Market Trends Section Component
-  const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
+  const MarketTrendsSection = ({ marketTrends }) => {
+    if (!marketTrends || marketTrends.length === 0) {
+      return null;
+    }
+    
     const salaryTrends = marketTrends.filter(trend => trend.type === 'salary');
     const growthTrends = marketTrends.filter(trend => trend.type === 'growth');
     const generalTrends = marketTrends.filter(trend => trend.type === 'general');
+    const sectionHeaders = marketTrends.filter(trend => trend.type === 'section_header');
     
     return (
       <div>
@@ -684,7 +862,32 @@ const CareerDashboard = () => {
           </div>
         )}
         
-        {generalTrends.length > 0 && (
+        {sectionHeaders.length > 0 && generalTrends.length > 0 && (
+          <div>
+            {sectionHeaders.map((header, hIndex) => {
+              const relatedTrends = generalTrends.filter(trend => trend.subsection === header.title);
+              if (relatedTrends.length === 0) return null;
+              
+              return (
+                <div key={hIndex} className="mb-6">
+                  <h3 className="text-lg font-semibold mb-4">{header.title}</h3>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <ul className="space-y-3">
+                      {relatedTrends.map((trend, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="text-blue-600 mr-2 mt-1">•</span>
+                          <span>{trend.trend}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        
+        {!sectionHeaders.length && generalTrends.length > 0 && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-4">Industry Insights</h3>
             <div className="bg-gray-50 rounded-lg p-4">
@@ -699,12 +902,81 @@ const CareerDashboard = () => {
             </div>
           </div>
         )}
-        
-        {salaryTrends.length === 0 && growthTrends.length === 0 && generalTrends.length === 0 && (
-          <div className="text-center p-6 bg-gray-50 rounded-lg">
-            <p className="text-lg text-gray-500">No specific market trend data is available for your selected career paths.</p>
-          </div>
-        )}
+      </div>
+    );
+  };
+
+  // Networking Strategy Component
+  const NetworkingStrategySection = ({ strategies }) => {
+    if (!strategies || strategies.length === 0) {
+      return null;
+    }
+    
+    const strategyItems = strategies.filter(item => item.type === 'strategy');
+    
+    return (
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-4">Networking Strategy</h3>
+        <div className="bg-gray-50 rounded-lg p-4">
+          <ul className="space-y-3">
+            {strategyItems.map((item, index) => (
+              <li key={index} className="flex items-start">
+                <span className="text-blue-600 mr-2 mt-1">•</span>
+                <span>{item.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
+  // Personal Branding Component
+  const PersonalBrandingSection = ({ tips }) => {
+    if (!tips || tips.length === 0) {
+      return null;
+    }
+    
+    const brandingTips = tips.filter(item => item.type === 'tip');
+    
+    return (
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-4">Personal Branding</h3>
+        <div className="bg-gray-50 rounded-lg p-4">
+          <ul className="space-y-3">
+            {brandingTips.map((tip, index) => (
+              <li key={index} className="flex items-start">
+                <span className="text-blue-600 mr-2 mt-1">•</span>
+                <span>{tip.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
+  // Interview Preparation Component
+  const InterviewPrepSection = ({ tips }) => {
+    if (!tips || tips.length === 0) {
+      return null;
+    }
+    
+    const interviewTips = tips.filter(item => item.type === 'tip');
+    
+    return (
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-4">Interview Preparation</h3>
+        <div className="bg-gray-50 rounded-lg p-4">
+          <ul className="space-y-3">
+            {interviewTips.map((tip, index) => (
+              <li key={index} className="flex items-start">
+                <span className="text-blue-600 mr-2 mt-1">•</span>
+                <span>{tip.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     );
   };
@@ -752,6 +1024,10 @@ const CareerDashboard = () => {
 
   // Custom Timeline Component
   const TimelineChart = ({ milestones }) => {
+    if (!milestones || milestones.length === 0) {
+      return null;
+    }
+    
     return (
       <div className="mb-6">
         <h3 className="text-lg font-semibold mb-4">Your Transition Roadmap</h3>
@@ -785,146 +1061,94 @@ const CareerDashboard = () => {
   const generateNextSteps = () => {
     const steps = [];
     
-    // Based on experience level
-    if (userData.experienceLevel === 'Complete beginner' || userData.experienceLevel === 'Some exposure') {
-      steps.push({
-        icon: (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-        ),
-        color: 'text-blue-600',
-        title: 'Start with Fundamentals',
-        description: getBeginnerLearningPath()
-      });
+    // Use networking strategies if available
+    if (networkingStrategy && networkingStrategy.length > 0) {
+      const networkingStrategies = networkingStrategy.filter(item => item.type === 'strategy');
+      if (networkingStrategies.length > 0) {
+        steps.push({
+          icon: (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          ),
+          color: 'text-blue-600',
+          title: 'Build Your Network',
+          description: networkingStrategies[0].text
+        });
+      }
     }
     
-    // Based on career path interests
-    if (userData.careerPathsInterest.includes('Software Development')) {
-      steps.push({
-        icon: (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-          </svg>
-        ),
-        color: 'text-indigo-600',
-        title: 'Practice Coding Daily',
-        description: 'Start with LeetCode or HackerRank exercises'
-      });
-    }
-    
-    if (userData.careerPathsInterest.includes('Data Analysis/Science')) {
-      steps.push({
-        icon: (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-        ),
-        color: 'text-green-600',
-        title: 'Learn Data Visualization',
-        description: 'Master Python libraries like Pandas and Matplotlib'
-      });
-    }
-    
-    // Based on timeline
-    if (userData.transitionTimeline === 'Less than 6 months') {
-      steps.push({
-        icon: (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        ),
-        color: 'text-yellow-600',
-        title: 'Accelerated Learning Plan',
-        description: 'Focus on bootcamps or intensive courses'
-      });
+    // Use personal branding tips if available
+    if (personalBranding && personalBranding.length > 0) {
+      const brandingTips = personalBranding.filter(item => item.type === 'tip');
+      if (brandingTips.length > 0) {
+        steps.push({
+          icon: (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          ),
+          color: 'text-purple-600',
+          title: 'Develop Your Brand',
+          description: brandingTips[0].text
+        });
+      }
     }
     
     // Based on skills gap
-    const hasLargeSkillGap = skillsGap.some(skill => skill.gap > 2);
-    if (hasLargeSkillGap) {
-      steps.push({
-        icon: (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-          </svg>
-        ),
-        color: 'text-red-600',
-        title: 'Bridge Skill Gaps',
-        description: `Focus on: ${getTopSkillGaps()}`
-      });
+    if (skillsGap && skillsGap.length > 0) {
+      const topGaps = skillsGap
+        .filter(skill => skill.gap > 1)
+        .sort((a, b) => b.gap - a.gap)
+        .slice(0, 1);
+        
+      if (topGaps.length > 0) {
+        steps.push({
+          icon: (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          ),
+          color: 'text-red-600',
+          title: `Learn ${topGaps[0].name}`,
+          description: topGaps[0].description
+        });
+      }
+    }
+    
+    // Use interview preparation tips if available
+    if (interviewPrep && interviewPrep.length > 0) {
+      const interviewTips = interviewPrep.filter(item => item.type === 'tip');
+      if (interviewTips.length > 0) {
+        steps.push({
+          icon: (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+          ),
+          color: 'text-green-600',
+          title: 'Prepare for Interviews',
+          description: interviewTips[0].text
+        });
+      }
     }
     
     // Based on current role
-    if (userData.currentRole && userData.currentRole !== 'Not specified') {
+    if (userData.currentRole && userData.currentRole !== '') {
       steps.push({
         icon: (
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         ),
-        color: 'text-purple-600',
+        color: 'text-indigo-600',
         title: 'Leverage Current Experience',
         description: `Apply your ${userData.currentRole} skills to tech projects`
       });
     }
     
-    // Based on time commitment
-    if (userData.timeCommitment === '1-5 hours' || userData.timeCommitment === '5-10 hours') {
-      steps.push({
-        icon: (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        ),
-        color: 'text-cyan-600',
-        title: 'Micro-Learning Strategy',
-        description: 'Use lunch breaks and commute time for learning'
-      });
-    }
-    
-    // Always include networking if not already added
-    const hasNetworking = steps.some(step => step.title.includes('Network'));
-    if (!hasNetworking) {
-      steps.push({
-        icon: (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-        ),
-        color: 'text-gray-600',
-        title: 'Build Professional Network',
-        description: 'Join tech meetups and online communities'
-      });
-    }
-    
-    // Return top 3-4 most relevant steps
+    // Return top 4 most relevant steps
     return steps.slice(0, 4);
-  };
-
-  // Helper functions for generating specific content
-  const getBeginnerLearningPath = () => {
-    const paths = userData.careerPathsInterest;
-    if (paths.includes('Software Development')) {
-      return 'Start with HTML, CSS, and JavaScript basics';
-    } else if (paths.includes('Data Analysis/Science')) {
-      return 'Begin with Python fundamentals and statistics';
-    } else if (paths.includes('UX/UI Design')) {
-      return 'Learn design principles and Figma basics';
-    } else if (paths.includes('Cybersecurity')) {
-      return 'Start with networking and security fundamentals';
-    }
-    return 'Begin with computer science fundamentals';
-  };
-
-  const getTopSkillGaps = () => {
-    const topGaps = skillsGap
-      .filter(skill => skill.gap > 2)
-      .sort((a, b) => b.gap - a.gap)
-      .slice(0, 3)
-      .map(skill => skill.name);
-    
-    return topGaps.join(', ') || 'Key technical skills';
   };
 
   if (loading) {
@@ -1015,11 +1239,15 @@ const CareerDashboard = () => {
               <div>
                 <h3 className="text-sm font-medium text-gray-500">Career Interests</h3>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {userData.careerPathsInterest.slice(0, 3).map((interest, index) => (
-                    <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                      {interest}
-                    </span>
-                  ))}
+                  {userData.careerPathsInterest && userData.careerPathsInterest.length > 0 ? (
+                    userData.careerPathsInterest.slice(0, 3).map((interest, index) => (
+                      <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                        {interest}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-500">No specific interests provided</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -1031,7 +1259,7 @@ const CareerDashboard = () => {
               </div>
               <div>
                 <h3 className="text-sm font-medium text-gray-500">Time Commitment</h3>
-                <p className="text-lg font-semibold">{userData.timeCommitment} per week</p>
+                <p className="text-lg font-semibold">{userData.timeCommitment || 'Not specified'}</p>
               </div>
             </div>
           </div>
@@ -1067,10 +1295,7 @@ const CareerDashboard = () => {
             <p className="text-gray-600 mb-6">
               Current job market trends and salary data for your recommended career paths as of {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.
             </p>
-            <MarketTrendsSection 
-              marketTrends={marketTrends}
-              careerPaths={careerPaths}
-            />
+            <MarketTrendsSection marketTrends={marketTrends} />
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -1085,7 +1310,7 @@ const CareerDashboard = () => {
                   <p className="text-gray-600">
                     For the most current job market insights related to your career path recommendations, 
                     consider reading industry reports or visiting job market websites focused on tech careers.
-                    You can also retake the assessment to generate a new analysis that may include market data.
+                    You can also retake the assessment to generate a new analysis that includes market data.
                   </p>
                 </div>
               </div>
@@ -1119,6 +1344,30 @@ const CareerDashboard = () => {
           </div>
         )}
         
+        {/* Networking Strategy */}
+        {networkingStrategy.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-2xl font-bold mb-6">Networking Strategy</h2>
+            <NetworkingStrategySection strategies={networkingStrategy} />
+          </div>
+        )}
+        
+        {/* Personal Branding */}
+        {personalBranding.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-2xl font-bold mb-6">Personal Branding</h2>
+            <PersonalBrandingSection tips={personalBranding} />
+          </div>
+        )}
+        
+        {/* Interview Preparation */}
+        {interviewPrep.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-2xl font-bold mb-6">Interview Preparation</h2>
+            <InterviewPrepSection tips={interviewPrep} />
+          </div>
+        )}
+        
         {/* Current Tools Proficiency */}
         {userData.toolsUsed && userData.toolsUsed.length > 0 && userData.toolsUsed[0] !== 'None' && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -1128,15 +1377,17 @@ const CareerDashboard = () => {
         )}
         
         {/* Transition Timeline */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-bold mb-6">Your Transition Roadmap</h2>
-          <div className="mb-4">
-            <p className="text-gray-600">
-              Based on your {userData.transitionTimeline} timeline and {userData.timeCommitment} weekly commitment
-            </p>
+        {userData.transitionTimeline && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold mb-6">Your Transition Roadmap</h2>
+            <div className="mb-4">
+              <p className="text-gray-600">
+                Based on your {userData.transitionTimeline} timeline and {userData.timeCommitment || 'specified'} weekly commitment
+              </p>
+            </div>
+            <TimelineChart milestones={timelineMilestones} />
           </div>
-          <TimelineChart milestones={timelineMilestones} />
-        </div>
+        )}
         
         {/* Complete Analysis */}
         <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
@@ -1177,7 +1428,7 @@ const CareerDashboard = () => {
         </span>
       </button>
 
-      {/* Custom Feedback Form Modal - Updated to match Google Form */}
+      {/* Custom Feedback Form Modal */}
       {showFeedbackForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">

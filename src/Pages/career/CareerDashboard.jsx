@@ -16,6 +16,7 @@ const CareerDashboard = () => {
   const [networkingStrategy, setNetworkingStrategy] = useState([]);
   const [personalBranding, setPersonalBranding] = useState([]);
   const [interviewPrep, setInterviewPrep] = useState([]);
+  const [showAllSkills, setShowAllSkills] = useState(false);
   const [userData, setUserData] = useState({
     name: '',
     email: '',
@@ -1310,14 +1311,50 @@ const CareerDashboard = () => {
         {skillsGap.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-bold mb-6">Skills Gap Analysis</h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 mb-4">
               Visual representation of your current skill levels versus required levels for your target career paths.
+            </p>
+            <p className="text-gray-600 mb-6">
+              Click "Show Personalized Learning Resources" to see resources tailored specifically to your skill level and career goals.
             </p>
             <div className="grid md:grid-cols-2 gap-4">
               {skillsGap.slice(0, 6).map((skill, index) => (
                 <SkillLevelChart key={index} skill={skill} />
               ))}
             </div>
+            
+            {skillsGap.length > 6 && (
+              <div className="text-center mt-6">
+                <button
+                  onClick={() => setShowAllSkills(prevState => !prevState)}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center mx-auto"
+                >
+                  {showAllSkills ? (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+                      </svg>
+                      Show Less
+                    </>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                      View All Skills
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+            
+            {showAllSkills && skillsGap.length > 6 && (
+              <div className="grid md:grid-cols-2 gap-4 mt-6">
+                {skillsGap.slice(6).map((skill, index) => (
+                  <SkillLevelChart key={index + 6} skill={skill} />
+                ))}
+              </div>
+            )}
           </div>
         )}
         

@@ -42,9 +42,52 @@ class ClaudeApiService {
         throw new Error(`API error: ${response.status} - ${errorText}`);
       }
       
+      // Parse the response data
       const data = await response.json();
+      console.log("API Response structure:", Object.keys(data));
+      
+      // Handle different possible response formats
+      let responseText = '';
+      
+      // Check for Anthropic API v1 format
+      if (data.content) {
+        console.log("Content structure:", typeof data.content);
+        
+        // If content is an array of objects with text property (newer Claude API)
+        if (Array.isArray(data.content) && data.content.length > 0 && data.content[0].text) {
+          responseText = data.content[0].text;
+        } 
+        // If content is a string (possible format)
+        else if (typeof data.content === 'string') {
+          responseText = data.content;
+        }
+        // Otherwise try to get the content in a different way
+        else {
+          console.log("Unexpected content format:", data.content);
+          // Try to parse content as JSON if it's an object
+          if (typeof data.content === 'object') {
+            responseText = JSON.stringify(data.content);
+          }
+        }
+      }
+      // Check for completion format (older Claude API)
+      else if (data.completion) {
+        responseText = data.completion;
+      }
+      // Final fallback for the standard Claude message format
+      else if (data.message && data.message.content) {
+        responseText = data.message.content;
+      }
+      // Last resort - return the entire response as a string
+      else {
+        console.warn("Unrecognized API response format, returning full response as string");
+        responseText = JSON.stringify(data);
+      }
+      
       console.log("Received successful response from Claude API");
-      return data.content[0].text;
+      console.log("First 100 chars of response:", responseText.substring(0, 100));
+      
+      return responseText;
     } catch (error) {
       console.error('Error getting form suggestions from Claude API:', error);
       throw error;
@@ -108,17 +151,54 @@ class ClaudeApiService {
         throw new Error(`API error: ${response.status} - ${errorText}`);
       }
       
+      // Parse the response data
       const data = await response.json();
+      console.log("API Response structure:", Object.keys(data));
+      
+      // Handle different possible response formats
+      let responseText = '';
+      
+      // Check for Anthropic API v1 format
+      if (data.content) {
+        console.log("Content structure:", typeof data.content);
+        
+        // If content is an array of objects with text property (newer Claude API)
+        if (Array.isArray(data.content) && data.content.length > 0 && data.content[0].text) {
+          responseText = data.content[0].text;
+        } 
+        // If content is a string (possible format)
+        else if (typeof data.content === 'string') {
+          responseText = data.content;
+        }
+        // Otherwise try to get the content in a different way
+        else {
+          console.log("Unexpected content format:", data.content);
+          // Try to parse content as JSON if it's an object
+          if (typeof data.content === 'object') {
+            responseText = JSON.stringify(data.content);
+          }
+        }
+      }
+      // Check for completion format (older Claude API)
+      else if (data.completion) {
+        responseText = data.completion;
+      }
+      // Check for standard Claude message format
+      else if (data.message && data.message.content) {
+        responseText = data.message.content;
+      }
+      // Last resort - return the entire response as a string
+      else {
+        console.warn("Unrecognized API response format, returning full response as string");
+        responseText = JSON.stringify(data);
+      }
+      
       console.log("Received successful response from Claude API");
       
-      // DEBUGGING: Log the actual response text
-      const responseText = data.content[0].text;
-      console.log("=== CLAUDE RESPONSE START ===");
-      console.log(responseText);
-      console.log("=== CLAUDE RESPONSE END ===");
-      
-      // Log first 500 characters to see format
-      console.log("First 500 chars:", responseText.substring(0, 500));
+      // DEBUGGING: Log the actual response text (first 500 chars to avoid console flood)
+      console.log("=== CLAUDE RESPONSE START (first 500 chars) ===");
+      console.log(responseText.substring(0, 500));
+      console.log("=== CLAUDE RESPONSE PREVIEW END ===");
       
       // Check if Skills Gap section exists
       const hasSkillsGap = responseText.includes("SKILLS GAP ANALYSIS");
@@ -130,9 +210,9 @@ class ClaudeApiService {
         const skillsGapEnd = responseText.indexOf("LEARNING ROADMAP") || responseText.indexOf("TRANSITION STRATEGY");
         if (skillsGapEnd > skillsGapStart) {
           const skillsGapSection = responseText.substring(skillsGapStart, skillsGapEnd);
-          console.log("=== SKILLS GAP SECTION ===");
-          console.log(skillsGapSection);
-          console.log("=== END SKILLS GAP ===");
+          console.log("=== SKILLS GAP SECTION PREVIEW ===");
+          console.log(skillsGapSection.substring(0, 200) + "...");
+          console.log("=== END SKILLS GAP PREVIEW ===");
         }
       }
       

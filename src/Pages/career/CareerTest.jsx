@@ -13,6 +13,7 @@ const CareerTest = () => {
   const [loading, setLoading] = useState(false);
   const [aiAnalyzing, setAiAnalyzing] = useState(false);
   const [showAiAssistant, setShowAiAssistant] = useState(false);
+  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     // Personal information
     fullName: '',
@@ -82,7 +83,7 @@ const CareerTest = () => {
     }));
   };
 
-  // New handler for checkboxes
+  // Handler for checkboxes
   const handleCheckboxChange = (fieldName, value) => {
     setFormData(prevState => {
       // If value is already in array, remove it (unchecked)
@@ -105,9 +106,19 @@ const CareerTest = () => {
   const handleAiFillForm = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
+      console.log('Requesting AI form suggestions...');
       
       // Call the Claude API service to get form suggestions
       const suggestions = await claudeApiService.getFormSuggestions();
+      
+      console.log('Received suggestions, processing...');
+      console.log('Suggestions preview:', suggestions.substring(0, 100) + '...');
+      
+      if (!suggestions || typeof suggestions !== 'string') {
+        throw new Error('Invalid response format from AI service');
+      }
       
       // Parse suggestions and update form
       const suggestionLines = suggestions.split('\n');
@@ -336,6 +347,7 @@ const CareerTest = () => {
     } catch (error) {
       console.error('Error with AI form fill:', error);
       setLoading(false);
+      setError('Failed to get AI suggestions: ' + error.message);
       toast.error('Failed to get AI suggestions. Please fill the form manually.');
     }
   };
@@ -350,9 +362,13 @@ const CareerTest = () => {
     
     try {
       setAiAnalyzing(true);
+      setError(null);
+      
+      console.log('Starting form submission process...');
       
       // 1. Save form data to local storage for the app's use
       const savedSubmission = storageService.saveCareerTest(formData);
+      console.log('Form data saved to local storage');
       
       // 2. Submit only name and email to Google Form
       const googleFormData = {
@@ -360,36 +376,63 @@ const CareerTest = () => {
         email: formData.email
       };
       
-      // Submit the minimal data to Google Form
-      const formSubmissionResult = await googleFormService.submitToGoogleForm(googleFormData);
-      
-      if (!formSubmissionResult.success) {
-        console.warn('Google Form submission may have failed, but continuing analysis');
+      console.log('Submitting minimal data to Google Form...');
+      try {
+        // Submit the minimal data to Google Form
+        const formSubmissionResult = await googleFormService.submitToGoogleForm(googleFormData);
+        
+        if (!formSubmissionResult.success) {
+          console.warn('Google Form submission may have failed, but continuing analysis');
+        } else {
+          console.log('Google Form submission successful');
+        }
+      } catch (googleFormError) {
+        console.warn('Google Form submission error, but continuing analysis:', googleFormError);
       }
       
       // 3. Use the Claude API service to analyze the complete form data
-      const analysis = await claudeApiService.analyzeCareerPath(formData);
-      setCareerAnalysis(analysis);
+      console.log('Sending data to Claude API for analysis...');
       
-      // 4. Save the analysis to storage
-      storageService.saveCareerAnalysis({
-        userId: formData.email,
-        analysis
-      });
-      
-      setAiAnalyzing(false);
-      
-      // 5. Navigate to dashboard page with analysis and form data
-      navigate('/career/dashboard', { 
-        state: { 
-          analysis,
-          formData 
-        } 
-      });
+      try {
+        const analysis = await claudeApiService.analyzeCareerPath(formData);
+        
+        // Verify we got a valid string response
+        if (!analysis || typeof analysis !== 'string') {
+          throw new Error('Invalid response from career analysis. Please try again.');
+        }
+        
+        console.log('Analysis successfully received from Claude API');
+        console.log('Analysis length:', analysis.length);
+        
+        setCareerAnalysis(analysis);
+        
+        // 4. Save the analysis to storage
+        storageService.saveAnalysis({
+          submissionId: new Date().getTime().toString(),
+          analysis: analysis,
+          timestamp: new Date().toISOString()
+        });
+        
+        console.log('Analysis saved to storage');
+        
+        setAiAnalyzing(false);
+        
+        // 5. Navigate to dashboard page with analysis and form data
+        navigate('/career/dashboard', { 
+          state: { 
+            analysis,
+            formData 
+          } 
+        });
+      } catch (claudeError) {
+        console.error('Claude API error:', claudeError);
+        throw new Error('Failed to analyze your career data: ' + claudeError.message);
+      }
       
     } catch (error) {
       console.error('Error submitting form:', error);
       setAiAnalyzing(false);
+      setError('Error submitting form: ' + error.message);
       toast.error('Error submitting form. Please try again.');
     }
   };
@@ -472,6 +515,11 @@ const CareerTest = () => {
       <h1 className="text-3xl font-bold mb-6">Career Transition to Tech</h1>
       <p className="mb-8">Help us understand your background and tech interests to recommend the best career path</p>
 
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          <p>{error}</p>
+        </div>
+      )}
   
       <div className="flex justify-between items-center mb-6">
         <div>

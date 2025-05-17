@@ -1450,7 +1450,7 @@ const CareerDashboard = () => {
       {/* Floating Feedback Button */}
       <button
         onClick={() => setShowFeedbackForm(true)}
-        className="fixed bottom-8 right-8 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-all transform hover:scale-110 group"
+        className="fixed bottom-8 right-8 bg-red-600 text-white p-4 rounded-full shadow-lg hover:bg-red-700 transition-all transform hover:scale-110 group"
         aria-label="Give Feedback"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1492,8 +1492,8 @@ const CareerDashboard = () => {
                         onClick={() => handleFeedbackChange({ target: { name: 'rating', value: value.toString() } })}
                         className={`w-12 h-12 rounded-full border-2 transition-all ${
                           feedbackData.rating === value.toString()
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : 'border-gray-300 hover:border-blue-500'
+                            ? 'bg-red-600 text-white border-red-600'
+                            : 'border-gray-300 hover:border-red-500'
                         }`}
                       >
                         {value}
@@ -1512,7 +1512,7 @@ const CareerDashboard = () => {
                     value={feedbackData.improvements}
                     onChange={handleFeedbackChange}
                     rows="4"
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
                     placeholder="Tell us how we can make this better..."
                     required
                   />
@@ -1523,7 +1523,7 @@ const CareerDashboard = () => {
                   <button
                     type="submit"
                     disabled={submittingFeedback || !feedbackData.rating || !feedbackData.improvements}
-                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition disabled:bg-gray-400"
+                    className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition disabled:bg-gray-400"
                   >
                     {submittingFeedback ? 'Submitting...' : 'Submit Feedback'}
                   </button>

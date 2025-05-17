@@ -560,6 +560,7 @@ const CareerDashboard = () => {
     return skills;
   };
 
+  
   const formatAnalysisText = (text) => {
   if (!text) return [];
 
@@ -1389,13 +1390,14 @@ const CareerDashboard = () => {
           </div>
         )}
         
-        {/* Complete Analysis */}
+        {/* 
         <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
           <h2 className="text-2xl font-bold mb-6">Detailed Analysis</h2>
           <div>
             {formatAnalysisText(analysis)}
           </div>
         </div>
+        */}
 
         {/* Next Steps - Dynamic based on user analysis */}
         <div className="bg-blue-50 rounded-lg p-6 mt-8">

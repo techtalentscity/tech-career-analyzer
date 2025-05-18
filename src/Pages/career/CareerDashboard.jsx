@@ -3104,178 +3104,200 @@ const CareerDashboard = () => {
             
             <SimpleBarChart data={chartData} title="" />
             
-            <div className="mt-8 grid md:grid-cols-3 gap-6">
-              {careerPaths.slice(0, 3).map((path, index) => (
-                <div key={index} className={`p-5 rounded-lg ${
-                  index === 0 ? 'bg-blue-50 border border-blue-100' :
-                  index === 1 ? 'bg-green-50 border border-green-100' :
-                  'bg-purple-50 border border-purple-100'
-                }`}>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-lg">{path.title}</h3>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      index === 0 ? 'bg-blue-100 text-blue-800' :
-                      index === 1 ? 'bg-green-100 text-green-800' :
-                      'bg-purple-100 text-purple-800'
+            {/* Prepare third career path if needed */}
+            {(() => {
+              let displayPaths = [...careerPaths];
+              
+              // Generate a third path if we have fewer than 3
+              if (displayPaths.length < 3) {
+                const thirdPathNeeded = 3 - displayPaths.length;
+                for (let i = 0; i < thirdPathNeeded; i++) {
+                  // Get suggested career path based on existing paths and user data
+                  const relatedPath = generateRelatedCareerPath(displayPaths, userData, skillsGap);
+                  if (relatedPath) {
+                    displayPaths.push(relatedPath);
+                  }
+                }
+              }
+              
+              // Only show the first 3 paths
+              displayPaths = displayPaths.slice(0, 3);
+              
+              return (
+                <div className="mt-8 grid md:grid-cols-3 gap-6">
+                  {displayPaths.map((path, index) => (
+                    <div key={index} className={`p-5 rounded-lg ${
+                      index === 0 ? 'bg-blue-50 border border-blue-100' :
+                      index === 1 ? 'bg-green-50 border border-green-100' :
+                      'bg-purple-50 border border-purple-100'
                     }`}>
-                      {path.match}% Match
-                    </span>
-                  </div>
-                  
-                  <div className="space-y-3 mt-4">
-                    {index === 0 && (
-                      <>
-                        <div className="mb-3">
-                          <h4 className="text-sm font-medium text-gray-500 uppercase">Why This Path</h4>
-                          <p className="text-gray-700 mt-1">
-                            <strong>Perfect Fit:</strong> Your {userData.experienceLevel.toLowerCase()} experience
-                            {userData.studyField ? ` in ${userData.studyField}` : ''} aligns with the core requirements.
-                          </p>
-                          <p className="text-gray-700 mt-2">
-                            <strong>Key Advantage:</strong> Your background in {
-                              userData.currentRole ? userData.currentRole : 'your current field'
-                            } provides transferable skills highly valued in this role.
-                          </p>
-                        </div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-semibold text-lg">{path.title}</h3>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          index === 0 ? 'bg-blue-100 text-blue-800' :
+                          index === 1 ? 'bg-green-100 text-green-800' :
+                          'bg-purple-100 text-purple-800'
+                        }`}>
+                          {path.match}% Match
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-3 mt-4">
+                        {index === 0 && (
+                          <>
+                            <div className="mb-3">
+                              <h4 className="text-sm font-medium text-gray-500 uppercase">Why This Path</h4>
+                              <p className="text-gray-700 mt-1">
+                                <strong>Perfect Fit:</strong> Your {userData.experienceLevel.toLowerCase()} experience
+                                {userData.studyField ? ` in ${userData.studyField}` : ''} aligns with the core requirements.
+                              </p>
+                              <p className="text-gray-700 mt-2">
+                                <strong>Key Advantage:</strong> Your background in {
+                                  userData.currentRole ? userData.currentRole : 'your current field'
+                                } provides transferable skills highly valued in this role.
+                              </p>
+                            </div>
+                            
+                            <div className="mb-3">
+                              <h4 className="text-sm font-medium text-gray-500 uppercase">Required Skills</h4>
+                              <div className="mt-1 flex flex-wrap gap-2">
+                                {skillsGap.filter(skill => skill.gap > 0).slice(0, 3).map((skill, idx) => (
+                                  <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                                    {skill.name}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            <div className="mb-3">
+                              <h4 className="text-sm font-medium text-gray-500 uppercase">Estimated Timeline</h4>
+                              <p className="text-gray-700 mt-1">
+                                <strong>{userData.transitionTimeline === 'Less than 6 months' || userData.transitionTimeline === 'Already transitioning' ? 
+                                  '3-6 months' : 
+                                  userData.transitionTimeline === '6-12 months' ? 
+                                  '6-9 months' : 
+                                  '9-12 months'}</strong> based on your current experience and commitment level
+                              </p>
+                            </div>
+                            
+                            <div className="mb-3">
+                              <h4 className="text-sm font-medium text-gray-500 uppercase">Career Outlook</h4>
+                              <p className="text-gray-700 mt-1">
+                                <strong>Strong Growth:</strong> Projected 22% increase in demand over the next 5 years with competitive salary ranges
+                              </p>
+                            </div>
+                          </>
+                        )}
+                        {index === 1 && (
+                          <>
+                            <div className="mb-3">
+                              <h4 className="text-sm font-medium text-gray-500 uppercase">Why This Path</h4>
+                              <p className="text-gray-700 mt-1">
+                                <strong>Strong Alternative:</strong> Your technical skills combined with your background
+                                {userData.currentRole ? ` in ${userData.currentRole}` : ''} create an excellent foundation.
+                              </p>
+                              <p className="text-gray-700 mt-2">
+                                <strong>Natural Fit:</strong> Your interest in {
+                                  userData.careerPathsInterest && userData.careerPathsInterest.length > 0 
+                                    ? userData.careerPathsInterest[0] 
+                                    : 'technology'
+                                } aligns well with the core responsibilities.
+                              </p>
+                            </div>
+                            
+                            <div className="mb-3">
+                              <h4 className="text-sm font-medium text-gray-500 uppercase">Required Skills</h4>
+                              <div className="mt-1 flex flex-wrap gap-2">
+                                {skillsGap.filter(skill => skill.gap > 0).slice(2, 5).map((skill, idx) => (
+                                  <span key={idx} className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
+                                    {skill.name}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            <div className="mb-3">
+                              <h4 className="text-sm font-medium text-gray-500 uppercase">Estimated Timeline</h4>
+                              <p className="text-gray-700 mt-1">
+                                <strong>{userData.transitionTimeline === 'Less than 6 months' || userData.transitionTimeline === 'Already transitioning' ? 
+                                  '4-8 months' : 
+                                  userData.transitionTimeline === '6-12 months' ? 
+                                  '8-12 months' : 
+                                  '10-14 months'}</strong> to build necessary specialization and portfolio
+                              </p>
+                            </div>
+                            
+                            <div className="mb-3">
+                              <h4 className="text-sm font-medium text-gray-500 uppercase">Career Outlook</h4>
+                              <p className="text-gray-700 mt-1">
+                                <strong>High Demand:</strong> Consistent growth with varied opportunities across industries
+                              </p>
+                            </div>
+                          </>
+                        )}
+                        {index === 2 && (
+                          <>
+                            <div className="mb-3">
+                              <h4 className="text-sm font-medium text-gray-500 uppercase">Why This Path</h4>
+                              <p className="text-gray-700 mt-1">
+                                <strong>Complementary Option:</strong> Leverages your analytical skills and technical knowledge while opening different opportunities.
+                              </p>
+                              <p className="text-gray-700 mt-2">
+                                <strong>Growth Potential:</strong> Your background in {userData.studyField || 'your field'} provides a strong foundation for this emerging role.
+                              </p>
+                            </div>
+                            
+                            <div className="mb-3">
+                              <h4 className="text-sm font-medium text-gray-500 uppercase">Required Skills</h4>
+                              <div className="mt-1 flex flex-wrap gap-2">
+                                {skillsGap.filter(skill => skill.gap > 0).slice(4, 7).map((skill, idx) => (
+                                  <span key={idx} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+                                    {skill.name}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            <div className="mb-3">
+                              <h4 className="text-sm font-medium text-gray-500 uppercase">Estimated Timeline</h4>
+                              <p className="text-gray-700 mt-1">
+                                <strong>{userData.transitionTimeline === 'Less than 6 months' || userData.transitionTimeline === 'Already transitioning' ? 
+                                  '6-10 months' : 
+                                  userData.transitionTimeline === '6-12 months' ? 
+                                  '10-14 months' : 
+                                  '12-18 months'}</strong> to acquire specialized knowledge and experience
+                              </p>
+                            </div>
+                            
+                            <div className="mb-3">
+                              <h4 className="text-sm font-medium text-gray-500 uppercase">Career Outlook</h4>
+                              <p className="text-gray-700 mt-1">
+                                <strong>Emerging Field:</strong> Growing demand for specialists with your technical background
+                              </p>
+                            </div>
+                          </>
+                        )}
                         
-                        <div className="mb-3">
-                          <h4 className="text-sm font-medium text-gray-500 uppercase">Required Skills</h4>
-                          <div className="mt-1 flex flex-wrap gap-2">
-                            {skillsGap.filter(skill => skill.gap > 0).slice(0, 3).map((skill, idx) => (
-                              <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
-                                {skill.name}
-                              </span>
-                            ))}
-                          </div>
+                        <div className="pt-3">
+                          <a 
+                            href={`https://www.google.com/search?q=${encodeURIComponent(path.title)}+career+path+requirements`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`text-sm font-medium ${
+                              index === 0 ? 'text-blue-600 hover:text-blue-800' :
+                              index === 1 ? 'text-green-600 hover:text-green-800' :
+                              'text-purple-600 hover:text-purple-800'
+                            }`}
+                          >
+                            Learn more about this career →
+                          </a>
                         </div>
-                        
-                        <div className="mb-3">
-                          <h4 className="text-sm font-medium text-gray-500 uppercase">Estimated Timeline</h4>
-                          <p className="text-gray-700 mt-1">
-                            <strong>{userData.transitionTimeline === 'Less than 6 months' || userData.transitionTimeline === 'Already transitioning' ? 
-                              '3-6 months' : 
-                              userData.transitionTimeline === '6-12 months' ? 
-                              '6-9 months' : 
-                              '9-12 months'}</strong> based on your current experience and commitment level
-                          </p>
-                        </div>
-                        
-                        <div className="mb-3">
-                          <h4 className="text-sm font-medium text-gray-500 uppercase">Career Outlook</h4>
-                          <p className="text-gray-700 mt-1">
-                            <strong>Strong Growth:</strong> Projected 22% increase in demand over the next 5 years with competitive salary ranges
-                          </p>
-                        </div>
-                      </>
-                    )}
-                    {index === 1 && (
-                      <>
-                        <div className="mb-3">
-                          <h4 className="text-sm font-medium text-gray-500 uppercase">Why This Path</h4>
-                          <p className="text-gray-700 mt-1">
-                            <strong>Strong Alternative:</strong> Your technical skills combined with your background
-                            {userData.currentRole ? ` in ${userData.currentRole}` : ''} create an excellent foundation.
-                          </p>
-                          <p className="text-gray-700 mt-2">
-                            <strong>Natural Fit:</strong> Your interest in {
-                              userData.careerPathsInterest && userData.careerPathsInterest.length > 0 
-                                ? userData.careerPathsInterest[0] 
-                                : 'technology'
-                            } aligns well with the core responsibilities.
-                          </p>
-                        </div>
-                        
-                        <div className="mb-3">
-                          <h4 className="text-sm font-medium text-gray-500 uppercase">Required Skills</h4>
-                          <div className="mt-1 flex flex-wrap gap-2">
-                            {skillsGap.filter(skill => skill.gap > 0).slice(2, 5).map((skill, idx) => (
-                              <span key={idx} className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
-                                {skill.name}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        <div className="mb-3">
-                          <h4 className="text-sm font-medium text-gray-500 uppercase">Estimated Timeline</h4>
-                          <p className="text-gray-700 mt-1">
-                            <strong>{userData.transitionTimeline === 'Less than 6 months' || userData.transitionTimeline === 'Already transitioning' ? 
-                              '4-8 months' : 
-                              userData.transitionTimeline === '6-12 months' ? 
-                              '8-12 months' : 
-                              '10-14 months'}</strong> to build necessary specialization and portfolio
-                          </p>
-                        </div>
-                        
-                        <div className="mb-3">
-                          <h4 className="text-sm font-medium text-gray-500 uppercase">Career Outlook</h4>
-                          <p className="text-gray-700 mt-1">
-                            <strong>High Demand:</strong> Consistent growth with varied opportunities across industries
-                          </p>
-                        </div>
-                      </>
-                    )}
-                    {index === 2 && (
-                      <>
-                        <div className="mb-3">
-                          <h4 className="text-sm font-medium text-gray-500 uppercase">Why This Path</h4>
-                          <p className="text-gray-700 mt-1">
-                            <strong>Emerging Option:</strong> Leverages your technical aptitude while opening new opportunities in innovative fields.
-                          </p>
-                          <p className="text-gray-700 mt-2">
-                            <strong>Complementary Skills:</strong> Your background provides unique perspectives valued in this growing field.
-                          </p>
-                        </div>
-                        
-                        <div className="mb-3">
-                          <h4 className="text-sm font-medium text-gray-500 uppercase">Required Skills</h4>
-                          <div className="mt-1 flex flex-wrap gap-2">
-                            {skillsGap.filter(skill => skill.gap > 0).slice(4, 7).map((skill, idx) => (
-                              <span key={idx} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
-                                {skill.name}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        <div className="mb-3">
-                          <h4 className="text-sm font-medium text-gray-500 uppercase">Estimated Timeline</h4>
-                          <p className="text-gray-700 mt-1">
-                            <strong>{userData.transitionTimeline === 'Less than 6 months' || userData.transitionTimeline === 'Already transitioning' ? 
-                              '6-10 months' : 
-                              userData.transitionTimeline === '6-12 months' ? 
-                              '10-14 months' : 
-                              '12-18 months'}</strong> to acquire specialized knowledge and experience
-                          </p>
-                        </div>
-                        
-                        <div className="mb-3">
-                          <h4 className="text-sm font-medium text-gray-500 uppercase">Career Outlook</h4>
-                          <p className="text-gray-700 mt-1">
-                            <strong>Emerging Field:</strong> Rapidly growing with potential for specialization and leadership roles
-                          </p>
-                        </div>
-                      </>
-                    )}
-                    
-                    <div className="pt-3">
-                      <a 
-                        href={`https://www.google.com/search?q=${encodeURIComponent(path.title)}+career+path+requirements`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`text-sm font-medium ${
-                          index === 0 ? 'text-blue-600 hover:text-blue-800' :
-                          index === 1 ? 'text-green-600 hover:text-green-800' :
-                          'text-purple-600 hover:text-purple-800'
-                        }`}
-                      >
-                        Learn more about this career →
-                      </a>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              );
+            })()}
             
             <div className="mt-8 bg-gray-50 p-4 rounded-lg">
               <h3 className="font-semibold text-lg mb-3">Career Path Comparison</h3>
@@ -3292,47 +3314,66 @@ const CareerDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {careerPaths.slice(0, 3).map((path, index) => (
-                      <tr key={index}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="font-medium text-gray-900">{path.title}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={`inline-flex px-2 text-xs leading-5 font-semibold rounded-full ${
-                            index === 0 ? 'bg-blue-100 text-blue-800' :
-                            index === 1 ? 'bg-green-100 text-green-800' :
-                            'bg-purple-100 text-purple-800'}`}>
-                            {path.match}%
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {index === 0 ? 
-                              (userData.transitionTimeline === 'Less than 6 months' ? '3-6 months' : '6-12 months') :
-                             index === 1 ? 
-                              (userData.transitionTimeline === 'Less than 6 months' ? '4-8 months' : '8-12 months') :
-                              (userData.transitionTimeline === 'Less than 6 months' ? '6-10 months' : '10-16 months')}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {index === 0 ? 
-                              (skillsGap.length > 0 ? skillsGap[0].name : 'Technical foundations') :
-                             index === 1 ? 
-                              (skillsGap.length > 1 ? skillsGap[1].name : 'Analytical skills') :
-                              (skillsGap.length > 2 ? skillsGap[2].name : 'Specialized knowledge')}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={`text-sm ${
-                            index === 0 ? 'text-green-600' :
-                            index === 1 ? 'text-blue-600' :
-                            'text-purple-600'}`}>
-                            {index === 0 ? 'Very High' : index === 1 ? 'High' : 'Growing'}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                    {(() => {
+                      let displayPaths = [...careerPaths];
+                      
+                      // Generate a third path if we have fewer than 3
+                      if (displayPaths.length < 3) {
+                        const thirdPathNeeded = 3 - displayPaths.length;
+                        for (let i = 0; i < thirdPathNeeded; i++) {
+                          // Get suggested career path based on existing paths and user data
+                          const relatedPath = generateRelatedCareerPath(displayPaths, userData, skillsGap);
+                          if (relatedPath) {
+                            displayPaths.push(relatedPath);
+                          }
+                        }
+                      }
+                      
+                      // Only show the first 3 paths
+                      displayPaths = displayPaths.slice(0, 3);
+                      
+                      return displayPaths.map((path, index) => (
+                        <tr key={index}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="font-medium text-gray-900">{path.title}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className={`inline-flex px-2 text-xs leading-5 font-semibold rounded-full ${
+                              index === 0 ? 'bg-blue-100 text-blue-800' :
+                              index === 1 ? 'bg-green-100 text-green-800' :
+                              'bg-purple-100 text-purple-800'}`}>
+                              {path.match}%
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {index === 0 ? 
+                                (userData.transitionTimeline === 'Less than 6 months' ? '3-6 months' : '6-12 months') :
+                              index === 1 ? 
+                                (userData.transitionTimeline === 'Less than 6 months' ? '4-8 months' : '8-12 months') :
+                                (userData.transitionTimeline === 'Less than 6 months' ? '6-10 months' : '10-16 months')}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {index === 0 ? 
+                                (skillsGap.length > 0 ? skillsGap[0].name : 'Technical foundations') :
+                              index === 1 ? 
+                                (skillsGap.length > 1 ? skillsGap[1].name : 'Analytical skills') :
+                                (skillsGap.length > 2 ? skillsGap[2].name : 'Specialized knowledge')}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className={`text-sm ${
+                              index === 0 ? 'text-green-600' :
+                              index === 1 ? 'text-blue-600' :
+                              'text-purple-600'}`}>
+                              {index === 0 ? 'Very High' : index === 1 ? 'High' : 'Growing'}
+                            </div>
+                          </td>
+                        </tr>
+                      ));
+                    })()}
                   </tbody>
                 </table>
               </div>

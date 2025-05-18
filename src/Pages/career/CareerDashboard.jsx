@@ -1,123 +1,4 @@
-els[proficiency - 1]}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${(proficiency / 5) * 100}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  // Market Trends Section Component
-  const MarketTrendsSection = ({ marketTrends }) => {
-    if (!marketTrends || marketTrends.length === 0) {
-      return null;
-    }
-    
-    const salaryTrends = marketTrends.filter(trend => trend.type === 'salary');
-    const growthTrends = marketTrends.filter(trend => trend.type === 'growth');
-    const generalTrends = marketTrends.filter(trend => trend.type === 'general');
-    const sectionHeaders = marketTrends.filter(trend => trend.type === 'section_header');
-    
-    return (
-      <div>
-        {salaryTrends.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-4">Salary Ranges</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              {salaryTrends.map((trend, index) => (
-                <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium">{trend.careerPath}</span>
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <span className="text-2xl font-bold text-blue-700">
-                      ${trend.minSalary.toLocaleString()} - ${trend.maxSalary.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="text-center text-sm text-gray-600 mt-2">Annual salary range</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {growthTrends.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-4">Job Growth Projections</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              {growthTrends.map((trend, index) => (
-                <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium">{trend.careerPath}</span>
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <span className={`text-3xl font-bold ${
-                      trend.growth > 15 ? 'text-green-600' : 
-                      trend.growth > 5 ? 'text-blue-600' : 
-                      'text-orange-600'
-                    }`}>
-                      {trend.growth}%
-                    </span>
-                  </div>
-                  <div className="text-center text-sm text-gray-600 mt-2">Projected growth rate</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {sectionHeaders.length > 0 && generalTrends.length > 0 && (
-          <div>
-            {sectionHeaders.map((header, hIndex) => {
-              const relatedTrends = generalTrends.filter(trend => trend.subsection === header.title);
-              if (relatedTrends.length === 0) return null;
-              
-              return (
-                <div key={hIndex} className="mb-6">
-                  <h3 className="text-lg font-semibold mb-4">{header.title}</h3>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <ul className="space-y-3">
-                      {relatedTrends.map((trend, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="text-blue-600 mr-2 mt-1">•</span>
-                          <span>{trend.trend}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-        
-        {!sectionHeaders.length && generalTrends.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-4">Industry Insights</h3>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <ul className="space-y-3">
-                {generalTrends.map((trend, index) => (
-                  <li key={index} className="flex items-start">
-                    <span className="text-blue-600 mr-2 mt-1">•</span>
-                    <span>{trend.trend}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Networking Strategy Component
+// Networking Strategy Component
   const NetworkingStrategySection = ({ strategies }) => {
     if (!strategies || strategies.length === 0) {
       return null;
@@ -1494,13 +1375,16 @@ els[proficiency - 1]}</span>
           </div>
         )}
         
-        {/* Current Tools Proficiency */}
+        {/* Technical Proficiency Section - COMMENTED OUT as requested */}
+        {/* 
+        Current Tools Proficiency - Removed as requested
         {userData.toolsUsed && userData.toolsUsed.length > 0 && userData.toolsUsed[0] !== 'None' && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-bold mb-6">Technical Proficiency</h2>
             <ToolsProficiency tools={userData.toolsUsed} />
           </div>
         )}
+        */}
         
         {/* Complete Analysis */}
         <div className="bg-white rounded-lg shadow-md p-6 md:p-8">

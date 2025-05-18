@@ -462,6 +462,7 @@ const CareerDashboard = () => {
     const skills = [];
     const userToolsUsed = userData.toolsUsed || [];
     
+    // Create a mapping of tools to skill names and categories based on actual user choices
     const toolSkillMapping = {
       'VS Code': { name: 'IDE Proficiency', category: 'Development Tools' },
       'GitHub': { name: 'Version Control', category: 'Collaboration Tools' },
@@ -474,6 +475,7 @@ const CareerDashboard = () => {
       'Docker': { name: 'Containerization', category: 'DevOps' }
     };
 
+    // Map user experience level to numeric values for skill comparison
     const experienceLevelMap = {
       'Complete beginner': 1,
       'Some exposure': 2,
@@ -529,12 +531,16 @@ const CareerDashboard = () => {
             requiredLevel = 5;
           }
           
+          // Determine learning resources based on skill name
+          let resources = determineSkillResources(skillName);
+          
           skills.push({
             name: skillName,
             description: description,
             currentLevel: userCurrentLevel,
             requiredLevel: requiredLevel,
-            gap: requiredLevel - userCurrentLevel
+            gap: requiredLevel - userCurrentLevel,
+            resources: resources
           });
         }
       }
@@ -563,19 +569,369 @@ const CareerDashboard = () => {
             requiredLevel = 5;
           }
           
+          // Determine learning resources based on skill name
+          let resources = determineSkillResources(skillName);
+          
           skills.push({
             name: skillName,
             description: description,
             currentLevel: userCurrentLevel,
             requiredLevel: requiredLevel,
-            gap: requiredLevel - userCurrentLevel
+            gap: requiredLevel - userCurrentLevel,
+            resources: resources
           });
         }
       }
     });
     
-    // Only return skills found in the analysis
+    // If no skills found but user has tools, generate skills based on tools
+    if (skills.length === 0 && userToolsUsed && userToolsUsed.length > 0 && userToolsUsed[0] !== 'None') {
+      userToolsUsed.forEach(tool => {
+        if (toolSkillMapping[tool]) {
+          const skillInfo = toolSkillMapping[tool];
+          const userCurrentLevel = currentLevel;
+          const requiredLevel = Math.min(userCurrentLevel + 2, 5);
+          
+          // Determine learning resources based on skill name
+          let resources = determineSkillResources(tool);
+          
+          skills.push({
+            name: skillInfo.name,
+            description: `Enhance your ${tool} skills to advance in your chosen career path.`,
+            currentLevel: userCurrentLevel,
+            requiredLevel: requiredLevel,
+            gap: requiredLevel - userCurrentLevel,
+            category: skillInfo.category,
+            resources: resources
+          });
+        }
+      });
+    }
+    
+    // If still no skills found, generate based on experience level and career paths
+    if (skills.length === 0 && careerPaths.length > 0) {
+      const topCareerPath = careerPaths[0].title;
+      const defaultSkills = determineDefaultSkillsForCareer(topCareerPath);
+      
+      defaultSkills.forEach(skill => {
+        const userCurrentLevel = currentLevel;
+        const requiredLevel = Math.min(userCurrentLevel + 2, 5);
+        
+        // Determine learning resources based on skill name
+        let resources = determineSkillResources(skill.name);
+        
+        skills.push({
+          name: skill.name,
+          description: skill.description,
+          currentLevel: userCurrentLevel,
+          requiredLevel: requiredLevel,
+          gap: requiredLevel - userCurrentLevel,
+          category: skill.category,
+          resources: resources
+        });
+      });
+    }
+    
     return skills;
+  };
+  
+  // Helper function to determine relevant learning resources for a skill
+  const determineSkillResources = (skillName) => {
+    const skillLower = skillName.toLowerCase();
+    
+    // Default resources
+    let resources = {
+      courses: [{
+        title: "Comprehensive Learning Path",
+        url: `https://www.coursera.org/search?query=${encodeURIComponent(skillName)}`,
+        platform: "Coursera"
+      }],
+      tutorials: [{
+        title: "Practical Tutorials",
+        url: `https://www.udemy.com/courses/search/?src=ukw&q=${encodeURIComponent(skillName)}`,
+        platform: "Udemy"
+      }],
+      videos: [{
+        title: "Video Tutorials",
+        url: `https://www.youtube.com/results?search_query=${encodeURIComponent(skillName)}+tutorial+beginner`,
+        platform: "YouTube"
+      }],
+      projects: [{
+        title: "Example Projects",
+        url: `https://github.com/topics/${encodeURIComponent(skillName.toLowerCase().replace(/ /g, '-'))}`,
+        platform: "GitHub"
+      }]
+    };
+    
+    // Add specific resources based on skill name
+    if (skillLower.includes('javascript') || skillLower.includes('js')) {
+      resources.courses.push({
+        title: "JavaScript Fundamentals",
+        url: "https://javascript.info/",
+        platform: "JavaScript.info"
+      });
+      resources.courses.push({
+        title: "Modern JavaScript",
+        url: "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/",
+        platform: "freeCodeCamp"
+      });
+      resources.tutorials.push({
+        title: "JavaScript Exercises",
+        url: "https://exercism.org/tracks/javascript",
+        platform: "Exercism"
+      });
+    }
+    else if (skillLower.includes('python')) {
+      resources.courses.push({
+        title: "Python for Everybody",
+        url: "https://www.py4e.com/",
+        platform: "py4e"
+      });
+      resources.tutorials.push({
+        title: "Python Exercises",
+        url: "https://exercism.org/tracks/python",
+        platform: "Exercism"
+      });
+      resources.videos.push({
+        title: "Python Crash Course",
+        url: "https://www.youtube.com/watch?v=rfscVS0vtbw",
+        platform: "YouTube"
+      });
+    }
+    else if (skillLower.includes('react')) {
+      resources.courses.push({
+        title: "React Documentation",
+        url: "https://react.dev/learn",
+        platform: "React.dev"
+      });
+      resources.tutorials.push({
+        title: "React Projects",
+        url: "https://www.freecodecamp.org/learn/front-end-development-libraries/#react",
+        platform: "freeCodeCamp"
+      });
+    }
+    else if (skillLower.includes('data science') || skillLower.includes('data analysis')) {
+      resources.courses.push({
+        title: "Data Science Path",
+        url: "https://www.datacamp.com/",
+        platform: "DataCamp"
+      });
+      resources.tutorials.push({
+        title: "Kaggle Tutorials",
+        url: "https://www.kaggle.com/learn",
+        platform: "Kaggle"
+      });
+    }
+    else if (skillLower.includes('machine learning') || skillLower.includes('ai')) {
+      resources.courses.push({
+        title: "ML Crash Course",
+        url: "https://developers.google.com/machine-learning/crash-course",
+        platform: "Google"
+      });
+      resources.tutorials.push({
+        title: "Practical ML",
+        url: "https://www.kaggle.com/learn/intro-to-machine-learning",
+        platform: "Kaggle"
+      });
+    }
+    else if (skillLower.includes('web dev') || skillLower.includes('frontend') || skillLower.includes('front-end')) {
+      resources.courses.push({
+        title: "Web Development Path",
+        url: "https://www.freecodecamp.org/learn/responsive-web-design/",
+        platform: "freeCodeCamp"
+      });
+      resources.tutorials.push({
+        title: "Frontend Mentor",
+        url: "https://www.frontendmentor.io/challenges",
+        platform: "Frontend Mentor"
+      });
+    }
+    else if (skillLower.includes('backend') || skillLower.includes('back-end') || skillLower.includes('server')) {
+      resources.courses.push({
+        title: "Backend Development",
+        url: "https://www.theodinproject.com/paths/full-stack-javascript/courses/nodejs",
+        platform: "The Odin Project"
+      });
+    }
+    else if (skillLower.includes('cloud') || skillLower.includes('aws') || skillLower.includes('azure')) {
+      resources.courses.push({
+        title: "Cloud Fundamentals",
+        url: "https://aws.amazon.com/training/learn-about/",
+        platform: "AWS Training"
+      });
+    }
+    else if (skillLower.includes('database') || skillLower.includes('sql')) {
+      resources.courses.push({
+        title: "SQL Course",
+        url: "https://www.khanacademy.org/computing/computer-programming/sql",
+        platform: "Khan Academy"
+      });
+      resources.tutorials.push({
+        title: "SQL Exercises",
+        url: "https://www.sqlzoo.net/",
+        platform: "SQLZoo"
+      });
+    }
+    
+    return resources;
+  };
+  
+  // Helper function to determine default skills based on career path
+  const determineDefaultSkillsForCareer = (careerPath) => {
+    const careerLower = careerPath.toLowerCase();
+    
+    if (careerLower.includes('frontend') || careerLower.includes('front-end') || careerLower.includes('front end')) {
+      return [
+        {
+          name: "JavaScript Programming",
+          description: "Develop strong JavaScript skills required for modern frontend development",
+          category: "Programming Languages"
+        },
+        {
+          name: "Frontend Frameworks",
+          description: "Learn React, Vue, or Angular to build interactive web applications",
+          category: "Frontend"
+        },
+        {
+          name: "Responsive Design",
+          description: "Master CSS and responsive design principles for modern web applications",
+          category: "Web Development"
+        }
+      ];
+    }
+    else if (careerLower.includes('backend') || careerLower.includes('back-end') || careerLower.includes('back end')) {
+      return [
+        {
+          name: "Server-side Programming",
+          description: "Master Node.js, Python, or Java for backend development",
+          category: "Programming Languages"
+        },
+        {
+          name: "Database Management",
+          description: "Learn SQL and database design principles for efficient data storage",
+          category: "Database"
+        },
+        {
+          name: "API Development",
+          description: "Develop skills in creating RESTful and GraphQL APIs",
+          category: "Web Development"
+        }
+      ];
+    }
+    else if (careerLower.includes('fullstack') || careerLower.includes('full-stack') || careerLower.includes('full stack')) {
+      return [
+        {
+          name: "JavaScript Full Stack",
+          description: "Develop end-to-end JavaScript skills for both frontend and backend",
+          category: "Programming Languages"
+        },
+        {
+          name: "Database Management",
+          description: "Learn SQL and NoSQL database technologies for data persistence",
+          category: "Database"
+        },
+        {
+          name: "Web Application Architecture",
+          description: "Understand how to design scalable and maintainable web applications",
+          category: "System Design"
+        }
+      ];
+    }
+    else if (careerLower.includes('data') || careerLower.includes('analyst')) {
+      return [
+        {
+          name: "Data Analysis",
+          description: "Learn techniques for cleaning, processing, and analyzing large datasets",
+          category: "Data Science"
+        },
+        {
+          name: "Python for Data Science",
+          description: "Master Python with pandas, NumPy, and matplotlib for data analysis",
+          category: "Programming Languages"
+        },
+        {
+          name: "Data Visualization",
+          description: "Develop skills in creating insightful visualizations and dashboards",
+          category: "Data Science"
+        }
+      ];
+    }
+    else if (careerLower.includes('machine learning') || careerLower.includes('ml') || careerLower.includes('ai')) {
+      return [
+        {
+          name: "Machine Learning Fundamentals",
+          description: "Master core ML algorithms and their applications",
+          category: "Artificial Intelligence"
+        },
+        {
+          name: "Python for ML",
+          description: "Learn Python with scikit-learn, TensorFlow, and PyTorch",
+          category: "Programming Languages"
+        },
+        {
+          name: "Mathematics for ML",
+          description: "Develop skills in statistics, linear algebra, and calculus for ML",
+          category: "Mathematics"
+        }
+      ];
+    }
+    else if (careerLower.includes('devops') || careerLower.includes('cloud')) {
+      return [
+        {
+          name: "Cloud Technologies",
+          description: "Master AWS, Azure, or Google Cloud for cloud infrastructure",
+          category: "Cloud Computing"
+        },
+        {
+          name: "Containerization",
+          description: "Learn Docker and Kubernetes for container orchestration",
+          category: "DevOps"
+        },
+        {
+          name: "Infrastructure as Code",
+          description: "Develop skills in Terraform, CloudFormation, or Ansible",
+          category: "DevOps"
+        }
+      ];
+    }
+    else if (careerLower.includes('mobile') || careerLower.includes('app')) {
+      return [
+        {
+          name: "Mobile Development",
+          description: "Learn React Native or Flutter for cross-platform app development",
+          category: "Mobile Development"
+        },
+        {
+          name: "UI/UX for Mobile",
+          description: "Master mobile interface design principles and user experience",
+          category: "Design"
+        },
+        {
+          name: "State Management",
+          description: "Develop skills in managing application state for complex apps",
+          category: "Software Architecture"
+        }
+      ];
+    }
+    
+    // Default skills for general tech careers
+    return [
+      {
+        name: "Programming Fundamentals",
+        description: "Build a strong foundation in programming principles and logic",
+        category: "Programming"
+      },
+      {
+        name: "Web Development",
+        description: "Develop skills in creating modern web applications and services",
+        category: "Web Development"
+      },
+      {
+        name: "Project Management",
+        description: "Learn to manage technical projects and collaborate effectively",
+        category: "Soft Skills"
+      }
+    ];
   };
 
   // Format analysis text for display
@@ -1286,11 +1642,11 @@ const CareerDashboard = () => {
 
   // Custom Timeline Component
   const TimelineChart = ({ milestones }) => {
+    const [expandedMilestone, setExpandedMilestone] = useState(null);
+    
     if (!milestones || milestones.length === 0) {
       return null;
     }
-    
-    const [expandedMilestone, setExpandedMilestone] = useState(null);
     
     return (
       <div className="mb-6">
@@ -1667,64 +2023,217 @@ const CareerDashboard = () => {
                 {skillsGap.slice(0, 4).map((skill, index) => (
                   <div key={index} className="bg-white p-4 rounded-lg shadow-sm">
                     <h4 className="font-semibold text-lg mb-2">{skill.name}</h4>
-                    <p className="text-sm text-gray-600 mb-3">Level: {skill.currentLevel} → {skill.requiredLevel}</p>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <span className="text-green-600 mr-2">•</span>
-                        <a 
-                          href={`https://www.coursera.org/search?query=${encodeURIComponent(skill.name)}`} 
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          Coursera Courses
-                        </a>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-green-600 mr-2">•</span>
-                        <a 
-                          href={`https://www.udemy.com/courses/search/?src=ukw&q=${encodeURIComponent(skill.name)}`} 
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          Udemy Tutorials
-                        </a>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-green-600 mr-2">•</span>
+                    <p className="text-sm text-gray-600 mb-3">
+                      {skill.currentLevel === 1 ? 'Beginner' : 
+                       skill.currentLevel === 2 ? 'Basic' :
+                       skill.currentLevel === 3 ? 'Intermediate' :
+                       skill.currentLevel === 4 ? 'Advanced' : 'Expert'} → {
+                       skill.requiredLevel === 1 ? 'Beginner' : 
+                       skill.requiredLevel === 2 ? 'Basic' :
+                       skill.requiredLevel === 3 ? 'Intermediate' :
+                       skill.requiredLevel === 4 ? 'Advanced' : 'Expert'}
+                    </p>
+                    <p className="text-sm text-gray-700 mb-4">{skill.description}</p>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <h5 className="text-sm font-medium text-green-800 mb-1">Recommended Courses</h5>
+                        <ul className="space-y-1">
+                          {skill.resources?.courses.map((course, cIdx) => (
+                            <li key={cIdx} className="flex items-start">
+                              <span className="text-green-600 mr-2">•</span>
+                              <a 
+                                href={course.url} 
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline text-sm"
+                              >
+                                {course.title} ({course.platform})
+                              </a>
+                            </li>
+                          )) || (
+                            <li className="flex items-start">
+                              <span className="text-green-600 mr-2">•</span>
+                              <a 
+                                href={`https://www.coursera.org/search?query=${encodeURIComponent(skill.name)}`} 
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline text-sm"
+                              >
+                                Coursera Courses
+                              </a>
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                      
+                      <div>
+                        <h5 className="text-sm font-medium text-green-800 mb-1">Practice & Projects</h5>
+                        <ul className="space-y-1">
+                          {skill.resources?.tutorials.map((tutorial, tIdx) => (
+                            <li key={tIdx} className="flex items-start">
+                              <span className="text-green-600 mr-2">•</span>
+                              <a 
+                                href={tutorial.url} 
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline text-sm"
+                              >
+                                {tutorial.title} ({tutorial.platform})
+                              </a>
+                            </li>
+                          )) || (
+                            <li className="flex items-start">
+                              <span className="text-green-600 mr-2">•</span>
+                              <a 
+                                href={`https://www.udemy.com/courses/search/?src=ukw&q=${encodeURIComponent(skill.name)}`} 
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline text-sm"
+                              >
+                                Udemy Tutorials
+                              </a>
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                      
+                      <div>
+                        <h5 className="text-sm font-medium text-green-800 mb-1">Learning Communities</h5>
+                        <ul className="space-y-1">
+                          <li className="flex items-start">
+                            <span className="text-green-600 mr-2">•</span>
+                            <a 
+                              href={`https://www.reddit.com/search/?q=${encodeURIComponent(skill.name)}%20learning`} 
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline text-sm"
+                            >
+                              Reddit Communities
+                            </a>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-green-600 mr-2">•</span>
+                            <a 
+                              href={`https://discord.com/servers?search=${encodeURIComponent(skill.name)}`} 
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline text-sm"
+                            >
+                              Discord Learning Groups
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {skillsGap.length > 4 && (
+                <div className="grid md:grid-cols-2 gap-6 mt-6">
+                  {skillsGap.slice(4, 6).map((skill, index) => (
+                    <div key={index} className="bg-white p-4 rounded-lg shadow-sm">
+                      <h4 className="font-semibold text-lg mb-2">{skill.name}</h4>
+                      <p className="text-sm text-gray-600 mb-3">
+                        {skill.currentLevel === 1 ? 'Beginner' : 
+                         skill.currentLevel === 2 ? 'Basic' :
+                         skill.currentLevel === 3 ? 'Intermediate' :
+                         skill.currentLevel === 4 ? 'Advanced' : 'Expert'} → {
+                         skill.requiredLevel === 1 ? 'Beginner' : 
+                         skill.requiredLevel === 2 ? 'Basic' :
+                         skill.requiredLevel === 3 ? 'Intermediate' :
+                         skill.requiredLevel === 4 ? 'Advanced' : 'Expert'}
+                      </p>
+                      
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {skill.resources?.courses.slice(0, 1).map((course, cIdx) => (
+                          <a 
+                            key={cIdx}
+                            href={course.url} 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm hover:bg-blue-100"
+                          >
+                            {course.platform} Courses
+                          </a>
+                        ))}
+                        
+                        {skill.resources?.tutorials.slice(0, 1).map((tutorial, tIdx) => (
+                          <a 
+                            key={tIdx}
+                            href={tutorial.url} 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm hover:bg-green-100"
+                          >
+                            {tutorial.platform}
+                          </a>
+                        ))}
+                        
                         <a 
                           href={`https://www.youtube.com/results?search_query=${encodeURIComponent(skill.name)}+tutorial+beginner`} 
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
+                          className="px-3 py-1 bg-red-50 text-red-700 rounded-full text-sm hover:bg-red-100"
                         >
-                          YouTube Learning Paths
+                          YouTube
                         </a>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-green-600 mr-2">•</span>
+                        
                         <a 
                           href={`https://github.com/topics/${encodeURIComponent(skill.name.toLowerCase().replace(/ /g, '-'))}`} 
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
+                          className="px-3 py-1 bg-gray-50 text-gray-700 rounded-full text-sm hover:bg-gray-100"
                         >
-                          GitHub Projects & Examples
+                          GitHub
                         </a>
-                      </li>
-                    </ul>
-                  </div>
-                ))}
-              </div>
-              {skillsGap.length > 4 && (
-                <div className="mt-4 text-center">
-                  <p className="text-gray-600">
-                    These are starting points for your top skills gaps. For a comprehensive learning plan, 
-                    consider working with a career coach or mentor.
-                  </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
+              
+              <div className="mt-6 bg-white rounded-lg p-4 border border-green-100">
+                <h4 className="font-medium text-green-800 mb-3">Learning Path Strategy</h4>
+                <div className="flex">
+                  <svg className="h-5 w-5 text-green-600 mr-2 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-gray-700">
+                    <strong>Focus on your highest gap skills first</strong> - Begin with {
+                      skillsGap.length > 0 ? skillsGap.sort((a, b) => b.gap - a.gap)[0].name : 'core skills'
+                    } to build a strong foundation for your career transition.
+                  </p>
+                </div>
+                <div className="flex mt-2">
+                  <svg className="h-5 w-5 text-green-600 mr-2 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-gray-700">
+                    <strong>Apply as you learn</strong> - For each skill, complete at least one project to reinforce your learning 
+                    before moving to the next skill.
+                  </p>
+                </div>
+                <div className="flex mt-2">
+                  <svg className="h-5 w-5 text-green-600 mr-2 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-gray-700">
+                    <strong>Commit to a schedule</strong> - Based on your {userData.timeCommitment || "available time"}, 
+                    allocate specific hours each week dedicated to each skill in your learning roadmap.
+                  </p>
+                </div>
+                <div className="flex mt-2">
+                  <svg className="h-5 w-5 text-green-600 mr-2 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-gray-700">
+                    <strong>Join learning communities</strong> - Engage with others learning the same skills to stay motivated
+                    and solve problems collaboratively.
+                  </p>
+                </div>
+              </div>
             </div>
             
             <div className="grid md:grid-cols-2 gap-4">

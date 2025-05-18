@@ -1033,7 +1033,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Create timeline visualization data - Based purely on user's specified timeline
+  // Create timeline visualization data - Based on user's specified timeline, career paths, and skills gap
   const createTimelineData = () => {
     const timelineMap = {
       'Less than 6 months': 6,
@@ -1043,31 +1043,241 @@ const CareerDashboard = () => {
       'Already transitioning': 3
     };
     
+    // Get user's top career path if available
+    const topCareerPath = careerPaths.length > 0 ? careerPaths[0].title : "";
+    
+    // Get user's top skills gaps
+    const topSkillsGaps = skillsGap
+      .filter(skill => skill.gap > 0)
+      .sort((a, b) => b.gap - a.gap)
+      .slice(0, 3)
+      .map(skill => skill.name);
+    
     const months = timelineMap[userData.transitionTimeline] || 12;
     const milestones = [];
     
+    // Monthly weekly commitment translation
+    const commitmentMap = {
+      'Less than 5 hours per week': 'part-time',
+      '5-10 hours per week': 'balanced',
+      '10-20 hours per week': 'dedicated',
+      '20+ hours per week': 'intensive',
+      'Full-time': 'full-time'
+    };
+    
+    const commitment = commitmentMap[userData.timeCommitment] || 'balanced';
+    
     if (months <= 6) {
+      // Accelerated learning path (6 months or less)
       milestones.push(
-        { month: 1, label: 'Start Learning', progress: 20 },
-        { month: 3, label: 'Complete Basics', progress: 50 },
-        { month: 6, label: 'Job Ready', progress: 100 }
+        { 
+          month: 1, 
+          label: 'Core Foundations', 
+          progress: 20,
+          details: [
+            `Begin learning ${topSkillsGaps[0] || 'fundamentals'} through online courses`,
+            `Set up development environment for ${topCareerPath || 'your selected path'}`,
+            'Join relevant tech communities and forums'
+          ]
+        },
+        { 
+          month: 2, 
+          label: 'Skill Building', 
+          progress: 40,
+          details: [
+            `Advance to intermediate ${topSkillsGaps[0] || 'skills'} concepts`,
+            `Start learning ${topSkillsGaps[1] || 'additional skills'}`,
+            'Complete first small project to apply new skills'
+          ]
+        },
+        { 
+          month: 3, 
+          label: 'Project Development', 
+          progress: 60,
+          details: [
+            'Begin comprehensive portfolio project',
+            `Continue advancing ${topSkillsGaps[0] || 'primary skill'} with advanced topics`,
+            'Prepare resume highlighting transferable skills from current role'
+          ]
+        },
+        { 
+          month: 4, 
+          label: 'Portfolio Building', 
+          progress: 75,
+          details: [
+            'Complete and refine main portfolio project',
+            'Create professional online presence (GitHub, LinkedIn)',
+            'Begin networking with professionals in target field'
+          ]
+        },
+        { 
+          month: 5, 
+          label: 'Job Search Preparation', 
+          progress: 90,
+          details: [
+            'Practice technical interviews and coding challenges',
+            'Reach out to recruiters and companies in your desired field',
+            'Attend industry meetups and events'
+          ]
+        },
+        { 
+          month: 6, 
+          label: 'Job Ready', 
+          progress: 100,
+          details: [
+            'Launch full job search campaign',
+            'Continue enhancing skills while interviewing',
+            'Consider freelance or contract work to build experience'
+          ]
+        }
       );
     } else if (months <= 12) {
+      // Standard learning path (12 months)
       milestones.push(
-        { month: 2, label: 'Foundation', progress: 20 },
-        { month: 4, label: 'Core Skills', progress: 40 },
-        { month: 6, label: 'Projects', progress: 60 },
-        { month: 9, label: 'Portfolio', progress: 80 },
-        { month: 12, label: 'Job Ready', progress: 100 }
+        { 
+          month: 1, 
+          label: 'Self-Assessment', 
+          progress: 10,
+          details: [
+            'Analyze your transferable skills from current role',
+            'Research trends and requirements for your target careers',
+            'Set up initial learning schedule and goals'
+          ]
+        },
+        { 
+          month: 2, 
+          label: 'Foundation Building', 
+          progress: 20,
+          details: [
+            `Begin foundational courses in ${topSkillsGaps[0] || 'key skills'}`,
+            'Set up development environment and tools',
+            'Join online communities related to your target field'
+          ]
+        },
+        { 
+          month: 4, 
+          label: 'Core Skills Development', 
+          progress: 40,
+          details: [
+            `Continue advancing ${topSkillsGaps[0] || 'primary skill'}`,
+            `Begin learning ${topSkillsGaps[1] || 'secondary skills'}`,
+            'Complete first set of guided projects'
+          ]
+        },
+        { 
+          month: 6, 
+          label: 'Project Implementation', 
+          progress: 60,
+          details: [
+            'Start independent portfolio projects',
+            'Enhance online presence (LinkedIn, GitHub)',
+            'Begin networking with industry professionals'
+          ]
+        },
+        { 
+          month: 8, 
+          label: 'Advanced Learning', 
+          progress: 70,
+          details: [
+            `Focus on advanced ${topCareerPath || 'career path'} concepts`,
+            'Refine portfolio with complex projects',
+            'Get feedback from mentors on your progress'
+          ]
+        },
+        { 
+          month: 10, 
+          label: 'Portfolio Refinement', 
+          progress: 85,
+          details: [
+            'Complete and polish 2-3 substantial portfolio projects',
+            'Update resume highlighting new skills and projects',
+            'Prepare for technical interviews and challenges'
+          ]
+        },
+        { 
+          month: 12, 
+          label: 'Job Ready', 
+          progress: 100,
+          details: [
+            'Launch targeted job search in your chosen field',
+            'Continue skills enhancement while interviewing',
+            'Consider freelance opportunities to build experience'
+          ]
+        }
       );
     } else {
+      // Extended learning path (18+ months)
       milestones.push(
-        { month: 3, label: 'Foundation', progress: 15 },
-        { month: 6, label: 'Core Skills', progress: 30 },
-        { month: 9, label: 'Specialization', progress: 45 },
-        { month: 12, label: 'Projects', progress: 60 },
-        { month: 15, label: 'Portfolio', progress: 80 },
-        { month: 18, label: 'Job Ready', progress: 100 }
+        { 
+          month: 1, 
+          label: 'Career Exploration', 
+          progress: 5,
+          details: [
+            'Explore different specializations within your chosen path',
+            'Identify mentors and learning resources',
+            'Create comprehensive learning plan'
+          ]
+        },
+        { 
+          month: 3, 
+          label: 'Foundation Building', 
+          progress: 15,
+          details: [
+            `Begin learning ${topSkillsGaps[0] || 'foundational skills'}`,
+            'Set up development environment and basic tools',
+            'Complete basic exercises and small projects'
+          ]
+        },
+        { 
+          month: 6, 
+          label: 'Core Skills', 
+          progress: 30,
+          details: [
+            `Continue advancing in ${topSkillsGaps[0] || 'primary skill'}`,
+            `Begin learning ${topSkillsGaps[1] || 'complementary skills'}`,
+            'Start building simple portfolio projects'
+          ]
+        },
+        { 
+          month: 9, 
+          label: 'Specialization', 
+          progress: 45,
+          details: [
+            `Focus on ${topCareerPath || 'chosen specialization'} specific skills`,
+            'Begin networking with professionals in target field',
+            'Enhance online presence (LinkedIn, GitHub)'
+          ]
+        },
+        { 
+          month: 12, 
+          label: 'Advanced Projects', 
+          progress: 60,
+          details: [
+            'Develop complex portfolio projects',
+            'Contribute to open source or community projects',
+            'Build professional relationships in the industry'
+          ]
+        },
+        { 
+          month: 15, 
+          label: 'Professional Development', 
+          progress: 80,
+          details: [
+            'Refine portfolio with high-quality projects',
+            'Attend industry events and conferences',
+            'Prepare for technical interviews and assessments'
+          ]
+        },
+        { 
+          month: 18, 
+          label: 'Career Transition', 
+          progress: 100,
+          details: [
+            'Launch targeted job search in your specialized field',
+            'Consider freelance or contract work to build experience',
+            'Continue learning advanced topics while interviewing'
+          ]
+        }
       );
     }
     
@@ -1080,25 +1290,62 @@ const CareerDashboard = () => {
       return null;
     }
     
+    const [expandedMilestone, setExpandedMilestone] = useState(null);
+    
     return (
       <div className="mb-6">
         <div className="relative">
           <div className="absolute left-0 top-0 h-full w-1 bg-gray-300" />
           {milestones.map((milestone, index) => (
-            <div key={index} className="relative flex items-center mb-8">
-              <div className={`absolute left-0 w-4 h-4 rounded-full ${
-                index === 0 ? 'bg-blue-600' : 'bg-gray-400'
-              } -translate-x-1.5`} />
-              <div className="ml-8">
-                <div className="flex items-center mb-1">
-                  <span className="font-semibold">{milestone.label}</span>
-                  <span className="ml-2 text-sm text-gray-600">({milestone.month} months)</span>
-                </div>
-                <div className="w-64 bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${milestone.progress}%` }}
-                  />
+            <div key={index} className="relative mb-10">
+              <div className="flex items-center">
+                <div className={`absolute left-0 w-5 h-5 rounded-full ${
+                  index === 0 ? 'bg-blue-600' : 'bg-gray-400'
+                } -translate-x-2 z-10`} />
+                <div className="ml-8 w-full">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <span className="font-semibold text-lg">{milestone.label}</span>
+                      <span className="ml-2 text-sm text-gray-600">Month {milestone.month}</span>
+                    </div>
+                    <button 
+                      onClick={() => setExpandedMilestone(expandedMilestone === index ? null : index)}
+                      className="text-blue-600 text-sm font-medium flex items-center"
+                    >
+                      {expandedMilestone === index ? 'Hide Details' : 'Show Details'}
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        className={`h-4 w-4 ml-1 transition-transform duration-200 ${expandedMilestone === index ? 'rotate-180' : ''}`} 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${milestone.progress}%` }}
+                    />
+                  </div>
+                  
+                  {expandedMilestone === index && milestone.details && (
+                    <div className="mt-3 bg-blue-50 rounded-lg p-4 border border-blue-100">
+                      <h4 className="font-medium text-blue-800 mb-2">Activities & Objectives</h4>
+                      <ul className="space-y-2">
+                        {milestone.details.map((detail, dIdx) => (
+                          <li key={dIdx} className="flex items-start">
+                            <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-gray-700">{detail}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1322,7 +1569,86 @@ const CareerDashboard = () => {
         {careerPaths.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-bold mb-6">Career Path Compatibility</h2>
-            <SimpleBarChart data={chartData} title="Match Percentage by Career Path" />
+            <p className="text-gray-600 mb-4">
+              Based on your experience, skills, and interests, these career paths have the highest compatibility with your profile.
+            </p>
+            
+            <SimpleBarChart data={chartData} title="" />
+            
+            <div className="mt-8 grid md:grid-cols-3 gap-6">
+              {careerPaths.slice(0, 3).map((path, index) => (
+                <div key={index} className={`p-5 rounded-lg ${
+                  index === 0 ? 'bg-blue-50 border border-blue-100' :
+                  index === 1 ? 'bg-green-50 border border-green-100' :
+                  'bg-purple-50 border border-purple-100'
+                }`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-lg">{path.title}</h3>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      index === 0 ? 'bg-blue-100 text-blue-800' :
+                      index === 1 ? 'bg-green-100 text-green-800' :
+                      'bg-purple-100 text-purple-800'
+                    }`}>
+                      {path.match}% Match
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-3 mt-4">
+                    {index === 0 && (
+                      <>
+                        <p className="text-gray-700">
+                          <strong>Top Choice:</strong> This career path leverages your {userData.experienceLevel.toLowerCase()} experience
+                          {userData.studyField ? ` in ${userData.studyField}` : ''}.
+                        </p>
+                        <p className="text-gray-700">
+                          <strong>Key Advantage:</strong> Aligns with your interests in {
+                            userData.careerPathsInterest && userData.careerPathsInterest.length > 0 
+                              ? userData.careerPathsInterest[0] 
+                              : 'technology'
+                          }.
+                        </p>
+                      </>
+                    )}
+                    {index === 1 && (
+                      <>
+                        <p className="text-gray-700">
+                          <strong>Strong Alternative:</strong> Good option that balances your technical skills with your background
+                          {userData.currentRole ? ` in ${userData.currentRole}` : ''}.
+                        </p>
+                        <p className="text-gray-700">
+                          <strong>Benefit:</strong> Provides strong growth opportunities within your desired timeline.
+                        </p>
+                      </>
+                    )}
+                    {index === 2 && (
+                      <>
+                        <p className="text-gray-700">
+                          <strong>Emerging Option:</strong> Matches your interest in innovative technologies with growth potential.
+                        </p>
+                        <p className="text-gray-700">
+                          <strong>Consideration:</strong> May require additional focused learning in specialized areas.
+                        </p>
+                      </>
+                    )}
+                    
+                    <div className="pt-3">
+                      <a 
+                        href={`https://www.google.com/search?q=${encodeURIComponent(path.title)}+career+path+requirements`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`text-sm font-medium ${
+                          index === 0 ? 'text-blue-600 hover:text-blue-800' :
+                          index === 1 ? 'text-green-600 hover:text-green-800' :
+                          'text-purple-600 hover:text-purple-800'
+                        }`}
+                      >
+                        Learn more about this career →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
         
@@ -1445,11 +1771,38 @@ const CareerDashboard = () => {
         {/* Transition Timeline */}
         {userData.transitionTimeline && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6">Your Transition Roadmap</h2>
-            <div className="mb-4">
+            <h2 className="text-xl font-bold mb-6">Your Career Transition Roadmap</h2>
+            <div className="mb-6">
+              <div className="flex flex-wrap gap-3 mb-4">
+                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                  Timeline: {userData.transitionTimeline}
+                </span>
+                {userData.timeCommitment && (
+                  <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                    Weekly Commitment: {userData.timeCommitment}
+                  </span>
+                )}
+                {userData.workPreference && (
+                  <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                    Preferred Work: {userData.workPreference}
+                  </span>
+                )}
+              </div>
               <p className="text-gray-600">
-                Based on your {userData.transitionTimeline} timeline and {userData.timeCommitment || 'specified'} weekly commitment
+                This personalized roadmap is based on your specific circumstances, target career paths, and identified skill gaps.
+                Each milestone includes recommended activities aligned with your goals and timeline.
               </p>
+              <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4 mt-4">
+                <div className="flex">
+                  <svg className="h-5 w-5 text-yellow-600 mr-2 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-gray-700">
+                    <strong className="text-yellow-700">Pro Tip:</strong> Click "Show Details" on each milestone to see specific 
+                    activities and objectives. Adjust your pace as needed based on your progress and changing circumstances.
+                  </p>
+                </div>
+              </div>
             </div>
             <TimelineChart milestones={timelineMilestones} />
           </div>

@@ -1,4 +1,2285 @@
-// Networking Strategy Component
+// src/Pages/career/CareerDashboard.jsx
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import storageService from '../../services/storageService';
+import { toast } from 'react-toastify';
+
+const CareerDashboard = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [analysis, setAnalysis] = useState('');
+  const [careerPaths, setCareerPaths] = useState([]);
+  const [skillsGap, setSkillsGap] = useState([]);
+  const [marketTrends, setMarketTrends] = useState([]);
+  const [networkingStrategy, setNetworkingStrategy] = useState([]);
+  const [personalBranding, setPersonalBranding] = useState([]);
+  const [interviewPrep, setInterviewPrep] = useState([]);
+  const [showAllSkills, setShowAllSkills] = useState(false);
+  // Set showLearningResources to true by default so resources are visible
+  const [showLearningResources, setShowLearningResources] = useState(true);
+  const [userData, setUserData] = useState({
+    name: '',
+    email: '',
+    experienceLevel: '',
+    studyField: '',
+    educationLevel: '',
+    currentRole: '',
+    yearsExperience: '',
+    jobResponsibilities: '',
+    jobProjects: '',
+    jobTechnologies: '',
+    publications: '',
+    transferableSkills: '',
+    interests: [],
+    careerPathsInterest: [],
+    toolsUsed: [],
+    techInterests: '',
+    timeCommitment: '',
+    targetSalary: '',
+    workPreference: '',
+    transitionTimeline: ''
+  });
+  const [activeTab, setActiveTab] = useState('analysis');
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  
+  // Feedback form state
+  const [feedbackData, setFeedbackData] = useState({
+    rating: '',
+    improvements: ''
+  });
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
+
+  const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeX9C7YtHTSBy4COsV6KaogdEvrjXoVQ0O2psoyfs1xqrySNg/formResponse';
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        if (location.state?.analysis) {
+          const analysisText = location.state.analysis;
+          setAnalysis(analysisText);
+          
+          // Extract data from analysis
+          const paths = extractCareerPaths(analysisText);
+          const skills = extractSkillsGap(analysisText);
+          const trends = extractMarketTrends(analysisText);
+          const networking = extractNetworkingStrategy(analysisText);
+          const branding = extractPersonalBranding(analysisText);
+          const interview = extractInterviewPrep(analysisText);
+          
+          // Set the extracted data
+          setCareerPaths(paths);
+          setSkillsGap(skills);
+          setMarketTrends(trends);
+          setNetworkingStrategy(networking);
+          setPersonalBranding(branding);
+          setInterviewPrep(interview);
+          
+          if (location.state.formData) {
+            const formData = location.state.formData;
+            
+            setUserData({
+              name: formData.fullName || '',
+              email: formData.email || '',
+              experienceLevel: formData.experienceLevel || '',
+              studyField: formData.studyField || '',
+              educationLevel: formData.educationLevel || '',
+              currentRole: formData.currentRole || '',
+              yearsExperience: formData.yearsExperience || '',
+              jobResponsibilities: formData.jobResponsibilities || '',
+              jobProjects: formData.jobProjects || '',
+              jobTechnologies: formData.jobTechnologies || '',
+              publications: formData.publications || '',
+              transferableSkills: formData.transferableSkills || '',
+              interests: typeof formData.techInterests === 'string' 
+                ? formData.techInterests.split(',').map(i => i.trim()) 
+                : (Array.isArray(formData.techInterests) ? formData.techInterests : []),
+              careerPathsInterest: formData.careerPathsInterest || [],
+              toolsUsed: formData.toolsUsed || [],
+              techInterests: formData.techInterests || '',
+              timeCommitment: formData.timeCommitment || '',
+              targetSalary: formData.targetSalary || '',
+              workPreference: formData.workPreference || '',
+              transitionTimeline: formData.transitionTimeline || ''
+            });
+          }
+        } else {
+          const storedAnalysis = storageService.getLatestAnalysis();
+          if (storedAnalysis) {
+            const analysisText = storedAnalysis.analysis;
+            setAnalysis(analysisText);
+            
+            // Extract data from analysis
+            const paths = extractCareerPaths(analysisText);
+            const skills = extractSkillsGap(analysisText);
+            const trends = extractMarketTrends(analysisText);
+            const networking = extractNetworkingStrategy(analysisText);
+            const branding = extractPersonalBranding(analysisText);
+            const interview = extractInterviewPrep(analysisText);
+            
+            // Set the extracted data
+            setCareerPaths(paths);
+            setSkillsGap(skills);
+            setMarketTrends(trends);
+            setNetworkingStrategy(networking);
+            setPersonalBranding(branding);
+            setInterviewPrep(interview);
+            
+            const submission = storageService.getSubmissionById(storedAnalysis.submissionId);
+            if (submission) {
+              setUserData({
+                name: submission.fullName || '',
+                email: submission.email || '',
+                experienceLevel: submission.experienceLevel || '',
+                studyField: submission.studyField || '',
+                educationLevel: submission.educationLevel || '',
+                currentRole: submission.currentRole || '',
+                yearsExperience: submission.yearsExperience || '',
+                jobResponsibilities: submission.jobResponsibilities || '',
+                jobProjects: submission.jobProjects || '',
+                jobTechnologies: submission.jobTechnologies || '',
+                publications: submission.publications || '',
+                transferableSkills: submission.transferableSkills || '',
+                interests: typeof submission.techInterests === 'string' 
+                  ? submission.techInterests.split(',').map(i => i.trim()) 
+                  : (Array.isArray(submission.techInterests) ? submission.techInterests : []),
+                careerPathsInterest: submission.careerPathsInterest || [],
+                toolsUsed: submission.toolsUsed || [],
+                techInterests: submission.techInterests || '',
+                timeCommitment: submission.timeCommitment || '',
+                targetSalary: submission.targetSalary || '',
+                workPreference: submission.workPreference || '',
+                transitionTimeline: submission.transitionTimeline || ''
+              });
+            }
+          } else {
+            navigate('/career/test', { 
+              state: { message: 'Please complete the assessment to view your dashboard' } 
+            });
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        navigate('/career/test', { 
+          state: { message: 'Error loading your results. Please try again.' } 
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+  }, [location, navigate]);
+
+  // Handle feedback form changes
+  const handleFeedbackChange = (e) => {
+    const { name, value } = e.target;
+    setFeedbackData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Submit feedback to Google Form
+  const submitFeedback = async (e) => {
+    e.preventDefault();
+    setSubmittingFeedback(true);
+    
+    try {
+      // Create FormData and append the feedback entries
+      const formData = new FormData();
+      
+      // Use the actual entry IDs from your Google Form
+      formData.append('entry.162050771', feedbackData.rating); // Rating question
+      formData.append('entry.2083196363', feedbackData.improvements); // Improvement suggestions
+      
+      // Submit to Google Form
+      await fetch(GOOGLE_FORM_URL, {
+        method: 'POST',
+        body: formData,
+        mode: 'no-cors' // Google Forms requires no-cors
+      });
+      
+      // Show success message
+      toast.success('Thank you for your feedback!');
+      setShowFeedbackForm(false);
+      setFeedbackData({
+        rating: '',
+        improvements: ''
+      });
+      
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      toast.error('Failed to submit feedback. Please try again.');
+    } finally {
+      setSubmittingFeedback(false);
+    }
+  };
+
+  // Extract career paths and their match percentages from analysis text
+  const extractCareerPaths = (text) => {
+    if (!text) return [];
+    
+    const lines = text.split('\n');
+    const careerPaths = [];
+    
+    const careerPathRegex = /^[a-z]\)\s+(.*?)\s+\((\d+)%\s+match/i;
+    
+    lines.forEach(line => {
+      const match = line.match(careerPathRegex);
+      if (match) {
+        careerPaths.push({
+          title: match[1].trim(),
+          match: parseInt(match[2], 10)
+        });
+      }
+    });
+    
+    return careerPaths;
+  };
+  
+  // Ensure we have exactly three career paths for display
+  const getThreeCareerPaths = (paths, userData, skillsGap) => {
+    // Make a defensive copy to avoid modifying the original
+    let displayPaths = [...paths];
+    
+    // If we have fewer than 3 paths, generate additional ones
+    while (displayPaths.length < 3) {
+      // Generate a complementary career path
+      const generatedPath = generateRelatedCareerPath(displayPaths, userData, skillsGap);
+      displayPaths.push(generatedPath);
+    }
+    
+    // Limit to exactly 3 paths
+    return displayPaths.slice(0, 3);
+  };
+
+  // Extract market trends data from analysis text
+  const extractMarketTrends = (text) => {
+    if (!text) return [];
+    
+    const marketTrends = [];
+    const lines = text.split('\n');
+    let inMarketTrendsSection = false;
+    let currentSubsection = "";
+    
+    lines.forEach((line, index) => {
+      if (line.includes("MARKET TRENDS") || line.includes("JOB MARKET ANALYSIS")) {
+        inMarketTrendsSection = true;
+        return;
+      }
+      
+      // Check for end of Market Trends section
+      if (inMarketTrendsSection && (
+          line.includes("NETWORKING STRATEGY") || 
+          line.includes("PERSONAL BRANDING") || 
+          line.includes("INTERVIEW PREPARATION") ||
+          line.includes("LEARNING ROADMAP") || 
+          line.includes("SKILLS GAP ANALYSIS") || 
+          line.includes("TRANSITION STRATEGY")
+        )) {
+        inMarketTrendsSection = false;
+        return;
+      }
+      
+      // Check for subsections within market trends
+      if (inMarketTrendsSection && line.match(/^\d+\.\s+[A-Z]/)) {
+        currentSubsection = line.replace(/^\d+\.\s+/, '').trim();
+        marketTrends.push({
+          title: currentSubsection,
+          type: 'section_header'
+        });
+        return;
+      }
+      
+      if (inMarketTrendsSection && line.trim() !== '') {
+        // Look for career path mentions with salary ranges
+        const salaryMatch = line.match(/(.+?)\s*:\s*\$(\d+[,\d]*)\s*-\s*\$(\d+[,\d]*)/i);
+        if (salaryMatch) {
+          marketTrends.push({
+            careerPath: salaryMatch[1].trim(),
+            minSalary: parseInt(salaryMatch[2].replace(/,/g, ''), 10),
+            maxSalary: parseInt(salaryMatch[3].replace(/,/g, ''), 10),
+            type: 'salary',
+            subsection: currentSubsection
+          });
+          return;
+        }
+        
+        // Look for growth statistics
+        const growthMatch = line.match(/(.+?)\s*:?\s*(\d+)%\s*growth/i);
+        if (growthMatch) {
+          marketTrends.push({
+            careerPath: growthMatch[1].trim(),
+            growth: parseInt(growthMatch[2], 10),
+            type: 'growth',
+            subsection: currentSubsection
+          });
+          return;
+        }
+        
+        // Look for general trends
+        if (line.match(/^\d+\.\s+/) || line.match(/^•\s+/) || line.match(/^-\s+/)) {
+          const trendText = line.replace(/^(\d+\.|•|-)\s+/, '').trim();
+          if (trendText) {
+            marketTrends.push({
+              trend: trendText,
+              type: 'general',
+              subsection: currentSubsection
+            });
+          }
+        }
+      }
+    });
+    
+    // Only return what's found in the analysis
+    return marketTrends;
+  };
+
+  // Extract networking strategy from analysis text
+  const extractNetworkingStrategy = (text) => {
+    if (!text) return [];
+    
+    const strategies = [];
+    const lines = text.split('\n');
+    let inNetworkingSection = false;
+    
+    lines.forEach((line, index) => {
+      if (line.includes("NETWORKING STRATEGY")) {
+        inNetworkingSection = true;
+        strategies.push({
+          title: line.trim(),
+          type: 'section_title'
+        });
+        return;
+      }
+      
+      if (inNetworkingSection && (
+        line.includes("PERSONAL BRANDING") || 
+        line.includes("INTERVIEW PREPARATION") ||
+        line.includes("LEARNING ROADMAP") || 
+        line.includes("SKILLS GAP ANALYSIS") || 
+        line.includes("TRANSITION STRATEGY")
+      )) {
+        inNetworkingSection = false;
+        return;
+      }
+      
+      if (inNetworkingSection && line.trim() !== '') {
+        if (line.trim().startsWith('-')) {
+          const strategyText = line.replace(/^-\s+/, '').trim();
+          strategies.push({
+            text: strategyText,
+            type: 'strategy'
+          });
+        }
+      }
+    });
+    
+    // Only return networking strategies found in the analysis
+    return strategies;
+  };
+
+  // Extract personal branding tips from analysis text
+  const extractPersonalBranding = (text) => {
+    if (!text) return [];
+    
+    const brandingTips = [];
+    const lines = text.split('\n');
+    let inBrandingSection = false;
+    
+    lines.forEach((line, index) => {
+      if (line.includes("PERSONAL BRANDING")) {
+        inBrandingSection = true;
+        brandingTips.push({
+          title: line.trim(),
+          type: 'section_title'
+        });
+        return;
+      }
+      
+      if (inBrandingSection && (
+        line.includes("NETWORKING STRATEGY") || 
+        line.includes("INTERVIEW PREPARATION") ||
+        line.includes("LEARNING ROADMAP") || 
+        line.includes("SKILLS GAP ANALYSIS") || 
+        line.includes("TRANSITION STRATEGY")
+      )) {
+        inBrandingSection = false;
+        return;
+      }
+      
+      if (inBrandingSection && line.trim() !== '') {
+        if (line.trim().startsWith('-')) {
+          const tipText = line.replace(/^-\s+/, '').trim();
+          brandingTips.push({
+            text: tipText,
+            type: 'tip'
+          });
+        }
+      }
+    });
+    
+    // Only return personal branding tips found in the analysis
+    return brandingTips;
+  };
+
+  // Extract interview preparation advice from analysis text
+  const extractInterviewPrep = (text) => {
+    if (!text) return [];
+    
+    const interviewTips = [];
+    const lines = text.split('\n');
+    let inInterviewSection = false;
+    
+    lines.forEach((line, index) => {
+      if (line.includes("INTERVIEW PREPARATION")) {
+        inInterviewSection = true;
+        interviewTips.push({
+          title: line.trim(),
+          type: 'section_title'
+        });
+        return;
+      }
+      
+      if (inInterviewSection && (
+        line.includes("NETWORKING STRATEGY") || 
+        line.includes("PERSONAL BRANDING") ||
+        line.includes("LEARNING ROADMAP") || 
+        line.includes("SKILLS GAP ANALYSIS") || 
+        line.includes("TRANSITION STRATEGY")
+      )) {
+        inInterviewSection = false;
+        return;
+      }
+      
+      if (inInterviewSection && line.trim() !== '') {
+        if (line.trim().startsWith('-')) {
+          const tipText = line.replace(/^-\s+/, '').trim();
+          interviewTips.push({
+            text: tipText,
+            type: 'tip'
+          });
+        }
+      }
+    });
+    
+    // Only return interview preparation tips found in the analysis
+    return interviewTips;
+  };
+
+  // Extract skills gap data from analysis text
+  const extractSkillsGap = (text) => {
+    if (!text) return [];
+    
+    const skills = [];
+    const userToolsUsed = userData.toolsUsed || [];
+    
+    // Create a mapping of tools to skill names and categories based on actual user choices
+    const toolSkillMapping = {
+      'VS Code': { name: 'IDE Proficiency', category: 'Development Tools' },
+      'GitHub': { name: 'Version Control', category: 'Collaboration Tools' },
+      'JavaScript': { name: 'JavaScript Programming', category: 'Programming Languages' },
+      'Python': { name: 'Python Programming', category: 'Programming Languages' },
+      'React': { name: 'React Framework', category: 'Frontend Frameworks' },
+      'Node.js': { name: 'Node.js Runtime', category: 'Backend Technologies' },
+      'SQL': { name: 'Database Management', category: 'Database' },
+      'AWS': { name: 'Cloud Computing', category: 'Cloud Services' },
+      'Docker': { name: 'Containerization', category: 'DevOps' }
+    };
+
+    // Map user experience level to numeric values for skill comparison
+    const experienceLevelMap = {
+      'Complete beginner': 1,
+      'Some exposure': 2,
+      'Beginner': 2,
+      'Intermediate': 3,
+      'Advanced': 4
+    };
+
+    const currentLevel = experienceLevelMap[userData.experienceLevel] || 1;
+
+    const lines = text.split('\n');
+    let inSkillsGapSection = false;
+    
+    lines.forEach((line) => {
+      // Check for section headers with both formats - plain and numbered
+      if (line.includes("SKILLS GAP ANALYSIS") || line.match(/\d+\.\s+SKILLS\s+GAP\s+ANALYSIS/i)) {
+        inSkillsGapSection = true;
+        return;
+      }
+      
+      // Check for end of section with both formats - plain and numbered
+      if (inSkillsGapSection && (
+        line.includes("LEARNING ROADMAP") || 
+        line.includes("TRANSITION STRATEGY") ||
+        line.match(/\d+\.\s+LEARNING\s+ROADMAP/i) ||
+        line.match(/\d+\.\s+TRANSITION\s+STRATEGY/i)
+      )) {
+        inSkillsGapSection = false;
+        return;
+      }
+      
+      // Pattern 1: numbered skills with descriptions (like in screenshot)
+      if (inSkillsGapSection && line.match(/^\d+\.\s+[^:]+:/)) {
+        // Format: "1. Programming Proficiency: Need to advance Python skills..."
+        const skillMatch = line.match(/^\d+\.\s+([^:]+):\s*(.+)/);
+        
+        if (skillMatch) {
+          const skillName = skillMatch[1].trim();
+          const description = skillMatch[2].trim();
+          
+          let userCurrentLevel = currentLevel;
+          let requiredLevel = 4;
+          
+          // Adjust required level based on description wording
+          const descLower = description.toLowerCase();
+          if (descLower.includes('basic') || descLower.includes('fundamental')) {
+            requiredLevel = 2;
+          } else if (descLower.includes('intermediate') || descLower.includes('solid')) {
+            requiredLevel = 3;
+          } else if (descLower.includes('advanced') || descLower.includes('deep')) {
+            requiredLevel = 4;
+          } else if (descLower.includes('expert') || descLower.includes('mastery')) {
+            requiredLevel = 5;
+          }
+          
+          // Determine learning resources based on skill name
+          let resources = determineSkillResources(skillName);
+          
+          skills.push({
+            name: skillName,
+            description: description,
+            currentLevel: userCurrentLevel,
+            requiredLevel: requiredLevel,
+            gap: requiredLevel - userCurrentLevel,
+            resources: resources
+          });
+        }
+      }
+      
+      // Alternative pattern: bullet points with colons
+      if (inSkillsGapSection && line.match(/^\s*-\s+[^:]+:/)) {
+        // Format: "- Programming Proficiency: Need to advance Python skills..."
+        const skillMatch = line.match(/^\s*-\s+([^:]+):\s*(.+)/);
+        
+        if (skillMatch) {
+          const skillName = skillMatch[1].trim();
+          const description = skillMatch[2].trim();
+          
+          let userCurrentLevel = currentLevel;
+          let requiredLevel = 4;
+          
+          // Determine levels based on description
+          const descLower = description.toLowerCase();
+          if (descLower.includes('basic') || descLower.includes('fundamental')) {
+            requiredLevel = 2;
+          } else if (descLower.includes('intermediate') || descLower.includes('solid')) {
+            requiredLevel = 3;
+          } else if (descLower.includes('advanced') || descLower.includes('deep')) {
+            requiredLevel = 4;
+          } else if (descLower.includes('expert') || descLower.includes('mastery')) {
+            requiredLevel = 5;
+          }
+          
+          // Determine learning resources based on skill name
+          let resources = determineSkillResources(skillName);
+          
+          skills.push({
+            name: skillName,
+            description: description,
+            currentLevel: userCurrentLevel,
+            requiredLevel: requiredLevel,
+            gap: requiredLevel - userCurrentLevel,
+            resources: resources
+          });
+        }
+      }
+    });
+    
+    // If no skills found but user has tools, generate skills based on tools
+    if (skills.length === 0 && userToolsUsed && userToolsUsed.length > 0 && userToolsUsed[0] !== 'None') {
+      userToolsUsed.forEach(tool => {
+        if (toolSkillMapping[tool]) {
+          const skillInfo = toolSkillMapping[tool];
+          const userCurrentLevel = currentLevel;
+          const requiredLevel = Math.min(userCurrentLevel + 2, 5);
+          
+          // Determine learning resources based on skill name
+          let resources = determineSkillResources(tool);
+          
+          skills.push({
+            name: skillInfo.name,
+            description: `Enhance your ${tool} skills to advance in your chosen career path.`,
+            currentLevel: userCurrentLevel,
+            requiredLevel: requiredLevel,
+            gap: requiredLevel - userCurrentLevel,
+            category: skillInfo.category,
+            resources: resources
+          });
+        }
+      });
+    }
+    
+    // If still no skills found, generate based on experience level and career paths
+    if (skills.length === 0 && careerPaths.length > 0) {
+      const topCareerPath = careerPaths[0].title;
+      const defaultSkills = determineDefaultSkillsForCareer(topCareerPath);
+      
+      defaultSkills.forEach(skill => {
+        const userCurrentLevel = currentLevel;
+        const requiredLevel = Math.min(userCurrentLevel + 2, 5);
+        
+        // Determine learning resources based on skill name
+        let resources = determineSkillResources(skill.name);
+        
+        skills.push({
+          name: skill.name,
+          description: skill.description,
+          currentLevel: userCurrentLevel,
+          requiredLevel: requiredLevel,
+          gap: requiredLevel - userCurrentLevel,
+          category: skill.category,
+          resources: resources
+        });
+      });
+    }
+    
+    return skills;
+  };
+  
+  // Helper function to determine relevant learning resources for a skill
+  const determineSkillResources = (skillName) => {
+    const skillLower = skillName.toLowerCase();
+    
+    // Default resources
+    let resources = {
+      courses: [{
+        title: "Comprehensive Learning Path",
+        url: `https://www.coursera.org/search?query=${encodeURIComponent(skillName)}`,
+        platform: "Coursera"
+      }],
+      tutorials: [{
+        title: "Practical Tutorials",
+        url: `https://www.udemy.com/courses/search/?src=ukw&q=${encodeURIComponent(skillName)}`,
+        platform: "Udemy"
+      }],
+      videos: [{
+        title: "Video Tutorials",
+        url: `https://www.youtube.com/results?search_query=${encodeURIComponent(skillName)}+tutorial+beginner`,
+        platform: "YouTube"
+      }],
+      projects: [{
+        title: "Example Projects",
+        url: `https://github.com/topics/${encodeURIComponent(skillName.toLowerCase().replace(/ /g, '-'))}`,
+        platform: "GitHub"
+      }]
+    };
+    
+    // Add specific resources based on skill name - EXPANDED FOR ALL TECH ROLES
+    
+    // Frontend Development
+    if (skillLower.includes('javascript') || skillLower.includes('js')) {
+      resources.courses.push({
+        title: "JavaScript Fundamentals",
+        url: "https://javascript.info/",
+        platform: "JavaScript.info"
+      });
+      resources.courses.push({
+        title: "Modern JavaScript",
+        url: "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/",
+        platform: "freeCodeCamp"
+      });
+      resources.tutorials.push({
+        title: "JavaScript Exercises",
+        url: "https://exercism.org/tracks/javascript",
+        platform: "Exercism"
+      });
+    }
+    else if (skillLower.includes('react')) {
+      resources.courses.push({
+        title: "React Documentation",
+        url: "https://react.dev/learn",
+        platform: "React.dev"
+      });
+      resources.tutorials.push({
+        title: "React Projects",
+        url: "https://www.freecodecamp.org/learn/front-end-development-libraries/#react",
+        platform: "freeCodeCamp"
+      });
+      resources.projects.push({
+        title: "React Project Ideas",
+        url: "https://github.com/florinpop17/app-ideas",
+        platform: "GitHub"
+      });
+    }
+    else if (skillLower.includes('vue')) {
+      resources.courses.push({
+        title: "Vue.js Documentation",
+        url: "https://vuejs.org/guide/introduction.html",
+        platform: "Vue.js"
+      });
+      resources.tutorials.push({
+        title: "Vue Mastery",
+        url: "https://www.vuemastery.com/courses/",
+        platform: "Vue Mastery"
+      });
+    }
+    else if (skillLower.includes('angular')) {
+      resources.courses.push({
+        title: "Angular Documentation",
+        url: "https://angular.io/docs",
+        platform: "Angular.io"
+      });
+      resources.tutorials.push({
+        title: "Angular University",
+        url: "https://angular-university.io/",
+        platform: "Angular University"
+      });
+    }
+    else if (skillLower.includes('css') || skillLower.includes('html')) {
+      resources.courses.push({
+        title: "CSS Grid & Flexbox",
+        url: "https://css-tricks.com/snippets/css/complete-guide-grid/",
+        platform: "CSS-Tricks"
+      });
+      resources.tutorials.push({
+        title: "Frontend Mentor Challenges",
+        url: "https://www.frontendmentor.io/challenges",
+        platform: "Frontend Mentor"
+      });
+    }
+    else if (skillLower.includes('typescript')) {
+      resources.courses.push({
+        title: "TypeScript Handbook",
+        url: "https://www.typescriptlang.org/docs/handbook/intro.html",
+        platform: "TypeScript"
+      });
+      resources.tutorials.push({
+        title: "TypeScript Exercises",
+        url: "https://typescript-exercises.github.io/",
+        platform: "TypeScript Exercises"
+      });
+    }
+    
+    // Backend Development
+    else if (skillLower.includes('python')) {
+      resources.courses.push({
+        title: "Python for Everybody",
+        url: "https://www.py4e.com/",
+        platform: "py4e"
+      });
+      resources.tutorials.push({
+        title: "Python Exercises",
+        url: "https://exercism.org/tracks/python",
+        platform: "Exercism"
+      });
+      resources.videos.push({
+        title: "Python Crash Course",
+        url: "https://www.youtube.com/watch?v=rfscVS0vtbw",
+        platform: "YouTube"
+      });
+    }
+    else if (skillLower.includes('node') || skillLower.includes('express')) {
+      resources.courses.push({
+        title: "Node.js Documentation",
+        url: "https://nodejs.org/en/docs/",
+        platform: "Node.js"
+      });
+      resources.tutorials.push({
+        title: "Express.js Guide",
+        url: "https://expressjs.com/en/guide/routing.html",
+        platform: "Express.js"
+      });
+    }
+    else if (skillLower.includes('java') && !skillLower.includes('javascript')) {
+      resources.courses.push({
+        title: "Java Programming",
+        url: "https://dev.java/learn/",
+        platform: "dev.java"
+      });
+      resources.tutorials.push({
+        title: "Spring Boot Documentation",
+        url: "https://spring.io/projects/spring-boot",
+        platform: "Spring.io"
+      });
+    }
+    else if (skillLower.includes('c#') || skillLower.includes('asp.net') || skillLower.includes('dotnet')) {
+      resources.courses.push({
+        title: ".NET Documentation",
+        url: "https://learn.microsoft.com/en-us/dotnet/",
+        platform: "Microsoft Learn"
+      });
+      resources.tutorials.push({
+        title: "ASP.NET Core Documentation",
+        url: "https://learn.microsoft.com/en-us/aspnet/core/",
+        platform: "Microsoft Learn"
+      });
+    }
+    else if (skillLower.includes('php') || skillLower.includes('laravel')) {
+      resources.courses.push({
+        title: "PHP Documentation",
+        url: "https://www.php.net/docs.php",
+        platform: "PHP.net"
+      });
+      resources.tutorials.push({
+        title: "Laravel Documentation",
+        url: "https://laravel.com/docs",
+        platform: "Laravel"
+      });
+    }
+    else if (skillLower.includes('ruby') || skillLower.includes('rails')) {
+      resources.courses.push({
+        title: "Ruby Documentation",
+        url: "https://ruby-doc.org/",
+        platform: "Ruby-Doc"
+      });
+      resources.tutorials.push({
+        title: "Ruby on Rails Guides",
+        url: "https://guides.rubyonrails.org/",
+        platform: "Ruby on Rails"
+      });
+    }
+    else if (skillLower.includes('go') || skillLower.includes('golang')) {
+      resources.courses.push({
+        title: "Go Documentation",
+        url: "https://go.dev/doc/",
+        platform: "Go.dev"
+      });
+      resources.tutorials.push({
+        title: "Go by Example",
+        url: "https://gobyexample.com/",
+        platform: "Go by Example"
+      });
+    }
+    
+    // Database & Data Engineering
+    else if (skillLower.includes('database') || skillLower.includes('sql')) {
+      resources.courses.push({
+        title: "SQL Course",
+        url: "https://www.khanacademy.org/computing/computer-programming/sql",
+        platform: "Khan Academy"
+      });
+      resources.tutorials.push({
+        title: "SQL Exercises",
+        url: "https://www.sqlzoo.net/",
+        platform: "SQLZoo"
+      });
+      resources.courses.push({
+        title: "Database Design",
+        url: "https://www.coursera.org/learn/database-design",
+        platform: "Coursera"
+      });
+    }
+    else if (skillLower.includes('mongodb') || skillLower.includes('nosql')) {
+      resources.courses.push({
+        title: "MongoDB University",
+        url: "https://university.mongodb.com/",
+        platform: "MongoDB"
+      });
+      resources.tutorials.push({
+        title: "NoSQL Design Patterns",
+        url: "https://docs.mongodb.com/manual/core/data-modeling-introduction/",
+        platform: "MongoDB Docs"
+      });
+    }
+    else if (skillLower.includes('postgresql') || skillLower.includes('postgres')) {
+      resources.courses.push({
+        title: "PostgreSQL Documentation",
+        url: "https://www.postgresql.org/docs/",
+        platform: "PostgreSQL"
+      });
+      resources.tutorials.push({
+        title: "PostgreSQL Exercises",
+        url: "https://pgexercises.com/",
+        platform: "PG Exercises"
+      });
+    }
+    
+    // DevOps & Cloud
+    else if (skillLower.includes('devops') || skillLower.includes('ci/cd') || skillLower.includes('cicd')) {
+      resources.courses.push({
+        title: "DevOps Fundamentals",
+        url: "https://www.atlassian.com/devops",
+        platform: "Atlassian"
+      });
+      resources.tutorials.push({
+        title: "CI/CD Pipeline Tutorials",
+        url: "https://www.jenkins.io/doc/tutorials/",
+        platform: "Jenkins"
+      });
+    }
+    else if (skillLower.includes('kubernetes') || skillLower.includes('k8s')) {
+      resources.courses.push({
+        title: "Kubernetes Documentation",
+        url: "https://kubernetes.io/docs/tutorials/",
+        platform: "Kubernetes.io"
+      });
+      resources.tutorials.push({
+        title: "Kubernetes Learning Path",
+        url: "https://azure.microsoft.com/en-us/resources/kubernetes-learning-path/",
+        platform: "Microsoft Azure"
+      });
+    }
+    else if (skillLower.includes('docker') || skillLower.includes('container')) {
+      resources.courses.push({
+        title: "Docker Documentation",
+        url: "https://docs.docker.com/get-started/",
+        platform: "Docker"
+      });
+      resources.tutorials.push({
+        title: "Docker Labs",
+        url: "https://github.com/docker/labs",
+        platform: "GitHub"
+      });
+    }
+    else if (skillLower.includes('cloud') || skillLower.includes('aws') || skillLower.includes('azure')) {
+      resources.courses.push({
+        title: "Cloud Fundamentals",
+        url: "https://aws.amazon.com/training/learn-about/",
+        platform: "AWS Training"
+      });
+      resources.tutorials.push({
+        title: "Cloud Architecture Center",
+        url: "https://cloud.google.com/architecture",
+        platform: "Google Cloud"
+      });
+    }
+    else if (skillLower.includes('terraform') || skillLower.includes('infrastructure as code')) {
+      resources.courses.push({
+        title: "Terraform Documentation",
+        url: "https://learn.hashicorp.com/terraform",
+        platform: "HashiCorp Learn"
+      });
+      resources.tutorials.push({
+        title: "Infrastructure as Code Tutorials",
+        url: "https://developer.hashicorp.com/terraform/tutorials",
+        platform: "HashiCorp"
+      });
+    }
+    
+    // Data Science & Machine Learning
+    else if (skillLower.includes('data science') || skillLower.includes('data analysis')) {
+      resources.courses.push({
+        title: "Data Science Path",
+        url: "https://www.datacamp.com/",
+        platform: "DataCamp"
+      });
+      resources.tutorials.push({
+        title: "Kaggle Tutorials",
+        url: "https://www.kaggle.com/learn",
+        platform: "Kaggle"
+      });
+    }
+    else if (skillLower.includes('machine learning') || skillLower.includes('ml') || skillLower.includes('ai')) {
+      resources.courses.push({
+        title: "ML Crash Course",
+        url: "https://developers.google.com/machine-learning/crash-course",
+        platform: "Google"
+      });
+      resources.tutorials.push({
+        title: "Practical ML",
+        url: "https://www.kaggle.com/learn/intro-to-machine-learning",
+        platform: "Kaggle"
+      });
+    }
+    else if (skillLower.includes('deep learning') || skillLower.includes('neural network')) {
+      resources.courses.push({
+        title: "Deep Learning Specialization",
+        url: "https://www.deeplearning.ai/courses/deep-learning-specialization/",
+        platform: "DeepLearning.AI"
+      });
+      resources.tutorials.push({
+        title: "PyTorch Tutorials",
+        url: "https://pytorch.org/tutorials/",
+        platform: "PyTorch"
+      });
+    }
+    else if (skillLower.includes('tensorflow') || skillLower.includes('keras')) {
+      resources.courses.push({
+        title: "TensorFlow Documentation",
+        url: "https://www.tensorflow.org/learn",
+        platform: "TensorFlow"
+      });
+      resources.tutorials.push({
+        title: "Keras Documentation",
+        url: "https://keras.io/guides/",
+        platform: "Keras"
+      });
+    }
+    else if (skillLower.includes('nlp') || skillLower.includes('natural language')) {
+      resources.courses.push({
+        title: "NLP Specialization",
+        url: "https://www.coursera.org/specializations/natural-language-processing",
+        platform: "Coursera"
+      });
+      resources.tutorials.push({
+        title: "Hugging Face Transformers",
+        url: "https://huggingface.co/docs/transformers/index",
+        platform: "Hugging Face"
+      });
+    }
+    
+    // Mobile Development
+    else if (skillLower.includes('android') || skillLower.includes('kotlin')) {
+      resources.courses.push({
+        title: "Android Developers",
+        url: "https://developer.android.com/courses",
+        platform: "Android"
+      });
+      resources.tutorials.push({
+        title: "Kotlin Documentation",
+        url: "https://kotlinlang.org/docs/home.html",
+        platform: "Kotlin"
+      });
+    }
+    else if (skillLower.includes('ios') || skillLower.includes('swift')) {
+      resources.courses.push({
+        title: "Swift Documentation",
+        url: "https://docs.swift.org/swift-book/",
+        platform: "Swift.org"
+      });
+      resources.tutorials.push({
+        title: "iOS App Dev Tutorials",
+        url: "https://developer.apple.com/tutorials/app-dev-training/",
+        platform: "Apple Developer"
+      });
+    }
+    else if (skillLower.includes('react native') || (skillLower.includes('react') && skillLower.includes('mobile'))) {
+      resources.courses.push({
+        title: "React Native Documentation",
+        url: "https://reactnative.dev/docs/getting-started",
+        platform: "React Native"
+      });
+      resources.tutorials.push({
+        title: "React Native Express",
+        url: "https://www.reactnative.express/",
+        platform: "React Native Express"
+      });
+    }
+    else if (skillLower.includes('flutter') || skillLower.includes('dart')) {
+      resources.courses.push({
+        title: "Flutter Documentation",
+        url: "https://docs.flutter.dev/",
+        platform: "Flutter"
+      });
+      resources.tutorials.push({
+        title: "Flutter Codelabs",
+        url: "https://codelabs.developers.google.com/?cat=flutter",
+        platform: "Google Developers"
+      });
+    }
+    
+    // Cybersecurity
+    else if (skillLower.includes('security') || skillLower.includes('cyber') || skillLower.includes('infosec')) {
+      resources.courses.push({
+        title: "Cybersecurity Fundamentals",
+        url: "https://www.coursera.org/specializations/intro-cyber-security",
+        platform: "Coursera"
+      });
+      resources.tutorials.push({
+        title: "OWASP Top Ten",
+        url: "https://owasp.org/www-project-top-ten/",
+        platform: "OWASP"
+      });
+    }
+    else if (skillLower.includes('penetration testing') || skillLower.includes('ethical hacking') || skillLower.includes('pen test')) {
+      resources.courses.push({
+        title: "Penetration Testing",
+        url: "https://www.offensive-security.com/pwk-oscp/",
+        platform: "Offensive Security"
+      });
+      resources.tutorials.push({
+        title: "HackTheBox Academy",
+        url: "https://academy.hackthebox.com/",
+        platform: "HackTheBox"
+      });
+    }
+    else if (skillLower.includes('network security') || skillLower.includes('firewall')) {
+      resources.courses.push({
+        title: "Network Security",
+        url: "https://www.comptia.org/certifications/security",
+        platform: "CompTIA"
+      });
+      resources.tutorials.push({
+        title: "Cisco Security",
+        url: "https://www.cisco.com/c/en/us/training-events/training-certifications/certifications/security.html",
+        platform: "Cisco"
+      });
+    }
+    
+    // QA & Testing
+    else if (skillLower.includes('test') || skillLower.includes('qa') || skillLower.includes('quality assurance')) {
+      resources.courses.push({
+        title: "Software Testing",
+        url: "https://www.ministryoftesting.com/",
+        platform: "Ministry of Testing"
+      });
+      resources.tutorials.push({
+        title: "Test Automation University",
+        url: "https://testautomationu.applitools.com/",
+        platform: "Applitools"
+      });
+    }
+    else if (skillLower.includes('selenium') || skillLower.includes('webdriver')) {
+      resources.courses.push({
+        title: "Selenium Documentation",
+        url: "https://www.selenium.dev/documentation/en/",
+        platform: "Selenium"
+      });
+      resources.tutorials.push({
+        title: "Selenium WebDriver Tutorials",
+        url: "https://ultimateqa.com/automation/",
+        platform: "UltimateQA"
+      });
+    }
+    else if (skillLower.includes('cypress') || skillLower.includes('playwright')) {
+      resources.courses.push({
+        title: "Cypress Documentation",
+        url: "https://docs.cypress.io/",
+        platform: "Cypress"
+      });
+      resources.tutorials.push({
+        title: "Playwright Documentation",
+        url: "https://playwright.dev/docs/intro",
+        platform: "Playwright"
+      });
+    }
+    
+    // UX/UI Design
+    else if (skillLower.includes('ux') || skillLower.includes('ui') || skillLower.includes('user experience') || skillLower.includes('user interface')) {
+      resources.courses.push({
+        title: "UX Design Course",
+        url: "https://www.interaction-design.org/courses",
+        platform: "Interaction Design Foundation"
+      });
+      resources.tutorials.push({
+        title: "UI/UX Case Studies",
+        url: "https://www.nngroup.com/articles/",
+        platform: "Nielsen Norman Group"
+      });
+    }
+    else if (skillLower.includes('figma')) {
+      resources.courses.push({
+        title: "Figma Documentation",
+        url: "https://help.figma.com/hc/en-us",
+        platform: "Figma"
+      });
+      resources.tutorials.push({
+        title: "Figma Community",
+        url: "https://www.figma.com/community/explore",
+        platform: "Figma"
+      });
+    }
+    else if (skillLower.includes('design system') || skillLower.includes('design thinking')) {
+      resources.courses.push({
+        title: "Design Systems Course",
+        url: "https://designsystemcourse.com/",
+        platform: "Design Systems"
+      });
+      resources.tutorials.push({
+        title: "Design Thinking",
+        url: "https://www.ideou.com/pages/design-thinking",
+        platform: "IDEO U"
+      });
+    }
+    
+    // Product Management
+    else if (skillLower.includes('product management') || skillLower.includes('product manager')) {
+      resources.courses.push({
+        title: "Product Management Courses",
+        url: "https://www.productschool.com/",
+        platform: "Product School"
+      });
+      resources.tutorials.push({
+        title: "Product Management Resources",
+        url: "https://www.mindtheproduct.com/",
+        platform: "Mind the Product"
+      });
+    }
+    else if (skillLower.includes('agile') || skillLower.includes('scrum')) {
+      resources.courses.push({
+        title: "Agile Methodologies",
+        url: "https://www.scrum.org/resources/what-is-scrum",
+        platform: "Scrum.org"
+      });
+      resources.tutorials.push({
+        title: "Agile Resources",
+        url: "https://www.atlassian.com/agile",
+        platform: "Atlassian"
+      });
+    }
+    else if (skillLower.includes('product management') || skillLower.includes('roadmap')) {
+      resources.courses.push({
+        title: "Product Roadmapping",
+        url: "https://www.productplan.com/learn/",
+        platform: "ProductPlan"
+      });
+      resources.tutorials.push({
+        title: "Product Management Templates",
+        url: "https://www.aha.io/roadmapping/guide",
+        platform: "Aha!"
+      });
+    }
+    
+    // Web Development General
+    else if (skillLower.includes('web dev') || skillLower.includes('frontend') || skillLower.includes('front-end') || skillLower.includes('front end')) {
+      resources.courses.push({
+        title: "Web Development Path",
+        url: "https://www.freecodecamp.org/learn/responsive-web-design/",
+        platform: "freeCodeCamp"
+      });
+      resources.tutorials.push({
+        title: "Frontend Mentor",
+        url: "https://www.frontendmentor.io/challenges",
+        platform: "Frontend Mentor"
+      });
+    }
+    else if (skillLower.includes('backend') || skillLower.includes('back-end') || skillLower.includes('back end') || skillLower.includes('server')) {
+      resources.courses.push({
+        title: "Backend Development",
+        url: "https://www.theodinproject.com/paths/full-stack-javascript/courses/nodejs",
+        platform: "The Odin Project"
+      });
+      resources.tutorials.push({
+        title: "Backend Web Development",
+        url: "https://roadmap.sh/backend",
+        platform: "roadmap.sh"
+      });
+    }
+    else if (skillLower.includes('fullstack') || skillLower.includes('full-stack') || skillLower.includes('full stack')) {
+      resources.courses.push({
+        title: "Full Stack Development",
+        url: "https://www.freecodecamp.org/learn/",
+        platform: "freeCodeCamp"
+      });
+      resources.tutorials.push({
+        title: "Full Stack Open",
+        url: "https://fullstackopen.com/en/",
+        platform: "University of Helsinki"
+      });
+    }
+    
+    // Blockchain & Web3
+    else if (skillLower.includes('blockchain') || skillLower.includes('web3') || skillLower.includes('crypto')) {
+      resources.courses.push({
+        title: "Blockchain Basics",
+        url: "https://www.coursera.org/learn/blockchain-basics",
+        platform: "Coursera"
+      });
+      resources.tutorials.push({
+        title: "Web3 University",
+        url: "https://www.web3.university/",
+        platform: "Web3 University"
+      });
+    }
+    else if (skillLower.includes('solidity') || skillLower.includes('smart contract')) {
+      resources.courses.push({
+        title: "Solidity Documentation",
+        url: "https://docs.soliditylang.org/",
+        platform: "Solidity"
+      });
+      resources.tutorials.push({
+        title: "CryptoZombies",
+        url: "https://cryptozombies.io/",
+        platform: "CryptoZombies"
+      });
+    }
+    
+    // Soft Skills & Career Development
+    else if (skillLower.includes('communication') || skillLower.includes('soft skill')) {
+      resources.courses.push({
+        title: "Communication Skills",
+        url: "https://www.coursera.org/specializations/effective-communication",
+        platform: "Coursera"
+      });
+      resources.tutorials.push({
+        title: "Professional Communication",
+        url: "https://www.linkedin.com/learning/topics/communication",
+        platform: "LinkedIn Learning"
+      });
+    }
+    else if (skillLower.includes('leadership') || skillLower.includes('management')) {
+      resources.courses.push({
+        title: "Leadership Skills",
+        url: "https://www.coursera.org/specializations/organizational-leadership",
+        platform: "Coursera"
+      });
+      resources.tutorials.push({
+        title: "Management Training",
+        url: "https://www.mindtools.com/pages/main/newMN_LDR.htm",
+        platform: "Mind Tools"
+      });
+    }
+    
+    return resources;
+  };
+  
+  // Helper function to determine default skills based on career path
+  const determineDefaultSkillsForCareer = (careerPath) => {
+    const careerLower = careerPath.toLowerCase();
+    
+    // Frontend Development Paths
+    if (careerLower.includes('frontend') || careerLower.includes('front-end') || careerLower.includes('front end')) {
+      return [
+        {
+          name: "JavaScript Programming",
+          description: "Develop strong JavaScript skills required for modern frontend development",
+          category: "Programming Languages"
+        },
+        {
+          name: "Frontend Frameworks",
+          description: "Learn React, Vue, or Angular to build interactive web applications",
+          category: "Frontend"
+        },
+        {
+          name: "Responsive Design",
+          description: "Master CSS and responsive design principles for modern web applications",
+          category: "Web Development"
+        }
+      ];
+    }
+    // Backend Development Paths
+    else if (careerLower.includes('backend') || careerLower.includes('back-end') || careerLower.includes('back end')) {
+      return [
+        {
+          name: "Server-side Programming",
+          description: "Master Node.js, Python, or Java for backend development",
+          category: "Programming Languages"
+        },
+        {
+          name: "Database Management",
+          description: "Learn SQL and database design principles for efficient data storage",
+          category: "Database"
+        },
+        {
+          name: "API Development",
+          description: "Develop skills in creating RESTful and GraphQL APIs",
+          category: "Web Development"
+        }
+      ];
+    }
+    // Full Stack Development Paths
+    else if (careerLower.includes('fullstack') || careerLower.includes('full-stack') || careerLower.includes('full stack')) {
+      return [
+        {
+          name: "JavaScript Full Stack",
+          description: "Develop end-to-end JavaScript skills for both frontend and backend",
+          category: "Programming Languages"
+        },
+        {
+          name: "Database Management",
+          description: "Learn SQL and NoSQL database technologies for data persistence",
+          category: "Database"
+        },
+        {
+          name: "Web Application Architecture",
+          description: "Understand how to design scalable and maintainable web applications",
+          category: "System Design"
+        }
+      ];
+    }
+    // Data Science & Analytics Paths
+    else if (careerLower.includes('data') || careerLower.includes('analyst')) {
+      return [
+        {
+          name: "Data Analysis",
+          description: "Learn techniques for cleaning, processing, and analyzing large datasets",
+          category: "Data Science"
+        },
+        {
+          name: "Python for Data Science",
+          description: "Master Python with pandas, NumPy, and matplotlib for data analysis",
+          category: "Programming Languages"
+        },
+        {
+          name: "Data Visualization",
+          description: "Develop skills in creating insightful visualizations and dashboards",
+          category: "Data Science"
+        }
+      ];
+    }
+    // Machine Learning & AI Paths
+    else if (careerLower.includes('machine learning') || careerLower.includes('ml') || careerLower.includes('ai')) {
+      return [
+        {
+          name: "Machine Learning Fundamentals",
+          description: "Master core ML algorithms and their applications",
+          category: "Artificial Intelligence"
+        },
+        {
+          name: "Python for ML",
+          description: "Learn Python with scikit-learn, TensorFlow, and PyTorch",
+          category: "Programming Languages"
+        },
+        {
+          name: "Mathematics for ML",
+          description: "Develop skills in statistics, linear algebra, and calculus for ML",
+          category: "Mathematics"
+        }
+      ];
+    }
+    // DevOps & Cloud Paths
+    else if (careerLower.includes('devops') || careerLower.includes('cloud')) {
+      return [
+        {
+          name: "Cloud Technologies",
+          description: "Master AWS, Azure, or Google Cloud for cloud infrastructure",
+          category: "Cloud Computing"
+        },
+        {
+          name: "Containerization",
+          description: "Learn Docker and Kubernetes for container orchestration",
+          category: "DevOps"
+        },
+        {
+          name: "Infrastructure as Code",
+          description: "Develop skills in Terraform, CloudFormation, or Ansible",
+          category: "DevOps"
+        }
+      ];
+    }
+    // Mobile Development Paths
+    else if (careerLower.includes('mobile') || careerLower.includes('app')) {
+      return [
+        {
+          name: "Mobile Development",
+          description: "Learn React Native or Flutter for cross-platform app development",
+          category: "Mobile Development"
+        },
+        {
+          name: "UI/UX for Mobile",
+          description: "Master mobile interface design principles and user experience",
+          category: "Design"
+        },
+        {
+          name: "State Management",
+          description: "Develop skills in managing application state for complex apps",
+          category: "Software Architecture"
+        }
+      ];
+    }
+    // Cybersecurity Paths
+    else if (careerLower.includes('security') || careerLower.includes('cyber')) {
+      return [
+        {
+          name: "Security Fundamentals",
+          description: "Learn core cybersecurity principles and best practices",
+          category: "Cybersecurity"
+        },
+        {
+          name: "Network Security",
+          description: "Understand network protocols and security measures",
+          category: "Cybersecurity"
+        },
+        {
+          name: "Security Operations",
+          description: "Develop skills in threat detection, incident response, and security monitoring",
+          category: "Cybersecurity"
+        }
+      ];
+    }
+    // QA & Testing Paths
+    else if (careerLower.includes('qa') || careerLower.includes('test') || careerLower.includes('quality')) {
+      return [
+        {
+          name: "Test Automation",
+          description: "Learn frameworks like Selenium, Cypress, or Playwright for automated testing",
+          category: "QA"
+        },
+        {
+          name: "Testing Methodologies",
+          description: "Understand different testing approaches including unit, integration, and E2E testing",
+          category: "QA"
+        },
+        {
+          name: "CI/CD for Testing",
+          description: "Implement continuous testing in development pipelines",
+          category: "DevOps"
+        }
+      ];
+    }
+    // UX/UI Design Paths
+    else if (careerLower.includes('ux') || careerLower.includes('ui') || careerLower.includes('design')) {
+      return [
+        {
+          name: "UI Design Principles",
+          description: "Master visual design, typography, and layout for digital interfaces",
+          category: "Design"
+        },
+        {
+          name: "User Experience Research",
+          description: "Learn methods for understanding user needs and testing designs",
+          category: "Design"
+        },
+        {
+          name: "Design Tools",
+          description: "Develop proficiency in industry tools like Figma, Sketch, or Adobe XD",
+          category: "Design"
+        }
+      ];
+    }
+    // Product Management Paths
+    else if (careerLower.includes('product') || careerLower.includes('manager')) {
+      return [
+        {
+          name: "Product Strategy",
+          description: "Understand how to define and execute product vision and roadmap",
+          category: "Product Management"
+        },
+        {
+          name: "User Research",
+          description: "Learn techniques for gathering and analyzing user feedback",
+          category: "Product Management"
+        },
+        {
+          name: "Agile Methodologies",
+          description: "Master frameworks for iterative product development and delivery",
+          category: "Project Management"
+        }
+      ];
+    }
+    // Blockchain & Web3 Paths
+    else if (careerLower.includes('blockchain') || careerLower.includes('web3')) {
+      return [
+        {
+          name: "Blockchain Fundamentals",
+          description: "Understand the core concepts of distributed ledger technology",
+          category: "Blockchain"
+        },
+        {
+          name: "Smart Contract Development",
+          description: "Learn languages like Solidity for creating decentralized applications",
+          category: "Blockchain"
+        },
+        {
+          name: "Web3 Architecture",
+          description: "Develop skills in building decentralized applications and services",
+          category: "Blockchain"
+        }
+      ];
+    }
+    
+    // Default skills for general tech careers
+    return [
+      {
+        name: "Programming Fundamentals",
+        description: "Build a strong foundation in programming principles and logic",
+        category: "Programming"
+      },
+      {
+        name: "Web Development",
+        description: "Develop skills in creating modern web applications and services",
+        category: "Web Development"
+      },
+      {
+        name: "Project Management",
+        description: "Learn to manage technical projects and collaborate effectively",
+        category: "Soft Skills"
+      }
+    ];
+  };
+
+  // Format analysis text for display
+  const formatAnalysisText = (text) => {
+    if (!text) return [];
+    
+    const lines = text.split('\n');
+    let formattedContent = [];
+    let inSkillsGapSection = false;
+    let inLearningRoadmapSection = false;
+    
+    // Track if we should skip the current section
+    let skipCurrentSection = false;
+    let currentSkipSection = "";
+    
+    // Sections to skip - both plain names and numbered versions
+    const skipSectionKeywords = [
+      "NETWORKING STRATEGY", 
+      "PERSONAL BRANDING", 
+      "INTERVIEW PREPARATION",
+      "MARKET TRENDS",
+      "JOB MARKET ANALYSIS"
+    ];
+    
+    // Enhance learning roadmap with more comprehensive content
+    const enhanceLearningRoadmap = (monthHeader, tasks) => {
+      // First, add the original month header
+      formattedContent.push(
+        <h5 key={`enhanced-month-${monthHeader}`} className="font-semibold mt-4 mb-2 text-blue-600 ml-4">
+          {monthHeader}
+        </h5>
+      );
+      
+      // Add the original tasks
+      tasks.forEach((task, tIndex) => {
+        formattedContent.push(
+          <div key={`enhanced-task-${monthHeader}-${tIndex}`} className="flex items-start mb-3 ml-6">
+            <span className="text-blue-600 mr-2">•</span>
+            <p dangerouslySetInnerHTML={processContent(task)} />
+          </div>
+        );
+      });
+      
+      // Add enhanced resources based on the tasks
+      const resourcesForTasks = generateResourcesForTasks(tasks);
+      
+      if (resourcesForTasks.length > 0) {
+        formattedContent.push(
+          <div key={`enhanced-resources-${monthHeader}`} className="ml-6 mt-2 mb-4">
+            <div className="bg-blue-50 rounded-lg p-4">
+              <h6 className="font-medium text-blue-800 mb-2 text-sm">Recommended Resources:</h6>
+              <div className="space-y-2">
+                {resourcesForTasks.map((resource, rIndex) => (
+                  <div key={`resource-${monthHeader}-${rIndex}`} className="flex items-start">
+                    <svg className="h-4 w-4 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <div>
+                      <p className="text-sm text-gray-800 font-medium">{resource.title}</p>
+                      <a 
+                        href={resource.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-xs text-blue-600 hover:underline"
+                      >
+                        {resource.platform || 'View Resource'} →
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      }
+    };
+    
+    // Generate specific resources based on task descriptions
+    const generateResourcesForTasks = (tasks) => {
+      const resources = [];
+      
+      // Join all tasks into a single string for easier checking
+      const tasksText = tasks.join(' ').toLowerCase();
+      
+      // Check for specific keywords and add relevant resources
+      if (tasksText.includes('ai') || tasksText.includes('machine learning')) {
+        resources.push({
+          title: 'Machine Learning for Healthcare',
+          url: 'https://www.coursera.org/specializations/ai-for-medicine',
+          platform: 'Coursera'
+        });
+        resources.push({
+          title: 'AI for Financial Services',
+          url: 'https://www.edx.org/course/artificial-intelligence-for-trading',
+          platform: 'edX'
+        });
+      }
+      
+      if (tasksText.includes('cloud') || tasksText.includes('azure') || tasksText.includes('google cloud')) {
+        resources.push({
+          title: 'Google Cloud Certification Training',
+          url: 'https://cloud.google.com/certification',
+          platform: 'Google Cloud'
+        });
+        resources.push({
+          title: 'Microsoft Azure Fundamentals',
+          url: 'https://learn.microsoft.com/en-us/training/paths/az-900-describe-cloud-concepts/',
+          platform: 'Microsoft Learn'
+        });
+      }
+      
+      if (tasksText.includes('mlops') || tasksText.includes('kubeflow') || tasksText.includes('mlflow')) {
+        resources.push({
+          title: 'MLOps Specialization',
+          url: 'https://www.deeplearning.ai/courses/machine-learning-engineering-for-production-mlops/',
+          platform: 'DeepLearning.AI'
+        });
+        resources.push({
+          title: 'Kubeflow Documentation & Tutorials',
+          url: 'https://www.kubeflow.org/docs/started/getting-started/',
+          platform: 'Kubeflow.org'
+        });
+      }
+      
+      if (tasksText.includes('business analytics') || tasksText.includes('performance indicators')) {
+        resources.push({
+          title: 'Business Analytics Specialization',
+          url: 'https://www.coursera.org/specializations/business-analytics',
+          platform: 'Coursera'
+        });
+      }
+      
+      if (tasksText.includes('data engineering') || tasksText.includes('hadoop') || tasksText.includes('spark')) {
+        resources.push({
+          title: 'Data Engineering with Google Cloud',
+          url: 'https://www.coursera.org/professional-certificates/gcp-data-engineering',
+          platform: 'Coursera'
+        });
+        resources.push({
+          title: 'Spark & Hadoop Fundamentals',
+          url: 'https://www.udemy.com/course/best-hands-on-big-data-practices-hadoop-spark-using-python/',
+          platform: 'Udemy'
+        });
+      }
+      
+      if (tasksText.includes('project') || tasksText.includes('capstone')) {
+        resources.push({
+          title: 'End-to-End ML Project Template',
+          url: 'https://github.com/https-deeplearning-ai/machine-learning-engineering-for-production-public',
+          platform: 'GitHub'
+        });
+      }
+      
+      // Add professional certifications if career paths indicate they're valuable
+      if (careerPaths.some(path => path.title.includes('Data Scientist') || path.title.includes('ML Engineer'))) {
+        resources.push({
+          title: 'TensorFlow Developer Certification',
+          url: 'https://www.tensorflow.org/certificate',
+          platform: 'TensorFlow.org'
+        });
+      }
+      
+      // Limit to 3 resources to avoid overwhelming the user
+      return resources.slice(0, 3);
+    };
+    
+    // Add comprehensive roadmap continuation based on user's timeline
+    const addLearningRoadmapContinuation = () => {
+      // Only add continuation if we found a learning roadmap section
+      if (!inLearningRoadmapSection) return;
+      
+      // Get first career path if available
+      const topCareerPath = careerPaths.length > 0 ? careerPaths[0].title : "";
+      
+      // Add continuation header
+      formattedContent.push(
+        <div key="roadmap-continuation-header" className="mt-6 mb-4 bg-blue-50 p-4 rounded-lg">
+          <h4 className="font-semibold text-blue-800">Extended Learning Roadmap</h4>
+          <p className="text-sm text-gray-700 mt-1">
+            Continuing your journey toward {topCareerPath || "your career goals"} with additional milestones.
+          </p>
+        </div>
+      );
+      
+      // Add additional months based on timeline
+      const timelineMap = {
+        'Less than 6 months': 9,
+        '6-12 months': 12,
+        '1-2 years': 18,
+        '2+ years': 24,
+        'Already transitioning': 9
+      };
+      
+      const maxMonths = timelineMap[userData.transitionTimeline] || 12;
+      
+      // Month 7-8
+      if (maxMonths >= 8) {
+        const month78Tasks = [
+          "Start building a personal portfolio website showcasing your projects and skills",
+          "Begin contributing to open-source projects related to your field",
+          "Enhance your understanding of system design and architecture principles"
+        ];
+        
+        enhanceLearningRoadmap("Month 7-8:", month78Tasks);
+      }
+      
+      // Month 9-10
+      if (maxMonths >= 10) {
+        const month910Tasks = [
+          "Take advanced specialized courses in your chosen career path's domain",
+          "Start networking with professionals in your target industry through meetups and conferences",
+          "Begin preparing for technical interviews with practice sessions"
+        ];
+        
+        enhanceLearningRoadmap("Month 9-10:", month910Tasks);
+      }
+      
+      // Month 11-12
+      if (maxMonths >= 12) {
+        const month1112Tasks = [
+          "Finalize your professional portfolio with at least 3-5 substantial projects",
+          "Prepare case studies of your projects to showcase problem-solving abilities",
+          "Start applying for relevant positions and opportunities"
+        ];
+        
+        enhanceLearningRoadmap("Month 11-12:", month1112Tasks);
+      }
+      
+      // Month 13-15 (for longer timelines)
+      if (maxMonths >= 15) {
+        const month1315Tasks = [
+          "Deepen expertise in specialized areas with advanced certifications",
+          "Mentor others and lead collaborative projects to demonstrate leadership",
+          "Explore freelance opportunities to build real-world experience"
+        ];
+        
+        enhanceLearningRoadmap("Month 13-15:", month1315Tasks);
+      }
+      
+      // Month 16-18 (for longer timelines)
+      if (maxMonths >= 18) {
+        const month1618Tasks = [
+          "Focus on emerging technologies and trends in your field",
+          "Consider publishing articles or research on your learnings",
+          "Position yourself as a specialist in a high-demand niche"
+        ];
+        
+        enhanceLearningRoadmap("Month 16-18:", month1618Tasks);
+      }
+      
+      // Beyond (for 2+ year timelines)
+      if (maxMonths >= 24) {
+        const beyondTasks = [
+          "Consider advanced degrees or specialized education if beneficial for your career goals",
+          "Build a personal brand as a thought leader in your specialty",
+          "Explore entrepreneurial opportunities leveraging your technical expertise"
+        ];
+        
+        enhanceLearningRoadmap("Month 19-24:", beyondTasks);
+      }
+      
+      // Add final milestone
+      formattedContent.push(
+        <div key="roadmap-final-milestone" className="mt-6 mb-6 ml-4">
+          <div className="flex items-center">
+            <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center text-white mr-3">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h5 className="font-bold text-green-700">Career Transition Complete!</h5>
+          </div>
+          <p className="text-gray-700 ml-11 mt-1">
+            By this point, you should have the skills, portfolio, and experience needed 
+            to successfully transition into your new role as a {topCareerPath || "technology professional"}.
+          </p>
+        </div>
+      );
+    };
+    
+    const processContent = (content) => {
+      content = content.replace(/\btheir\b/gi, 'your');
+      content = content.replace(/\bthey\b/gi, 'you');
+      content = content.replace(/\bthem\b/gi, 'you');
+      content = content.replace(/\bthemselves\b/gi, 'yourself');
+      
+      if (userData.educationLevel && userData.educationLevel !== 'Not specified') {
+        const educationTerms = [userData.educationLevel, userData.studyField].filter(Boolean);
+        educationTerms.forEach(term => {
+          if (term && term.length > 3) {
+            const regex = new RegExp(`(${term})`, 'gi');
+            content = content.replace(regex, '<strong class="text-blue-700">$1</strong>');
+          }
+        });
+      }
+      
+      if (userData.currentRole && userData.currentRole !== 'Not specified') {
+        const regex = new RegExp(`(${userData.currentRole})`, 'gi');
+        content = content.replace(regex, '<strong class="text-purple-700">$1</strong>');
+      }
+      
+      return { __html: content };
+    };
+    
+    // Store the current month in learning roadmap for task collection
+    let currentMonthTasks = [];
+    let currentMonthHeader = '';
+
+    lines.forEach((line, index) => {
+      // Check for numbered section headers (like "7. NETWORKING STRATEGY:")
+      const numberedSectionMatch = line.match(/^\d+\.\s+([A-Z\s]+):/);
+      
+      // If this is a numbered section header that matches our skip list
+      if (numberedSectionMatch && skipSectionKeywords.some(keyword => 
+          numberedSectionMatch[1].includes(keyword))) {
+        skipCurrentSection = true;
+        currentSkipSection = numberedSectionMatch[1];
+        return;
+      }
+      
+      // Look for learning roadmap section
+      if (line.includes("LEARNING ROADMAP") || line.match(/\d+\.\s+LEARNING\s+ROADMAP/i)) {
+        inLearningRoadmapSection = true;
+        formattedContent.push(
+          <h3 key={`header-roadmap-${index}`} className="text-xl font-bold mt-8 mb-4 text-blue-800">
+            {line}
+          </h3>
+        );
+        return;
+      }
+      
+      // Check if we're exiting a section we're skipping
+      // (When we hit another numbered section heading)
+      if (skipCurrentSection && line.match(/^\d+\.\s+[A-Z\s]+:/)) {
+        skipCurrentSection = false;
+        currentSkipSection = "";
+      }
+      
+      // Skip processing this line if we're in a section to skip
+      if (skipCurrentSection) {
+        return;
+      }
+
+      // Continue with normal processing for non-skipped sections
+      if (line.includes("SKILLS GAP ANALYSIS")) {
+        inSkillsGapSection = true;
+        formattedContent.push(
+          <h3 key={`header-${index}`} className="text-xl font-bold mt-8 mb-4 text-blue-800">
+            {line}
+          </h3>
+        );
+        return;
+      }
+      
+      if (line.includes("TRANSITION STRATEGY") || (inLearningRoadmapSection && line.match(/^\d+\.\s+[A-Z\s]+:/))) {
+        // If we were in learning roadmap section, add the continuation
+        if (inLearningRoadmapSection) {
+          // Process any remaining tasks from the last month
+          if (currentMonthHeader && currentMonthTasks.length > 0) {
+            enhanceLearningRoadmap(currentMonthHeader, currentMonthTasks);
+            currentMonthTasks = [];
+            currentMonthHeader = '';
+          }
+          
+          // Add continuation roadmap
+          addLearningRoadmapContinuation();
+        }
+        
+        inSkillsGapSection = false;
+        inLearningRoadmapSection = false;
+        
+        // Continue normal processing for the new section header
+        formattedContent.push(
+          <h3 key={`header-${index}`} className="text-xl font-bold mt-8 mb-4 text-blue-800">
+            {line}
+          </h3>
+        );
+        return;
+      }
+
+      if (inSkillsGapSection && line.match(/^\d+\.\s+/) && line.includes(':')) {
+        return;
+      }
+
+      // Process month headers in learning roadmap
+      if (inLearningRoadmapSection && line.trim().match(/^Month\s+\d+-?\d*:/i)) {
+        // If we already have a month with tasks, process it before starting a new one
+        if (currentMonthHeader && currentMonthTasks.length > 0) {
+          enhanceLearningRoadmap(currentMonthHeader, currentMonthTasks);
+          currentMonthTasks = [];
+        }
+        
+        // Set the new current month
+        currentMonthHeader = line.trim();
+        return;
+      }
+      
+      // Process tasks within a month
+      if (inLearningRoadmapSection && currentMonthHeader && (line.trim().startsWith('-') || line.trim().startsWith('•'))) {
+        currentMonthTasks.push(line.replace(/^[-•]\s+/, '').trim());
+        return;
+      }
+
+      if (line.match(/^\d+\.\s+[A-Z]/)) {
+        formattedContent.push(
+          <h3 key={`header-${index}`} className="text-xl font-bold mt-8 mb-4 text-blue-800">
+            {line}
+          </h3>
+        );
+      }
+      else if (line.match(/^[a-z]\)\s+.*?\(\d+%\s+match/i)) {
+        formattedContent.push(
+          <h4 key={`subheader-${index}`} className="text-lg font-semibold mt-6 mb-2 text-blue-700">
+            {line}
+          </h4>
+        );
+      }
+      else if (line.trim().startsWith('-')) {
+        const content = line.replace(/^-\s+/, '');
+        formattedContent.push(
+          <div key={`bullet-${index}`} className="flex items-start mb-3">
+            <span className="text-blue-600 mr-2">•</span>
+            <p dangerouslySetInnerHTML={processContent(content)} />
+          </div>
+        );
+      }
+      else if (line.trim().match(/^\d+\.\s+/)) {
+        const content = line.replace(/^\d+\.\s+/, '');
+        formattedContent.push(
+          <div key={`numbered-${index}`} className="flex items-start mb-3">
+            <span className="text-blue-600 mr-2">•</span>
+            <p dangerouslySetInnerHTML={processContent(content)} />
+          </div>
+        );
+      }
+      else if (line.trim() === '') {
+        formattedContent.push(<br key={`break-${index}`} />);
+      }
+      else {
+        formattedContent.push(
+          <p key={`text-${index}`} className="mb-3 text-gray-900" dangerouslySetInnerHTML={processContent(line)} />
+        );
+      }
+    });
+    
+    // Process any remaining month tasks at the end
+    if (inLearningRoadmapSection && currentMonthHeader && currentMonthTasks.length > 0) {
+      enhanceLearningRoadmap(currentMonthHeader, currentMonthTasks);
+      
+      // Add continuation roadmap at the end
+      addLearningRoadmapContinuation();
+    }
+
+    return formattedContent;
+  };
+
+  // Custom Simple Bar Chart Component
+  const SimpleBarChart = ({ data, title }) => {
+    if (!data || data.length === 0) return null;
+    
+    const maxValue = Math.max(...data.map(item => item.value));
+    
+    return (
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-4">{title}</h3>
+        <div className="space-y-4">
+          {data.map((item, index) => (
+            <div key={index}>
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-medium">{item.label}</span>
+                <span className="text-sm text-gray-600">{item.value}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-8 relative">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    index === 0 ? 'bg-blue-600' : 
+                    index === 1 ? 'bg-green-500' : 
+                    index === 2 ? 'bg-purple-500' :
+                    index === 3 ? 'bg-orange-500' :
+                    'bg-pink-500'
+                  }`}
+                  style={{ width: `${(item.value / maxValue) * 100}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Custom Skill Level Chart Component
+  const SkillLevelChart = ({ skill }) => {
+    const levels = ['Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert'];
+    const levelColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
+    
+    return (
+      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+        <div className="flex justify-between items-start mb-3">
+          <h4 className="font-semibold text-lg">{skill.name}</h4>
+          {skill.gap > 0 && (
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              skill.gap > 2 ? 'bg-red-100 text-red-700' : 
+              skill.gap === 2 ? 'bg-yellow-100 text-yellow-700' : 
+              'bg-green-100 text-green-700'
+            }`}>
+              Gap: {skill.gap} {skill.gap === 1 ? 'level' : 'levels'}
+            </span>
+          )}
+        </div>
+        
+        <div className="grid grid-cols-5 gap-1 mb-3">
+          {levels.map((level, index) => (
+            <div key={index} className="relative">
+              <div className={`h-8 rounded ${
+                index < skill.currentLevel ? levelColors[index] : 'bg-gray-300'
+              } ${index < skill.requiredLevel ? 'opacity-100' : 'opacity-30'}`}>
+                {index < skill.requiredLevel && index >= skill.currentLevel && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">Need</span>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-center mt-1">{level}</p>
+            </div>
+          ))}
+        </div>
+        
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-gray-600">Current: {levels[Math.max(0, skill.currentLevel - 1)]}</span>
+          <span className="text-blue-600 font-medium">Target: {levels[Math.max(0, skill.requiredLevel - 1)]}</span>
+        </div>
+        
+        {skill.description && (
+          <p className="text-sm text-gray-700 mt-3">{skill.description}</p>
+        )}
+      </div>
+    );
+  };
+
+  // Custom Tools Proficiency Component
+  const ToolsProficiency = ({ tools }) => {
+    if (!tools || tools.length === 0 || (tools.length === 1 && tools[0] === 'None')) {
+      return null;
+    }
+    
+    const experienceMultiplier = {
+      'Complete beginner': 0.5,
+      'Some exposure': 0.7,
+      'Beginner': 0.8,
+      'Intermediate': 1,
+      'Advanced': 1.2
+    };
+
+    const toolProficiencyMap = {
+      'VS Code': 3,
+      'GitHub': 3,
+      'JavaScript': 4,
+      'Python': 4,
+      'React': 4,
+      'Node.js': 4,
+      'SQL': 3,
+      'AWS': 5,
+      'Docker': 4
+    };
+
+    const multiplier = experienceMultiplier[userData.experienceLevel] || 1;
+    
+    return (
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-4">Current Tools & Technologies</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          {tools.filter(tool => tool !== 'None').map((tool, index) => {
+            const proficiency = Math.round((toolProficiencyMap[tool] || 3) * multiplier);
+            const proficiencyLabels = ['Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert'];
+            
+            return (
+              <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-medium">{tool}</span>
+                  <span className="text-sm text-gray-600">{proficiencyLabels[proficiency - 1]}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${(proficiency / 5) * 100}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Market Trends Section Component
+  const MarketTrendsSection = ({ marketTrends }) => {
+    if (!marketTrends || marketTrends.length === 0) {
+      return null;
+    }
+    
+    const salaryTrends = marketTrends.filter(trend => trend.type === 'salary');
+    const growthTrends = marketTrends.filter(trend => trend.type === 'growth');
+    const generalTrends = marketTrends.filter(trend => trend.type === 'general');
+    const sectionHeaders = marketTrends.filter(trend => trend.type === 'section_header');
+    
+    return (
+      <div>
+        {salaryTrends.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-4">Salary Ranges</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              {salaryTrends.map((trend, index) => (
+                <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-medium">{trend.careerPath}</span>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <span className="text-2xl font-bold text-blue-700">
+                      ${trend.minSalary.toLocaleString()} - ${trend.maxSalary.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="text-center text-sm text-gray-600 mt-2">Annual salary range</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {growthTrends.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-4">Job Growth Projections</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              {growthTrends.map((trend, index) => (
+                <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-medium">{trend.careerPath}</span>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <span className={`text-3xl font-bold ${
+                      trend.growth > 15 ? 'text-green-600' : 
+                      trend.growth > 5 ? 'text-blue-600' : 
+                      'text-orange-600'
+                    }`}>
+                      {trend.growth}%
+                    </span>
+                  </div>
+                  <div className="text-center text-sm text-gray-600 mt-2">Projected growth rate</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {sectionHeaders.length > 0 && generalTrends.length > 0 && (
+          <div>
+            {sectionHeaders.map((header, hIndex) => {
+              const relatedTrends = generalTrends.filter(trend => trend.subsection === header.title);
+              if (relatedTrends.length === 0) return null;
+              
+              return (
+                <div key={hIndex} className="mb-6">
+                  <h3 className="text-lg font-semibold mb-4">{header.title}</h3>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <ul className="space-y-3">
+                      {relatedTrends.map((trend, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="text-blue-600 mr-2 mt-1">•</span>
+                          <span>{trend.trend}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        
+        {!sectionHeaders.length && generalTrends.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-4">Industry Insights</h3>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <ul className="space-y-3">
+                {generalTrends.map((trend, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="text-blue-600 mr-2 mt-1">•</span>
+                    <span>{trend.trend}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Networking Strategy Component
   const NetworkingStrategySection = ({ strategies }) => {
     if (!strategies || strategies.length === 0) {
       return null;
@@ -1377,7 +3658,7 @@
         
         {/* Technical Proficiency Section - COMMENTED OUT as requested */}
         {/* 
-        Current Tools Proficiency - Removed as requested
+        // Current Tools Proficiency - Removed as requested
         {userData.toolsUsed && userData.toolsUsed.length > 0 && userData.toolsUsed[0] !== 'None' && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-bold mb-6">Technical Proficiency</h2>

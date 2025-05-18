@@ -1869,6 +1869,12 @@ const CareerDashboard = () => {
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
                     placeholder="Tell us how we can make this better..."
                     required
+                    value={feedbackData.improvements}
+                    onChange={handleFeedbackChange}
+                    rows="4"
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                    placeholder="Tell us how we can make this better..."
+                    required
                   />
                     rows="4"
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"

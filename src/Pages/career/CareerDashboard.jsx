@@ -1,11 +1,4 @@
-const proficiency = Math.round((toolProficiencyMap[tool] || 3) * multiplier);
-            const proficiencyLabels = ['Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert'];
-            
-            return (
-              <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium">{tool}</span>
-                  <span className="text-sm text-gray-600">{proficiencyLabels[proficiency - 1]}</span>
+els[proficiency - 1]}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 

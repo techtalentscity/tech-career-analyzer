@@ -2012,6 +2012,11 @@ export const careerPathHasSkill = (careerPath, skillName) => {
     skillLower.includes(skill.toLowerCase()) || 
     skill.toLowerCase().includes(skillLower)
   );
+}; primary skills list
+  return careerData.primarySkills.some(skill => 
+    skillLower.includes(skill.toLowerCase()) || 
+    skill.toLowerCase().includes(skillLower)
+  );
 };
 
 /**
@@ -2021,7 +2026,7 @@ export const getSkillRelevanceText = (skillName, careerPaths) => {
   const skillLower = skillName.toLowerCase();
   
   if (careerPaths.length === 0) {
-    return 'This skill is important for many technology roles.';
+    return 'This skill is important for many professional roles.';
   }
   
   const primaryPath = careerPaths[0].title;
@@ -2030,13 +2035,16 @@ export const getSkillRelevanceText = (skillName, careerPaths) => {
   const isPrimarySkill = careerPathHasSkill(primaryPath, skillName);
   const isSecondarySkill = secondaryPath ? careerPathHasSkill(secondaryPath, skillName) : false;
   
+  // Check if this is a technical or non-technical skill
+  const isTechnicalSkill = isSkillTechnical(skillName);
+  
   if (isPrimarySkill && isSecondarySkill) {
-    return `This is a core skill for both ${primaryPath} and ${secondaryPath} career paths.`;
+    return `This is a core ${isTechnicalSkill ? 'technical ' : ''}skill for both ${primaryPath} and ${secondaryPath} career paths.`;
   } else if (isPrimarySkill) {
-    return `This is a key skill for the ${primaryPath} career path.`;
+    return `This is a key ${isTechnicalSkill ? 'technical ' : ''}skill for the ${primaryPath} career path.`;
   } else if (isSecondarySkill) {
     return `While not as critical for ${primaryPath}, this skill is important for the ${secondaryPath} career path.`;
   } else {
-    return `This skill provides valuable foundations for your transition to ${primaryPath}.`;
+    return `This skill provides valuable ${isTechnicalSkill ? 'technical ' : ''}foundations for your transition to ${primaryPath}.`;
   }
 };

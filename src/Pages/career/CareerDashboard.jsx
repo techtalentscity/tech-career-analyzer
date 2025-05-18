@@ -240,6 +240,148 @@ const CareerDashboard = () => {
     return careerPaths;
   };
   
+  // Generate a related career path based on existing paths
+  const generateRelatedCareerPath = (existingPaths, userData, skillsGap) => {
+    // Common career paths we can suggest as alternatives
+    const commonPaths = [
+      { title: "Data Scientist", baseMatch: 85 },
+      { title: "Machine Learning Engineer", baseMatch: 83 },
+      { title: "Data Engineer", baseMatch: 82 },
+      { title: "Full Stack Developer", baseMatch: 80 },
+      { title: "Frontend Developer", baseMatch: 78 },
+      { title: "Backend Developer", baseMatch: 78 },
+      { title: "DevOps Engineer", baseMatch: 75 },
+      { title: "Cloud Engineer", baseMatch: 75 },
+      { title: "Product Manager", baseMatch: 73 },
+      { title: "UX/UI Designer", baseMatch: 70 },
+      { title: "Mobile App Developer", baseMatch: 72 },
+      { title: "Cybersecurity Specialist", baseMatch: 70 },
+      { title: "AI Research Scientist", baseMatch: 68 },
+      { title: "Business Intelligence Analyst", baseMatch: 75 },
+      { title: "MLOps Engineer", baseMatch: 72 }
+    ];
+    
+    // Filter out paths that are already in existingPaths
+    const availablePaths = commonPaths.filter(path => 
+      !existingPaths.some(existing => existing.title.toLowerCase() === path.title.toLowerCase())
+    );
+    
+    if (availablePaths.length === 0) {
+      // Fallback if all common paths are already used
+      return { 
+        title: "Technical Project Manager", 
+        match: 70 
+      };
+    }
+    
+    // Consider user's interests and skills to find a complementary path
+    let bestMatch = null;
+    let highestScore = 0;
+    
+    availablePaths.forEach(path => {
+      let score = path.baseMatch;
+      const pathTitle = path.title.toLowerCase();
+      
+      // Adjust score based on user's interests
+      if (userData.careerPathsInterest && userData.careerPathsInterest.length > 0) {
+        userData.careerPathsInterest.forEach(interest => {
+          if (pathTitle.includes(interest.toLowerCase())) {
+            score += 10;
+          }
+        });
+      }
+      
+      // Adjust score based on user's education
+      if (userData.studyField) {
+        const field = userData.studyField.toLowerCase();
+        
+        if (
+          (field.includes("comput") || field.includes("software") || field.includes("engineer")) && 
+          (pathTitle.includes("developer") || pathTitle.includes("engineer"))
+        ) {
+          score += 5;
+        }
+        else if (
+          (field.includes("math") || field.includes("statistic") || field.includes("physics")) && 
+          (pathTitle.includes("data") || pathTitle.includes("machine") || pathTitle.includes("ai"))
+        ) {
+          score += 5;
+        }
+        else if (
+          (field.includes("design") || field.includes("art") || field.includes("psych")) && 
+          (pathTitle.includes("designer") || pathTitle.includes("ux"))
+        ) {
+          score += 5;
+        }
+        else if (
+          (field.includes("business") || field.includes("management") || field.includes("admin")) && 
+          (pathTitle.includes("manager") || pathTitle.includes("analyst"))
+        ) {
+          score += 5;
+        }
+      }
+      
+      // Adjust score based on skill gaps
+      if (skillsGap && skillsGap.length > 0) {
+        skillsGap.forEach(skill => {
+          const skillName = skill.name.toLowerCase();
+          
+          if (
+            (skillName.includes("python") || skillName.includes("data")) && 
+            (pathTitle.includes("data") || pathTitle.includes("machine") || pathTitle.includes("ai"))
+          ) {
+            score += 3;
+          }
+          else if (
+            (skillName.includes("javascript") || skillName.includes("react") || skillName.includes("web")) && 
+            (pathTitle.includes("frontend") || pathTitle.includes("full stack"))
+          ) {
+            score += 3;
+          }
+          else if (
+            (skillName.includes("cloud") || skillName.includes("devops") || skillName.includes("kubernetes")) && 
+            (pathTitle.includes("devops") || pathTitle.includes("cloud"))
+          ) {
+            score += 3;
+          }
+        });
+      }
+      
+      // If existing paths suggest a trend, boost related paths
+      const existingTrends = existingPaths.map(p => p.title.toLowerCase());
+      if (existingTrends.some(t => t.includes("data")) && pathTitle.includes("data")) {
+        score += 8;
+      }
+      else if (existingTrends.some(t => t.includes("developer")) && pathTitle.includes("developer")) {
+        score += 8;
+      }
+      else if (existingTrends.some(t => t.includes("machine")) && 
+              (pathTitle.includes("machine") || pathTitle.includes("ai") || pathTitle.includes("mlops"))) {
+        score += 8;
+      }
+      
+      // Set lower match percentage than existing paths
+      const lowestExistingMatch = existingPaths.length > 0 ? 
+        Math.min(...existingPaths.map(p => p.match)) : 90;
+      
+      // Ensure new path has slightly lower match than existing ones
+      const finalMatch = Math.min(score, lowestExistingMatch - 3);
+      
+      if (finalMatch > highestScore) {
+        highestScore = finalMatch;
+        bestMatch = {
+          title: path.title,
+          match: Math.round(finalMatch)
+        };
+      }
+    });
+    
+    return bestMatch || {
+      title: "Technical Project Manager",
+      match: 70
+    };
+  };
+  
   // Ensure we have exactly three career paths for display
   const getThreeCareerPaths = (paths, userData, skillsGap) => {
     // Make a defensive copy to avoid modifying the original

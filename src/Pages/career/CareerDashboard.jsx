@@ -663,7 +663,9 @@ const CareerDashboard = () => {
       }]
     };
     
-    // Add specific resources based on skill name
+    // Add specific resources based on skill name - EXPANDED FOR ALL TECH ROLES
+    
+    // Frontend Development
     if (skillLower.includes('javascript') || skillLower.includes('js')) {
       resources.courses.push({
         title: "JavaScript Fundamentals",
@@ -681,6 +683,73 @@ const CareerDashboard = () => {
         platform: "Exercism"
       });
     }
+    else if (skillLower.includes('react')) {
+      resources.courses.push({
+        title: "React Documentation",
+        url: "https://react.dev/learn",
+        platform: "React.dev"
+      });
+      resources.tutorials.push({
+        title: "React Projects",
+        url: "https://www.freecodecamp.org/learn/front-end-development-libraries/#react",
+        platform: "freeCodeCamp"
+      });
+      resources.projects.push({
+        title: "React Project Ideas",
+        url: "https://github.com/florinpop17/app-ideas",
+        platform: "GitHub"
+      });
+    }
+    else if (skillLower.includes('vue')) {
+      resources.courses.push({
+        title: "Vue.js Documentation",
+        url: "https://vuejs.org/guide/introduction.html",
+        platform: "Vue.js"
+      });
+      resources.tutorials.push({
+        title: "Vue Mastery",
+        url: "https://www.vuemastery.com/courses/",
+        platform: "Vue Mastery"
+      });
+    }
+    else if (skillLower.includes('angular')) {
+      resources.courses.push({
+        title: "Angular Documentation",
+        url: "https://angular.io/docs",
+        platform: "Angular.io"
+      });
+      resources.tutorials.push({
+        title: "Angular University",
+        url: "https://angular-university.io/",
+        platform: "Angular University"
+      });
+    }
+    else if (skillLower.includes('css') || skillLower.includes('html')) {
+      resources.courses.push({
+        title: "CSS Grid & Flexbox",
+        url: "https://css-tricks.com/snippets/css/complete-guide-grid/",
+        platform: "CSS-Tricks"
+      });
+      resources.tutorials.push({
+        title: "Frontend Mentor Challenges",
+        url: "https://www.frontendmentor.io/challenges",
+        platform: "Frontend Mentor"
+      });
+    }
+    else if (skillLower.includes('typescript')) {
+      resources.courses.push({
+        title: "TypeScript Handbook",
+        url: "https://www.typescriptlang.org/docs/handbook/intro.html",
+        platform: "TypeScript"
+      });
+      resources.tutorials.push({
+        title: "TypeScript Exercises",
+        url: "https://typescript-exercises.github.io/",
+        platform: "TypeScript Exercises"
+      });
+    }
+    
+    // Backend Development
     else if (skillLower.includes('python')) {
       resources.courses.push({
         title: "Python for Everybody",
@@ -698,18 +767,185 @@ const CareerDashboard = () => {
         platform: "YouTube"
       });
     }
-    else if (skillLower.includes('react')) {
+    else if (skillLower.includes('node') || skillLower.includes('express')) {
       resources.courses.push({
-        title: "React Documentation",
-        url: "https://react.dev/learn",
-        platform: "React.dev"
+        title: "Node.js Documentation",
+        url: "https://nodejs.org/en/docs/",
+        platform: "Node.js"
       });
       resources.tutorials.push({
-        title: "React Projects",
-        url: "https://www.freecodecamp.org/learn/front-end-development-libraries/#react",
-        platform: "freeCodeCamp"
+        title: "Express.js Guide",
+        url: "https://expressjs.com/en/guide/routing.html",
+        platform: "Express.js"
       });
     }
+    else if (skillLower.includes('java') && !skillLower.includes('javascript')) {
+      resources.courses.push({
+        title: "Java Programming",
+        url: "https://dev.java/learn/",
+        platform: "dev.java"
+      });
+      resources.tutorials.push({
+        title: "Spring Boot Documentation",
+        url: "https://spring.io/projects/spring-boot",
+        platform: "Spring.io"
+      });
+    }
+    else if (skillLower.includes('c#') || skillLower.includes('asp.net') || skillLower.includes('dotnet')) {
+      resources.courses.push({
+        title: ".NET Documentation",
+        url: "https://learn.microsoft.com/en-us/dotnet/",
+        platform: "Microsoft Learn"
+      });
+      resources.tutorials.push({
+        title: "ASP.NET Core Documentation",
+        url: "https://learn.microsoft.com/en-us/aspnet/core/",
+        platform: "Microsoft Learn"
+      });
+    }
+    else if (skillLower.includes('php') || skillLower.includes('laravel')) {
+      resources.courses.push({
+        title: "PHP Documentation",
+        url: "https://www.php.net/docs.php",
+        platform: "PHP.net"
+      });
+      resources.tutorials.push({
+        title: "Laravel Documentation",
+        url: "https://laravel.com/docs",
+        platform: "Laravel"
+      });
+    }
+    else if (skillLower.includes('ruby') || skillLower.includes('rails')) {
+      resources.courses.push({
+        title: "Ruby Documentation",
+        url: "https://ruby-doc.org/",
+        platform: "Ruby-Doc"
+      });
+      resources.tutorials.push({
+        title: "Ruby on Rails Guides",
+        url: "https://guides.rubyonrails.org/",
+        platform: "Ruby on Rails"
+      });
+    }
+    else if (skillLower.includes('go') || skillLower.includes('golang')) {
+      resources.courses.push({
+        title: "Go Documentation",
+        url: "https://go.dev/doc/",
+        platform: "Go.dev"
+      });
+      resources.tutorials.push({
+        title: "Go by Example",
+        url: "https://gobyexample.com/",
+        platform: "Go by Example"
+      });
+    }
+    
+    // Database & Data Engineering
+    else if (skillLower.includes('database') || skillLower.includes('sql')) {
+      resources.courses.push({
+        title: "SQL Course",
+        url: "https://www.khanacademy.org/computing/computer-programming/sql",
+        platform: "Khan Academy"
+      });
+      resources.tutorials.push({
+        title: "SQL Exercises",
+        url: "https://www.sqlzoo.net/",
+        platform: "SQLZoo"
+      });
+      resources.courses.push({
+        title: "Database Design",
+        url: "https://www.coursera.org/learn/database-design",
+        platform: "Coursera"
+      });
+    }
+    else if (skillLower.includes('mongodb') || skillLower.includes('nosql')) {
+      resources.courses.push({
+        title: "MongoDB University",
+        url: "https://university.mongodb.com/",
+        platform: "MongoDB"
+      });
+      resources.tutorials.push({
+        title: "NoSQL Design Patterns",
+        url: "https://docs.mongodb.com/manual/core/data-modeling-introduction/",
+        platform: "MongoDB Docs"
+      });
+    }
+    else if (skillLower.includes('postgresql') || skillLower.includes('postgres')) {
+      resources.courses.push({
+        title: "PostgreSQL Documentation",
+        url: "https://www.postgresql.org/docs/",
+        platform: "PostgreSQL"
+      });
+      resources.tutorials.push({
+        title: "PostgreSQL Exercises",
+        url: "https://pgexercises.com/",
+        platform: "PG Exercises"
+      });
+    }
+    
+    // DevOps & Cloud
+    else if (skillLower.includes('devops') || skillLower.includes('ci/cd') || skillLower.includes('cicd')) {
+      resources.courses.push({
+        title: "DevOps Fundamentals",
+        url: "https://www.atlassian.com/devops",
+        platform: "Atlassian"
+      });
+      resources.tutorials.push({
+        title: "CI/CD Pipeline Tutorials",
+        url: "https://www.jenkins.io/doc/tutorials/",
+        platform: "Jenkins"
+      });
+    }
+    else if (skillLower.includes('kubernetes') || skillLower.includes('k8s')) {
+      resources.courses.push({
+        title: "Kubernetes Documentation",
+        url: "https://kubernetes.io/docs/tutorials/",
+        platform: "Kubernetes.io"
+      });
+      resources.tutorials.push({
+        title: "Kubernetes Learning Path",
+        url: "https://azure.microsoft.com/en-us/resources/kubernetes-learning-path/",
+        platform: "Microsoft Azure"
+      });
+    }
+    else if (skillLower.includes('docker') || skillLower.includes('container')) {
+      resources.courses.push({
+        title: "Docker Documentation",
+        url: "https://docs.docker.com/get-started/",
+        platform: "Docker"
+      });
+      resources.tutorials.push({
+        title: "Docker Labs",
+        url: "https://github.com/docker/labs",
+        platform: "GitHub"
+      });
+    }
+    else if (skillLower.includes('cloud') || skillLower.includes('aws') || skillLower.includes('azure')) {
+      resources.courses.push({
+        title: "Cloud Fundamentals",
+        url: "https://aws.amazon.com/training/learn-about/",
+        platform: "AWS Training"
+      });
+      resources.tutorials.push({
+        title: "Cloud Architecture Center",
+        url: "https://cloud.google.com/architecture",
+        platform: "Google Cloud"
+      });
+    }
+    else if (skillLower.includes('terraform') || skillLower.includes('infrastructure as code')) {
+      resources.courses.push({
+        title: "Terraform Documentation",
+        url: "https://learn.hashicorp.com/terraform",
+        platform: "HashiCorp Learn"
+      });
+      resources.tutorials.push({
+        title: "Infrastructure as Code Tutorials",
+        url: "https://developer.hashicorp.com/terraform/tutorials",
+        platform: "HashiCorp"
+      });
+    }
+    
+    // Data Science & Machine Learning
     else if (skillLower.includes('data science') || skillLower.includes('data analysis')) {
       resources.courses.push({
         title: "Data Science Path",
@@ -722,7 +958,7 @@ const CareerDashboard = () => {
         platform: "Kaggle"
       });
     }
-    else if (skillLower.includes('machine learning') || skillLower.includes('ai')) {
+    else if (skillLower.includes('machine learning') || skillLower.includes('ml') || skillLower.includes('ai')) {
       resources.courses.push({
         title: "ML Crash Course",
         url: "https://developers.google.com/machine-learning/crash-course",
@@ -734,7 +970,247 @@ const CareerDashboard = () => {
         platform: "Kaggle"
       });
     }
-    else if (skillLower.includes('web dev') || skillLower.includes('frontend') || skillLower.includes('front-end')) {
+    else if (skillLower.includes('deep learning') || skillLower.includes('neural network')) {
+      resources.courses.push({
+        title: "Deep Learning Specialization",
+        url: "https://www.deeplearning.ai/courses/deep-learning-specialization/",
+        platform: "DeepLearning.AI"
+      });
+      resources.tutorials.push({
+        title: "PyTorch Tutorials",
+        url: "https://pytorch.org/tutorials/",
+        platform: "PyTorch"
+      });
+    }
+    else if (skillLower.includes('tensorflow') || skillLower.includes('keras')) {
+      resources.courses.push({
+        title: "TensorFlow Documentation",
+        url: "https://www.tensorflow.org/learn",
+        platform: "TensorFlow"
+      });
+      resources.tutorials.push({
+        title: "Keras Documentation",
+        url: "https://keras.io/guides/",
+        platform: "Keras"
+      });
+    }
+    else if (skillLower.includes('nlp') || skillLower.includes('natural language')) {
+      resources.courses.push({
+        title: "NLP Specialization",
+        url: "https://www.coursera.org/specializations/natural-language-processing",
+        platform: "Coursera"
+      });
+      resources.tutorials.push({
+        title: "Hugging Face Transformers",
+        url: "https://huggingface.co/docs/transformers/index",
+        platform: "Hugging Face"
+      });
+    }
+    
+    // Mobile Development
+    else if (skillLower.includes('android') || skillLower.includes('kotlin')) {
+      resources.courses.push({
+        title: "Android Developers",
+        url: "https://developer.android.com/courses",
+        platform: "Android"
+      });
+      resources.tutorials.push({
+        title: "Kotlin Documentation",
+        url: "https://kotlinlang.org/docs/home.html",
+        platform: "Kotlin"
+      });
+    }
+    else if (skillLower.includes('ios') || skillLower.includes('swift')) {
+      resources.courses.push({
+        title: "Swift Documentation",
+        url: "https://docs.swift.org/swift-book/",
+        platform: "Swift.org"
+      });
+      resources.tutorials.push({
+        title: "iOS App Dev Tutorials",
+        url: "https://developer.apple.com/tutorials/app-dev-training/",
+        platform: "Apple Developer"
+      });
+    }
+    else if (skillLower.includes('react native') || (skillLower.includes('react') && skillLower.includes('mobile'))) {
+      resources.courses.push({
+        title: "React Native Documentation",
+        url: "https://reactnative.dev/docs/getting-started",
+        platform: "React Native"
+      });
+      resources.tutorials.push({
+        title: "React Native Express",
+        url: "https://www.reactnative.express/",
+        platform: "React Native Express"
+      });
+    }
+    else if (skillLower.includes('flutter') || skillLower.includes('dart')) {
+      resources.courses.push({
+        title: "Flutter Documentation",
+        url: "https://docs.flutter.dev/",
+        platform: "Flutter"
+      });
+      resources.tutorials.push({
+        title: "Flutter Codelabs",
+        url: "https://codelabs.developers.google.com/?cat=flutter",
+        platform: "Google Developers"
+      });
+    }
+    
+    // Cybersecurity
+    else if (skillLower.includes('security') || skillLower.includes('cyber') || skillLower.includes('infosec')) {
+      resources.courses.push({
+        title: "Cybersecurity Fundamentals",
+        url: "https://www.coursera.org/specializations/intro-cyber-security",
+        platform: "Coursera"
+      });
+      resources.tutorials.push({
+        title: "OWASP Top Ten",
+        url: "https://owasp.org/www-project-top-ten/",
+        platform: "OWASP"
+      });
+    }
+    else if (skillLower.includes('penetration testing') || skillLower.includes('ethical hacking') || skillLower.includes('pen test')) {
+      resources.courses.push({
+        title: "Penetration Testing",
+        url: "https://www.offensive-security.com/pwk-oscp/",
+        platform: "Offensive Security"
+      });
+      resources.tutorials.push({
+        title: "HackTheBox Academy",
+        url: "https://academy.hackthebox.com/",
+        platform: "HackTheBox"
+      });
+    }
+    else if (skillLower.includes('network security') || skillLower.includes('firewall')) {
+      resources.courses.push({
+        title: "Network Security",
+        url: "https://www.comptia.org/certifications/security",
+        platform: "CompTIA"
+      });
+      resources.tutorials.push({
+        title: "Cisco Security",
+        url: "https://www.cisco.com/c/en/us/training-events/training-certifications/certifications/security.html",
+        platform: "Cisco"
+      });
+    }
+    
+    // QA & Testing
+    else if (skillLower.includes('test') || skillLower.includes('qa') || skillLower.includes('quality assurance')) {
+      resources.courses.push({
+        title: "Software Testing",
+        url: "https://www.ministryoftesting.com/",
+        platform: "Ministry of Testing"
+      });
+      resources.tutorials.push({
+        title: "Test Automation University",
+        url: "https://testautomationu.applitools.com/",
+        platform: "Applitools"
+      });
+    }
+    else if (skillLower.includes('selenium') || skillLower.includes('webdriver')) {
+      resources.courses.push({
+        title: "Selenium Documentation",
+        url: "https://www.selenium.dev/documentation/en/",
+        platform: "Selenium"
+      });
+      resources.tutorials.push({
+        title: "Selenium WebDriver Tutorials",
+        url: "https://ultimateqa.com/automation/",
+        platform: "UltimateQA"
+      });
+    }
+    else if (skillLower.includes('cypress') || skillLower.includes('playwright')) {
+      resources.courses.push({
+        title: "Cypress Documentation",
+        url: "https://docs.cypress.io/",
+        platform: "Cypress"
+      });
+      resources.tutorials.push({
+        title: "Playwright Documentation",
+        url: "https://playwright.dev/docs/intro",
+        platform: "Playwright"
+      });
+    }
+    
+    // UX/UI Design
+    else if (skillLower.includes('ux') || skillLower.includes('ui') || skillLower.includes('user experience') || skillLower.includes('user interface')) {
+      resources.courses.push({
+        title: "UX Design Course",
+        url: "https://www.interaction-design.org/courses",
+        platform: "Interaction Design Foundation"
+      });
+      resources.tutorials.push({
+        title: "UI/UX Case Studies",
+        url: "https://www.nngroup.com/articles/",
+        platform: "Nielsen Norman Group"
+      });
+    }
+    else if (skillLower.includes('figma')) {
+      resources.courses.push({
+        title: "Figma Documentation",
+        url: "https://help.figma.com/hc/en-us",
+        platform: "Figma"
+      });
+      resources.tutorials.push({
+        title: "Figma Community",
+        url: "https://www.figma.com/community/explore",
+        platform: "Figma"
+      });
+    }
+    else if (skillLower.includes('design system') || skillLower.includes('design thinking')) {
+      resources.courses.push({
+        title: "Design Systems Course",
+        url: "https://designsystemcourse.com/",
+        platform: "Design Systems"
+      });
+      resources.tutorials.push({
+        title: "Design Thinking",
+        url: "https://www.ideou.com/pages/design-thinking",
+        platform: "IDEO U"
+      });
+    }
+    
+    // Product Management
+    else if (skillLower.includes('product management') || skillLower.includes('product manager')) {
+      resources.courses.push({
+        title: "Product Management Courses",
+        url: "https://www.productschool.com/",
+        platform: "Product School"
+      });
+      resources.tutorials.push({
+        title: "Product Management Resources",
+        url: "https://www.mindtheproduct.com/",
+        platform: "Mind the Product"
+      });
+    }
+    else if (skillLower.includes('agile') || skillLower.includes('scrum')) {
+      resources.courses.push({
+        title: "Agile Methodologies",
+        url: "https://www.scrum.org/resources/what-is-scrum",
+        platform: "Scrum.org"
+      });
+      resources.tutorials.push({
+        title: "Agile Resources",
+        url: "https://www.atlassian.com/agile",
+        platform: "Atlassian"
+      });
+    }
+    else if (skillLower.includes('product management') || skillLower.includes('roadmap')) {
+      resources.courses.push({
+        title: "Product Roadmapping",
+        url: "https://www.productplan.com/learn/",
+        platform: "ProductPlan"
+      });
+      resources.tutorials.push({
+        title: "Product Management Templates",
+        url: "https://www.aha.io/roadmapping/guide",
+        platform: "Aha!"
+      });
+    }
+    
+    // Web Development General
+    else if (skillLower.includes('web dev') || skillLower.includes('frontend') || skillLower.includes('front-end') || skillLower.includes('front end')) {
       resources.courses.push({
         title: "Web Development Path",
         url: "https://www.freecodecamp.org/learn/responsive-web-design/",
@@ -746,30 +1222,80 @@ const CareerDashboard = () => {
         platform: "Frontend Mentor"
       });
     }
-    else if (skillLower.includes('backend') || skillLower.includes('back-end') || skillLower.includes('server')) {
+    else if (skillLower.includes('backend') || skillLower.includes('back-end') || skillLower.includes('back end') || skillLower.includes('server')) {
       resources.courses.push({
         title: "Backend Development",
         url: "https://www.theodinproject.com/paths/full-stack-javascript/courses/nodejs",
         platform: "The Odin Project"
       });
-    }
-    else if (skillLower.includes('cloud') || skillLower.includes('aws') || skillLower.includes('azure')) {
-      resources.courses.push({
-        title: "Cloud Fundamentals",
-        url: "https://aws.amazon.com/training/learn-about/",
-        platform: "AWS Training"
+      resources.tutorials.push({
+        title: "Backend Web Development",
+        url: "https://roadmap.sh/backend",
+        platform: "roadmap.sh"
       });
     }
-    else if (skillLower.includes('database') || skillLower.includes('sql')) {
+    else if (skillLower.includes('fullstack') || skillLower.includes('full-stack') || skillLower.includes('full stack')) {
       resources.courses.push({
-        title: "SQL Course",
-        url: "https://www.khanacademy.org/computing/computer-programming/sql",
-        platform: "Khan Academy"
+        title: "Full Stack Development",
+        url: "https://www.freecodecamp.org/learn/",
+        platform: "freeCodeCamp"
       });
       resources.tutorials.push({
-        title: "SQL Exercises",
-        url: "https://www.sqlzoo.net/",
-        platform: "SQLZoo"
+        title: "Full Stack Open",
+        url: "https://fullstackopen.com/en/",
+        platform: "University of Helsinki"
+      });
+    }
+    
+    // Blockchain & Web3
+    else if (skillLower.includes('blockchain') || skillLower.includes('web3') || skillLower.includes('crypto')) {
+      resources.courses.push({
+        title: "Blockchain Basics",
+        url: "https://www.coursera.org/learn/blockchain-basics",
+        platform: "Coursera"
+      });
+      resources.tutorials.push({
+        title: "Web3 University",
+        url: "https://www.web3.university/",
+        platform: "Web3 University"
+      });
+    }
+    else if (skillLower.includes('solidity') || skillLower.includes('smart contract')) {
+      resources.courses.push({
+        title: "Solidity Documentation",
+        url: "https://docs.soliditylang.org/",
+        platform: "Solidity"
+      });
+      resources.tutorials.push({
+        title: "CryptoZombies",
+        url: "https://cryptozombies.io/",
+        platform: "CryptoZombies"
+      });
+    }
+    
+    // Soft Skills & Career Development
+    else if (skillLower.includes('communication') || skillLower.includes('soft skill')) {
+      resources.courses.push({
+        title: "Communication Skills",
+        url: "https://www.coursera.org/specializations/effective-communication",
+        platform: "Coursera"
+      });
+      resources.tutorials.push({
+        title: "Professional Communication",
+        url: "https://www.linkedin.com/learning/topics/communication",
+        platform: "LinkedIn Learning"
+      });
+    }
+    else if (skillLower.includes('leadership') || skillLower.includes('management')) {
+      resources.courses.push({
+        title: "Leadership Skills",
+        url: "https://www.coursera.org/specializations/organizational-leadership",
+        platform: "Coursera"
+      });
+      resources.tutorials.push({
+        title: "Management Training",
+        url: "https://www.mindtools.com/pages/main/newMN_LDR.htm",
+        platform: "Mind Tools"
       });
     }
     
@@ -780,6 +1306,7 @@ const CareerDashboard = () => {
   const determineDefaultSkillsForCareer = (careerPath) => {
     const careerLower = careerPath.toLowerCase();
     
+    // Frontend Development Paths
     if (careerLower.includes('frontend') || careerLower.includes('front-end') || careerLower.includes('front end')) {
       return [
         {
@@ -799,6 +1326,7 @@ const CareerDashboard = () => {
         }
       ];
     }
+    // Backend Development Paths
     else if (careerLower.includes('backend') || careerLower.includes('back-end') || careerLower.includes('back end')) {
       return [
         {
@@ -818,6 +1346,7 @@ const CareerDashboard = () => {
         }
       ];
     }
+    // Full Stack Development Paths
     else if (careerLower.includes('fullstack') || careerLower.includes('full-stack') || careerLower.includes('full stack')) {
       return [
         {
@@ -837,6 +1366,7 @@ const CareerDashboard = () => {
         }
       ];
     }
+    // Data Science & Analytics Paths
     else if (careerLower.includes('data') || careerLower.includes('analyst')) {
       return [
         {
@@ -856,6 +1386,7 @@ const CareerDashboard = () => {
         }
       ];
     }
+    // Machine Learning & AI Paths
     else if (careerLower.includes('machine learning') || careerLower.includes('ml') || careerLower.includes('ai')) {
       return [
         {
@@ -875,6 +1406,7 @@ const CareerDashboard = () => {
         }
       ];
     }
+    // DevOps & Cloud Paths
     else if (careerLower.includes('devops') || careerLower.includes('cloud')) {
       return [
         {
@@ -894,6 +1426,7 @@ const CareerDashboard = () => {
         }
       ];
     }
+    // Mobile Development Paths
     else if (careerLower.includes('mobile') || careerLower.includes('app')) {
       return [
         {
@@ -910,6 +1443,106 @@ const CareerDashboard = () => {
           name: "State Management",
           description: "Develop skills in managing application state for complex apps",
           category: "Software Architecture"
+        }
+      ];
+    }
+    // Cybersecurity Paths
+    else if (careerLower.includes('security') || careerLower.includes('cyber')) {
+      return [
+        {
+          name: "Security Fundamentals",
+          description: "Learn core cybersecurity principles and best practices",
+          category: "Cybersecurity"
+        },
+        {
+          name: "Network Security",
+          description: "Understand network protocols and security measures",
+          category: "Cybersecurity"
+        },
+        {
+          name: "Security Operations",
+          description: "Develop skills in threat detection, incident response, and security monitoring",
+          category: "Cybersecurity"
+        }
+      ];
+    }
+    // QA & Testing Paths
+    else if (careerLower.includes('qa') || careerLower.includes('test') || careerLower.includes('quality')) {
+      return [
+        {
+          name: "Test Automation",
+          description: "Learn frameworks like Selenium, Cypress, or Playwright for automated testing",
+          category: "QA"
+        },
+        {
+          name: "Testing Methodologies",
+          description: "Understand different testing approaches including unit, integration, and E2E testing",
+          category: "QA"
+        },
+        {
+          name: "CI/CD for Testing",
+          description: "Implement continuous testing in development pipelines",
+          category: "DevOps"
+        }
+      ];
+    }
+    // UX/UI Design Paths
+    else if (careerLower.includes('ux') || careerLower.includes('ui') || careerLower.includes('design')) {
+      return [
+        {
+          name: "UI Design Principles",
+          description: "Master visual design, typography, and layout for digital interfaces",
+          category: "Design"
+        },
+        {
+          name: "User Experience Research",
+          description: "Learn methods for understanding user needs and testing designs",
+          category: "Design"
+        },
+        {
+          name: "Design Tools",
+          description: "Develop proficiency in industry tools like Figma, Sketch, or Adobe XD",
+          category: "Design"
+        }
+      ];
+    }
+    // Product Management Paths
+    else if (careerLower.includes('product') || careerLower.includes('manager')) {
+      return [
+        {
+          name: "Product Strategy",
+          description: "Understand how to define and execute product vision and roadmap",
+          category: "Product Management"
+        },
+        {
+          name: "User Research",
+          description: "Learn techniques for gathering and analyzing user feedback",
+          category: "Product Management"
+        },
+        {
+          name: "Agile Methodologies",
+          description: "Master frameworks for iterative product development and delivery",
+          category: "Project Management"
+        }
+      ];
+    }
+    // Blockchain & Web3 Paths
+    else if (careerLower.includes('blockchain') || careerLower.includes('web3')) {
+      return [
+        {
+          name: "Blockchain Fundamentals",
+          description: "Understand the core concepts of distributed ledger technology",
+          category: "Blockchain"
+        },
+        {
+          name: "Smart Contract Development",
+          description: "Learn languages like Solidity for creating decentralized applications",
+          category: "Blockchain"
+        },
+        {
+          name: "Web3 Architecture",
+          description: "Develop skills in building decentralized applications and services",
+          category: "Blockchain"
         }
       ];
     }

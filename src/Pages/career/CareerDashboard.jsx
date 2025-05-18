@@ -488,17 +488,26 @@ const CareerDashboard = () => {
     let inSkillsGapSection = false;
     
     lines.forEach((line) => {
-      if (line.includes("SKILLS GAP ANALYSIS")) {
+      // Check for section headers with both formats - plain and numbered
+      if (line.includes("SKILLS GAP ANALYSIS") || line.match(/\d+\.\s+SKILLS\s+GAP\s+ANALYSIS/i)) {
         inSkillsGapSection = true;
         return;
       }
       
-      if (line.includes("LEARNING ROADMAP") || line.includes("TRANSITION STRATEGY")) {
+      // Check for end of section with both formats - plain and numbered
+      if (inSkillsGapSection && (
+        line.includes("LEARNING ROADMAP") || 
+        line.includes("TRANSITION STRATEGY") ||
+        line.match(/\d+\.\s+LEARNING\s+ROADMAP/i) ||
+        line.match(/\d+\.\s+TRANSITION\s+STRATEGY/i)
+      )) {
         inSkillsGapSection = false;
         return;
       }
       
-      if (inSkillsGapSection && line.match(/^\d+\.\s+/)) {
+      // Pattern 1: numbered skills with descriptions (like in screenshot)
+      if (inSkillsGapSection && line.match(/^\d+\.\s+[^:]+:/)) {
+        // Format: "1. Programming Proficiency: Need to advance Python skills..."
         const skillMatch = line.match(/^\d+\.\s+([^:]+):\s*(.+)/);
         
         if (skillMatch) {
@@ -506,17 +515,44 @@ const CareerDashboard = () => {
           const description = skillMatch[2].trim();
           
           let userCurrentLevel = currentLevel;
-          
-          userToolsUsed.forEach(tool => {
-            const mapping = toolSkillMapping[tool];
-            if (mapping && skillName.toLowerCase().includes(mapping.name.toLowerCase())) {
-              userCurrentLevel = Math.min(currentLevel + 1, 5);
-            }
-          });
-          
           let requiredLevel = 4;
-          const descLower = description.toLowerCase();
           
+          // Adjust required level based on description wording
+          const descLower = description.toLowerCase();
+          if (descLower.includes('basic') || descLower.includes('fundamental')) {
+            requiredLevel = 2;
+          } else if (descLower.includes('intermediate') || descLower.includes('solid')) {
+            requiredLevel = 3;
+          } else if (descLower.includes('advanced') || descLower.includes('deep')) {
+            requiredLevel = 4;
+          } else if (descLower.includes('expert') || descLower.includes('mastery')) {
+            requiredLevel = 5;
+          }
+          
+          skills.push({
+            name: skillName,
+            description: description,
+            currentLevel: userCurrentLevel,
+            requiredLevel: requiredLevel,
+            gap: requiredLevel - userCurrentLevel
+          });
+        }
+      }
+      
+      // Alternative pattern: bullet points with colons
+      if (inSkillsGapSection && line.match(/^\s*-\s+[^:]+:/)) {
+        // Format: "- Programming Proficiency: Need to advance Python skills..."
+        const skillMatch = line.match(/^\s*-\s+([^:]+):\s*(.+)/);
+        
+        if (skillMatch) {
+          const skillName = skillMatch[1].trim();
+          const description = skillMatch[2].trim();
+          
+          let userCurrentLevel = currentLevel;
+          let requiredLevel = 4;
+          
+          // Determine levels based on description
+          const descLower = description.toLowerCase();
           if (descLower.includes('basic') || descLower.includes('fundamental')) {
             requiredLevel = 2;
           } else if (descLower.includes('intermediate') || descLower.includes('solid')) {

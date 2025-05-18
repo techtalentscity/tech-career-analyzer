@@ -17,7 +17,8 @@ const CareerDashboard = () => {
   const [personalBranding, setPersonalBranding] = useState([]);
   const [interviewPrep, setInterviewPrep] = useState([]);
   const [showAllSkills, setShowAllSkills] = useState(false);
-  const [showLearningResources, setShowLearningResources] = useState(false);
+  // Set showLearningResources to true by default so resources are visible
+  const [showLearningResources, setShowLearningResources] = useState(true);
   const [userData, setUserData] = useState({
     name: '',
     email: '',
@@ -236,6 +237,16 @@ const CareerDashboard = () => {
       }
     });
     
+    // If no career paths were found, add some defaults
+    if (careerPaths.length === 0) {
+      return [
+        { title: "Software Development", match: 85 },
+        { title: "Data Science", match: 75 },
+        { title: "Web Development", match: 70 },
+        { title: "UX/UI Design", match: 65 }
+      ];
+    }
+    
     return careerPaths;
   };
 
@@ -317,6 +328,49 @@ const CareerDashboard = () => {
       }
     });
     
+    // If no market trends were found, add default data
+    if (marketTrends.length === 0) {
+      marketTrends.push(
+        // Default salary data
+        {
+          careerPath: "Software Engineer",
+          minSalary: 75000,
+          maxSalary: 150000,
+          type: 'salary'
+        },
+        {
+          careerPath: "Data Scientist",
+          minSalary: 85000,
+          maxSalary: 160000,
+          type: 'salary'
+        },
+        // Default growth data
+        {
+          careerPath: "Web Development",
+          growth: 15,
+          type: 'growth'
+        },
+        {
+          careerPath: "Machine Learning",
+          growth: 25,
+          type: 'growth'
+        },
+        // Default trends
+        {
+          trend: "Remote work opportunities continue to grow in tech fields",
+          type: 'general'
+        },
+        {
+          trend: "Increasing demand for full-stack developers who can work across the entire technology stack",
+          type: 'general'
+        },
+        {
+          trend: "Growing emphasis on cybersecurity skills across all tech roles",
+          type: 'general'
+        }
+      );
+    }
+    
     return marketTrends;
   };
 
@@ -359,6 +413,32 @@ const CareerDashboard = () => {
         }
       }
     });
+    
+    // Add default networking strategies if none were found
+    if (strategies.length === 0 || !strategies.some(s => s.type === 'strategy')) {
+      strategies.push(
+        {
+          title: "NETWORKING STRATEGY",
+          type: 'section_title'
+        },
+        {
+          text: "Attend tech meetups and conferences related to your field of interest",
+          type: 'strategy'
+        },
+        {
+          text: "Join relevant online communities on platforms like GitHub, Stack Overflow, and specialized Discord servers",
+          type: 'strategy'
+        },
+        {
+          text: "Connect with professionals in your target role on LinkedIn and request informational interviews",
+          type: 'strategy'
+        },
+        {
+          text: "Participate in hackathons and coding challenges to build connections and showcase skills",
+          type: 'strategy'
+        }
+      );
+    }
     
     return strategies;
   };
@@ -403,6 +483,32 @@ const CareerDashboard = () => {
       }
     });
     
+    // Add default branding tips if none were found
+    if (brandingTips.length === 0 || !brandingTips.some(t => t.type === 'tip')) {
+      brandingTips.push(
+        {
+          title: "PERSONAL BRANDING",
+          type: 'section_title'
+        },
+        {
+          text: "Create a professional portfolio website showcasing your projects and skills",
+          type: 'tip'
+        },
+        {
+          text: "Develop a consistent personal brand across LinkedIn, GitHub, and other professional platforms",
+          type: 'tip'
+        },
+        {
+          text: "Start a technical blog to demonstrate your knowledge and thought leadership",
+          type: 'tip'
+        },
+        {
+          text: "Contribute to open-source projects to build credibility in the community",
+          type: 'tip'
+        }
+      );
+    }
+    
     return brandingTips;
   };
 
@@ -446,10 +552,36 @@ const CareerDashboard = () => {
       }
     });
     
+    // Add default interview tips if none were found
+    if (interviewTips.length === 0 || !interviewTips.some(t => t.type === 'tip')) {
+      interviewTips.push(
+        {
+          title: "INTERVIEW PREPARATION",
+          type: 'section_title'
+        },
+        {
+          text: "Practice technical problem-solving on platforms like LeetCode, HackerRank, and CodeSignal",
+          type: 'tip'
+        },
+        {
+          text: "Prepare stories about your projects using the STAR method (Situation, Task, Action, Result)",
+          type: 'tip'
+        },
+        {
+          text: "Research common interview questions for your target role and practice your responses",
+          type: 'tip'
+        },
+        {
+          text: "Prepare thoughtful questions to ask your interviewers about the company and role",
+          type: 'tip'
+        }
+      );
+    }
+    
     return interviewTips;
   };
 
-  // Extract skills gap data from analysis text
+  // Extract skills gap data from analysis text - IMPROVED
   const extractSkillsGap = (text) => {
     if (!text) return [];
     
@@ -532,31 +664,98 @@ const CareerDashboard = () => {
       }
     });
     
-    // Only use default skills if absolutely needed
-    if (skills.length === 0 && userData.careerPathsInterest && userData.careerPathsInterest.length > 0) {
+    // Enhanced default skills based on career interests
+    if (skills.length === 0) {
       const defaultSkillsByPath = {
-        'Software Development': ['Programming', 'Problem Solving', 'System Design', 'Testing'],
-        'Data Analysis/Science': ['Statistics', 'Data Visualization', 'SQL', 'Python'],
-        'UX/UI Design': ['Design Principles', 'Prototyping', 'User Research', 'Design Tools'],
-        'Product Management': ['Product Strategy', 'Analytics', 'Communication', 'Agile Methods'],
-        'Cybersecurity': ['Network Security', 'Ethical Hacking', 'Security Tools', 'Compliance'],
-        'Cloud Engineering': ['Cloud Platforms', 'Infrastructure', 'Automation', 'Monitoring'],
-        'DevOps': ['CI/CD', 'Automation', 'Infrastructure as Code', 'Containerization'],
-        'AI/Machine Learning': ['Mathematics', 'ML Algorithms', 'Data Processing', 'Deep Learning']
+        'Software Development': [
+          { name: 'Programming Fundamentals', description: 'Core concepts like variables, loops, functions, and data structures', requiredLevel: 4 },
+          { name: 'Problem Solving', description: 'Breaking down complex problems into manageable components', requiredLevel: 4 },
+          { name: 'System Design', description: 'Architecting scalable and maintainable software systems', requiredLevel: 3 },
+          { name: 'Testing', description: 'Writing effective unit and integration tests', requiredLevel: 3 }
+        ],
+        'Data Analysis/Science': [
+          { name: 'Statistics', description: 'Understanding statistical methods and their applications', requiredLevel: 4 },
+          { name: 'Data Visualization', description: 'Creating clear and insightful visualizations', requiredLevel: 3 },
+          { name: 'SQL', description: 'Querying and manipulating databases effectively', requiredLevel: 4 },
+          { name: 'Python', description: 'Using Python for data analysis and modeling', requiredLevel: 4 }
+        ],
+        'UX/UI Design': [
+          { name: 'Design Principles', description: 'Understanding core principles of visual design', requiredLevel: 4 },
+          { name: 'Prototyping', description: 'Creating interactive prototypes for user testing', requiredLevel: 3 },
+          { name: 'User Research', description: 'Conducting effective user research and usability testing', requiredLevel: 3 },
+          { name: 'Design Tools', description: 'Proficiency with industry standard design tools', requiredLevel: 4 }
+        ],
+        'Product Management': [
+          { name: 'Product Strategy', description: 'Developing vision and roadmap for products', requiredLevel: 4 },
+          { name: 'Analytics', description: 'Using data to inform product decisions', requiredLevel: 3 },
+          { name: 'Communication', description: 'Effectively conveying complex information to stakeholders', requiredLevel: 4 },
+          { name: 'Agile Methods', description: 'Working with agile development methodologies', requiredLevel: 3 }
+        ],
+        'Cybersecurity': [
+          { name: 'Network Security', description: 'Understanding fundamentals of secure network design', requiredLevel: 4 },
+          { name: 'Ethical Hacking', description: 'Identifying vulnerabilities through ethical hacking techniques', requiredLevel: 3 },
+          { name: 'Security Tools', description: 'Proficiency with security testing and monitoring tools', requiredLevel: 4 },
+          { name: 'Compliance', description: 'Knowledge of security standards and compliance frameworks', requiredLevel: 3 }
+        ],
+        'Cloud Engineering': [
+          { name: 'Cloud Platforms', description: 'Working with major cloud service providers', requiredLevel: 4 },
+          { name: 'Infrastructure', description: 'Managing cloud infrastructure and services', requiredLevel: 4 },
+          { name: 'Automation', description: 'Automating deployment and management processes', requiredLevel: 3 },
+          { name: 'Monitoring', description: 'Implementing monitoring and alerting systems', requiredLevel: 3 }
+        ],
+        'DevOps': [
+          { name: 'CI/CD', description: 'Setting up continuous integration and deployment pipelines', requiredLevel: 4 },
+          { name: 'Automation', description: 'Writing scripts to automate repetitive tasks', requiredLevel: 4 },
+          { name: 'Infrastructure as Code', description: 'Managing infrastructure using code and version control', requiredLevel: 3 },
+          { name: 'Containerization', description: 'Working with Docker and container orchestration', requiredLevel: 3 }
+        ],
+        'AI/Machine Learning': [
+          { name: 'Mathematics', description: 'Strong foundation in linear algebra, calculus, and statistics', requiredLevel: 4 },
+          { name: 'ML Algorithms', description: 'Understanding and implementing machine learning algorithms', requiredLevel: 4 },
+          { name: 'Data Processing', description: 'Preparing and transforming data for machine learning models', requiredLevel: 3 },
+          { name: 'Deep Learning', description: 'Working with neural networks and deep learning frameworks', requiredLevel: 3 }
+        ]
       };
       
-      userData.careerPathsInterest.forEach(path => {
-        const pathSkills = defaultSkillsByPath[path] || [];
-        pathSkills.forEach(skill => {
-          skills.push({
-            name: skill,
-            currentLevel: currentLevel,
-            requiredLevel: 4,
-            gap: 4 - currentLevel,
-            careerPath: path
+      // Check if user has career path interests
+      if (userData.careerPathsInterest && userData.careerPathsInterest.length > 0) {
+        // Add skills based on specified career paths
+        userData.careerPathsInterest.forEach(path => {
+          const pathSkills = defaultSkillsByPath[path] || [];
+          pathSkills.forEach(skill => {
+            skills.push({
+              name: skill.name,
+              description: skill.description,
+              currentLevel: currentLevel,
+              requiredLevel: skill.requiredLevel,
+              gap: skill.requiredLevel - currentLevel,
+              careerPath: path
+            });
           });
         });
-      });
+      } 
+      
+      // If still no skills (no career paths specified), add general tech skills
+      if (skills.length === 0) {
+        const generalTechSkills = [
+          { name: 'Programming', description: 'Writing code to solve problems and build applications', requiredLevel: 3 },
+          { name: 'Web Development', description: 'Building responsive and interactive web applications', requiredLevel: 3 },
+          { name: 'Data Analysis', description: 'Extracting insights from data using analytical tools', requiredLevel: 3 },
+          { name: 'Communication', description: 'Effectively explaining technical concepts to diverse audiences', requiredLevel: 4 },
+          { name: 'Project Management', description: 'Planning and executing projects to meet deadlines and requirements', requiredLevel: 3 },
+          { name: 'Problem Solving', description: 'Approaching complex problems with structured solutions', requiredLevel: 4 }
+        ];
+        
+        generalTechSkills.forEach(skill => {
+          skills.push({
+            name: skill.name,
+            description: skill.description,
+            currentLevel: currentLevel,
+            requiredLevel: skill.requiredLevel,
+            gap: skill.requiredLevel - currentLevel
+          });
+        });
+      }
     }
     
     return skills;
@@ -1180,6 +1379,46 @@ const CareerDashboard = () => {
         title: 'Leverage Current Experience',
         description: `Apply your ${userData.currentRole} skills to tech projects`
       });
+    }
+    
+    // If we still don't have enough steps, add some default ones
+    if (steps.length < 3) {
+      const defaultSteps = [
+        {
+          icon: (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          ),
+          color: 'text-yellow-600',
+          title: 'Create a Learning Plan',
+          description: 'Develop a structured learning path based on your skills gap analysis'
+        },
+        {
+          icon: (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          ),
+          color: 'text-teal-600',
+          title: 'Build a Portfolio',
+          description: 'Showcase your projects and skills with a professional online portfolio'
+        },
+        {
+          icon: (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+            </svg>
+          ),
+          color: 'text-pink-600',
+          title: 'Join Tech Communities',
+          description: 'Engage with professionals and peers in your chosen tech field'
+        }
+      ];
+      
+      while (steps.length < 4 && defaultSteps.length > 0) {
+        steps.push(defaultSteps.shift());
+      }
     }
     
     // Return top 4 most relevant steps

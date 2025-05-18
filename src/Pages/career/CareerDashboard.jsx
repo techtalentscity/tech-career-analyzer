@@ -237,7 +237,7 @@ const CareerDashboard = () => {
       }
     });
     
-    // Removed default career paths - return only what's found in the analysis
+    // Only return what's actually found in the analysis
     return careerPaths;
   };
 
@@ -319,7 +319,7 @@ const CareerDashboard = () => {
       }
     });
     
-    // Removed default market trends - return only what's found in the analysis
+    // Only return what's found in the analysis
     return marketTrends;
   };
 
@@ -363,7 +363,7 @@ const CareerDashboard = () => {
       }
     });
     
-    // Removed default networking strategies - return only what's found in the analysis
+    // Only return networking strategies found in the analysis
     return strategies;
   };
 
@@ -407,7 +407,7 @@ const CareerDashboard = () => {
       }
     });
     
-    // Removed default branding tips - return only what's found in the analysis
+    // Only return personal branding tips found in the analysis
     return brandingTips;
   };
 
@@ -451,7 +451,7 @@ const CareerDashboard = () => {
       }
     });
     
-    // Removed default interview tips - return only what's found in the analysis
+    // Only return interview preparation tips found in the analysis
     return interviewTips;
   };
 
@@ -538,7 +538,7 @@ const CareerDashboard = () => {
       }
     });
     
-    // Removed default skills - return only what's found in the analysis
+    // Only return skills found in the analysis
     return skills;
   };
 
@@ -766,7 +766,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Custom Tools Proficiency Component - Still using user's actual tools data
+  // Custom Tools Proficiency Component
   const ToolsProficiency = ({ tools }) => {
     if (!tools || tools.length === 0 || (tools.length === 1 && tools[0] === 'None')) {
       return null;
@@ -925,7 +925,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Networking Strategy Component - Fixed to remove duplicate heading
+  // Networking Strategy Component
   const NetworkingStrategySection = ({ strategies }) => {
     if (!strategies || strategies.length === 0) {
       return null;
@@ -949,7 +949,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Personal Branding Component - Fixed to remove duplicate heading
+  // Personal Branding Component
   const PersonalBrandingSection = ({ tips }) => {
     if (!tips || tips.length === 0) {
       return null;
@@ -973,7 +973,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Interview Preparation Component - Fixed to remove duplicate heading
+  // Interview Preparation Component
   const InterviewPrepSection = ({ tips }) => {
     if (!tips || tips.length === 0) {
       return null;
@@ -997,7 +997,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Create timeline visualization data
+  // Create timeline visualization data - Based purely on user's specified timeline
   const createTimelineData = () => {
     const timelineMap = {
       'Less than 6 months': 6,
@@ -1038,7 +1038,7 @@ const CareerDashboard = () => {
     return milestones;
   };
 
-  // Custom Timeline Component - Fixed to remove duplicate heading
+  // Custom Timeline Component
   const TimelineChart = ({ milestones }) => {
     if (!milestones || milestones.length === 0) {
       return null;
@@ -1162,7 +1162,8 @@ const CareerDashboard = () => {
       });
     }
     
-    // Return available steps - no default steps added if not enough
+    // Return only the steps that were generated from actual user data
+    // No default steps or fallbacks
     return steps;
   };
 

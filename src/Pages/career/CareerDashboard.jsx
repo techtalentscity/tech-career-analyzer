@@ -237,8 +237,234 @@ const CareerDashboard = () => {
       }
     });
     
-    // Only return what's actually found in the analysis
+    // Generate a third related career path if only two were found
+    if (careerPaths.length === 2) {
+      const thirdPath = generateRelatedCareerPath(careerPaths, userData, skillsGap);
+      if (thirdPath) {
+        careerPaths.push(thirdPath);
+      }
+    }
+    
+    // Only return what's actually found in the analysis (plus generated path if needed)
     return careerPaths;
+  };
+  
+  // Generate a contextually relevant third career path based on user data and existing paths
+  const generateRelatedCareerPath = (existingPaths, userData, skillsGap) => {
+    // Extract information about the first two paths to understand user's field
+    const firstPathTitle = existingPaths[0].title.toLowerCase();
+    const secondPathTitle = existingPaths[1].title.toLowerCase();
+    const firstPathMatch = existingPaths[0].match;
+    
+    // Extract key user information
+    const userExperience = userData.experienceLevel || '';
+    const userRole = userData.currentRole || '';
+    const userEducation = userData.educationLevel || '';
+    const userField = userData.studyField || '';
+    const userInterests = Array.isArray(userData.careerPathsInterest) ? 
+                          userData.careerPathsInterest : 
+                          (typeof userData.careerPathsInterest === 'string' ? 
+                          [userData.careerPathsInterest] : []);
+    
+    // Default match percentage slightly lower than second choice
+    const matchPercentage = Math.max(existingPaths[1].match - 5, 75);
+    
+    // Determine industry/domain focus based on user data and existing paths
+    let domain = '';
+    let domainSpecific = '';
+    
+    // Check for AI/ML specialization
+    if (firstPathTitle.includes('machine learning') || 
+        firstPathTitle.includes('ml') || 
+        firstPathTitle.includes('ai') || 
+        secondPathTitle.includes('machine learning') || 
+        secondPathTitle.includes('ml') || 
+        secondPathTitle.includes('ai') || 
+        userField.toLowerCase().includes('computer') ||
+        userInterests.some(i => i.toLowerCase().includes('machine learning') || i.toLowerCase().includes('ai'))) {
+        
+      domain = 'ai';
+      
+      // Determine more specific AI domain
+      if (userRole.toLowerCase().includes('research') || 
+          userField.toLowerCase().includes('research') ||
+          firstPathTitle.includes('scientist')) {
+        domainSpecific = 'research';
+      } else if (firstPathTitle.includes('engineer') || secondPathTitle.includes('engineer')) {
+        domainSpecific = 'engineering';
+      } else if (userRole.toLowerCase().includes('product') || userField.toLowerCase().includes('product')) {
+        domainSpecific = 'product';
+      } else {
+        domainSpecific = 'operations';
+      }
+    }
+    // Check for data science specialization
+    else if (firstPathTitle.includes('data') || 
+             secondPathTitle.includes('data') ||
+             userField.toLowerCase().includes('data') ||
+             userInterests.some(i => i.toLowerCase().includes('data'))) {
+      domain = 'data';
+      
+      // Determine more specific data domain
+      if (userRole.toLowerCase().includes('analyst') || 
+          userField.toLowerCase().includes('analytics')) {
+        domainSpecific = 'analytics';
+      } else if (userRole.toLowerCase().includes('engineer') || 
+                 firstPathTitle.includes('engineer') || 
+                 secondPathTitle.includes('engineer')) {
+        domainSpecific = 'engineering';
+      } else {
+        domainSpecific = 'analytics';
+      }
+    }
+    // Check for software development specialization
+    else if (firstPathTitle.includes('developer') ||
+             firstPathTitle.includes('software') ||
+             secondPathTitle.includes('developer') ||
+             secondPathTitle.includes('software') ||
+             userRole.toLowerCase().includes('developer') ||
+             userRole.toLowerCase().includes('software') ||
+             userInterests.some(i => i.toLowerCase().includes('software') || i.toLowerCase().includes('development'))) {
+      domain = 'software';
+      
+      // Determine more specific software domain
+      if (userRole.toLowerCase().includes('frontend') || 
+          userField.toLowerCase().includes('frontend') ||
+          userInterests.some(i => i.toLowerCase().includes('frontend'))) {
+        domainSpecific = 'frontend';
+      } else if (userRole.toLowerCase().includes('backend') || 
+                 userField.toLowerCase().includes('backend') ||
+                 userInterests.some(i => i.toLowerCase().includes('backend'))) {
+        domainSpecific = 'backend';
+      } else {
+        domainSpecific = 'fullstack';
+      }
+    }
+    // Check for cloud/devops specialization
+    else if (firstPathTitle.includes('cloud') ||
+             firstPathTitle.includes('devops') ||
+             secondPathTitle.includes('cloud') ||
+             secondPathTitle.includes('devops') ||
+             userRole.toLowerCase().includes('cloud') ||
+             userRole.toLowerCase().includes('devops') ||
+             userInterests.some(i => i.toLowerCase().includes('cloud') || i.toLowerCase().includes('devops'))) {
+      domain = 'cloud';
+    }
+    // Default to general tech with management lean
+    else {
+      domain = 'tech';
+    }
+    
+    // Generate the third path based on determined domain
+    let thirdPath = {
+      title: '',
+      match: matchPercentage
+    };
+    
+    // AI/ML domain related roles
+    if (domain === 'ai') {
+      if (domainSpecific === 'research' && 
+          !firstPathTitle.includes('research scientist') && 
+          !secondPathTitle.includes('research scientist')) {
+        thirdPath.title = 'AI Research Scientist';
+      }
+      else if (domainSpecific === 'engineering' && 
+               !firstPathTitle.includes('ml engineer') && 
+               !secondPathTitle.includes('ml engineer')) {
+        thirdPath.title = 'Machine Learning Engineer';
+      }
+      else if (domainSpecific === 'product' && 
+               !firstPathTitle.includes('product manager') && 
+               !secondPathTitle.includes('product manager')) {
+        thirdPath.title = 'AI Product Manager';
+      }
+      else if (!firstPathTitle.includes('mlops') && !secondPathTitle.includes('mlops')) {
+        thirdPath.title = 'MLOps Engineer';
+      }
+      else if (!firstPathTitle.includes('computer vision') && !secondPathTitle.includes('computer vision')) {
+        thirdPath.title = 'Computer Vision Engineer';
+      }
+      else {
+        thirdPath.title = 'NLP Specialist';
+      }
+    }
+    // Data domain related roles
+    else if (domain === 'data') {
+      if (domainSpecific === 'analytics' && 
+          !firstPathTitle.includes('data analyst') && 
+          !secondPathTitle.includes('data analyst')) {
+        thirdPath.title = 'Business Intelligence Analyst';
+      }
+      else if (domainSpecific === 'engineering' && 
+               !firstPathTitle.includes('data engineer') && 
+               !secondPathTitle.includes('data engineer')) {
+        thirdPath.title = 'Data Engineer';
+      }
+      else if (!firstPathTitle.includes('data architect') && !secondPathTitle.includes('data architect')) {
+        thirdPath.title = 'Data Architect';
+      }
+      else {
+        thirdPath.title = 'Analytics Engineer';
+      }
+    }
+    // Software development domain related roles
+    else if (domain === 'software') {
+      if (domainSpecific === 'frontend' && 
+          !firstPathTitle.includes('frontend') && 
+          !secondPathTitle.includes('frontend')) {
+        thirdPath.title = 'Frontend Developer';
+      }
+      else if (domainSpecific === 'backend' && 
+               !firstPathTitle.includes('backend') && 
+               !secondPathTitle.includes('backend')) {
+        thirdPath.title = 'Backend Developer';
+      }
+      else if (!firstPathTitle.includes('fullstack') && !secondPathTitle.includes('fullstack')) {
+        thirdPath.title = 'Full Stack Developer';
+      }
+      else if (!firstPathTitle.includes('mobile') && !secondPathTitle.includes('mobile')) {
+        thirdPath.title = 'Mobile Developer';
+      }
+      else {
+        thirdPath.title = 'Software Architect';
+      }
+    }
+    // Cloud/DevOps domain related roles
+    else if (domain === 'cloud') {
+      if (!firstPathTitle.includes('devops') && !secondPathTitle.includes('devops')) {
+        thirdPath.title = 'DevOps Engineer';
+      }
+      else if (!firstPathTitle.includes('cloud') && !secondPathTitle.includes('cloud')) {
+        thirdPath.title = 'Cloud Solutions Architect';
+      }
+      else if (!firstPathTitle.includes('site reliability') && !secondPathTitle.includes('site reliability')) {
+        thirdPath.title = 'Site Reliability Engineer';
+      }
+      else {
+        thirdPath.title = 'Infrastructure Engineer';
+      }
+    }
+    // Default tech roles (management, UX, etc.)
+    else {
+      if (userRole.toLowerCase().includes('manage') || userField.toLowerCase().includes('manage')) {
+        thirdPath.title = 'Technical Product Manager';
+      }
+      else if (userRole.toLowerCase().includes('design') || userField.toLowerCase().includes('design')) {
+        thirdPath.title = 'UX/UI Designer';
+      }
+      else if (firstPathMatch > 85) {
+        // If first match is very high, suggest a leadership version of same role
+        const leadershipTitle = firstPathTitle.includes('senior') ? 
+                              firstPathTitle : 
+                              'Senior ' + existingPaths[0].title;
+        thirdPath.title = leadershipTitle;
+      }
+      else {
+        thirdPath.title = 'Technical Program Manager';
+      }
+    }
+    
+    return thirdPath;
   };
 
   // Extract market trends data from analysis text

@@ -941,6 +941,7 @@ const CareerDashboard = () => {
     const lines = text.split('\n');
     let formattedContent = [];
     let inSkillsGapSection = false;
+    let inLearningRoadmapSection = false;
     
     // Track if we should skip the current section
     let skipCurrentSection = false;
@@ -954,7 +955,263 @@ const CareerDashboard = () => {
       "MARKET TRENDS",
       "JOB MARKET ANALYSIS"
     ];
-
+    
+    // Enhance learning roadmap with more comprehensive content
+    const enhanceLearningRoadmap = (monthHeader, tasks) => {
+      // First, add the original month header
+      formattedContent.push(
+        <h5 key={`enhanced-month-${monthHeader}`} className="font-semibold mt-4 mb-2 text-blue-600 ml-4">
+          {monthHeader}
+        </h5>
+      );
+      
+      // Add the original tasks
+      tasks.forEach((task, tIndex) => {
+        formattedContent.push(
+          <div key={`enhanced-task-${monthHeader}-${tIndex}`} className="flex items-start mb-3 ml-6">
+            <span className="text-blue-600 mr-2">•</span>
+            <p dangerouslySetInnerHTML={processContent(task)} />
+          </div>
+        );
+      });
+      
+      // Add enhanced resources based on the tasks
+      const resourcesForTasks = generateResourcesForTasks(tasks);
+      
+      if (resourcesForTasks.length > 0) {
+        formattedContent.push(
+          <div key={`enhanced-resources-${monthHeader}`} className="ml-6 mt-2 mb-4">
+            <div className="bg-blue-50 rounded-lg p-4">
+              <h6 className="font-medium text-blue-800 mb-2 text-sm">Recommended Resources:</h6>
+              <div className="space-y-2">
+                {resourcesForTasks.map((resource, rIndex) => (
+                  <div key={`resource-${monthHeader}-${rIndex}`} className="flex items-start">
+                    <svg className="h-4 w-4 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <div>
+                      <p className="text-sm text-gray-800 font-medium">{resource.title}</p>
+                      <a 
+                        href={resource.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-xs text-blue-600 hover:underline"
+                      >
+                        {resource.platform || 'View Resource'} →
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      }
+    };
+    
+    // Generate specific resources based on task descriptions
+    const generateResourcesForTasks = (tasks) => {
+      const resources = [];
+      
+      // Join all tasks into a single string for easier checking
+      const tasksText = tasks.join(' ').toLowerCase();
+      
+      // Check for specific keywords and add relevant resources
+      if (tasksText.includes('ai') || tasksText.includes('machine learning')) {
+        resources.push({
+          title: 'Machine Learning for Healthcare',
+          url: 'https://www.coursera.org/specializations/ai-for-medicine',
+          platform: 'Coursera'
+        });
+        resources.push({
+          title: 'AI for Financial Services',
+          url: 'https://www.edx.org/course/artificial-intelligence-for-trading',
+          platform: 'edX'
+        });
+      }
+      
+      if (tasksText.includes('cloud') || tasksText.includes('azure') || tasksText.includes('google cloud')) {
+        resources.push({
+          title: 'Google Cloud Certification Training',
+          url: 'https://cloud.google.com/certification',
+          platform: 'Google Cloud'
+        });
+        resources.push({
+          title: 'Microsoft Azure Fundamentals',
+          url: 'https://learn.microsoft.com/en-us/training/paths/az-900-describe-cloud-concepts/',
+          platform: 'Microsoft Learn'
+        });
+      }
+      
+      if (tasksText.includes('mlops') || tasksText.includes('kubeflow') || tasksText.includes('mlflow')) {
+        resources.push({
+          title: 'MLOps Specialization',
+          url: 'https://www.deeplearning.ai/courses/machine-learning-engineering-for-production-mlops/',
+          platform: 'DeepLearning.AI'
+        });
+        resources.push({
+          title: 'Kubeflow Documentation & Tutorials',
+          url: 'https://www.kubeflow.org/docs/started/getting-started/',
+          platform: 'Kubeflow.org'
+        });
+      }
+      
+      if (tasksText.includes('business analytics') || tasksText.includes('performance indicators')) {
+        resources.push({
+          title: 'Business Analytics Specialization',
+          url: 'https://www.coursera.org/specializations/business-analytics',
+          platform: 'Coursera'
+        });
+      }
+      
+      if (tasksText.includes('data engineering') || tasksText.includes('hadoop') || tasksText.includes('spark')) {
+        resources.push({
+          title: 'Data Engineering with Google Cloud',
+          url: 'https://www.coursera.org/professional-certificates/gcp-data-engineering',
+          platform: 'Coursera'
+        });
+        resources.push({
+          title: 'Spark & Hadoop Fundamentals',
+          url: 'https://www.udemy.com/course/best-hands-on-big-data-practices-hadoop-spark-using-python/',
+          platform: 'Udemy'
+        });
+      }
+      
+      if (tasksText.includes('project') || tasksText.includes('capstone')) {
+        resources.push({
+          title: 'End-to-End ML Project Template',
+          url: 'https://github.com/https-deeplearning-ai/machine-learning-engineering-for-production-public',
+          platform: 'GitHub'
+        });
+      }
+      
+      // Add professional certifications if career paths indicate they're valuable
+      if (careerPaths.some(path => path.title.includes('Data Scientist') || path.title.includes('ML Engineer'))) {
+        resources.push({
+          title: 'TensorFlow Developer Certification',
+          url: 'https://www.tensorflow.org/certificate',
+          platform: 'TensorFlow.org'
+        });
+      }
+      
+      // Limit to 3 resources to avoid overwhelming the user
+      return resources.slice(0, 3);
+    };
+    
+    // Add comprehensive roadmap continuation based on user's timeline
+    const addLearningRoadmapContinuation = () => {
+      // Only add continuation if we found a learning roadmap section
+      if (!inLearningRoadmapSection) return;
+      
+      // Get first career path if available
+      const topCareerPath = careerPaths.length > 0 ? careerPaths[0].title : "";
+      
+      // Add continuation header
+      formattedContent.push(
+        <div key="roadmap-continuation-header" className="mt-6 mb-4 bg-blue-50 p-4 rounded-lg">
+          <h4 className="font-semibold text-blue-800">Extended Learning Roadmap</h4>
+          <p className="text-sm text-gray-700 mt-1">
+            Continuing your journey toward {topCareerPath || "your career goals"} with additional milestones.
+          </p>
+        </div>
+      );
+      
+      // Add additional months based on timeline
+      const timelineMap = {
+        'Less than 6 months': 9,
+        '6-12 months': 12,
+        '1-2 years': 18,
+        '2+ years': 24,
+        'Already transitioning': 9
+      };
+      
+      const maxMonths = timelineMap[userData.transitionTimeline] || 12;
+      
+      // Month 7-8
+      if (maxMonths >= 8) {
+        const month78Tasks = [
+          "Start building a personal portfolio website showcasing your projects and skills",
+          "Begin contributing to open-source projects related to your field",
+          "Enhance your understanding of system design and architecture principles"
+        ];
+        
+        enhanceLearningRoadmap("Month 7-8:", month78Tasks);
+      }
+      
+      // Month 9-10
+      if (maxMonths >= 10) {
+        const month910Tasks = [
+          "Take advanced specialized courses in your chosen career path's domain",
+          "Start networking with professionals in your target industry through meetups and conferences",
+          "Begin preparing for technical interviews with practice sessions"
+        ];
+        
+        enhanceLearningRoadmap("Month 9-10:", month910Tasks);
+      }
+      
+      // Month 11-12
+      if (maxMonths >= 12) {
+        const month1112Tasks = [
+          "Finalize your professional portfolio with at least 3-5 substantial projects",
+          "Prepare case studies of your projects to showcase problem-solving abilities",
+          "Start applying for relevant positions and opportunities"
+        ];
+        
+        enhanceLearningRoadmap("Month 11-12:", month1112Tasks);
+      }
+      
+      // Month 13-15 (for longer timelines)
+      if (maxMonths >= 15) {
+        const month1315Tasks = [
+          "Deepen expertise in specialized areas with advanced certifications",
+          "Mentor others and lead collaborative projects to demonstrate leadership",
+          "Explore freelance opportunities to build real-world experience"
+        ];
+        
+        enhanceLearningRoadmap("Month 13-15:", month1315Tasks);
+      }
+      
+      // Month 16-18 (for longer timelines)
+      if (maxMonths >= 18) {
+        const month1618Tasks = [
+          "Focus on emerging technologies and trends in your field",
+          "Consider publishing articles or research on your learnings",
+          "Position yourself as a specialist in a high-demand niche"
+        ];
+        
+        enhanceLearningRoadmap("Month 16-18:", month1618Tasks);
+      }
+      
+      // Beyond (for 2+ year timelines)
+      if (maxMonths >= 24) {
+        const beyondTasks = [
+          "Consider advanced degrees or specialized education if beneficial for your career goals",
+          "Build a personal brand as a thought leader in your specialty",
+          "Explore entrepreneurial opportunities leveraging your technical expertise"
+        ];
+        
+        enhanceLearningRoadmap("Month 19-24:", beyondTasks);
+      }
+      
+      // Add final milestone
+      formattedContent.push(
+        <div key="roadmap-final-milestone" className="mt-6 mb-6 ml-4">
+          <div className="flex items-center">
+            <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center text-white mr-3">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h5 className="font-bold text-green-700">Career Transition Complete!</h5>
+          </div>
+          <p className="text-gray-700 ml-11 mt-1">
+            By this point, you should have the skills, portfolio, and experience needed 
+            to successfully transition into your new role as a {topCareerPath || "technology professional"}.
+          </p>
+        </div>
+      );
+    };
+    
     const processContent = (content) => {
       content = content.replace(/\btheir\b/gi, 'your');
       content = content.replace(/\bthey\b/gi, 'you');
@@ -978,6 +1235,10 @@ const CareerDashboard = () => {
       
       return { __html: content };
     };
+    
+    // Store the current month in learning roadmap for task collection
+    let currentMonthTasks = [];
+    let currentMonthHeader = '';
 
     lines.forEach((line, index) => {
       // Check for numbered section headers (like "7. NETWORKING STRATEGY:")
@@ -988,6 +1249,17 @@ const CareerDashboard = () => {
           numberedSectionMatch[1].includes(keyword))) {
         skipCurrentSection = true;
         currentSkipSection = numberedSectionMatch[1];
+        return;
+      }
+      
+      // Look for learning roadmap section
+      if (line.includes("LEARNING ROADMAP") || line.match(/\d+\.\s+LEARNING\s+ROADMAP/i)) {
+        inLearningRoadmapSection = true;
+        formattedContent.push(
+          <h3 key={`header-roadmap-${index}`} className="text-xl font-bold mt-8 mb-4 text-blue-800">
+            {line}
+          </h3>
+        );
         return;
       }
       
@@ -1014,11 +1286,52 @@ const CareerDashboard = () => {
         return;
       }
       
-      if (line.includes("LEARNING ROADMAP") || line.includes("TRANSITION STRATEGY")) {
+      if (line.includes("TRANSITION STRATEGY") || (inLearningRoadmapSection && line.match(/^\d+\.\s+[A-Z\s]+:/))) {
+        // If we were in learning roadmap section, add the continuation
+        if (inLearningRoadmapSection) {
+          // Process any remaining tasks from the last month
+          if (currentMonthHeader && currentMonthTasks.length > 0) {
+            enhanceLearningRoadmap(currentMonthHeader, currentMonthTasks);
+            currentMonthTasks = [];
+            currentMonthHeader = '';
+          }
+          
+          // Add continuation roadmap
+          addLearningRoadmapContinuation();
+        }
+        
         inSkillsGapSection = false;
+        inLearningRoadmapSection = false;
+        
+        // Continue normal processing for the new section header
+        formattedContent.push(
+          <h3 key={`header-${index}`} className="text-xl font-bold mt-8 mb-4 text-blue-800">
+            {line}
+          </h3>
+        );
+        return;
       }
 
       if (inSkillsGapSection && line.match(/^\d+\.\s+/) && line.includes(':')) {
+        return;
+      }
+
+      // Process month headers in learning roadmap
+      if (inLearningRoadmapSection && line.trim().match(/^Month\s+\d+-?\d*:/i)) {
+        // If we already have a month with tasks, process it before starting a new one
+        if (currentMonthHeader && currentMonthTasks.length > 0) {
+          enhanceLearningRoadmap(currentMonthHeader, currentMonthTasks);
+          currentMonthTasks = [];
+        }
+        
+        // Set the new current month
+        currentMonthHeader = line.trim();
+        return;
+      }
+      
+      // Process tasks within a month
+      if (inLearningRoadmapSection && currentMonthHeader && (line.trim().startsWith('-') || line.trim().startsWith('•'))) {
+        currentMonthTasks.push(line.replace(/^[-•]\s+/, '').trim());
         return;
       }
 
@@ -1054,13 +1367,6 @@ const CareerDashboard = () => {
           </div>
         );
       }
-      else if (line.trim().match(/^Month\s+\d+-?\d*:/i)) {
-        formattedContent.push(
-          <h5 key={`month-${index}`} className="font-semibold mt-4 mb-2 text-blue-600 ml-4">
-            {line}
-          </h5>
-        );
-      }
       else if (line.trim() === '') {
         formattedContent.push(<br key={`break-${index}`} />);
       }
@@ -1070,6 +1376,14 @@ const CareerDashboard = () => {
         );
       }
     });
+    
+    // Process any remaining month tasks at the end
+    if (inLearningRoadmapSection && currentMonthHeader && currentMonthTasks.length > 0) {
+      enhanceLearningRoadmap(currentMonthHeader, currentMonthTasks);
+      
+      // Add continuation roadmap at the end
+      addLearningRoadmapContinuation();
+    }
 
     return formattedContent;
   };

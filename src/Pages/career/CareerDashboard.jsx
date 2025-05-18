@@ -249,222 +249,20 @@ const CareerDashboard = () => {
     return careerPaths;
   };
   
-  // Generate a contextually relevant third career path based on user data and existing paths
-  const generateRelatedCareerPath = (existingPaths, userData, skillsGap) => {
-    // Extract information about the first two paths to understand user's field
-    const firstPathTitle = existingPaths[0].title.toLowerCase();
-    const secondPathTitle = existingPaths[1].title.toLowerCase();
-    const firstPathMatch = existingPaths[0].match;
+  // Ensure we have exactly three career paths for display
+  const getThreeCareerPaths = (paths, userData, skillsGap) => {
+    // Make a defensive copy to avoid modifying the original
+    let displayPaths = [...paths];
     
-    // Extract key user information
-    const userExperience = userData.experienceLevel || '';
-    const userRole = userData.currentRole || '';
-    const userEducation = userData.educationLevel || '';
-    const userField = userData.studyField || '';
-    const userInterests = Array.isArray(userData.careerPathsInterest) ? 
-                          userData.careerPathsInterest : 
-                          (typeof userData.careerPathsInterest === 'string' ? 
-                          [userData.careerPathsInterest] : []);
-    
-    // Default match percentage slightly lower than second choice
-    const matchPercentage = Math.max(existingPaths[1].match - 5, 75);
-    
-    // Determine industry/domain focus based on user data and existing paths
-    let domain = '';
-    let domainSpecific = '';
-    
-    // Check for AI/ML specialization
-    if (firstPathTitle.includes('machine learning') || 
-        firstPathTitle.includes('ml') || 
-        firstPathTitle.includes('ai') || 
-        secondPathTitle.includes('machine learning') || 
-        secondPathTitle.includes('ml') || 
-        secondPathTitle.includes('ai') || 
-        userField.toLowerCase().includes('computer') ||
-        userInterests.some(i => i.toLowerCase().includes('machine learning') || i.toLowerCase().includes('ai'))) {
-        
-      domain = 'ai';
-      
-      // Determine more specific AI domain
-      if (userRole.toLowerCase().includes('research') || 
-          userField.toLowerCase().includes('research') ||
-          firstPathTitle.includes('scientist')) {
-        domainSpecific = 'research';
-      } else if (firstPathTitle.includes('engineer') || secondPathTitle.includes('engineer')) {
-        domainSpecific = 'engineering';
-      } else if (userRole.toLowerCase().includes('product') || userField.toLowerCase().includes('product')) {
-        domainSpecific = 'product';
-      } else {
-        domainSpecific = 'operations';
-      }
-    }
-    // Check for data science specialization
-    else if (firstPathTitle.includes('data') || 
-             secondPathTitle.includes('data') ||
-             userField.toLowerCase().includes('data') ||
-             userInterests.some(i => i.toLowerCase().includes('data'))) {
-      domain = 'data';
-      
-      // Determine more specific data domain
-      if (userRole.toLowerCase().includes('analyst') || 
-          userField.toLowerCase().includes('analytics')) {
-        domainSpecific = 'analytics';
-      } else if (userRole.toLowerCase().includes('engineer') || 
-                 firstPathTitle.includes('engineer') || 
-                 secondPathTitle.includes('engineer')) {
-        domainSpecific = 'engineering';
-      } else {
-        domainSpecific = 'analytics';
-      }
-    }
-    // Check for software development specialization
-    else if (firstPathTitle.includes('developer') ||
-             firstPathTitle.includes('software') ||
-             secondPathTitle.includes('developer') ||
-             secondPathTitle.includes('software') ||
-             userRole.toLowerCase().includes('developer') ||
-             userRole.toLowerCase().includes('software') ||
-             userInterests.some(i => i.toLowerCase().includes('software') || i.toLowerCase().includes('development'))) {
-      domain = 'software';
-      
-      // Determine more specific software domain
-      if (userRole.toLowerCase().includes('frontend') || 
-          userField.toLowerCase().includes('frontend') ||
-          userInterests.some(i => i.toLowerCase().includes('frontend'))) {
-        domainSpecific = 'frontend';
-      } else if (userRole.toLowerCase().includes('backend') || 
-                 userField.toLowerCase().includes('backend') ||
-                 userInterests.some(i => i.toLowerCase().includes('backend'))) {
-        domainSpecific = 'backend';
-      } else {
-        domainSpecific = 'fullstack';
-      }
-    }
-    // Check for cloud/devops specialization
-    else if (firstPathTitle.includes('cloud') ||
-             firstPathTitle.includes('devops') ||
-             secondPathTitle.includes('cloud') ||
-             secondPathTitle.includes('devops') ||
-             userRole.toLowerCase().includes('cloud') ||
-             userRole.toLowerCase().includes('devops') ||
-             userInterests.some(i => i.toLowerCase().includes('cloud') || i.toLowerCase().includes('devops'))) {
-      domain = 'cloud';
-    }
-    // Default to general tech with management lean
-    else {
-      domain = 'tech';
+    // If we have fewer than 3 paths, generate additional ones
+    while (displayPaths.length < 3) {
+      // Generate a complementary career path
+      const generatedPath = generateRelatedCareerPath(displayPaths, userData, skillsGap);
+      displayPaths.push(generatedPath);
     }
     
-    // Generate the third path based on determined domain
-    let thirdPath = {
-      title: '',
-      match: matchPercentage
-    };
-    
-    // AI/ML domain related roles
-    if (domain === 'ai') {
-      if (domainSpecific === 'research' && 
-          !firstPathTitle.includes('research scientist') && 
-          !secondPathTitle.includes('research scientist')) {
-        thirdPath.title = 'AI Research Scientist';
-      }
-      else if (domainSpecific === 'engineering' && 
-               !firstPathTitle.includes('ml engineer') && 
-               !secondPathTitle.includes('ml engineer')) {
-        thirdPath.title = 'Machine Learning Engineer';
-      }
-      else if (domainSpecific === 'product' && 
-               !firstPathTitle.includes('product manager') && 
-               !secondPathTitle.includes('product manager')) {
-        thirdPath.title = 'AI Product Manager';
-      }
-      else if (!firstPathTitle.includes('mlops') && !secondPathTitle.includes('mlops')) {
-        thirdPath.title = 'MLOps Engineer';
-      }
-      else if (!firstPathTitle.includes('computer vision') && !secondPathTitle.includes('computer vision')) {
-        thirdPath.title = 'Computer Vision Engineer';
-      }
-      else {
-        thirdPath.title = 'NLP Specialist';
-      }
-    }
-    // Data domain related roles
-    else if (domain === 'data') {
-      if (domainSpecific === 'analytics' && 
-          !firstPathTitle.includes('data analyst') && 
-          !secondPathTitle.includes('data analyst')) {
-        thirdPath.title = 'Business Intelligence Analyst';
-      }
-      else if (domainSpecific === 'engineering' && 
-               !firstPathTitle.includes('data engineer') && 
-               !secondPathTitle.includes('data engineer')) {
-        thirdPath.title = 'Data Engineer';
-      }
-      else if (!firstPathTitle.includes('data architect') && !secondPathTitle.includes('data architect')) {
-        thirdPath.title = 'Data Architect';
-      }
-      else {
-        thirdPath.title = 'Analytics Engineer';
-      }
-    }
-    // Software development domain related roles
-    else if (domain === 'software') {
-      if (domainSpecific === 'frontend' && 
-          !firstPathTitle.includes('frontend') && 
-          !secondPathTitle.includes('frontend')) {
-        thirdPath.title = 'Frontend Developer';
-      }
-      else if (domainSpecific === 'backend' && 
-               !firstPathTitle.includes('backend') && 
-               !secondPathTitle.includes('backend')) {
-        thirdPath.title = 'Backend Developer';
-      }
-      else if (!firstPathTitle.includes('fullstack') && !secondPathTitle.includes('fullstack')) {
-        thirdPath.title = 'Full Stack Developer';
-      }
-      else if (!firstPathTitle.includes('mobile') && !secondPathTitle.includes('mobile')) {
-        thirdPath.title = 'Mobile Developer';
-      }
-      else {
-        thirdPath.title = 'Software Architect';
-      }
-    }
-    // Cloud/DevOps domain related roles
-    else if (domain === 'cloud') {
-      if (!firstPathTitle.includes('devops') && !secondPathTitle.includes('devops')) {
-        thirdPath.title = 'DevOps Engineer';
-      }
-      else if (!firstPathTitle.includes('cloud') && !secondPathTitle.includes('cloud')) {
-        thirdPath.title = 'Cloud Solutions Architect';
-      }
-      else if (!firstPathTitle.includes('site reliability') && !secondPathTitle.includes('site reliability')) {
-        thirdPath.title = 'Site Reliability Engineer';
-      }
-      else {
-        thirdPath.title = 'Infrastructure Engineer';
-      }
-    }
-    // Default tech roles (management, UX, etc.)
-    else {
-      if (userRole.toLowerCase().includes('manage') || userField.toLowerCase().includes('manage')) {
-        thirdPath.title = 'Technical Product Manager';
-      }
-      else if (userRole.toLowerCase().includes('design') || userField.toLowerCase().includes('design')) {
-        thirdPath.title = 'UX/UI Designer';
-      }
-      else if (firstPathMatch > 85) {
-        // If first match is very high, suggest a leadership version of same role
-        const leadershipTitle = firstPathTitle.includes('senior') ? 
-                              firstPathTitle : 
-                              'Senior ' + existingPaths[0].title;
-        thirdPath.title = leadershipTitle;
-      }
-      else {
-        thirdPath.title = 'Technical Program Manager';
-      }
-    }
-    
-    return thirdPath;
+    // Limit to exactly 3 paths
+    return displayPaths.slice(0, 3);
   };
 
   // Extract market trends data from analysis text
@@ -3102,202 +2900,184 @@ const CareerDashboard = () => {
               Based on your experience, skills, and interests, these career paths have the highest compatibility with your profile.
             </p>
             
-            <SimpleBarChart data={chartData} title="" />
+            {/* Create a combined chart data with ensured three paths */}
+            <SimpleBarChart data={getThreeCareerPaths(careerPaths, userData, skillsGap).map(path => ({
+              label: path.title,
+              value: path.match
+            }))} title="" />
             
-            {/* Prepare third career path if needed */}
-            {(() => {
-              let displayPaths = [...careerPaths];
-              
-              // Generate a third path if we have fewer than 3
-              if (displayPaths.length < 3) {
-                const thirdPathNeeded = 3 - displayPaths.length;
-                for (let i = 0; i < thirdPathNeeded; i++) {
-                  // Get suggested career path based on existing paths and user data
-                  const relatedPath = generateRelatedCareerPath(displayPaths, userData, skillsGap);
-                  if (relatedPath) {
-                    displayPaths.push(relatedPath);
-                  }
-                }
-              }
-              
-              // Only show the first 3 paths
-              displayPaths = displayPaths.slice(0, 3);
-              
-              return (
-                <div className="mt-8 grid md:grid-cols-3 gap-6">
-                  {displayPaths.map((path, index) => (
-                    <div key={index} className={`p-5 rounded-lg ${
-                      index === 0 ? 'bg-blue-50 border border-blue-100' :
-                      index === 1 ? 'bg-green-50 border border-green-100' :
-                      'bg-purple-50 border border-purple-100'
+            <div className="mt-8 grid md:grid-cols-3 gap-6">
+              {getThreeCareerPaths(careerPaths, userData, skillsGap).map((path, index) => (
+                <div key={index} className={`p-5 rounded-lg ${
+                  index === 0 ? 'bg-blue-50 border border-blue-100' :
+                  index === 1 ? 'bg-green-50 border border-green-100' :
+                  'bg-purple-50 border border-purple-100'
+                }`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-lg">{path.title}</h3>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      index === 0 ? 'bg-blue-100 text-blue-800' :
+                      index === 1 ? 'bg-green-100 text-green-800' :
+                      'bg-purple-100 text-purple-800'
                     }`}>
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-semibold text-lg">{path.title}</h3>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          index === 0 ? 'bg-blue-100 text-blue-800' :
-                          index === 1 ? 'bg-green-100 text-green-800' :
-                          'bg-purple-100 text-purple-800'
-                        }`}>
-                          {path.match}% Match
-                        </span>
-                      </div>
-                      
-                      <div className="space-y-3 mt-4">
-                        {index === 0 && (
-                          <>
-                            <div className="mb-3">
-                              <h4 className="text-sm font-medium text-gray-500 uppercase">Why This Path</h4>
-                              <p className="text-gray-700 mt-1">
-                                <strong>Perfect Fit:</strong> Your {userData.experienceLevel.toLowerCase()} experience
-                                {userData.studyField ? ` in ${userData.studyField}` : ''} aligns with the core requirements.
-                              </p>
-                              <p className="text-gray-700 mt-2">
-                                <strong>Key Advantage:</strong> Your background in {
-                                  userData.currentRole ? userData.currentRole : 'your current field'
-                                } provides transferable skills highly valued in this role.
-                              </p>
-                            </div>
-                            
-                            <div className="mb-3">
-                              <h4 className="text-sm font-medium text-gray-500 uppercase">Required Skills</h4>
-                              <div className="mt-1 flex flex-wrap gap-2">
-                                {skillsGap.filter(skill => skill.gap > 0).slice(0, 3).map((skill, idx) => (
-                                  <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
-                                    {skill.name}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                            
-                            <div className="mb-3">
-                              <h4 className="text-sm font-medium text-gray-500 uppercase">Estimated Timeline</h4>
-                              <p className="text-gray-700 mt-1">
-                                <strong>{userData.transitionTimeline === 'Less than 6 months' || userData.transitionTimeline === 'Already transitioning' ? 
-                                  '3-6 months' : 
-                                  userData.transitionTimeline === '6-12 months' ? 
-                                  '6-9 months' : 
-                                  '9-12 months'}</strong> based on your current experience and commitment level
-                              </p>
-                            </div>
-                            
-                            <div className="mb-3">
-                              <h4 className="text-sm font-medium text-gray-500 uppercase">Career Outlook</h4>
-                              <p className="text-gray-700 mt-1">
-                                <strong>Strong Growth:</strong> Projected 22% increase in demand over the next 5 years with competitive salary ranges
-                              </p>
-                            </div>
-                          </>
-                        )}
-                        {index === 1 && (
-                          <>
-                            <div className="mb-3">
-                              <h4 className="text-sm font-medium text-gray-500 uppercase">Why This Path</h4>
-                              <p className="text-gray-700 mt-1">
-                                <strong>Strong Alternative:</strong> Your technical skills combined with your background
-                                {userData.currentRole ? ` in ${userData.currentRole}` : ''} create an excellent foundation.
-                              </p>
-                              <p className="text-gray-700 mt-2">
-                                <strong>Natural Fit:</strong> Your interest in {
-                                  userData.careerPathsInterest && userData.careerPathsInterest.length > 0 
-                                    ? userData.careerPathsInterest[0] 
-                                    : 'technology'
-                                } aligns well with the core responsibilities.
-                              </p>
-                            </div>
-                            
-                            <div className="mb-3">
-                              <h4 className="text-sm font-medium text-gray-500 uppercase">Required Skills</h4>
-                              <div className="mt-1 flex flex-wrap gap-2">
-                                {skillsGap.filter(skill => skill.gap > 0).slice(2, 5).map((skill, idx) => (
-                                  <span key={idx} className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
-                                    {skill.name}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                            
-                            <div className="mb-3">
-                              <h4 className="text-sm font-medium text-gray-500 uppercase">Estimated Timeline</h4>
-                              <p className="text-gray-700 mt-1">
-                                <strong>{userData.transitionTimeline === 'Less than 6 months' || userData.transitionTimeline === 'Already transitioning' ? 
-                                  '4-8 months' : 
-                                  userData.transitionTimeline === '6-12 months' ? 
-                                  '8-12 months' : 
-                                  '10-14 months'}</strong> to build necessary specialization and portfolio
-                              </p>
-                            </div>
-                            
-                            <div className="mb-3">
-                              <h4 className="text-sm font-medium text-gray-500 uppercase">Career Outlook</h4>
-                              <p className="text-gray-700 mt-1">
-                                <strong>High Demand:</strong> Consistent growth with varied opportunities across industries
-                              </p>
-                            </div>
-                          </>
-                        )}
-                        {index === 2 && (
-                          <>
-                            <div className="mb-3">
-                              <h4 className="text-sm font-medium text-gray-500 uppercase">Why This Path</h4>
-                              <p className="text-gray-700 mt-1">
-                                <strong>Complementary Option:</strong> Leverages your analytical skills and technical knowledge while opening different opportunities.
-                              </p>
-                              <p className="text-gray-700 mt-2">
-                                <strong>Growth Potential:</strong> Your background in {userData.studyField || 'your field'} provides a strong foundation for this emerging role.
-                              </p>
-                            </div>
-                            
-                            <div className="mb-3">
-                              <h4 className="text-sm font-medium text-gray-500 uppercase">Required Skills</h4>
-                              <div className="mt-1 flex flex-wrap gap-2">
-                                {skillsGap.filter(skill => skill.gap > 0).slice(4, 7).map((skill, idx) => (
-                                  <span key={idx} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
-                                    {skill.name}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                            
-                            <div className="mb-3">
-                              <h4 className="text-sm font-medium text-gray-500 uppercase">Estimated Timeline</h4>
-                              <p className="text-gray-700 mt-1">
-                                <strong>{userData.transitionTimeline === 'Less than 6 months' || userData.transitionTimeline === 'Already transitioning' ? 
-                                  '6-10 months' : 
-                                  userData.transitionTimeline === '6-12 months' ? 
-                                  '10-14 months' : 
-                                  '12-18 months'}</strong> to acquire specialized knowledge and experience
-                              </p>
-                            </div>
-                            
-                            <div className="mb-3">
-                              <h4 className="text-sm font-medium text-gray-500 uppercase">Career Outlook</h4>
-                              <p className="text-gray-700 mt-1">
-                                <strong>Emerging Field:</strong> Growing demand for specialists with your technical background
-                              </p>
-                            </div>
-                          </>
-                        )}
-                        
-                        <div className="pt-3">
-                          <a 
-                            href={`https://www.google.com/search?q=${encodeURIComponent(path.title)}+career+path+requirements`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`text-sm font-medium ${
-                              index === 0 ? 'text-blue-600 hover:text-blue-800' :
-                              index === 1 ? 'text-green-600 hover:text-green-800' :
-                              'text-purple-600 hover:text-purple-800'
-                            }`}
-                          >
-                            Learn more about this career →
-                          </a>
+                      {path.match}% Match
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-3 mt-4">
+                    {index === 0 && (
+                      <>
+                        <div className="mb-3">
+                          <h4 className="text-sm font-medium text-gray-500 uppercase">Why This Path</h4>
+                          <p className="text-gray-700 mt-1">
+                            <strong>Perfect Fit:</strong> Your {userData.experienceLevel.toLowerCase()} experience
+                            {userData.studyField ? ` in ${userData.studyField}` : ''} aligns with the core requirements.
+                          </p>
+                          <p className="text-gray-700 mt-2">
+                            <strong>Key Advantage:</strong> Your background in {
+                              userData.currentRole ? userData.currentRole : 'your current field'
+                            } provides transferable skills highly valued in this role.
+                          </p>
                         </div>
-                      </div>
+                        
+                        <div className="mb-3">
+                          <h4 className="text-sm font-medium text-gray-500 uppercase">Required Skills</h4>
+                          <div className="mt-1 flex flex-wrap gap-2">
+                            {skillsGap.filter(skill => skill.gap > 0).slice(0, 3).map((skill, idx) => (
+                              <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                                {skill.name}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div className="mb-3">
+                          <h4 className="text-sm font-medium text-gray-500 uppercase">Estimated Timeline</h4>
+                          <p className="text-gray-700 mt-1">
+                            <strong>{userData.transitionTimeline === 'Less than 6 months' || userData.transitionTimeline === 'Already transitioning' ? 
+                              '3-6 months' : 
+                              userData.transitionTimeline === '6-12 months' ? 
+                              '6-9 months' : 
+                              '9-12 months'}</strong> based on your current experience and commitment level
+                          </p>
+                        </div>
+                        
+                        <div className="mb-3">
+                          <h4 className="text-sm font-medium text-gray-500 uppercase">Career Outlook</h4>
+                          <p className="text-gray-700 mt-1">
+                            <strong>Strong Growth:</strong> Projected 22% increase in demand over the next 5 years with competitive salary ranges
+                          </p>
+                        </div>
+                      </>
+                    )}
+                    {index === 1 && (
+                      <>
+                        <div className="mb-3">
+                          <h4 className="text-sm font-medium text-gray-500 uppercase">Why This Path</h4>
+                          <p className="text-gray-700 mt-1">
+                            <strong>Strong Alternative:</strong> Your technical skills combined with your background
+                            {userData.currentRole ? ` in ${userData.currentRole}` : ''} create an excellent foundation.
+                          </p>
+                          <p className="text-gray-700 mt-2">
+                            <strong>Natural Fit:</strong> Your interest in {
+                              userData.careerPathsInterest && userData.careerPathsInterest.length > 0 
+                                ? userData.careerPathsInterest[0] 
+                                : 'technology'
+                            } aligns well with the core responsibilities.
+                          </p>
+                        </div>
+                        
+                        <div className="mb-3">
+                          <h4 className="text-sm font-medium text-gray-500 uppercase">Required Skills</h4>
+                          <div className="mt-1 flex flex-wrap gap-2">
+                            {skillsGap.filter(skill => skill.gap > 0).slice(2, 5).map((skill, idx) => (
+                              <span key={idx} className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
+                                {skill.name}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div className="mb-3">
+                          <h4 className="text-sm font-medium text-gray-500 uppercase">Estimated Timeline</h4>
+                          <p className="text-gray-700 mt-1">
+                            <strong>{userData.transitionTimeline === 'Less than 6 months' || userData.transitionTimeline === 'Already transitioning' ? 
+                              '4-8 months' : 
+                              userData.transitionTimeline === '6-12 months' ? 
+                              '8-12 months' : 
+                              '10-14 months'}</strong> to build necessary specialization and portfolio
+                          </p>
+                        </div>
+                        
+                        <div className="mb-3">
+                          <h4 className="text-sm font-medium text-gray-500 uppercase">Career Outlook</h4>
+                          <p className="text-gray-700 mt-1">
+                            <strong>High Demand:</strong> Consistent growth with varied opportunities across industries
+                          </p>
+                        </div>
+                      </>
+                    )}
+                    {index === 2 && (
+                      <>
+                        <div className="mb-3">
+                          <h4 className="text-sm font-medium text-gray-500 uppercase">Why This Path</h4>
+                          <p className="text-gray-700 mt-1">
+                            <strong>Complementary Option:</strong> Leverages your analytical skills and technical knowledge while opening different opportunities.
+                          </p>
+                          <p className="text-gray-700 mt-2">
+                            <strong>Growth Potential:</strong> Your background in {userData.studyField || 'your field'} provides a strong foundation for this emerging role.
+                          </p>
+                        </div>
+                        
+                        <div className="mb-3">
+                          <h4 className="text-sm font-medium text-gray-500 uppercase">Required Skills</h4>
+                          <div className="mt-1 flex flex-wrap gap-2">
+                            {skillsGap.filter(skill => skill.gap > 0).slice(4, 7).map((skill, idx) => (
+                              <span key={idx} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+                                {skill.name}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div className="mb-3">
+                          <h4 className="text-sm font-medium text-gray-500 uppercase">Estimated Timeline</h4>
+                          <p className="text-gray-700 mt-1">
+                            <strong>{userData.transitionTimeline === 'Less than 6 months' || userData.transitionTimeline === 'Already transitioning' ? 
+                              '6-10 months' : 
+                              userData.transitionTimeline === '6-12 months' ? 
+                              '10-14 months' : 
+                              '12-18 months'}</strong> to acquire specialized knowledge and experience
+                          </p>
+                        </div>
+                        
+                        <div className="mb-3">
+                          <h4 className="text-sm font-medium text-gray-500 uppercase">Career Outlook</h4>
+                          <p className="text-gray-700 mt-1">
+                            <strong>Emerging Field:</strong> Growing demand for specialists with your technical background
+                          </p>
+                        </div>
+                      </>
+                    )}
+                    
+                    <div className="pt-3">
+                      <a 
+                        href={`https://www.google.com/search?q=${encodeURIComponent(path.title)}+career+path+requirements`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`text-sm font-medium ${
+                          index === 0 ? 'text-blue-600 hover:text-blue-800' :
+                          index === 1 ? 'text-green-600 hover:text-green-800' :
+                          'text-purple-600 hover:text-purple-800'
+                        }`}
+                      >
+                        Learn more about this career →
+                      </a>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              );
-            })()}
+              ))}
+            </div>
             
             <div className="mt-8 bg-gray-50 p-4 rounded-lg">
               <h3 className="font-semibold text-lg mb-3">Career Path Comparison</h3>
@@ -3314,66 +3094,47 @@ const CareerDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {(() => {
-                      let displayPaths = [...careerPaths];
-                      
-                      // Generate a third path if we have fewer than 3
-                      if (displayPaths.length < 3) {
-                        const thirdPathNeeded = 3 - displayPaths.length;
-                        for (let i = 0; i < thirdPathNeeded; i++) {
-                          // Get suggested career path based on existing paths and user data
-                          const relatedPath = generateRelatedCareerPath(displayPaths, userData, skillsGap);
-                          if (relatedPath) {
-                            displayPaths.push(relatedPath);
-                          }
-                        }
-                      }
-                      
-                      // Only show the first 3 paths
-                      displayPaths = displayPaths.slice(0, 3);
-                      
-                      return displayPaths.map((path, index) => (
-                        <tr key={index}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="font-medium text-gray-900">{path.title}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className={`inline-flex px-2 text-xs leading-5 font-semibold rounded-full ${
-                              index === 0 ? 'bg-blue-100 text-blue-800' :
-                              index === 1 ? 'bg-green-100 text-green-800' :
-                              'bg-purple-100 text-purple-800'}`}>
-                              {path.match}%
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
-                              {index === 0 ? 
-                                (userData.transitionTimeline === 'Less than 6 months' ? '3-6 months' : '6-12 months') :
-                              index === 1 ? 
-                                (userData.transitionTimeline === 'Less than 6 months' ? '4-8 months' : '8-12 months') :
-                                (userData.transitionTimeline === 'Less than 6 months' ? '6-10 months' : '10-16 months')}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
-                              {index === 0 ? 
-                                (skillsGap.length > 0 ? skillsGap[0].name : 'Technical foundations') :
-                              index === 1 ? 
-                                (skillsGap.length > 1 ? skillsGap[1].name : 'Analytical skills') :
-                                (skillsGap.length > 2 ? skillsGap[2].name : 'Specialized knowledge')}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className={`text-sm ${
-                              index === 0 ? 'text-green-600' :
-                              index === 1 ? 'text-blue-600' :
-                              'text-purple-600'}`}>
-                              {index === 0 ? 'Very High' : index === 1 ? 'High' : 'Growing'}
-                            </div>
-                          </td>
-                        </tr>
-                      ));
-                    })()}
+                    {getThreeCareerPaths(careerPaths, userData, skillsGap).map((path, index) => (
+                      <tr key={index}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium text-gray-900">{path.title}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className={`inline-flex px-2 text-xs leading-5 font-semibold rounded-full ${
+                            index === 0 ? 'bg-blue-100 text-blue-800' :
+                            index === 1 ? 'bg-green-100 text-green-800' :
+                            'bg-purple-100 text-purple-800'}`}>
+                            {path.match}%
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {index === 0 ? 
+                              (userData.transitionTimeline === 'Less than 6 months' ? '3-6 months' : '6-12 months') :
+                             index === 1 ? 
+                              (userData.transitionTimeline === 'Less than 6 months' ? '4-8 months' : '8-12 months') :
+                              (userData.transitionTimeline === 'Less than 6 months' ? '6-10 months' : '10-16 months')}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {index === 0 ? 
+                              (skillsGap.length > 0 ? skillsGap[0].name : 'Technical foundations') :
+                             index === 1 ? 
+                              (skillsGap.length > 1 ? skillsGap[1].name : 'Analytical skills') :
+                              (skillsGap.length > 2 ? skillsGap[2].name : 'Specialized knowledge')}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className={`text-sm ${
+                            index === 0 ? 'text-green-600' :
+                            index === 1 ? 'text-blue-600' :
+                            'text-purple-600'}`}>
+                            {index === 0 ? 'Very High' : index === 1 ? 'High' : 'Growing'}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>

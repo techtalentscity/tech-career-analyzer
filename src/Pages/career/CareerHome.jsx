@@ -168,6 +168,72 @@ const CareerHome = () => {
           </div>
         </section>
 
+        {/* Success Stats */}
+        <section className="mb-20 py-8">
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <div className="bg-white rounded-xl p-6 shadow-lg text-center transform hover:-translate-y-1 transition-all duration-300">
+              <div className="text-4xl font-bold text-indigo-600 mb-2">35%</div>
+              <p className="text-gray-700">Faster transition to tech roles compared to self-guided paths</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-lg text-center transform hover:-translate-y-1 transition-all duration-300">
+              <div className="text-4xl font-bold text-indigo-600 mb-2">
+                <span className="text-2xl">$</span>65K-160K
+              </div>
+              <p className="text-gray-700">Salary range of recommended career paths</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-lg text-center transform hover:-translate-y-1 transition-all duration-300">
+              <div className="text-4xl font-bold text-indigo-600 mb-2">0.1%</div>
+              <p className="text-gray-700">Investment of your potential first-year tech salary</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Social Proof */}
+        <section className="mb-20 bg-gray-50 py-12 rounded-3xl">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800">Success Stories</h2>
+          <p className="text-center text-gray-600 mb-10">Join thousands who have successfully transitioned to tech careers</p>
+          
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto px-6">
+            <div className="bg-white rounded-xl p-6 shadow-md">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold">JD</div>
+                <div className="ml-4">
+                  <div className="font-bold">James D.</div>
+                  <div className="text-sm text-gray-500">Marketing → Data Analyst</div>
+                </div>
+              </div>
+              <p className="text-gray-700">"The roadmap was spot-on. Followed it for 7 months and landed a job that increased my salary by 40%."</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-md">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">SL</div>
+                <div className="ml-4">
+                  <div className="font-bold">Sarah L.</div>
+                  <div className="text-sm text-gray-500">Teacher → Front-End Developer</div>
+                </div>
+              </div>
+              <p className="text-gray-700">"The skills gap analysis saved me months of studying the wrong things. Focused learning made all the difference."</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-md">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">MT</div>
+                <div className="ml-4">
+                  <div className="font-bold">Michael T.</div>
+                  <div className="text-sm text-gray-500">Sales → DevOps Engineer</div>
+                </div>
+              </div>
+              <p className="text-gray-700">"The transition strategy helped me leverage my existing skills. Landed a tech role in just 5 months."</p>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap justify-center gap-8 md:gap-12 mt-12">
+            <img src="/logos/company1.png" alt="Tech company logo" className="h-8 opacity-60 hover:opacity-100 transition-opacity" />
+            <img src="/logos/company2.png" alt="Tech company logo" className="h-8 opacity-60 hover:opacity-100 transition-opacity" />
+            <img src="/logos/company3.png" alt="Tech company logo" className="h-8 opacity-60 hover:opacity-100 transition-opacity" />
+            <img src="/logos/company4.png" alt="Tech company logo" className="h-8 opacity-60 hover:opacity-100 transition-opacity" />
+          </div>
+        </section>
+
         {/* What's Included Section */}
         <section className="mb-20" aria-label="Features">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800">What You Get</h2>
@@ -193,6 +259,72 @@ const CareerHome = () => {
           </div>
         </section>
 
+        {/* Pricing Section */}
+        <section className="mb-20 text-center">
+          <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl p-8 md:p-12 max-w-3xl mx-auto relative overflow-hidden">
+            <div className="absolute top-0 right-0 bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-2 transform rotate-45 translate-x-10 translate-y-3">
+              Limited Time Offer
+            </div>
+            
+            <h2 className="text-3xl font-bold mb-4 text-gray-800">Career Transition Analysis</h2>
+            <p className="text-gray-600 mb-8">Complete access to your personalized career roadmap for 30 days</p>
+            
+            <div className="flex justify-center items-center mb-6">
+              <span className="text-gray-400 line-through text-2xl mr-4">$79</span>
+              <span className="text-4xl font-bold text-indigo-600">$60</span>
+            </div>
+            
+            <ul className="text-left max-w-md mx-auto mb-8 space-y-2">
+              <li className="flex items-start">
+                <span className="text-green-500 mr-2">✓</span>
+                <span>Complete career path recommendations</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 mr-2">✓</span>
+                <span>Personalized skills gap analysis</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 mr-2">✓</span>
+                <span>Custom learning roadmap</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 mr-2">✓</span>
+                <span>Networking & interview preparation strategies</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 mr-2">✓</span>
+                <span>Downloadable PDF report</span>
+              </li>
+            </ul>
+            
+            <div className="mb-6">
+              <div className="text-sm text-gray-500 mb-2">Special offer ends in:</div>
+              <div className="flex justify-center gap-3">
+                <div className="bg-gray-100 p-2 rounded-lg w-16">
+                  <div className="text-xl font-bold">13</div>
+                  <div className="text-xs text-gray-500">Days</div>
+                </div>
+                <div className="bg-gray-100 p-2 rounded-lg w-16">
+                  <div className="text-xl font-bold">07</div>
+                  <div className="text-xs text-gray-500">Hours</div>
+                </div>
+                <div className="bg-gray-100 p-2 rounded-lg w-16">
+                  <div className="text-xl font-bold">32</div>
+                  <div className="text-xs text-gray-500">Minutes</div>
+                </div>
+              </div>
+            </div>
+            
+            <button
+              onClick={handleStartTest}
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-12 py-4 rounded-full font-bold text-lg hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-xl"
+              aria-label="Begin your career assessment"
+            >
+              Start Your Assessment
+            </button>
+          </div>
+        </section>
+
         {/* How It Works */}
         <section className="mb-20" aria-label="Process">
           <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-8 md:p-12">
@@ -211,6 +343,93 @@ const CareerHome = () => {
                   <div className="text-3xl mt-4 transform hover:scale-110 transition-transform">{item.icon}</div>
                 </article>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Value Comparison */}
+        <section className="mb-20">
+          <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Why Choose Our Analysis</h2>
+          
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+            <div className="grid md:grid-cols-3">
+              <div className="p-8 bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
+                <h3 className="text-xl font-bold mb-4">Our AI Career Analysis</h3>
+                <div className="text-3xl font-bold mb-4">$60</div>
+                <p className="mb-6 text-indigo-100">One-time payment for 30-day access</p>
+                <ul className="space-y-3">
+                  <li className="flex items-start">
+                    <span className="text-green-300 mr-2">✓</span>
+                    <span>Personalized to your skills & background</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-300 mr-2">✓</span>
+                    <span>Specific learning roadmap with timeline</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-300 mr-2">✓</span>
+                    <span>Current market data on salary & demand</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-300 mr-2">✓</span>
+                    <span>Complete transition strategy</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-300 mr-2">✓</span>
+                    <span>Downloadable PDF report</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="col-span-2 grid grid-cols-2">
+                <div className="p-8 border-b md:border-r">
+                  <h3 className="text-xl font-bold mb-4 text-gray-800">Career Coach</h3>
+                  <div className="text-3xl font-bold mb-4 text-gray-700">$150-300</div>
+                  <p className="mb-6 text-gray-500">Per hour session</p>
+                  <ul className="space-y-3 text-gray-600">
+                    <li className="flex items-start">
+                      <span className="text-gray-400 mr-2">✓</span>
+                      <span>Personalized advice</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-red-400 mr-2">✗</span>
+                      <span>No detailed learning paths</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-red-400 mr-2">✗</span>
+                      <span>Limited market data</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-red-400 mr-2">✗</span>
+                      <span>Multiple sessions needed ($$$)</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div className="p-8 border-b">
+                  <h3 className="text-xl font-bold mb-4 text-gray-800">Generic Assessments</h3>
+                  <div className="text-3xl font-bold mb-4 text-gray-700">$0-30</div>
+                  <p className="mb-6 text-gray-500">Basic assessment</p>
+                  <ul className="space-y-3 text-gray-600">
+                    <li className="flex items-start">
+                      <span className="text-red-400 mr-2">✗</span>
+                      <span>Generic recommendations</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-red-400 mr-2">✗</span>
+                      <span>No specific learning path</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-red-400 mr-2">✗</span>
+                      <span>No skills gap analysis</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-red-400 mr-2">✗</span>
+                      <span>No transition strategy</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -264,6 +483,56 @@ const CareerHome = () => {
             <div className="mt-8 p-4 bg-indigo-50 rounded-lg">
               <p className="text-sm text-indigo-700 font-medium">
                 <span className="font-bold">Next Step:</span> Complete the full assessment to get your personalized career roadmap
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Risk Reversal */}
+        <section className="mb-20">
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-8 border border-green-100 shadow-sm max-w-4xl mx-auto">
+            <div className="flex flex-col md:flex-row items-center">
+              <div className="text-4xl mr-6 text-green-500 mb-4 md:mb-0">🛡️</div>
+              <div>
+                <h3 className="text-xl font-bold mb-2 text-gray-800">Satisfaction Guarantee</h3>
+                <p className="text-gray-700">
+                  If you don't feel our analysis provides actionable insights for your career transition, 
+                  contact us within 7 days for a full refund. We're confident our assessment will 
+                  deliver significant value to your career planning.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* AI Credentials */}
+        <section className="mb-20">
+          <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-8 max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">The Science Behind Our Analysis</h2>
+            
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="text-4xl mb-4 text-indigo-600">💾</div>
+                <h3 className="font-bold mb-2">Data-Driven</h3>
+                <p className="text-gray-600">Trained on thousands of successful tech career transitions</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4 text-indigo-600">👨‍💼</div>
+                <h3 className="font-bold mb-2">Expert Developed</h3>
+                <p className="text-gray-600">Created by tech industry leaders and career coaches</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4 text-indigo-600">🔄</div>
+                <h3 className="font-bold mb-2">Regularly Updated</h3>
+                <p className="text-gray-600">Constantly refreshed with latest market trends and salary data</p>
+              </div>
+            </div>
+            
+            <div className="mt-8 p-4 bg-indigo-50 rounded-lg">
+              <p className="text-sm text-indigo-700 text-center">
+                Our AI analyzes 50+ factors from your background to create a truly personalized transition plan
               </p>
             </div>
           </div>

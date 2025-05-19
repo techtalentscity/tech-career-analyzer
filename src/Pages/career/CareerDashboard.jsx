@@ -1319,6 +1319,9 @@ const CareerDashboard = () => {
     return steps;
   };
 
+  const timelineMilestones = createTimelineData();
+  const nextSteps = generateNextSteps();
+
   if (loading) {
     return <LoadingSpinner message="Loading your career analysis..." />;
   }
@@ -1328,8 +1331,6 @@ const CareerDashboard = () => {
     label: path.title,
     value: path.match
   }));
-  const timelineMilestones = createTimelineData();
-  const nextSteps = generateNextSteps();
 
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
@@ -1554,59 +1555,32 @@ const CareerDashboard = () => {
           </div>
         )}
         
-        {/* Market Trends Analysis */}
-        {marketTrends.length > 0 ? (
+        {/* Transition Timeline */}
+        {userData.transitionTimeline && timelineMilestones.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-2xl font-bold mb-6">Market Trends Analysis</h2>
-            <p className="text-gray-600 mb-6">
-              Current job market trends and salary data for your recommended career paths as of {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.
-            </p>
-            <MarketTrendsSection marketTrends={marketTrends} />
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-2xl font-bold mb-6">Market Trends Analysis</h2>
-            <div className="bg-blue-50 p-6 rounded-lg">
-              <div className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600 mt-0.5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                  <p className="text-blue-700 font-medium mb-2">Market data not available for this analysis</p>
-                  <p className="text-gray-600">
-                    For the most current job market insights related to your career path recommendations, 
-                    consider reading industry reports or visiting job market websites focused on tech careers.
-                    You can also retake the assessment to generate a new analysis that includes market data.
-                  </p>
-                </div>
+            <h2 className="text-xl font-bold mb-6">Your Career Transition Roadmap</h2>
+            <div className="mb-6">
+              <div className="flex flex-wrap gap-3 mb-4">
+                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                  Timeline: {userData.transitionTimeline}
+                </span>
+                {userData.timeCommitment && (
+                  <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                    Weekly Commitment: {userData.timeCommitment}
+                  </span>
+                )}
+                {userData.workPreference && (
+                  <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                    Preferred Work: {userData.workPreference}
+                  </span>
+                )}
               </div>
-              <div className="mt-4 flex flex-wrap gap-3">
-                <a 
-                  href="https://www.bls.gov/ooh/computer-and-information-technology/home.htm"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 border border-blue-300 bg-white text-blue-700 rounded-md hover:bg-blue-50"
-                >
-                  BLS Tech Outlook
-                </a>
-                <a 
-                  href="https://insights.dice.com/tech-job-report/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 border border-blue-300 bg-white text-blue-700 rounded-md hover:bg-blue-50"
-                >
-                  Dice Tech Jobs Report
-                </a>
-                <a 
-                  href="https://www.roberthalf.com/us/en/insights/salary-guide"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 border border-blue-300 bg-white text-blue-700 rounded-md hover:bg-blue-50"
-                >
-                  Salary Guides
-                </a>
-              </div>
+              <p className="text-gray-600">
+                This personalized roadmap is based on your specific circumstances, target career paths, and identified skill gaps.
+                Each milestone includes recommended activities aligned with your goals and timeline.
+              </p>
             </div>
+            <TimelineChart milestones={timelineMilestones} />
           </div>
         )}
         
@@ -1715,7 +1689,6 @@ const CareerDashboard = () => {
             </div>
           </div>
         )}
-
       </div>
 
       {/* Floating Feedback Button */}

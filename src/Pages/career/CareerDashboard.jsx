@@ -1,4 +1,4 @@
-// src/Pages/career/CareerDashboard.jsx
+// Fixed version of CareerDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -986,6 +986,80 @@ const CareerDashboard = () => {
         {skill.description && (
           <p className="text-sm text-gray-700 mt-3">{skill.description}</p>
         )}
+      </div>
+    );
+  };
+
+  // Define the previously missing section components
+  
+  // Networking Strategy Component
+  const NetworkingStrategySection = ({ strategies }) => {
+    if (!strategies || strategies.length === 0) {
+      return null;
+    }
+    
+    const strategyItems = strategies.filter(item => item.type === 'strategy');
+    
+    return (
+      <div className="mb-6">
+        <div className="bg-gray-50 rounded-lg p-4">
+          <ul className="space-y-3">
+            {strategyItems.map((item, index) => (
+              <li key={index} className="flex items-start">
+                <span className="text-blue-600 mr-2 mt-1">•</span>
+                <span>{item.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
+  // Personal Branding Component
+  const PersonalBrandingSection = ({ tips }) => {
+    if (!tips || tips.length === 0) {
+      return null;
+    }
+    
+    const brandingTips = tips.filter(item => item.type === 'tip');
+    
+    return (
+      <div className="mb-6">
+        <div className="bg-gray-50 rounded-lg p-4">
+          <ul className="space-y-3">
+            {brandingTips.map((tip, index) => (
+              <li key={index} className="flex items-start">
+                <span className="text-blue-600 mr-2 mt-1">•</span>
+                <span>{tip.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
+  // Interview Preparation Component
+  const InterviewPrepSection = ({ tips }) => {
+    if (!tips || tips.length === 0) {
+      return null;
+    }
+    
+    const interviewTips = tips.filter(item => item.type === 'tip');
+    
+    return (
+      <div className="mb-6">
+        <div className="bg-gray-50 rounded-lg p-4">
+          <ul className="space-y-3">
+            {interviewTips.map((tip, index) => (
+              <li key={index} className="flex items-start">
+                <span className="text-blue-600 mr-2 mt-1">•</span>
+                <span>{tip.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     );
   };

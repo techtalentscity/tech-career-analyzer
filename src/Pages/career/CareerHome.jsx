@@ -202,7 +202,7 @@ const CareerHome = () => {
                   <div className="text-sm text-gray-500">Design & Tech Ops Coordinator</div>
                 </div>
               </div>
-              <p className="text-gray-700">"The roadmap was spot-on. Followed it for 7 months and landed a job that increased my salary by 40%."</p>
+              <p className="text-gray-700">"The personalized learning roadmap was incredibly detailed. It broke down complex tech concepts into manageable monthly goals that fit my schedule."</p>
             </div>
             <div className="bg-white rounded-xl p-6 shadow-md">
               <div className="flex items-center mb-4">
@@ -212,7 +212,7 @@ const CareerHome = () => {
                   <div className="text-sm text-gray-500">Project Manager</div>
                 </div>
               </div>
-              <p className="text-gray-700">"The skills gap analysis saved me months of studying the wrong things. Focused learning made all the difference."</p>
+              <p className="text-gray-700">"The skills gap analysis was eye-opening. It identified exactly which technical skills I needed to focus on and which of my existing abilities were most valuable."</p>
             </div>
             <div className="bg-white rounded-xl p-6 shadow-md">
               <div className="flex items-center mb-4">
@@ -222,7 +222,7 @@ const CareerHome = () => {
                   <div className="text-sm text-gray-500">Technical Program Manager</div>
                 </div>
               </div>
-              <p className="text-gray-700">"The transition strategy helped me leverage my existing skills. Landed a tech role in just 5 months."</p>
+              <p className="text-gray-700">"What impressed me most was the networking strategy and personal branding sections. The actionable advice helped me position my experience for tech roles effectively."</p>
             </div>
           </div>
         </section>

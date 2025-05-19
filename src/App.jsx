@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 // Career Test Components
 import CareerHome from './Pages/career/CareerHome';
 import CareerTest from './Pages/career/CareerTest';
-import CareerDashboard from './Pages/career/CareerDashboard';
+import CareerDashboard from './components/career/dashboard/CareerDashboard'; // UPDATED PATH
 
 // Import services - these are imported for initialization
 // You don't need to use them directly in App.jsx

@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 // Career Test Components
 import CareerHome from './Pages/career/CareerHome';
 import CareerTest from './Pages/career/CareerTest';
-import CareerDashboard from './components/career/dashboard/CareerDashboard'; // FIXED PATH
+import CareerDashboard from './Pages/career/dashboard/CareerDashboard'; // ✅ FIXED PATH
 
 // Import services
 import './services/googleFormService';

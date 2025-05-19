@@ -367,6 +367,18 @@ const SkillsGapSection = ({ skillsGap, showAllSkills, setShowAllSkills, careerPa
                   <strong>Join {careerPaths[0].title} communities</strong> - Connect with other professionals in this field to learn industry best practices and stay updated on trends specific to this career path.
                 </p>
               </div>
+              
+              {/* Add specific advice for non-technical roles */}
+              {!isTechnicalCareerPath(careerPaths[0].title) && (
+                <div className="flex mt-2">
+                  <svg className="h-5 w-5 text-green-600 mr-2 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-gray-700">
+                    <strong>Develop both domain and technical skills</strong> - For {careerPaths[0].title}s, balance industry knowledge with technical tools like {getDomainTechTools(careerPaths[0].title)} to maximize your effectiveness.
+                  </p>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -415,6 +427,38 @@ const SkillsGapSection = ({ skillsGap, showAllSkills, setShowAllSkills, careerPa
       )}
     </div>
   );
+};
+
+// Helper function to determine if a career path is primarily technical
+const isTechnicalCareerPath = (careerPath) => {
+  const technicalPaths = [
+    'Data Scientist', 'Machine Learning Engineer', 'MLOps Engineer', 'Data Engineer',
+    'Frontend Developer', 'Backend Developer', 'Full Stack Developer', 
+    'DevOps Engineer', 'Cloud Architect', 'AI Research Scientist',
+    'AR/VR Developer', 'Blockchain Developer', 'Quantum Computing Developer',
+    'Cybersecurity Engineer'
+  ];
+  
+  return technicalPaths.includes(careerPath);
+};
+
+// Helper function to get relevant technical tools for non-technical roles
+const getDomainTechTools = (careerPath) => {
+  const toolMap = {
+    'Product Manager': 'Jira, product analytics, and prototyping tools',
+    'Scrum Master': 'Agile management software and analytics dashboards',
+    'Business Analyst': 'SQL, Excel, Tableau, and requirements management tools',
+    'Financial Analyst': 'Excel, SQL, Power BI, and financial modeling software',
+    'Supply Chain Analyst': 'ERP systems, inventory management software, and data visualization',
+    'Healthcare Data Analyst': 'SQL, health information systems, and HIPAA-compliant analytics',
+    'Nursing Informatics Specialist': 'EHR systems, clinical decision support, and healthcare analytics',
+    'EdTech Specialist': 'LMS platforms, analytics, and digital learning tools',
+    'Instructional Designer': 'Articulate Storyline, Adobe Captivate, and learning analytics',
+    'Engineering Project Manager': 'CAD software, project management tools, and engineering analytics',
+    'BIM Manager': 'Revit, Navisworks, and BIM coordination software'
+  };
+  
+  return toolMap[careerPath] || 'relevant technical tools and software';
 };
 
 // Helper function for career-specific advice

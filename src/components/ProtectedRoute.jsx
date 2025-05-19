@@ -4,13 +4,19 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const ProtectedRoute = ({ children }) => {
-  const { currentUser } = useAuth();
-
+  const { currentUser, isAuthorized } = useAuth();
+  
+  // First check if user is authenticated
   if (!currentUser) {
-    // Redirect to login if not authenticated
     return <Navigate to="/login" />;
   }
-
+  
+  // Then check if user is authorized
+  if (!isAuthorized) {
+    return <Navigate to="/login" />;
+  }
+  
+  // If both authenticated and authorized, render the protected content
   return children;
 };
 

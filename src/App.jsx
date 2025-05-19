@@ -1,4 +1,4 @@
-// src/App.jsx
+// src/App.jsx - UPDATED IMPORT
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
@@ -7,11 +7,10 @@ import 'react-toastify/dist/ReactToastify.css';
 // Career Test Components
 import CareerHome from './Pages/career/CareerHome';
 import CareerTest from './Pages/career/CareerTest';
-import CareerDashboard from './components/career/dashboard/CareerDashboard'; // UPDATED PATH
+import CareerDashboard from './components/career/dashboard/CareerDashboard'; // FIXED PATH
 
-// Import services - these are imported for initialization
-// You don't need to use them directly in App.jsx
-import './services/googleFormService'; // Import the Google Form service
+// Import services
+import './services/googleFormService';
 
 function App() {
   return (

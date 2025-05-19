@@ -481,8 +481,8 @@ const SkillsGapSection = ({ skillsGap, showAllSkills, setShowAllSkills, careerPa
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p className="text-sm text-gray-700">
-              <strong>Focus on {careerPaths.length > 0 && careerPathHasSkill(careerPaths[0].title, skillsGap[0].name) ? skillsGap[0].name : 'core skills'} first</strong> - Begin with {
-                skillsGap.length > 0 ? skillsGap.sort((a, b) => b.gap - a.gap)[0].name : 'core skills'
+              <strong>Focus on {careerPaths.length > 0 && skillsGap.length > 0 && careerPathHasSkill(careerPaths[0].title, skillsGap[0].name) ? skillsGap[0].name : 'core skills'} first</strong> - Begin with {
+                skillsGap.length > 0 ? [...skillsGap].sort((a, b) => b.gap - a.gap)[0].name : 'core skills'
               } to build a strong foundation for your {
                 careerPaths.length > 0 ? careerPaths[0].title : 'career'
               } transition.

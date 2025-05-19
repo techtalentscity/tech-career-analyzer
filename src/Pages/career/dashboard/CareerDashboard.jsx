@@ -266,6 +266,8 @@ const CareerDashboard = () => {
             skillsGap={skillsGap}
             showAllSkills={showAllSkills}
             setShowAllSkills={setShowAllSkills}
+            careerPaths={careerPaths}
+            userData={userData}
           />
         )}
         

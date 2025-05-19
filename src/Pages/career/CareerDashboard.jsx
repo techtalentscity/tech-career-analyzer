@@ -1097,30 +1097,6 @@ const CareerDashboard = () => {
           </div>
         )}
         
-        {/* Networking Strategy - Added based on first file */}
-        {networkingStrategy.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6">Networking Strategy</h2>
-            <NetworkingStrategySection strategies={networkingStrategy} />
-          </div>
-        )}
-        
-        {/* Personal Branding - Added based on first file */}
-        {personalBranding.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6">Personal Branding</h2>
-            <PersonalBrandingSection tips={personalBranding} />
-          </div>
-        )}
-        
-        {/* Interview Preparation - Added based on first file */}
-        {interviewPrep.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6">Interview Preparation</h2>
-            <InterviewPrepSection tips={interviewPrep} />
-          </div>
-        )}
-        
         {/* Transition Timeline */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-xl font-bold mb-6">Your Transition Roadmap</h2>
@@ -1133,12 +1109,36 @@ const CareerDashboard = () => {
         </div>
         
         {/* Complete Analysis */}
-        <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
+        <div className="bg-white rounded-lg shadow-md p-6 md:p-8 mb-6">
           <h2 className="text-2xl font-bold mb-6">Detailed Analysis</h2>
           <div>
             {formatAnalysisText(analysis)}
           </div>
         </div>
+        
+        {/* Networking Strategy */}
+        {networkingStrategy.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold mb-6">Networking Strategy</h2>
+            <NetworkingStrategySection strategies={networkingStrategy} />
+          </div>
+        )}
+        
+        {/* Personal Branding */}
+        {personalBranding.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold mb-6">Personal Branding</h2>
+            <PersonalBrandingSection tips={personalBranding} />
+          </div>
+        )}
+        
+        {/* Interview Preparation */}
+        {interviewPrep.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold mb-6">Interview Preparation</h2>
+            <InterviewPrepSection tips={interviewPrep} />
+          </div>
+        )}
 
         {/* Next Steps - Dynamic based on user analysis - UPDATED with improved approach */}
         <div className="bg-blue-50 rounded-lg p-6 mt-8">

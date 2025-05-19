@@ -1,28 +1,13 @@
 // src/context/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { 
-  getAuth, 
   GoogleAuthProvider, 
   signInWithPopup, 
   signOut, 
   onAuthStateChanged 
 } from "firebase/auth";
-import { initializeApp } from "firebase/app";
-
-// Your Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDuub4FXpY2s5Q4l3_anc8IQCLyO53NQ6I",
-  authDomain: "techtalents-city.firebaseapp.com",
-  projectId: "techtalents-city",
-  storageBucket: "techtalents-city.firebasestorage.app",
-  messagingSenderId: "429056041618",
-  appId: "1:429056041618:web:edda30a3a6e4489772bc4b",
-  measurementId: "G-C5J4YS08SB"
-};
-
-// Initialize Firebase directly in this file
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebase/config";
 
 const AuthContext = createContext();
 
@@ -31,7 +16,24 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  
+  // Check if user is authorized
+  const checkAuthorization = async (user) => {
+    if (!user) return false;
+    
+    try {
+      // Check if user's email exists in authorizedUsers collection
+      const userRef = doc(db, "authorizedUsers", user.email);
+      const docSnap = await getDoc(userRef);
+      
+      return docSnap.exists();
+    } catch (error) {
+      console.error("Error checking authorization:", error);
+      return false;
+    }
+  };
+  
   // Sign in with Google
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
@@ -51,16 +53,29 @@ export const AuthProvider = ({ children }) => {
 
   // Observer for auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+      
+      if (user) {
+        const authorized = await checkAuthorization(user);
+        setIsAuthorized(authorized);
+        
+        // Sign out if not authorized
+        if (!authorized) {
+          await signOut(auth);
+          setCurrentUser(null);
+        }
+      }
+      
       setLoading(false);
     });
-
+    
     return unsubscribe;
   }, []);
 
   const value = {
     currentUser,
+    isAuthorized,
     signInWithGoogle,
     logout,
   };

@@ -1,14 +1,11 @@
-// src/App.jsx - UPDATED IMPORT
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 // Career Test Components
 import CareerHome from './Pages/career/CareerHome';
 import CareerTest from './Pages/career/CareerTest';
-import CareerDashboard from './Pages/career/dashboard/CareerDashboard'; // ✅ FIXED PATH
-
+import CareerDashboard from './Pages/career/dashboard/CareerDashboard'; // CORRECTED PATH
 // Import services
 import './services/googleFormService';
 

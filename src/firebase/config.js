@@ -1,18 +1,22 @@
 // src/firebase/config.js
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getAnalytics } from "firebase/analytics";
 
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDuub4FXpY2s5Q4l3_anc8IQCLyO53NQ6I",
+  authDomain: "techtalents-city.firebaseapp.com",
+  projectId: "techtalents-city",
+  storageBucket: "techtalents-city.firebasestorage.app",
+  messagingSenderId: "429056041618",
+  appId: "1:429056041618:web:edda30a3a6e4489772bc4b",
+  measurementId: "G-C5J4YS08SB"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const analytics = getAnalytics(app);
 
-export { auth };
+export { auth, analytics };

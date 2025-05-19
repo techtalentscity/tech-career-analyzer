@@ -1,10 +1,10 @@
-// Fixed version of CareerDashboard.jsx
+// src/Pages/career/CareerDashboard.jsx - Integration with MarketTrendsSection
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import MarketTrendsSection from '../../components/MarketTrendsSection'; // Import MarketTrendsSection
 import storageService from '../../services/storageService';
 import { toast } from 'react-toastify';
-import MarketTrendsSection from '../../components/MarketTrendsSection'; // Make sure path is correct
 
 const CareerDashboard = () => {
   const location = useLocation();
@@ -990,8 +990,6 @@ const CareerDashboard = () => {
     );
   };
 
-  // Define the previously missing section components
-  
   // Networking Strategy Component
   const NetworkingStrategySection = ({ strategies }) => {
     if (!strategies || strategies.length === 0) {

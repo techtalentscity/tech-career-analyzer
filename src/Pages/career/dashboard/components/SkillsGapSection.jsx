@@ -118,7 +118,7 @@ const SkillsGapSection = ({ skillsGap, showAllSkills, setShowAllSkills, careerPa
         </div>
       )}
       
-      {/* Learning Resources Section - Basic version */}
+      {/* Learning Resources Section - More Complete */}
       <div className="bg-green-50 rounded-lg p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-green-800">
@@ -157,10 +157,15 @@ const SkillsGapSection = ({ skillsGap, showAllSkills, setShowAllSkills, careerPa
                 </p>
                 <p className="text-sm text-gray-700 mb-4">{skill.description}</p>
                 
-                {/* Simple Resource Display */}
+                {/* Course Recommendations */}
                 <div className="space-y-3">
                   <div>
-                    <h5 className="text-sm font-medium text-green-800 mb-1">Recommended Courses</h5>
+                    <h5 className="text-sm font-medium text-green-800 mb-1 flex items-center">
+                      <svg className="w-3.5 h-3.5 mr-1 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                      Recommended Courses
+                    </h5>
                     <ul className="space-y-2">
                       {personalizedResources.courses.slice(0, 2).map((course, cIdx) => (
                         <li key={cIdx} className="flex items-start border-l-2 border-green-200 pl-3">
@@ -173,19 +178,225 @@ const SkillsGapSection = ({ skillsGap, showAllSkills, setShowAllSkills, careerPa
                             >
                               {course.title}
                             </a>
-                            <span className="text-xs text-gray-500">
-                              {course.platform}
+                            <span className="text-xs text-gray-500 flex items-center mt-0.5">
+                              <span className="bg-green-100 text-green-800 px-1.5 py-0.5 rounded text-xs mr-2">
+                                {course.platform}
+                              </span>
+                              {course.relevance && (
+                                <span className="text-gray-500">{course.relevance}</span>
+                              )}
                             </span>
                           </div>
                         </li>
                       ))}
                     </ul>
                   </div>
+                  
+                  {/* Projects & Tutorials */}
+                  <div>
+                    <h5 className="text-sm font-medium text-green-800 mb-1 flex items-center">
+                      <svg className="w-3.5 h-3.5 mr-1 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                      </svg>
+                      Practice Projects & Tutorials
+                    </h5>
+                    <ul className="space-y-2">
+                      {personalizedResources.projects.slice(0, 1).map((project, pIdx) => (
+                        <li key={pIdx} className="flex items-start border-l-2 border-yellow-200 pl-3">
+                          <div>
+                            <a 
+                              href={project.url} 
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline text-sm block"
+                            >
+                              {project.title}
+                            </a>
+                            <span className="text-xs text-gray-500 flex items-center mt-0.5">
+                              <span className="bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded text-xs mr-2">
+                                {project.platform}
+                              </span>
+                              {project.relevance && (
+                                <span className="text-gray-500">{project.relevance}</span>
+                              )}
+                            </span>
+                          </div>
+                        </li>
+                      ))}
+                      
+                      {personalizedResources.tutorials.slice(0, 1).map((tutorial, tIdx) => (
+                        <li key={tIdx} className="flex items-start border-l-2 border-blue-200 pl-3">
+                          <div>
+                            <a 
+                              href={tutorial.url} 
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline text-sm block"
+                            >
+                              {tutorial.title}
+                            </a>
+                            <span className="text-xs text-gray-500 flex items-center mt-0.5">
+                              <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs mr-2">
+                                {tutorial.platform}
+                              </span>
+                              {tutorial.relevance && (
+                                <span className="text-gray-500">{tutorial.relevance}</span>
+                              )}
+                            </span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  {/* Community Support */}
+                  <div>
+                    <h5 className="text-sm font-medium text-green-800 mb-1 flex items-center">
+                      <svg className="w-3.5 h-3.5 mr-1 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Community & Support
+                    </h5>
+                    <ul className="space-y-2">
+                      {personalizedResources.communities.slice(0, 1).map((community, cIdx) => (
+                        <li key={cIdx} className="flex items-start border-l-2 border-purple-200 pl-3">
+                          <div>
+                            <a 
+                              href={community.url} 
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline text-sm block"
+                            >
+                              {community.title}
+                            </a>
+                            <span className="text-xs text-gray-500 flex items-center mt-0.5">
+                              <span className="bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded text-xs mr-2">
+                                {community.platform}
+                              </span>
+                              {community.relevance && (
+                                <span className="text-gray-500">{community.relevance}</span>
+                              )}
+                            </span>
+                          </div>
+                        </li>
+                      ))}
+                      
+                      <li className="flex items-start border-l-2 border-red-200 pl-3">
+                        <div>
+                          <a 
+                            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(skill.name)}+tutorial+${skill.currentLevel === 1 ? 'beginner' : skill.currentLevel === 2 ? 'basic' : 'advanced'}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline text-sm block"
+                          >
+                            {skill.name} Video Tutorials
+                          </a>
+                          <span className="text-xs text-gray-500 flex items-center mt-0.5">
+                            <span className="bg-red-100 text-red-800 px-1.5 py-0.5 rounded text-xs mr-2">
+                              YouTube
+                            </span>
+                            <span className="text-gray-500">Visual Learning</span>
+                          </span>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
+                
+                {/* Career Path Relevance */}
+                {careerPaths.length > 0 && (
+                  <div className="mt-4 pt-3 border-t border-gray-100">
+                    <p className="text-xs text-gray-600 flex items-center">
+                      <svg className="w-3.5 h-3.5 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="font-medium">Career relevance: </span>
+                      <span className="ml-1">{getSkillRelevanceText(skill.name, careerPaths)}</span>
+                    </p>
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
+        
+        {/* Additional skills (more compact view) */}
+        {skillsGap.length > 4 && (
+          <div className="grid md:grid-cols-2 gap-6 mt-6">
+            {skillsGap.slice(4, 6).map((skill, index) => {
+              // Get personalized resources for this skill
+              const personalizedResources = getPersonalizedResources(skill, careerPaths, userData);
+              
+              return (
+                <div key={index} className="bg-white p-4 rounded-lg shadow-sm">
+                  <div className="flex justify-between items-start">
+                    <h4 className="font-semibold text-lg mb-2">{skill.name}</h4>
+                    {careerPaths.length > 0 && careerPaths[0].title && 
+                      careerPathHasSkill(careerPaths[0].title, skill.name) && (
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-lg text-xs">
+                        Key for {careerPaths[0].title}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">
+                    {skill.currentLevel === 1 ? 'Beginner' : 
+                     skill.currentLevel === 2 ? 'Basic' :
+                     skill.currentLevel === 3 ? 'Intermediate' :
+                     skill.currentLevel === 4 ? 'Advanced' : 'Expert'} → {
+                     skill.requiredLevel === 1 ? 'Beginner' : 
+                     skill.requiredLevel === 2 ? 'Basic' :
+                     skill.requiredLevel === 3 ? 'Intermediate' :
+                     skill.requiredLevel === 4 ? 'Advanced' : 'Expert'}
+                  </p>
+                  
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {personalizedResources.courses.slice(0, 1).map((course, cIdx) => (
+                      <a 
+                        key={cIdx}
+                        href={course.url} 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm hover:bg-blue-100 flex items-center"
+                      >
+                        <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        {course.platform}
+                      </a>
+                    ))}
+                    
+                    {personalizedResources.tutorials.slice(0, 1).map((tutorial, tIdx) => (
+                      <a 
+                        key={tIdx}
+                        href={tutorial.url} 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm hover:bg-green-100 flex items-center"
+                      >
+                        <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        Tutorials
+                      </a>
+                    ))}
+                    
+                    <a 
+                      href={`https://www.youtube.com/results?search_query=${encodeURIComponent(skill.name)}+tutorial+${skill.currentLevel === 1 ? 'beginner' : skill.currentLevel === 2 ? 'basic' : 'advanced'}`} 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1 bg-red-50 text-red-700 rounded-full text-sm hover:bg-red-100 flex items-center"
+                    >
+                      <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Videos
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
         
         {/* Career-specific learning roadmap - Simplified Version */}
         <div className="mt-6 bg-white rounded-lg p-4 border border-green-100">

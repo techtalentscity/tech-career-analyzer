@@ -242,184 +242,23 @@ const CareerDashboard = () => {
   
   // Generate a related career path based on existing paths
   const generateRelatedCareerPath = (existingPaths, userData, skillsGap) => {
-    // Comprehensive list of tech career paths we can suggest as alternatives
+    // Common career paths we can suggest as alternatives
     const commonPaths = [
-      // Data Science & Analytics
       { title: "Data Scientist", baseMatch: 85 },
       { title: "Machine Learning Engineer", baseMatch: 83 },
       { title: "Data Engineer", baseMatch: 82 },
-      { title: "Business Intelligence Analyst", baseMatch: 75 },
-      { title: "Data Analyst", baseMatch: 78 },
-      { title: "Quantitative Analyst", baseMatch: 76 },
-      { title: "Computational Linguist", baseMatch: 74 },
-      { title: "Big Data Engineer", baseMatch: 81 },
-      { title: "Data Architect", baseMatch: 79 },
-      { title: "Research Scientist", baseMatch: 77 },
-      { title: "Statistician", baseMatch: 73 },
-      { title: "Biostatistician", baseMatch: 70 },
-      { title: "Analytics Engineer", baseMatch: 77 },
-      
-      // AI & Machine Learning
-      { title: "AI Research Scientist", baseMatch: 75 },
-      { title: "Computer Vision Engineer", baseMatch: 79 },
-      { title: "NLP Engineer", baseMatch: 78 },
-      { title: "MLOps Engineer", baseMatch: 72 },
-      { title: "AI Ethics Specialist", baseMatch: 68 },
-      { title: "Deep Learning Engineer", baseMatch: 80 },
-      { title: "Reinforcement Learning Engineer", baseMatch: 74 },
-      { title: "AI Product Manager", baseMatch: 71 },
-      { title: "Conversational AI Designer", baseMatch: 73 },
-      { title: "Applied AI Scientist", baseMatch: 77 },
-      { title: "Autonomous Systems Engineer", baseMatch: 76 },
-      
-      // Web Development
       { title: "Full Stack Developer", baseMatch: 80 },
       { title: "Frontend Developer", baseMatch: 78 },
       { title: "Backend Developer", baseMatch: 78 },
-      { title: "JavaScript Developer", baseMatch: 76 },
-      { title: "React Developer", baseMatch: 77 },
-      { title: "Angular Developer", baseMatch: 75 },
-      { title: "Vue.js Developer", baseMatch: 75 },
-      { title: "WordPress Developer", baseMatch: 70 },
-      { title: "WebGL Developer", baseMatch: 72 },
-      { title: "GraphQL Developer", baseMatch: 74 },
-      { title: "JAMstack Developer", baseMatch: 73 },
-      { title: "Progressive Web App Developer", baseMatch: 75 },
-      { title: "Web Accessibility Specialist", baseMatch: 69 },
-      
-      // Mobile Development
-      { title: "Mobile App Developer", baseMatch: 72 },
-      { title: "iOS Developer", baseMatch: 74 },
-      { title: "Android Developer", baseMatch: 74 },
-      { title: "React Native Developer", baseMatch: 75 },
-      { title: "Flutter Developer", baseMatch: 73 },
-      { title: "Mobile UX Designer", baseMatch: 71 },
-      { title: "AR/VR Mobile Developer", baseMatch: 76 },
-      { title: "Mobile Game Developer", baseMatch: 73 },
-      
-      // DevOps & Cloud
       { title: "DevOps Engineer", baseMatch: 75 },
-      { title: "Site Reliability Engineer (SRE)", baseMatch: 76 },
       { title: "Cloud Engineer", baseMatch: 75 },
-      { title: "Infrastructure Engineer", baseMatch: 74 },
-      { title: "Cloud Architect", baseMatch: 78 },
-      { title: "Platform Engineer", baseMatch: 77 },
-      { title: "Kubernetes Engineer", baseMatch: 75 },
-      { title: "DevSecOps Engineer", baseMatch: 73 },
-      { title: "Release Engineer", baseMatch: 72 },
-      { title: "AWS Specialist", baseMatch: 74 },
-      { title: "Azure Specialist", baseMatch: 73 },
-      { title: "Google Cloud Specialist", baseMatch: 73 },
-      { title: "Terraform Specialist", baseMatch: 72 },
-      { title: "Configuration Management Specialist", baseMatch: 70 },
-      
-      // Cybersecurity
-      { title: "Cybersecurity Specialist", baseMatch: 70 },
-      { title: "Security Engineer", baseMatch: 72 },
-      { title: "Penetration Tester", baseMatch: 74 },
-      { title: "Security Analyst", baseMatch: 71 },
-      { title: "Security Architect", baseMatch: 75 },
-      { title: "Cryptographer", baseMatch: 73 },
-      { title: "Security Operations Center Analyst", baseMatch: 69 },
-      { title: "Identity & Access Management Specialist", baseMatch: 68 },
-      { title: "Threat Intelligence Analyst", baseMatch: 70 },
-      { title: "Digital Forensics Specialist", baseMatch: 72 },
-      
-      // Design
-      { title: "UX/UI Designer", baseMatch: 70 },
-      { title: "Product Designer", baseMatch: 69 },
-      { title: "Interaction Designer", baseMatch: 68 },
-      { title: "UX Researcher", baseMatch: 67 },
-      { title: "UI Developer", baseMatch: 72 },
-      { title: "Design Systems Specialist", baseMatch: 70 },
-      { title: "Motion Designer", baseMatch: 67 },
-      
-      // Product & Management
       { title: "Product Manager", baseMatch: 73 },
-      { title: "Technical Product Manager", baseMatch: 75 },
-      { title: "Technical Program Manager", baseMatch: 72 },
-      { title: "Engineering Manager", baseMatch: 74 },
-      { title: "Agile Coach", baseMatch: 69 },
-      { title: "Scrum Master", baseMatch: 68 },
-      { title: "CTO", baseMatch: 80 },
-      { title: "VP of Engineering", baseMatch: 77 },
-      { title: "Technical Director", baseMatch: 75 },
-      
-      // Blockchain & Web3
-      { title: "Blockchain Developer", baseMatch: 74 },
-      { title: "Smart Contract Developer", baseMatch: 73 },
-      { title: "Solidity Developer", baseMatch: 72 },
-      { title: "Web3 Developer", baseMatch: 73 },
-      { title: "DeFi Engineer", baseMatch: 71 },
-      { title: "Blockchain Architect", baseMatch: 75 },
-      { title: "Crypto Security Engineer", baseMatch: 72 },
-      
-      // Game Development
-      { title: "Game Developer", baseMatch: 73 },
-      { title: "Game Engine Developer", baseMatch: 75 },
-      { title: "Unity Developer", baseMatch: 72 },
-      { title: "Unreal Engine Developer", baseMatch: 72 },
-      { title: "Game AI Engineer", baseMatch: 74 },
-      { title: "Game Backend Engineer", baseMatch: 73 },
-      { title: "Game Client Engineer", baseMatch: 71 },
-      
-      // Specialized Programming
-      { title: "Embedded Systems Engineer", baseMatch: 76 },
-      { title: "Firmware Engineer", baseMatch: 74 },
-      { title: "Robotics Engineer", baseMatch: 75 },
-      { title: "IoT Developer", baseMatch: 72 },
-      { title: "Quantum Computing Engineer", baseMatch: 78 },
-      { title: "High Performance Computing Specialist", baseMatch: 77 },
-      { title: "Systems Programmer", baseMatch: 75 },
-      { title: "Compiler Engineer", baseMatch: 76 },
-      
-      // Database
-      { title: "Database Administrator", baseMatch: 71 },
-      { title: "Database Engineer", baseMatch: 73 },
-      { title: "SQL Developer", baseMatch: 72 },
-      { title: "NoSQL Specialist", baseMatch: 73 },
-      { title: "Time Series Database Engineer", baseMatch: 71 },
-      { title: "Data Warehouse Engineer", baseMatch: 72 },
-      
-      // QA & Testing
-      { title: "QA Engineer", baseMatch: 69 },
-      { title: "Test Automation Engineer", baseMatch: 72 },
-      { title: "Performance Engineer", baseMatch: 73 },
-      { title: "Quality Engineer", baseMatch: 70 },
-      { title: "SDET (Software Development Engineer in Test)", baseMatch: 74 },
-      { title: "Accessibility Tester", baseMatch: 68 },
-      
-      // Industry-Specific Tech Roles
-      { title: "HealthTech Engineer", baseMatch: 71 },
-      { title: "FinTech Developer", baseMatch: 72 },
-      { title: "EdTech Specialist", baseMatch: 69 },
-      { title: "AdTech Engineer", baseMatch: 70 },
-      { title: "AgTech Developer", baseMatch: 69 },
-      { title: "LegalTech Engineer", baseMatch: 68 },
-      { title: "InsureTech Developer", baseMatch: 69 },
-      { title: "RetailTech Engineer", baseMatch: 70 },
-      
-      // Emerging Tech Fields
-      { title: "AR/VR Developer", baseMatch: 75 },
-      { title: "Augmented Reality Engineer", baseMatch: 74 },
-      { title: "Virtual Reality Developer", baseMatch: 74 },
-      { title: "Extended Reality (XR) Specialist", baseMatch: 73 },
-      { title: "Metaverse Developer", baseMatch: 72 },
-      { title: "Spatial Computing Engineer", baseMatch: 75 },
-      { title: "Digital Twin Developer", baseMatch: 71 },
-      { title: "Computer Graphics Engineer", baseMatch: 73 },
-      { title: "Computer Vision Developer", baseMatch: 74 },
-      
-      // Specialized Leadership & Architecture
-      { title: "Technical Architect", baseMatch: 76 },
-      { title: "Solutions Architect", baseMatch: 75 },
-      { title: "Enterprise Architect", baseMatch: 77 },
-      { title: "Integration Specialist", baseMatch: 72 },
-      { title: "Technical Lead", baseMatch: 74 },
-      { title: "API Architect", baseMatch: 73 },
-      { title: "Microservices Architect", baseMatch: 75 },
-      { title: "Technology Consultant", baseMatch: 71 },
-      { title: "Technical Project Manager", baseMatch: 70 }
+      { title: "UX/UI Designer", baseMatch: 70 },
+      { title: "Mobile App Developer", baseMatch: 72 },
+      { title: "Cybersecurity Specialist", baseMatch: 70 },
+      { title: "AI Research Scientist", baseMatch: 68 },
+      { title: "Business Intelligence Analyst", baseMatch: 75 },
+      { title: "MLOps Engineer", baseMatch: 72 }
     ];
     
     // Filter out paths that are already in existingPaths

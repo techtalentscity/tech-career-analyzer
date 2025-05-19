@@ -70,8 +70,77 @@ const getCareerSpecificAdvice = (careerPath) => {
     'Full Stack Developer': {
       title: 'Build complete web applications',
       description: 'Develop full-stack projects that showcase both frontend and backend skills, using modern technology stacks.'
+    },
+    'DevOps Engineer': {
+      title: 'Automate infrastructure deployments',
+      description: 'Create projects demonstrating CI/CD pipelines, infrastructure as code, and container orchestration.'
+    },
+    'Cloud Architect': {
+      title: 'Design scalable cloud solutions',
+      description: 'Develop architectures for applications on cloud platforms, demonstrating security, cost-efficiency, and scalability.'
+    },
+    'AR/VR Developer': {
+      title: 'Build immersive experiences',
+      description: 'Create AR/VR applications that showcase spatial computing principles and immersive user experiences.'
+    },
+    'Blockchain Developer': {
+      title: 'Develop decentralized applications',
+      description: 'Build DApps and smart contracts that demonstrate your understanding of blockchain principles and security.'
+    },
+    'Cybersecurity Engineer': {
+      title: 'Practice ethical hacking',
+      description: 'Develop security assessment tools and practice identifying vulnerabilities in controlled environments.'
+    },
+    'Quantum Computing Developer': {
+      title: 'Implement quantum algorithms',
+      description: 'Focus on implementing and understanding quantum algorithms and their advantages over classical computing.'
+    },
+    
+    // Non-technical tech-adjacent roles
+    'Product Manager': {
+      title: 'Develop a product strategy portfolio',
+      description: 'Create product requirement documents, roadmaps, and market analyses that showcase your product thinking and strategic abilities.'
+    },
+    'Scrum Master': {
+      title: 'Document Agile transformations',
+      description: 'Create case studies of your experience facilitating agile processes and improving team performance through metrics and retrospectives.'
+    },
+    'Business Analyst': {
+      title: 'Build analytical dashboards',
+      description: 'Create business analysis documents, process improvement proposals, and data visualization dashboards to demonstrate your analytical abilities.'
+    },
+    'Financial Analyst': {
+      title: 'Develop financial models',
+      description: 'Build financial models, forecasts, and analyses that showcase your financial acumen and technical Excel/data skills.'
+    },
+    'Supply Chain Analyst': {
+      title: 'Create supply chain optimizations',
+      description: 'Develop inventory optimization models, process improvements, and supply chain analytics that demonstrate your logistics expertise.'
+    },
+    'Healthcare Data Analyst': {
+      title: 'Build healthcare analytics projects',
+      description: 'Create dashboards and analyses focused on patient outcomes, healthcare costs, or clinical processes to showcase your healthcare analytics skills.'
+    },
+    'Nursing Informatics Specialist': {
+      title: 'Document clinical workflow improvements',
+      description: 'Create case studies of clinical workflow optimizations, EHR implementations, or nursing documentation improvements to demonstrate your expertise.'
+    },
+    'EdTech Specialist': {
+      title: 'Develop educational technology plans',
+      description: 'Create digital learning strategies, technology implementation plans, and educational analytics showcasing your EdTech expertise.'
+    },
+    'Instructional Designer': {
+      title: 'Build a learning design portfolio',
+      description: 'Create sample eLearning modules, curriculum designs, and learning experience prototypes to demonstrate your instructional design abilities.'
+    },
+    'Engineering Project Manager': {
+      title: 'Document technical project success',
+      description: 'Create case studies of engineering projects you've managed, including technical specifications, timelines, and outcomes.'
+    },
+    'BIM Manager': {
+      title: 'Develop BIM implementation plans',
+      description: 'Create BIM execution plans, standards documentation, and coordination workflows to showcase your BIM management expertise.'
     }
-    // More roles could be added here
   };
   
   return advice[careerPath] || {
@@ -85,7 +154,7 @@ const SkillsGapSection = ({ skillsGap, showAllSkills, setShowAllSkills, careerPa
   const findTopGapSkill = () => {
     if (!skillsGap || skillsGap.length === 0) return null;
     const sortedSkills = [...skillsGap].sort((a, b) => 
-      (b.requiredLevel - b.currentLevel) - (a.requiredLevel - a.currentLevel)
+      ((b.requiredLevel || 0) - (b.currentLevel || 0)) - ((a.requiredLevel || 0) - (a.currentLevel || 0))
     );
     return sortedSkills[0];
   };
@@ -118,7 +187,7 @@ const SkillsGapSection = ({ skillsGap, showAllSkills, setShowAllSkills, careerPa
         </div>
       )}
       
-      {/* Learning Resources Section - More Complete */}
+      {/* Learning Resources Section - Complete version */}
       <div className="bg-green-50 rounded-lg p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-green-800">
@@ -391,6 +460,18 @@ const SkillsGapSection = ({ skillsGap, showAllSkills, setShowAllSkills, careerPa
                       </svg>
                       Videos
                     </a>
+                    
+                    <a 
+                      href={`https://github.com/topics/${encodeURIComponent(skill.name.toLowerCase().replace(/ /g, '-'))}`} 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1 bg-gray-50 text-gray-700 rounded-full text-sm hover:bg-gray-100 flex items-center"
+                    >
+                      <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                      </svg>
+                      Projects
+                    </a>
                   </div>
                 </div>
               );
@@ -398,7 +479,7 @@ const SkillsGapSection = ({ skillsGap, showAllSkills, setShowAllSkills, careerPa
           </div>
         )}
         
-        {/* Career-specific learning roadmap - Simplified Version */}
+        {/* Career-specific learning roadmap */}
         <div className="mt-6 bg-white rounded-lg p-4 border border-green-100">
           <h4 className="font-medium text-green-800 mb-3 flex items-center">
             <svg className="w-5 h-5 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

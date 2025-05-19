@@ -12,7 +12,8 @@ const CareerDashboard = () => {
   const [analysis, setAnalysis] = useState('');
   const [careerPaths, setCareerPaths] = useState([]);
   const [skillsGap, setSkillsGap] = useState([]);
-  // Removed marketTrends state
+  // Restored marketTrends state
+  const [marketTrends, setMarketTrends] = useState([]);
   const [userData, setUserData] = useState({
     name: '',
     email: '',
@@ -57,11 +58,13 @@ const CareerDashboard = () => {
           // Extract data from analysis
           const paths = extractCareerPaths(analysisText);
           const skills = extractSkillsGap(analysisText);
-          // Removed extractMarketTrends call
+          // Restored extractMarketTrends call
+          const trends = extractMarketTrends(analysisText);
           
           setCareerPaths(paths);
           setSkillsGap(skills);
-          // Removed setMarketTrends
+          // Restored setMarketTrends
+          setMarketTrends(trends);
           
           if (location.state.formData) {
             const formData = location.state.formData;
@@ -100,11 +103,13 @@ const CareerDashboard = () => {
             // Extract data from analysis
             const paths = extractCareerPaths(analysisText);
             const skills = extractSkillsGap(analysisText);
-            // Removed extractMarketTrends call
+            // Restored extractMarketTrends call
+            const trends = extractMarketTrends(analysisText);
             
             setCareerPaths(paths);
             setSkillsGap(skills);
-            // Removed setMarketTrends
+            // Restored setMarketTrends
+            setMarketTrends(trends);
             
             const submission = storageService.getSubmissionById(storedAnalysis.submissionId);
             if (submission) {
@@ -220,118 +225,146 @@ const CareerDashboard = () => {
     return careerPaths;
   };
 
-  // Removed extractMarketTrends function
-
-  // Extract skills gap data from analysis text
-  const extractSkillsGap = (text) => {
+  // Restored extractMarketTrends function
+  const extractMarketTrends = (text) => {
     if (!text) return [];
     
-    const skills = [];
-    const userToolsUsed = userData.toolsUsed || [];
-    
-    const toolSkillMapping = {
-      'VS Code': { name: 'IDE Proficiency', category: 'Development Tools' },
-      'GitHub': { name: 'Version Control', category: 'Collaboration Tools' },
-      'JavaScript': { name: 'JavaScript Programming', category: 'Programming Languages' },
-      'Python': { name: 'Python Programming', category: 'Programming Languages' },
-      'React': { name: 'React Framework', category: 'Frontend Frameworks' },
-      'Node.js': { name: 'Node.js Runtime', category: 'Backend Technologies' },
-      'SQL': { name: 'Database Management', category: 'Database' },
-      'AWS': { name: 'Cloud Computing', category: 'Cloud Services' },
-      'Docker': { name: 'Containerization', category: 'DevOps' }
-    };
-
-    const experienceLevelMap = {
-      'Complete beginner': 1,
-      'Some exposure': 2,
-      'Beginner': 2,
-      'Intermediate': 3,
-      'Advanced': 4
-    };
-
-    const currentLevel = experienceLevelMap[userData.experienceLevel] || 1;
-
+    const trends = [];
     const lines = text.split('\n');
-    let inSkillsGapSection = false;
+    let inMarketTrendsSection = false;
     
     lines.forEach((line) => {
-      if (line.includes("SKILLS GAP ANALYSIS")) {
-        inSkillsGapSection = true;
+      if (line.includes("MARKET TRENDS") || line.includes("INDUSTRY ANALYSIS")) {
+        inMarketTrendsSection = true;
         return;
       }
       
-      if (line.includes("LEARNING ROADMAP") || line.includes("TRANSITION STRATEGY")) {
-        inSkillsGapSection = false;
+      if (line.includes("SKILLS GAP") || line.includes("LEARNING ROADMAP")) {
+        inMarketTrendsSection = false;
         return;
       }
       
-      if (inSkillsGapSection && line.match(/^\d+\.\s+/)) {
-        const skillMatch = line.match(/^\d+\.\s+([^:]+):\s*(.+)/);
+      if (inMarketTrendsSection && line.trim().startsWith('-')) {
+        const trend = line.replace(/^-\s+/, '').trim();
         
-        if (skillMatch) {
-          const skillName = skillMatch[1].trim();
-          const description = skillMatch[2].trim();
+        if (trend.length > 10) {
+          let category = 'General';
+          let icon = (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+          );
           
-          let userCurrentLevel = currentLevel;
-          
-          userToolsUsed.forEach(tool => {
-            const mapping = toolSkillMapping[tool];
-            if (mapping && skillName.toLowerCase().includes(mapping.name.toLowerCase())) {
-              userCurrentLevel = Math.min(currentLevel + 1, 5);
-            }
-          });
-          
-          let requiredLevel = 4;
-          const descLower = description.toLowerCase();
-          
-          if (descLower.includes('basic') || descLower.includes('fundamental')) {
-            requiredLevel = 2;
-          } else if (descLower.includes('intermediate') || descLower.includes('solid')) {
-            requiredLevel = 3;
-          } else if (descLower.includes('advanced') || descLower.includes('deep')) {
-            requiredLevel = 4;
-          } else if (descLower.includes('expert') || descLower.includes('mastery')) {
-            requiredLevel = 5;
+          if (trend.toLowerCase().includes('demand') || trend.toLowerCase().includes('growth')) {
+            category = 'Demand';
+            icon = (
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            );
+          } else if (trend.toLowerCase().includes('salary') || trend.toLowerCase().includes('compensation')) {
+            category = 'Salary';
+            icon = (
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            );
+          } else if (trend.toLowerCase().includes('skill') || trend.toLowerCase().includes('technology')) {
+            category = 'Skills';
+            icon = (
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            );
+          } else if (trend.toLowerCase().includes('location') || trend.toLowerCase().includes('remote')) {
+            category = 'Work Model';
+            icon = (
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7m-7-7v14" />
+              </svg>
+            );
           }
           
-          skills.push({
-            name: skillName,
-            description: description,
-            currentLevel: userCurrentLevel,
-            requiredLevel: requiredLevel,
-            gap: requiredLevel - userCurrentLevel
+          let trendColor = 'text-blue-600';
+          if (category === 'Demand') trendColor = 'text-green-600';
+          if (category === 'Salary') trendColor = 'text-purple-600';
+          if (category === 'Skills') trendColor = 'text-orange-600';
+          if (category === 'Work Model') trendColor = 'text-indigo-600';
+          
+          trends.push({
+            description: trend,
+            category,
+            icon,
+            color: trendColor
           });
         }
       }
     });
     
-    if (skills.length === 0 && userData.careerPathsInterest.length > 0) {
-      const defaultSkillsByPath = {
-        'Software Development': ['Programming', 'Problem Solving', 'System Design', 'Testing'],
-        'Data Analysis/Science': ['Statistics', 'Data Visualization', 'SQL', 'Python'],
-        'UX/UI Design': ['Design Principles', 'Prototyping', 'User Research', 'Design Tools'],
-        'Product Management': ['Product Strategy', 'Analytics', 'Communication', 'Agile Methods'],
-        'Cybersecurity': ['Network Security', 'Ethical Hacking', 'Security Tools', 'Compliance'],
-        'Cloud Engineering': ['Cloud Platforms', 'Infrastructure', 'Automation', 'Monitoring'],
-        'DevOps': ['CI/CD', 'Automation', 'Infrastructure as Code', 'Containerization'],
-        'AI/Machine Learning': ['Mathematics', 'ML Algorithms', 'Data Processing', 'Deep Learning']
+    // If no trends found, add some default ones based on career path
+    if (trends.length === 0 && userData.careerPathsInterest.length > 0) {
+      const defaultTrends = {
+        'Software Development': [
+          { description: 'Growing demand for full-stack developers with both frontend and backend expertise', category: 'Demand', color: 'text-green-600' },
+          { description: 'Average salary ranges from $75,000 for junior to $150,000+ for senior roles', category: 'Salary', color: 'text-purple-600' }
+        ],
+        'Data Analysis/Science': [
+          { description: 'Data science roles projected to grow 36% by 2026, much faster than average', category: 'Demand', color: 'text-green-600' },
+          { description: 'Increasing emphasis on machine learning and AI expertise', category: 'Skills', color: 'text-orange-600' }
+        ],
+        'UX/UI Design': [
+          { description: 'Companies prioritizing user experience as key competitive advantage', category: 'Demand', color: 'text-green-600' },
+          { description: 'Growing integration of UX with product development processes', category: 'Work Model', color: 'text-indigo-600' }
+        ],
+        'Cybersecurity': [
+          { description: 'Critical shortage of cybersecurity professionals globally', category: 'Demand', color: 'text-green-600' },
+          { description: 'Average cybersecurity salaries 16% higher than other IT roles', category: 'Salary', color: 'text-purple-600' }
+        ]
       };
       
       userData.careerPathsInterest.forEach(path => {
-        const pathSkills = defaultSkillsByPath[path] || [];
-        pathSkills.forEach(skill => {
-          skills.push({
-            name: skill,
-            currentLevel: currentLevel,
-            requiredLevel: 4,
-            gap: 4 - currentLevel,
-            careerPath: path
+        const pathTrends = defaultTrends[path];
+        if (pathTrends) {
+          pathTrends.forEach(trend => {
+            let trendIcon;
+            
+            if (trend.category === 'Demand') {
+              trendIcon = (
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              );
+            } else if (trend.category === 'Salary') {
+              trendIcon = (
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              );
+            } else if (trend.category === 'Skills') {
+              trendIcon = (
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              );
+            } else if (trend.category === 'Work Model') {
+              trendIcon = (
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7m-7-7v14" />
+                </svg>
+              );
+            }
+            
+            trends.push({
+              ...trend,
+              icon: trendIcon,
+              careerPath: path
+            });
           });
-        });
+        }
       });
     }
     
-    return skills;
+    return trends;
   };
 
   // Format analysis text for display
@@ -571,7 +604,28 @@ const CareerDashboard = () => {
     );
   };
 
-  // Removed MarketTrendsSection component
+  // Restored MarketTrendsSection component
+  const MarketTrendsSection = ({ trends }) => {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 className="text-xl font-bold mb-6">Market Trends Analysis</h2>
+        <p className="text-gray-600 mb-6">
+          Key insights into current industry trends relevant to your career interests.
+        </p>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {trends.slice(0, 8).map((trend, index) => (
+            <div key={index} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+              <div className={`${trend.color} mb-2`}>
+                {trend.icon}
+              </div>
+              <h3 className="font-semibold mb-2">{trend.category}</h3>
+              <p className="text-sm text-gray-600">{trend.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   // Create timeline visualization data
   const createTimelineData = () => {
@@ -924,7 +978,10 @@ const CareerDashboard = () => {
           </div>
         )}
         
-        {/* Removed Market Trends Analysis section */}
+        {/* Restored Market Trends Analysis section */}
+        {marketTrends.length > 0 && (
+          <MarketTrendsSection trends={marketTrends} />
+        )}
         
         {/* Current Tools Proficiency */}
         {userData.toolsUsed && userData.toolsUsed.length > 0 && userData.toolsUsed[0] !== 'None' && (

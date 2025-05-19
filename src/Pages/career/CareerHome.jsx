@@ -1,6 +1,7 @@
 // src/Pages/career/CareerHome.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext'; // Add this import
 
 // Constants
 const FEATURES = [
@@ -91,13 +92,20 @@ const CareerHome = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [expandedFAQ, setExpandedFAQ] = useState(null);
   const sampleResultsRef = useRef(null);
+  const { currentUser } = useAuth(); // Add this line to get authentication state
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
   const handleStartTest = () => {
-    navigate('/career/test');
+    if (currentUser) {
+      // User is logged in, go directly to test
+      navigate('/career/test');
+    } else {
+      // User is not logged in, go to login page
+      navigate('/login');
+    }
   };
 
   const handleViewSampleResults = () => {
@@ -106,6 +114,16 @@ const CareerHome = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 overflow-hidden">
+      {/* Optional: You can add a small auth status indicator here */}
+      {currentUser && (
+        <div className="absolute top-4 right-4 z-10">
+          <div className="bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-md text-sm flex items-center">
+            <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+            <span>Signed in as {currentUser.displayName || currentUser.email}</span>
+          </div>
+        </div>
+      )}
+      
       <div className="container mx-auto px-6 py-12 max-w-7xl">
         {/* Hero Section */}
         <section 
@@ -135,7 +153,7 @@ const CareerHome = () => {
                   className="bg-white text-indigo-600 px-8 md:px-12 py-4 md:py-5 rounded-full font-bold text-lg hover:bg-gradient-to-r hover:from-white hover:to-indigo-50 transform hover:scale-105 transition-all duration-300 shadow-xl flex items-center justify-center group"
                   aria-label="Start your career assessment"
                 >
-                  Start Your Assessment
+                  {currentUser ? "Continue Your Assessment" : "Start Your Assessment"}
                   <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
                 </button>
                 <button
@@ -313,7 +331,7 @@ const CareerHome = () => {
               className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-12 py-4 rounded-full font-bold text-lg hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-xl"
               aria-label="Begin your career assessment"
             >
-              Start Your Assessment
+              {currentUser ? "Continue Your Assessment" : "Start Your Assessment"}
             </button>
           </div>
         </section>
@@ -570,7 +588,7 @@ const CareerHome = () => {
               className="bg-white text-purple-600 px-8 md:px-12 py-4 md:py-5 rounded-full font-bold text-lg hover:bg-gradient-to-r hover:from-white hover:to-purple-50 transform hover:scale-105 transition-all duration-300 shadow-xl"
               aria-label="Begin your career assessment"
             >
-              Begin Your Assessment
+              {currentUser ? "Continue Your Assessment" : "Begin Your Assessment"}
             </button>
             <p className="mt-8 text-sm text-purple-200">
               Join the professionals who've successfully transitioned to tech careers

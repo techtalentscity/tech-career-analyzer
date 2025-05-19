@@ -7,6 +7,148 @@ import {
 } from '../utils/resourceRecommender';
 import { determineSkillResources } from '../utils/dataExtractors';
 
+// Helper function to determine if a career path is primarily technical
+const isTechnicalCareerPath = (careerPath) => {
+  const technicalPaths = [
+    'Data Scientist', 'Machine Learning Engineer', 'MLOps Engineer', 'Data Engineer',
+    'Frontend Developer', 'Backend Developer', 'Full Stack Developer', 
+    'DevOps Engineer', 'Cloud Architect', 'AI Research Scientist',
+    'AR/VR Developer', 'Blockchain Developer', 'Quantum Computing Developer',
+    'Cybersecurity Engineer'
+  ];
+  
+  return technicalPaths.includes(careerPath);
+};
+
+// Helper function to get relevant technical tools for non-technical roles
+const getDomainTechTools = (careerPath) => {
+  const toolMap = {
+    'Product Manager': 'Jira, product analytics, and prototyping tools',
+    'Scrum Master': 'Agile management software and analytics dashboards',
+    'Business Analyst': 'SQL, Excel, Tableau, and requirements management tools',
+    'Financial Analyst': 'Excel, SQL, Power BI, and financial modeling software',
+    'Supply Chain Analyst': 'ERP systems, inventory management software, and data visualization',
+    'Healthcare Data Analyst': 'SQL, health information systems, and HIPAA-compliant analytics',
+    'Nursing Informatics Specialist': 'EHR systems, clinical decision support, and healthcare analytics',
+    'EdTech Specialist': 'LMS platforms, analytics, and digital learning tools',
+    'Instructional Designer': 'Articulate Storyline, Adobe Captivate, and learning analytics',
+    'Engineering Project Manager': 'CAD software, project management tools, and engineering analytics',
+    'BIM Manager': 'Revit, Navisworks, and BIM coordination software'
+  };
+  
+  return toolMap[careerPath] || 'relevant technical tools and software';
+};
+
+// Helper function for career-specific advice
+const getCareerSpecificAdvice = (careerPath) => {
+  const advice = {
+    // Technical roles
+    'Data Scientist': {
+      title: 'Build a data science portfolio',
+      description: 'Create projects that showcase your data analysis, visualization, and machine learning skills with real-world datasets.'
+    },
+    'Machine Learning Engineer': {
+      title: 'Implement end-to-end ML systems',
+      description: 'Focus on building complete machine learning pipelines from data processing to model deployment and monitoring.'
+    },
+    'MLOps Engineer': {
+      title: 'Learn deployment frameworks',
+      description: 'Master tools like MLflow, Kubeflow, and CI/CD pipelines specifically for machine learning models.'
+    },
+    'Data Engineer': {
+      title: 'Master data pipeline technologies',
+      description: 'Build projects showcasing ETL processes, data warehousing, and efficient data processing at scale.'
+    },
+    'Frontend Developer': {
+      title: 'Create responsive web applications',
+      description: 'Build a portfolio of modern, responsive interfaces using frameworks like React, showing your UI/UX skills.'
+    },
+    'Backend Developer': {
+      title: 'Develop API and server solutions',
+      description: 'Create robust backend systems with APIs, authentication, and database integration to demonstrate your server-side expertise.'
+    },
+    'Full Stack Developer': {
+      title: 'Build complete web applications',
+      description: 'Develop full-stack projects that showcase both frontend and backend skills, using modern technology stacks.'
+    },
+    'DevOps Engineer': {
+      title: 'Automate infrastructure deployments',
+      description: 'Create projects demonstrating CI/CD pipelines, infrastructure as code, and container orchestration.'
+    },
+    'Cloud Architect': {
+      title: 'Design scalable cloud solutions',
+      description: 'Develop architectures for applications on cloud platforms, demonstrating security, cost-efficiency, and scalability.'
+    },
+    'AR/VR Developer': {
+      title: 'Build immersive experiences',
+      description: 'Create AR/VR applications that showcase spatial computing principles and immersive user experiences.'
+    },
+    'Blockchain Developer': {
+      title: 'Develop decentralized applications',
+      description: 'Build DApps and smart contracts that demonstrate your understanding of blockchain principles and security.'
+    },
+    'Cybersecurity Engineer': {
+      title: 'Practice ethical hacking',
+      description: 'Develop security assessment tools and practice identifying vulnerabilities in controlled environments.'
+    },
+    'Quantum Computing Developer': {
+      title: 'Implement quantum algorithms',
+      description: 'Focus on implementing and understanding quantum algorithms and their advantages over classical computing.'
+    },
+    
+    // Non-technical tech-adjacent roles
+    'Product Manager': {
+      title: 'Develop a product strategy portfolio',
+      description: 'Create product requirement documents, roadmaps, and market analyses that showcase your product thinking and strategic abilities.'
+    },
+    'Scrum Master': {
+      title: 'Document Agile transformations',
+      description: 'Create case studies of your experience facilitating agile processes and improving team performance through metrics and retrospectives.'
+    },
+    'Business Analyst': {
+      title: 'Build analytical dashboards',
+      description: 'Create business analysis documents, process improvement proposals, and data visualization dashboards to demonstrate your analytical abilities.'
+    },
+    'Financial Analyst': {
+      title: 'Develop financial models',
+      description: 'Build financial models, forecasts, and analyses that showcase your financial acumen and technical Excel/data skills.'
+    },
+    'Supply Chain Analyst': {
+      title: 'Create supply chain optimizations',
+      description: 'Develop inventory optimization models, process improvements, and supply chain analytics that demonstrate your logistics expertise.'
+    },
+    'Healthcare Data Analyst': {
+      title: 'Build healthcare analytics projects',
+      description: 'Create dashboards and analyses focused on patient outcomes, healthcare costs, or clinical processes to showcase your healthcare analytics skills.'
+    },
+    'Nursing Informatics Specialist': {
+      title: 'Document clinical workflow improvements',
+      description: 'Create case studies of clinical workflow optimizations, EHR implementations, or nursing documentation improvements to demonstrate your expertise.'
+    },
+    'EdTech Specialist': {
+      title: 'Develop educational technology plans',
+      description: 'Create digital learning strategies, technology implementation plans, and educational analytics showcasing your EdTech expertise.'
+    },
+    'Instructional Designer': {
+      title: 'Build a learning design portfolio',
+      description: 'Create sample eLearning modules, curriculum designs, and learning experience prototypes to demonstrate your instructional design abilities.'
+    },
+    'Engineering Project Manager': {
+      title: 'Document technical project success',
+      description: 'Create case studies of engineering projects you've managed, including technical specifications, timelines, and outcomes.'
+    },
+    'BIM Manager': {
+      title: 'Develop BIM implementation plans',
+      description: 'Create BIM execution plans, standards documentation, and coordination workflows to showcase your BIM management expertise.'
+    }
+  };
+  
+  return advice[careerPath] || {
+    title: 'Build a focused portfolio',
+    description: 'Create projects that showcase your skills aligned with your career goals and industry demands.'
+  };
+};
+
 const SkillsGapSection = ({ skillsGap, showAllSkills, setShowAllSkills, careerPaths, userData }) => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -427,148 +569,6 @@ const SkillsGapSection = ({ skillsGap, showAllSkills, setShowAllSkills, careerPa
       )}
     </div>
   );
-};
-
-// Helper function to determine if a career path is primarily technical
-const isTechnicalCareerPath = (careerPath) => {
-  const technicalPaths = [
-    'Data Scientist', 'Machine Learning Engineer', 'MLOps Engineer', 'Data Engineer',
-    'Frontend Developer', 'Backend Developer', 'Full Stack Developer', 
-    'DevOps Engineer', 'Cloud Architect', 'AI Research Scientist',
-    'AR/VR Developer', 'Blockchain Developer', 'Quantum Computing Developer',
-    'Cybersecurity Engineer'
-  ];
-  
-  return technicalPaths.includes(careerPath);
-};
-
-// Helper function to get relevant technical tools for non-technical roles
-const getDomainTechTools = (careerPath) => {
-  const toolMap = {
-    'Product Manager': 'Jira, product analytics, and prototyping tools',
-    'Scrum Master': 'Agile management software and analytics dashboards',
-    'Business Analyst': 'SQL, Excel, Tableau, and requirements management tools',
-    'Financial Analyst': 'Excel, SQL, Power BI, and financial modeling software',
-    'Supply Chain Analyst': 'ERP systems, inventory management software, and data visualization',
-    'Healthcare Data Analyst': 'SQL, health information systems, and HIPAA-compliant analytics',
-    'Nursing Informatics Specialist': 'EHR systems, clinical decision support, and healthcare analytics',
-    'EdTech Specialist': 'LMS platforms, analytics, and digital learning tools',
-    'Instructional Designer': 'Articulate Storyline, Adobe Captivate, and learning analytics',
-    'Engineering Project Manager': 'CAD software, project management tools, and engineering analytics',
-    'BIM Manager': 'Revit, Navisworks, and BIM coordination software'
-  };
-  
-  return toolMap[careerPath] || 'relevant technical tools and software';
-};
-
-// Helper function for career-specific advice
-const getCareerSpecificAdvice = (careerPath) => {
-  const advice = {
-    // Technical roles
-    'Data Scientist': {
-      title: 'Build a data science portfolio',
-      description: 'Create projects that showcase your data analysis, visualization, and machine learning skills with real-world datasets.'
-    },
-    'Machine Learning Engineer': {
-      title: 'Implement end-to-end ML systems',
-      description: 'Focus on building complete machine learning pipelines from data processing to model deployment and monitoring.'
-    },
-    'MLOps Engineer': {
-      title: 'Learn deployment frameworks',
-      description: 'Master tools like MLflow, Kubeflow, and CI/CD pipelines specifically for machine learning models.'
-    },
-    'Data Engineer': {
-      title: 'Master data pipeline technologies',
-      description: 'Build projects showcasing ETL processes, data warehousing, and efficient data processing at scale.'
-    },
-    'Frontend Developer': {
-      title: 'Create responsive web applications',
-      description: 'Build a portfolio of modern, responsive interfaces using frameworks like React, showing your UI/UX skills.'
-    },
-    'Backend Developer': {
-      title: 'Develop API and server solutions',
-      description: 'Create robust backend systems with APIs, authentication, and database integration to demonstrate your server-side expertise.'
-    },
-    'Full Stack Developer': {
-      title: 'Build complete web applications',
-      description: 'Develop full-stack projects that showcase both frontend and backend skills, using modern technology stacks.'
-    },
-    'DevOps Engineer': {
-      title: 'Automate infrastructure deployments',
-      description: 'Create projects demonstrating CI/CD pipelines, infrastructure as code, and container orchestration.'
-    },
-    'Cloud Architect': {
-      title: 'Design scalable cloud solutions',
-      description: 'Develop architectures for applications on cloud platforms, demonstrating security, cost-efficiency, and scalability.'
-    },
-    'AR/VR Developer': {
-      title: 'Build immersive experiences',
-      description: 'Create AR/VR applications that showcase spatial computing principles and immersive user experiences.'
-    },
-    'Blockchain Developer': {
-      title: 'Develop decentralized applications',
-      description: 'Build DApps and smart contracts that demonstrate your understanding of blockchain principles and security.'
-    },
-    'Cybersecurity Engineer': {
-      title: 'Practice ethical hacking',
-      description: 'Develop security assessment tools and practice identifying vulnerabilities in controlled environments.'
-    },
-    'Quantum Computing Developer': {
-      title: 'Implement quantum algorithms',
-      description: 'Focus on implementing and understanding quantum algorithms and their advantages over classical computing.'
-    },
-    
-    // Non-technical tech-adjacent roles
-    'Product Manager': {
-      title: 'Develop a product strategy portfolio',
-      description: 'Create product requirement documents, roadmaps, and market analyses that showcase your product thinking and strategic abilities.'
-    },
-    'Scrum Master': {
-      title: 'Document Agile transformations',
-      description: 'Create case studies of your experience facilitating agile processes and improving team performance through metrics and retrospectives.'
-    },
-    'Business Analyst': {
-      title: 'Build analytical dashboards',
-      description: 'Create business analysis documents, process improvement proposals, and data visualization dashboards to demonstrate your analytical abilities.'
-    },
-    'Financial Analyst': {
-      title: 'Develop financial models',
-      description: 'Build financial models, forecasts, and analyses that showcase your financial acumen and technical Excel/data skills.'
-    },
-    'Supply Chain Analyst': {
-      title: 'Create supply chain optimizations',
-      description: 'Develop inventory optimization models, process improvements, and supply chain analytics that demonstrate your logistics expertise.'
-    },
-    'Healthcare Data Analyst': {
-      title: 'Build healthcare analytics projects',
-      description: 'Create dashboards and analyses focused on patient outcomes, healthcare costs, or clinical processes to showcase your healthcare analytics skills.'
-    },
-    'Nursing Informatics Specialist': {
-      title: 'Document clinical workflow improvements',
-      description: 'Create case studies of clinical workflow optimizations, EHR implementations, or nursing documentation improvements to demonstrate your expertise.'
-    },
-    'EdTech Specialist': {
-      title: 'Develop educational technology plans',
-      description: 'Create digital learning strategies, technology implementation plans, and educational analytics showcasing your EdTech expertise.'
-    },
-    'Instructional Designer': {
-      title: 'Build a learning design portfolio',
-      description: 'Create sample eLearning modules, curriculum designs, and learning experience prototypes to demonstrate your instructional design abilities.'
-    },
-    'Engineering Project Manager': {
-      title: 'Document technical project success',
-      description: 'Create case studies of engineering projects you've managed, including technical specifications, timelines, and outcomes.'
-    },
-    'BIM Manager': {
-      title: 'Develop BIM implementation plans',
-      description: 'Create BIM execution plans, standards documentation, and coordination workflows to showcase your BIM management expertise.'
-    }
-  };
-  
-  return advice[careerPath] || {
-    title: 'Build a focused portfolio',
-    description: 'Create projects that showcase your skills aligned with your career goals and industry demands.'
-  };
 };
 
 export default SkillsGapSection;

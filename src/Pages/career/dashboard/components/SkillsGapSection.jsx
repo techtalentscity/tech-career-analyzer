@@ -81,6 +81,17 @@ const getCareerSpecificAdvice = (careerPath) => {
 };
 
 const SkillsGapSection = ({ skillsGap, showAllSkills, setShowAllSkills, careerPaths, userData }) => {
+  // Find the skill with the biggest gap (if any)
+  const findTopGapSkill = () => {
+    if (!skillsGap || skillsGap.length === 0) return null;
+    const sortedSkills = [...skillsGap].sort((a, b) => 
+      (b.requiredLevel - b.currentLevel) - (a.requiredLevel - a.currentLevel)
+    );
+    return sortedSkills[0];
+  };
+  
+  const topGapSkill = findTopGapSkill();
+  
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <h2 className="text-xl font-bold mb-6">Skills Gap Analysis</h2>
@@ -175,6 +186,60 @@ const SkillsGapSection = ({ skillsGap, showAllSkills, setShowAllSkills, careerPa
             );
           })}
         </div>
+        
+        {/* Career-specific learning roadmap - Simplified Version */}
+        <div className="mt-6 bg-white rounded-lg p-4 border border-green-100">
+          <h4 className="font-medium text-green-800 mb-3 flex items-center">
+            <svg className="w-5 h-5 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            {careerPaths.length > 0 ? `${careerPaths[0].title} Learning Path` : 'Career Learning Path'}
+          </h4>
+          
+          <div className="flex">
+            <svg className="h-5 w-5 text-green-600 mr-2 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm text-gray-700">
+              <strong>Focus on {topGapSkill ? topGapSkill.name : 'core skills'} first</strong> - Begin with foundational skills to build a strong base for your {careerPaths.length > 0 ? careerPaths[0].title : 'career'} transition.
+            </p>
+          </div>
+          
+          {/* Career-specific advice based on the path */}
+          {careerPaths.length > 0 && (
+            <>
+              <div className="flex mt-2">
+                <svg className="h-5 w-5 text-green-600 mr-2 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-sm text-gray-700">
+                  <strong>{getCareerSpecificAdvice(careerPaths[0].title).title}</strong> - {getCareerSpecificAdvice(careerPaths[0].title).description}
+                </p>
+              </div>
+              
+              <div className="flex mt-2">
+                <svg className="h-5 w-5 text-green-600 mr-2 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-sm text-gray-700">
+                  <strong>Join {careerPaths[0].title} communities</strong> - Connect with other professionals to learn industry best practices and stay updated on trends.
+                </p>
+              </div>
+              
+              {/* Add specific advice for non-technical roles */}
+              {!isTechnicalCareerPath(careerPaths[0].title) && (
+                <div className="flex mt-2">
+                  <svg className="h-5 w-5 text-green-600 mr-2 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-gray-700">
+                    <strong>Develop both domain and technical skills</strong> - For {careerPaths[0].title}s, balance industry knowledge with technical tools like {getDomainTechTools(careerPaths[0].title)} to maximize your effectiveness.
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
       
       {/* Skill level visualization charts */}
@@ -189,9 +254,23 @@ const SkillsGapSection = ({ skillsGap, showAllSkills, setShowAllSkills, careerPa
         <div className="text-center mt-6">
           <button
             onClick={() => setShowAllSkills(!showAllSkills)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center mx-auto"
           >
-            {showAllSkills ? 'Show Less' : 'View All Skills'}
+            {showAllSkills ? (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+                </svg>
+                Show Less
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+                View All Skills
+              </>
+            )}
           </button>
         </div>
       )}

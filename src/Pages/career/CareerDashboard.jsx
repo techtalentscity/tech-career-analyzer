@@ -1,9 +1,10 @@
-// src/Pages/career/CareerDashboard.jsx
+// Fixed version of CareerDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import storageService from '../../services/storageService';
 import { toast } from 'react-toastify';
+import MarketTrendsSection from '../../components/MarketTrendsSection'; // Make sure path is correct
 
 const CareerDashboard = () => {
   const location = useLocation();
@@ -274,6 +275,7 @@ const CareerDashboard = () => {
     const lines = text.split('\n');
     let inMarketTrendsSection = false;
     let currentSubsection = "";
+    let currentCareerPath = "";
     
     lines.forEach((line, index) => {
       if (line.includes("MARKET TRENDS") || line.includes("JOB MARKET ANALYSIS")) {
@@ -294,12 +296,24 @@ const CareerDashboard = () => {
         return;
       }
       
+      // Check for career path headers in market trends section
+      // Look for career path headers (often in the format "Career Path Name:")
+      if (inMarketTrendsSection && line.match(/^[A-Z][a-zA-Z\s]+(Path|Developer|Engineer|Analyst|Designer|Specialist|Manager):/)) {
+        currentCareerPath = line.replace(/:$/, '').trim();
+        marketTrends.push({
+          careerPath: currentCareerPath,
+          type: 'career_path_header'
+        });
+        return;
+      }
+      
       // Check for subsections within market trends
       if (inMarketTrendsSection && line.match(/^\d+\.\s+[A-Z]/)) {
         currentSubsection = line.replace(/^\d+\.\s+/, '').trim();
         marketTrends.push({
           title: currentSubsection,
-          type: 'section_header'
+          type: 'section_header',
+          aspect: currentSubsection.toUpperCase() // Keep aspect for backward compatibility
         });
         return;
       }
@@ -308,12 +322,14 @@ const CareerDashboard = () => {
         // Look for career path mentions with salary ranges
         const salaryMatch = line.match(/(.+?)\s*:\s*\$(\d+[,\d]*)\s*-\s*\$(\d+[,\d]*)/i);
         if (salaryMatch) {
+          const pathName = salaryMatch[1].trim();
           marketTrends.push({
-            careerPath: salaryMatch[1].trim(),
+            careerPath: pathName,
             minSalary: parseInt(salaryMatch[2].replace(/,/g, ''), 10),
             maxSalary: parseInt(salaryMatch[3].replace(/,/g, ''), 10),
             type: 'salary',
-            subsection: currentSubsection
+            subsection: currentSubsection,
+            aspect: 'SALARY TRENDS' // For backward compatibility
           });
           return;
         }
@@ -321,23 +337,48 @@ const CareerDashboard = () => {
         // Look for growth statistics
         const growthMatch = line.match(/(.+?)\s*:?\s*(\d+)%\s*growth/i);
         if (growthMatch) {
+          const pathName = growthMatch[1].trim();
           marketTrends.push({
-            careerPath: growthMatch[1].trim(),
+            careerPath: pathName,
             growth: parseInt(growthMatch[2], 10),
             type: 'growth',
-            subsection: currentSubsection
+            subsection: currentSubsection,
+            aspect: 'JOB MARKET OUTLOOK' // For backward compatibility
           });
           return;
         }
         
-        // Look for general trends
+        // Look for general trends - try to associate with current career path if possible
         if (line.match(/^\d+\.\s+/) || line.match(/^•\s+/) || line.match(/^-\s+/)) {
           const trendText = line.replace(/^(\d+\.|•|-)\s+/, '').trim();
           if (trendText) {
             marketTrends.push({
               trend: trendText,
               type: 'general',
-              subsection: currentSubsection
+              subsection: currentSubsection,
+              careerPath: currentCareerPath || null, // Associate with career path if available
+              aspect: currentSubsection ? currentSubsection.toUpperCase() : null // For backward compatibility
+            });
+          }
+        }
+        
+        // Special handling for formatted lists of salary ranges by level
+        if (line.match(/Entry\s*Level\s*:/i) || line.match(/Mid\s*Level\s*:/i) || line.match(/Senior\s*Level\s*:/i)) {
+          let level = "";
+          if (line.match(/Entry\s*Level\s*:/i)) level = "Entry Level";
+          else if (line.match(/Mid\s*Level\s*:/i)) level = "Mid Level";
+          else if (line.match(/Senior\s*Level\s*:/i)) level = "Senior Level";
+          
+          const salaryRange = line.match(/\$(\d+[,\d]*)\s*-\s*\$(\d+[,\d]*)/i);
+          if (salaryRange) {
+            marketTrends.push({
+              level: level,
+              careerPath: currentCareerPath,
+              minSalary: parseInt(salaryRange[1].replace(/,/g, ''), 10),
+              maxSalary: parseInt(salaryRange[2].replace(/,/g, ''), 10),
+              type: 'salary_by_level',
+              subsection: currentSubsection,
+              aspect: 'SALARY TRENDS' // For backward compatibility
             });
           }
         }
@@ -949,109 +990,8 @@ const CareerDashboard = () => {
     );
   };
 
-  // Market Trends Section Component
-  const MarketTrendsSection = ({ marketTrends }) => {
-    if (!marketTrends || marketTrends.length === 0) {
-      return null;
-    }
-    
-    const salaryTrends = marketTrends.filter(trend => trend.type === 'salary');
-    const growthTrends = marketTrends.filter(trend => trend.type === 'growth');
-    const generalTrends = marketTrends.filter(trend => trend.type === 'general');
-    const sectionHeaders = marketTrends.filter(trend => trend.type === 'section_header');
-    
-    return (
-      <div>
-        {salaryTrends.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-4">Salary Ranges</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              {salaryTrends.map((trend, index) => (
-                <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium">{trend.careerPath}</span>
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <span className="text-2xl font-bold text-blue-700">
-                      ${trend.minSalary.toLocaleString()} - ${trend.maxSalary.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="text-center text-sm text-gray-600 mt-2">Annual salary range</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {growthTrends.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-4">Job Growth Projections</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              {growthTrends.map((trend, index) => (
-                <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium">{trend.careerPath}</span>
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <span className={`text-3xl font-bold ${
-                      trend.growth > 15 ? 'text-green-600' : 
-                      trend.growth > 5 ? 'text-blue-600' : 
-                      'text-orange-600'
-                    }`}>
-                      {trend.growth}%
-                    </span>
-                  </div>
-                  <div className="text-center text-sm text-gray-600 mt-2">Projected growth rate</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {sectionHeaders.length > 0 && generalTrends.length > 0 && (
-          <div>
-            {sectionHeaders.map((header, hIndex) => {
-              const relatedTrends = generalTrends.filter(trend => trend.subsection === header.title);
-              if (relatedTrends.length === 0) return null;
-              
-              return (
-                <div key={hIndex} className="mb-6">
-                  <h3 className="text-lg font-semibold mb-4">{header.title}</h3>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <ul className="space-y-3">
-                      {relatedTrends.map((trend, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="text-blue-600 mr-2 mt-1">•</span>
-                          <span>{trend.trend}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-        
-        {!sectionHeaders.length && generalTrends.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-4">Industry Insights</h3>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <ul className="space-y-3">
-                {generalTrends.map((trend, index) => (
-                  <li key={index} className="flex items-start">
-                    <span className="text-blue-600 mr-2 mt-1">•</span>
-                    <span>{trend.trend}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
+  // Define the previously missing section components
+  
   // Networking Strategy Component
   const NetworkingStrategySection = ({ strategies }) => {
     if (!strategies || strategies.length === 0) {
@@ -1599,7 +1539,8 @@ const CareerDashboard = () => {
             <p className="text-gray-600 mb-6">
               Current job market trends and salary data for your recommended career paths as of {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.
             </p>
-            <MarketTrendsSection marketTrends={marketTrends} />
+            {/* Here's the updated component call with careerPaths prop */}
+            <MarketTrendsSection marketTrends={marketTrends} careerPaths={careerPaths} />
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">

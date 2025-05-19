@@ -1,4 +1,5 @@
-// Updated MarketTrendsSection.jsx - Career path oriented structure
+// Updated MarketTrendsSection.jsx component - Remove fallback logic
+
 import React from 'react';
 
 const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
@@ -52,71 +53,112 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
     );
   };
 
-  // Get all unique subsections from market trends to structure the display
-  const getMarketTrendCategories = () => {
-    // Filter to only include section headers
-    return marketTrends
-      .filter(trend => trend.type === 'section_header')
-      .map(header => header.title);
-  };
-
-  // Group salary and growth trends by career path
-  const groupTrendsByCareerPath = () => {
-    // First collect all unique career paths mentioned in the trends
-    const careerPathSet = new Set();
+  // Helper function to extract technology names from text
+  const extractTechnologies = (text) => {
+    if (!text) return [];
     
-    // Add paths from the careerPaths prop
-    if (careerPaths && careerPaths.length > 0) {
-      careerPaths.forEach(path => careerPathSet.add(path.title));
+    // Look for lists in the text
+    const techLists = text.match(/such as ([^.]+)/i) || 
+                     text.match(/including ([^.]+)/i) ||
+                     text.match(/notably ([^.]+)/i);
+    
+    if (techLists && techLists[1]) {
+      return techLists[1].split(',')
+        .map(tech => tech.replace(/and/i, '').trim())
+        .filter(tech => tech.length > 0);
     }
     
-    // Also add paths mentioned in the market trends data
-    marketTrends.forEach(trend => {
-      if (trend.careerPath) {
-        careerPathSet.add(trend.careerPath);
+    // If no list found, try to extract technologies by common tech words
+    const techKeywords = [
+      'AI', 'Machine Learning', 'Python', 'JavaScript', 'React', 'Cloud', 'DevOps',
+      'Data Science', 'Cybersecurity', 'Blockchain', 'AR/VR', 'IoT', 'Docker',
+      'Kubernetes', 'AWS', 'Azure', 'GCP', 'GraphQL', 'Node.js', 'TypeScript'
+    ];
+    
+    const foundTechs = [];
+    techKeywords.forEach(keyword => {
+      if (text.includes(keyword)) {
+        foundTechs.push(keyword);
       }
     });
     
-    // Convert to array and create the data structure
-    const paths = Array.from(careerPathSet);
-    
-    return paths.map(pathName => {
-      // Find salary data for this path
-      const salaryData = marketTrends.find(trend => 
-        trend.type === 'salary' && trend.careerPath === pathName
-      );
-      
-      // Find growth data for this path
-      const growthData = marketTrends.find(trend => 
-        trend.type === 'growth' && trend.careerPath === pathName
-      );
-      
-      // Find match percentage from careerPaths
-      const matchData = careerPaths?.find(path => path.title === pathName);
-      
-      return {
-        pathName,
-        salary: salaryData,
-        growth: growthData,
-        match: matchData?.match || null
-      };
-    });
+    return foundTechs.length > 0 ? foundTechs : [];
   };
-
-  // Get structured career path data
-  const careerPathsData = groupTrendsByCareerPath();
   
-  // Get general trend categories
-  const trendCategories = getMarketTrendCategories();
+  // Extract salary information from the trends
+  const findSalaryTrend = () => {
+    return marketTrends.find(trend => 
+      trend.aspect === 'SALARY TRENDS' || trend.aspect === 'Salary Trends'
+    );
+  };
+  
+  // Extract job market information
+  const findJobMarketTrend = () => {
+    return marketTrends.find(trend => 
+      trend.aspect === 'JOB MARKET OUTLOOK' || trend.aspect === 'Job Market Outlook'
+    );
+  };
+  
+  // Extract emerging technologies
+  const findTechTrend = () => {
+    return marketTrends.find(trend => 
+      trend.aspect === 'EMERGING TECHNOLOGIES' || trend.aspect === 'Emerging Technologies'
+    );
+  };
+  
+  // Extract industry sectors
+  const findIndustryTrend = () => {
+    return marketTrends.find(trend => 
+      trend.aspect === 'INDUSTRY SECTOR ANALYSIS' || trend.aspect === 'Industry Sector Analysis'
+    );
+  };
+  
+  // Get relevant trends
+  const salaryTrend = findSalaryTrend();
+  const jobMarketTrend = findJobMarketTrend();
+  const techTrend = findTechTrend();
+  const industryTrend = findIndustryTrend();
+  
+  // Extract technologies if not already processed
+  const technologies = techTrend?.technologies || extractTechnologies(techTrend?.details || '');
+  
+  // Extract industries if not already processed
+  const extractIndustries = (text) => {
+    if (!text) return [];
+    
+    const industryLists = text.match(/sectors include ([^.]+)/i) || 
+                         text.match(/industries like ([^.]+)/i) ||
+                         text.match(/notably in ([^.]+)/i);
+    
+    if (industryLists && industryLists[1]) {
+      return industryLists[1].split(',')
+        .map(ind => ind.replace(/and/i, '').trim())
+        .filter(ind => ind.length > 0);
+    }
+    
+    const commonIndustries = [
+      'Healthcare', 'Finance', 'Banking', 'Insurance', 'Technology', 'Retail',
+      'Manufacturing', 'Education', 'Government', 'Consulting', 'Energy'
+    ];
+    
+    const foundIndustries = [];
+    commonIndustries.forEach(ind => {
+      if (text.includes(ind)) {
+        foundIndustries.push(ind);
+      }
+    });
+    
+    return foundIndustries.length > 0 ? foundIndustries : [];
+  };
+  
+  const industries = industryTrend?.topIndustries || extractIndustries(industryTrend?.details || '');
 
   // Display a note at the top if some sections are missing
   const missingTrends = [];
-  const requiredCategories = ['JOB MARKET OUTLOOK', 'SALARY TRENDS', 'EMERGING TECHNOLOGIES', 'INDUSTRY SECTOR ANALYSIS'];
-  requiredCategories.forEach(category => {
-    if (!trendCategories.some(cat => cat.toUpperCase().includes(category))) {
-      missingTrends.push(category);
-    }
-  });
+  if (!jobMarketTrend) missingTrends.push('Job Market Outlook');
+  if (!salaryTrend) missingTrends.push('Salary Trends');
+  if (!techTrend) missingTrends.push('Emerging Technologies');
+  if (!industryTrend) missingTrends.push('Industry Sector Analysis');
 
   return (
     <div className="space-y-6">
@@ -138,251 +180,71 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
         </div>
       )}
 
-      {/* Display overview of job market outlook if available */}
-      {marketTrends.find(trend => 
-        trend.aspect === 'JOB MARKET OUTLOOK' || trend.aspect === 'Job Market Outlook'
-      ) && (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h3 className="text-xl font-bold text-blue-800 mb-4">Job Market Overview</h3>
+      {/* Job Market Outlook */}
+      {jobMarketTrend && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-xl font-bold text-blue-800 mb-4">Job Market Outlook</h3>
           <div className="bg-gray-50 p-4 rounded-lg mb-4">
-            <p className="text-gray-700">
-              {marketTrends.find(trend => 
-                trend.aspect === 'JOB MARKET OUTLOOK' || trend.aspect === 'Job Market Outlook'
-              )?.details}
-            </p>
+            <p className="text-gray-700">{jobMarketTrend.details}</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            {careerPaths.slice(0, 4).map((path, index) => (
+              <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-lg mb-2">{path.title}</h4>
+                <div className="flex items-center mb-2">
+                  <span className="mr-2">Demand:</span>
+                  <span className={`font-semibold ${getGrowthColor(
+                    jobMarketTrend.details.includes(path.title) ? 
+                      jobMarketTrend.details.substring(
+                        jobMarketTrend.details.indexOf(path.title),
+                        jobMarketTrend.details.indexOf('.', jobMarketTrend.details.indexOf(path.title))
+                      ) : ''
+                  )}`}>
+                    {path.match}% Match
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      {/* Career Path Specific Market Data */}
-      {careerPathsData.length > 0 && (
-        <div className="space-y-6">
-          <h3 className="text-xl font-bold text-blue-800 mb-4">Career-Specific Market Analysis</h3>
+      {/* Salary Trends */}
+      {salaryTrend && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-xl font-bold text-blue-800 mb-4">Salary Trends</h3>
+          <div className="bg-gray-50 p-4 rounded-lg mb-4">
+            <p className="text-gray-700">{salaryTrend.details}</p>
+          </div>
           
-          {careerPathsData.map((pathData, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-md p-6 mb-2">
-              <div className="flex justify-between items-center mb-4">
-                <h4 className="text-lg font-bold text-indigo-800">
-                  {pathData.pathName}
-                </h4>
-                {pathData.match && (
-                  <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
-                    {pathData.match}% Match
-                  </span>
-                )}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-lg mb-2">Entry Level</h4>
+              <div className="text-green-700 font-semibold">
+                {formatSalaryRange(salaryTrend.entryLevel || salaryTrend.details)}
               </div>
-              
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Salary information */}
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h5 className="font-semibold text-lg mb-3">Salary Range</h5>
-                  {pathData.salary ? (
-                    <div className="flex items-center justify-center">
-                      <span className="text-2xl font-bold text-blue-700">
-                        ${pathData.salary.minSalary.toLocaleString()} - ${pathData.salary.maxSalary.toLocaleString()}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center text-gray-500">
-                      Salary data not available
-                    </div>
-                  )}
-                  <div className="text-center text-sm text-gray-600 mt-2">Annual salary range</div>
-                </div>
-                
-                {/* Growth information */}
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h5 className="font-semibold text-lg mb-3">Job Growth</h5>
-                  {pathData.growth ? (
-                    <div className="flex items-center justify-center">
-                      <span className={`text-3xl font-bold ${
-                        pathData.growth.growth > 15 ? 'text-green-600' : 
-                        pathData.growth.growth > 5 ? 'text-blue-600' : 
-                        'text-orange-600'
-                      }`}>
-                        {pathData.growth.growth}%
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center text-gray-500">
-                      Growth data not available
-                    </div>
-                  )}
-                  <div className="text-center text-sm text-gray-600 mt-2">Projected growth rate</div>
-                </div>
-              </div>
-
-              {/* Display relevant trends for this career path if we can find them */}
-              {marketTrends.filter(trend => 
-                trend.type === 'general' && 
-                trend.trend && 
-                trend.trend.toLowerCase().includes(pathData.pathName.toLowerCase())
-              ).length > 0 && (
-                <div className="mt-4 bg-gray-50 p-4 rounded-lg">
-                  <h5 className="font-semibold mb-2">Key Insights</h5>
-                  <ul className="space-y-2">
-                    {marketTrends
-                      .filter(trend => 
-                        trend.type === 'general' && 
-                        trend.trend && 
-                        trend.trend.toLowerCase().includes(pathData.pathName.toLowerCase())
-                      )
-                      .map((trend, trendIndex) => (
-                        <li key={trendIndex} className="flex items-start">
-                          <span className="text-blue-600 mr-2 mt-1">•</span>
-                          <span>{trend.trend}</span>
-                        </li>
-                      ))
-                    }
-                  </ul>
-                </div>
-              )}
             </div>
-          ))}
-        </div>
-      )}
-
-      {/* Emerging Technologies Section */}
-      {marketTrends.find(trend => 
-        trend.aspect === 'EMERGING TECHNOLOGIES' || trend.aspect === 'Emerging Technologies'
-      ) && (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-bold text-blue-800 mb-4">Emerging Technologies</h3>
-          <div className="bg-gray-50 p-4 rounded-lg mb-4">
-            <p className="text-gray-700">
-              {marketTrends.find(trend => 
-                trend.aspect === 'EMERGING TECHNOLOGIES' || trend.aspect === 'Emerging Technologies'
-              )?.details}
-            </p>
-          </div>
-          
-          {/* Extract technologies if possible */}
-          {(() => {
-            const techTrend = marketTrends.find(trend => 
-              trend.aspect === 'EMERGING TECHNOLOGIES' || trend.aspect === 'Emerging Technologies'
-            );
             
-            if (!techTrend) return null;
-            
-            // Extract technologies
-            const extractTechnologies = (text) => {
-              if (!text) return [];
-              
-              const techLists = text.match(/such as ([^.]+)/i) || 
-                              text.match(/including ([^.]+)/i) ||
-                              text.match(/notably ([^.]+)/i);
-              
-              if (techLists && techLists[1]) {
-                return techLists[1].split(',')
-                  .map(tech => tech.replace(/and/i, '').trim())
-                  .filter(tech => tech.length > 0);
-              }
-              
-              const techKeywords = [
-                'AI', 'Machine Learning', 'Python', 'JavaScript', 'React', 'Cloud', 'DevOps',
-                'Data Science', 'Cybersecurity', 'Blockchain', 'AR/VR', 'IoT', 'Docker',
-                'Kubernetes', 'AWS', 'Azure', 'GCP', 'GraphQL', 'Node.js', 'TypeScript'
-              ];
-              
-              const foundTechs = [];
-              techKeywords.forEach(keyword => {
-                if (text.includes(keyword)) {
-                  foundTechs.push(keyword);
-                }
-              });
-              
-              return foundTechs.length > 0 ? foundTechs : [];
-            };
-            
-            const technologies = techTrend.technologies || extractTechnologies(techTrend.details || '');
-            
-            if (technologies.length === 0) return null;
-            
-            return (
-              <div className="flex flex-wrap gap-2 mt-4">
-                {technologies.map((tech, techIndex) => (
-                  <span key={techIndex} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                    {tech}
-                  </span>
-                ))}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-lg mb-2">Mid Level</h4>
+              <div className="text-green-700 font-semibold">
+                {formatSalaryRange(salaryTrend.midLevel || salaryTrend.details)}
               </div>
-            );
-          })()}
-        </div>
-      )}
-
-      {/* Industry Sector Analysis */}
-      {marketTrends.find(trend => 
-        trend.aspect === 'INDUSTRY SECTOR ANALYSIS' || trend.aspect === 'Industry Sector Analysis'
-      ) && (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-bold text-blue-800 mb-4">Top Hiring Industries</h3>
-          <div className="bg-gray-50 p-4 rounded-lg mb-4">
-            <p className="text-gray-700">
-              {marketTrends.find(trend => 
-                trend.aspect === 'INDUSTRY SECTOR ANALYSIS' || trend.aspect === 'Industry Sector Analysis'
-              )?.details}
-            </p>
-          </div>
-          
-          {/* Extract industries if possible */}
-          {(() => {
-            const industryTrend = marketTrends.find(trend => 
-              trend.aspect === 'INDUSTRY SECTOR ANALYSIS' || trend.aspect === 'Industry Sector Analysis'
-            );
+            </div>
             
-            if (!industryTrend) return null;
-            
-            // Extract industries
-            const extractIndustries = (text) => {
-              if (!text) return [];
-              
-              const industryLists = text.match(/sectors include ([^.]+)/i) || 
-                                  text.match(/industries like ([^.]+)/i) ||
-                                  text.match(/notably in ([^.]+)/i);
-              
-              if (industryLists && industryLists[1]) {
-                return industryLists[1].split(',')
-                  .map(ind => ind.replace(/and/i, '').trim())
-                  .filter(ind => ind.length > 0);
-              }
-              
-              const commonIndustries = [
-                'Healthcare', 'Finance', 'Banking', 'Insurance', 'Technology', 'Retail',
-                'Manufacturing', 'Education', 'Government', 'Consulting', 'Energy'
-              ];
-              
-              const foundIndustries = [];
-              commonIndustries.forEach(ind => {
-                if (text.includes(ind)) {
-                  foundIndustries.push(ind);
-                }
-              });
-              
-              return foundIndustries.length > 0 ? foundIndustries : [];
-            };
-            
-            const industries = industryTrend.topIndustries || extractIndustries(industryTrend.details || '');
-            
-            if (industries.length === 0) return null;
-            
-            return (
-              <div className="flex flex-wrap gap-2 mt-4">
-                {industries.map((industry, indIndex) => (
-                  <span key={indIndex} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-                    {industry}
-                  </span>
-                ))}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-lg mb-2">Senior Level</h4>
+              <div className="text-green-700 font-semibold">
+                {formatSalaryRange(salaryTrend.seniorLevel || salaryTrend.details)}
               </div>
-            );
-          })()}
+            </div>
+          </div>
         </div>
       )}
 
       {/* Regional Opportunities */}
-      {marketTrends.find(trend => 
-        trend.aspect === 'REGIONAL OPPORTUNITIES' || trend.aspect === 'Regional Opportunities'
-      ) && (
+      {marketTrends.find(trend => trend.aspect === 'REGIONAL OPPORTUNITIES' || trend.aspect === 'Regional Opportunities') && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold text-blue-800 mb-4">Regional Opportunities</h3>
           <div className="bg-gray-50 p-4 rounded-lg">
@@ -392,6 +254,46 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
               )?.details}
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Emerging Technologies */}
+      {techTrend && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-xl font-bold text-blue-800 mb-4">Emerging Technologies</h3>
+          <div className="bg-gray-50 p-4 rounded-lg mb-4">
+            <p className="text-gray-700">{techTrend.details}</p>
+          </div>
+          
+          {technologies.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {technologies.map((tech, techIndex) => (
+                <span key={techIndex} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                  {tech}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Industry Sector Analysis */}
+      {industryTrend && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-xl font-bold text-blue-800 mb-4">Top Hiring Industries</h3>
+          <div className="bg-gray-50 p-4 rounded-lg mb-4">
+            <p className="text-gray-700">{industryTrend.details}</p>
+          </div>
+          
+          {industries.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {industries.map((industry, indIndex) => (
+                <span key={indIndex} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                  {industry}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

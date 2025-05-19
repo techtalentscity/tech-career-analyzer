@@ -196,41 +196,34 @@ const CareerHome = () => {
           <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto px-6">
             <div className="bg-white rounded-xl p-6 shadow-md">
               <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold">JD</div>
+                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold">IO</div>
                 <div className="ml-4">
-                  <div className="font-bold">James D.</div>
-                  <div className="text-sm text-gray-500">Marketing → Data Analyst</div>
+                  <div className="font-bold">Isaac O.</div>
+                  <div className="text-sm text-gray-500">Design & Tech Ops Coordinator</div>
                 </div>
               </div>
               <p className="text-gray-700">"The roadmap was spot-on. Followed it for 7 months and landed a job that increased my salary by 40%."</p>
             </div>
             <div className="bg-white rounded-xl p-6 shadow-md">
               <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">SL</div>
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">TA</div>
                 <div className="ml-4">
-                  <div className="font-bold">Sarah L.</div>
-                  <div className="text-sm text-gray-500">Teacher → Front-End Developer</div>
+                  <div className="font-bold">Temitope A.</div>
+                  <div className="text-sm text-gray-500">Project Manager</div>
                 </div>
               </div>
               <p className="text-gray-700">"The skills gap analysis saved me months of studying the wrong things. Focused learning made all the difference."</p>
             </div>
             <div className="bg-white rounded-xl p-6 shadow-md">
               <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">MT</div>
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">OO</div>
                 <div className="ml-4">
-                  <div className="font-bold">Michael T.</div>
-                  <div className="text-sm text-gray-500">Sales → DevOps Engineer</div>
+                  <div className="font-bold">Oyebolade O.</div>
+                  <div className="text-sm text-gray-500">Technical Program Manager</div>
                 </div>
               </div>
               <p className="text-gray-700">"The transition strategy helped me leverage my existing skills. Landed a tech role in just 5 months."</p>
             </div>
-          </div>
-          
-          <div className="flex flex-wrap justify-center gap-8 md:gap-12 mt-12">
-            <img src="/logos/company1.png" alt="Tech company logo" className="h-8 opacity-60 hover:opacity-100 transition-opacity" />
-            <img src="/logos/company2.png" alt="Tech company logo" className="h-8 opacity-60 hover:opacity-100 transition-opacity" />
-            <img src="/logos/company3.png" alt="Tech company logo" className="h-8 opacity-60 hover:opacity-100 transition-opacity" />
-            <img src="/logos/company4.png" alt="Tech company logo" className="h-8 opacity-60 hover:opacity-100 transition-opacity" />
           </div>
         </section>
 

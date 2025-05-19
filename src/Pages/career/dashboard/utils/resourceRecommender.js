@@ -1412,6 +1412,34 @@ const skillLevelToResourceLevel = {
 };
 
 /**
+ * Helper function to check if a skill is technical or non-technical
+ */
+const isSkillTechnical = (skillName) => {
+  const technicalSkills = [
+    'python', 'javascript', 'java', 'c++', 'c#', 'ruby', 'go', 'php', 'swift', 'kotlin',
+    'react', 'angular', 'vue', 'node', 'express', 'django', 'flask', 'spring',
+    'data science', 'machine learning', 'deep learning', 'artificial intelligence', 'nlp',
+    'sql', 'mysql', 'postgresql', 'mongodb', 'oracle', 'database',
+    'aws', 'azure', 'gcp', 'cloud', 'serverless',
+    'docker', 'kubernetes', 'devops', 'ci/cd', 'terraform',
+    'git', 'linux', 'bash', 'shell',
+    'html', 'css', 'sass', 'less', 'bootstrap', 'tailwind',
+    'rest api', 'graphql', 'websocket',
+    'blockchain', 'solidity', 'ethereum', 'web3',
+    'unity', 'unreal', 'ar', 'vr', 'xr',
+    'tensorflow', 'pytorch', 'keras', 'scikit-learn',
+    'security', 'cryptography', 'penetration testing',
+    'revit', 'bim', 'autocad'
+  ];
+  
+  const skillLower = skillName.toLowerCase();
+  
+  return technicalSkills.some(techSkill => 
+    skillLower.includes(techSkill) || techSkill.includes(skillLower)
+  );
+};
+
+/**
  * Get personalized resource recommendations based on user's profile and career paths
  * 
  * @param {Object} skill - The skill to get resources for
@@ -2008,11 +2036,6 @@ export const careerPathHasSkill = (careerPath, skillName) => {
   if (!careerData) return false;
   
   // Check if the skill is in the primary skills list
-  return careerData.primarySkills.some(skill => 
-    skillLower.includes(skill.toLowerCase()) || 
-    skill.toLowerCase().includes(skillLower)
-  );
-}; primary skills list
   return careerData.primarySkills.some(skill => 
     skillLower.includes(skill.toLowerCase()) || 
     skill.toLowerCase().includes(skillLower)

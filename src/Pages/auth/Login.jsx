@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
-  const { currentUser, signInWithGoogle, isAuthorized } = useAuth();
+  const { currentUser, signInWithGoogle, isAuthorized, logout } = useAuth();
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -23,6 +23,15 @@ const Login = () => {
     } catch (error) {
       console.error("Login failed", error);
       setError("Failed to sign in. Please try again.");
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout failed", error);
+      setError("Failed to sign out. Please try again.");
     }
   };
 
@@ -81,7 +90,7 @@ const Login = () => {
         {/* Sign out button if signed in but unauthorized */}
         {currentUser && !isAuthorized && (
           <button
-            onClick={() => useAuth().logout()}
+            onClick={handleSignOut}
             className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition-all mt-4"
           >
             Sign Out and Try Another Account

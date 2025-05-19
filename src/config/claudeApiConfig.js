@@ -126,31 +126,29 @@ const CLAUDE_PROMPTS = {
        - [Strategy point]
        - [Strategy point]
        - [Strategy point]
-
+    
     6. MARKET TRENDS ANALYSIS:
-       Provide comprehensive job market data EXCLUSIVELY for the career paths recommended in section 1 above.
-       For each recommended career path, include:
+       Include current (as of 2025) job market data for the recommended career paths with the following specific sections:
        
        1. JOB MARKET OUTLOOK: 
-       Provide detailed job growth projections, hiring rates, and demand levels. 
-       Include specific percentages when possible.
+          Provide detailed job growth projections, hiring rates, and demand levels for each recommended career path. 
+          Include specific percentages when possible.
        
        2. SALARY TRENDS: 
-       Detail current salary ranges for entry-level, mid-level, and senior positions,
-       including how these have changed in the past year. Use specific dollar ranges.
-   
+          Detail current salary ranges for entry-level, mid-level, and senior positions in each recommended 
+          career path, including how these have changed in the past year. Use specific dollar ranges.
+       
        3. REGIONAL OPPORTUNITIES: 
-       Analyze which geographic regions show the strongest demand, including remote 
-       work opportunities and emerging tech hubs.
-   
+          Analyze which geographic regions show the strongest demand for each career path, including remote 
+          work opportunities and emerging tech hubs.
+       
        4. EMERGING TECHNOLOGIES: 
-       Identify the most important emerging technologies or skills becoming requirements 
-       for new hires in 2025 specific to these career paths.
-   
+          Identify the most important emerging technologies or skills within each career path that are 
+          becoming requirements for new hires in 2025.
+       
        5. INDUSTRY SECTOR ANALYSIS: 
-       Evaluate which industry sectors are most actively hiring (e.g., healthcare, 
-       finance, retail) and their growth trajectories.
-    
+          Evaluate which industry sectors are most actively hiring for each career path (e.g., healthcare, 
+          finance, retail) and their growth trajectories.
           
     7. NETWORKING STRATEGY:
        - [Specific networking tips tailored to their background and target roles]
@@ -174,8 +172,9 @@ const CLAUDE_PROMPTS = {
        - [How to address skills gaps during interviews]
     
     Make your analysis practical, personalized, and actionable. Focus on leveraging their specific educational background,
-    field of study, strengths, and interests to create a realistic path into tech. The market trends analysis should
-    focus ONLY on the career paths recommended in section 1 and include current, accurate market data for 2025.
+    field of study, strengths, and interests to create a realistic path into tech. The market trends analysis should be 
+    particularly relevant to their indicated interests (${formData.careerPathsInterest ? formData.careerPathsInterest.join(', ') : 'various tech roles'})
+    and include current, accurate market data for 2025.
   `
 };
 

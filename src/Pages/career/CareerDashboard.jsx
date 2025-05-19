@@ -1116,30 +1116,6 @@ const CareerDashboard = () => {
           </div>
         </div>
         
-        {/* Networking Strategy */}
-        {networkingStrategy.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6">Networking Strategy</h2>
-            <NetworkingStrategySection strategies={networkingStrategy} />
-          </div>
-        )}
-        
-        {/* Personal Branding */}
-        {personalBranding.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6">Personal Branding</h2>
-            <PersonalBrandingSection tips={personalBranding} />
-          </div>
-        )}
-        
-        {/* Interview Preparation */}
-        {interviewPrep.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6">Interview Preparation</h2>
-            <InterviewPrepSection tips={interviewPrep} />
-          </div>
-        )}
-
         {/* Next Steps - Dynamic based on user analysis - UPDATED with improved approach */}
         <div className="bg-blue-50 rounded-lg p-6 mt-8">
           <h2 className="text-xl font-bold mb-4">Recommended Next Steps</h2>

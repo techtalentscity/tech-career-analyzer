@@ -1,6 +1,6 @@
 // src/Pages/career/CareerDashboard.jsx
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import storageService from '../../services/storageService';
 import { toast } from 'react-toastify';
@@ -984,7 +984,7 @@ const CareerDashboard = () => {
         {/* Quick Actions Section */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <button 
               onClick={() => window.print()}
               className="flex items-center justify-center py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
@@ -992,7 +992,7 @@ const CareerDashboard = () => {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
-              Export Results (PDF)
+              Export Results
             </button>
             
             <button 
@@ -1004,6 +1004,16 @@ const CareerDashboard = () => {
               </svg>
               Retake Assessment
             </button>
+            
+            <Link 
+              to="/career/resources" 
+              className="flex items-center justify-center py-3 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              Learning Resources
+            </Link>
             
             <a 
               href="https://techtalentscity.com" 
@@ -1131,6 +1141,35 @@ const CareerDashboard = () => {
             ))}
           </div>
         </div>
+        
+        {/* Learning Resources Section */}
+        {analysis && (
+          <div className="bg-white rounded-lg shadow-md p-6 mt-8">
+            <h2 className="text-xl font-bold mb-4">Learning Resources & Interview Prep</h2>
+            <div className="flex flex-col md:flex-row items-center justify-between">
+              <div className="max-w-2xl mb-4 md:mb-0">
+                <p className="text-gray-700 mb-3">
+                  Access personalized learning materials and interview questions based on your career analysis. 
+                  We've curated resources specifically aligned with your skills gap and career goals.
+                </p>
+                <ul className="text-gray-600 list-disc list-inside mb-4">
+                  <li>Step-by-step learning paths for your target roles</li>
+                  <li>Common interview questions with recommended answers</li>
+                  <li>Technical practice exercises for skill development</li>
+                </ul>
+              </div>
+              <Link 
+                to="/career/resources" 
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md inline-flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span>Access Learning Resources</span>
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Floating Feedback Button */}

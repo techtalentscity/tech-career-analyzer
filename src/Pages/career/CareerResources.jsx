@@ -8,6 +8,9 @@ import LearningResourcesTab from '../../components/LearningResourcesTab';
 import InterviewPrepTab from '../../components/InterviewPrepTab';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
+// Debug log to check available methods
+console.log("Storage Service Methods:", Object.keys(storageService));
+
 const CareerResources = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
@@ -24,20 +27,53 @@ const CareerResources = () => {
       try {
         setLoading(true);
         
+        console.log("Current User:", currentUser);
+        
         if (!currentUser || !currentUser.email) {
           setError('User not authenticated. Please log in to continue.');
           setLoading(false);
           return;
         }
         
+        console.log("Attempting to load analysis for:", currentUser.email);
+        console.log("StorageService has getCareerAnalysis?", typeof storageService.getCareerAnalysis === 'function');
+        
         // Get the original Claude analysis from storage
-        const analysis = await storageService.getCareerAnalysis(currentUser.email);
+        let analysis;
+        
+        try {
+          if (typeof storageService.getCareerAnalysis === 'function') {
+            // Use the new method if available
+            analysis = await storageService.getCareerAnalysis(currentUser.email);
+            console.log("Got analysis using getCareerAnalysis:", !!analysis);
+          }
+          
+          if (!analysis) {
+            // Try formatted analysis first as fallback
+            analysis = await storageService.getFormattedAnalysis(currentUser.email);
+            console.log("Got formatted analysis:", !!analysis);
+            
+            if (!analysis) {
+              // Try getting the latest analysis as another fallback
+              const latestAnalysis = await storageService.getLatestAnalysis();
+              console.log("Got latest analysis:", !!latestAnalysis);
+              
+              if (latestAnalysis) {
+                analysis = latestAnalysis.analysis || latestAnalysis.raw;
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error in analysis retrieval:", error);
+        }
+        
         if (!analysis) {
           setError('Career analysis not found. Please complete the career assessment first.');
           setLoading(false);
           return;
         }
         
+        console.log("Analysis found, setting state...");
         setCareerAnalysis(analysis);
         
         // Extract the recommended career paths and skills from Claude's analysis

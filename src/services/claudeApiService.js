@@ -97,22 +97,18 @@ class ClaudeApiService {
       
       console.log("Response status:", response.status);
       
-      // FIXED ERROR HANDLING CODE - Read response as text first to avoid "body stream already read" error
       if (!response.ok) {
-        // Read as text first (only read the body stream once)
-        const errorText = await response.text();
-        let errorDetails = errorText;
-        
+        let errorText;
         try {
-          // Try to parse the text as JSON
-          const errorJson = JSON.parse(errorText);
-          errorDetails = JSON.stringify(errorJson);
+          // Try to parse as JSON first
+          const errorJson = await response.json();
+          errorText = JSON.stringify(errorJson);
         } catch {
-          // If not valid JSON, use the text as is
+          // If not JSON, get as text
+          errorText = await response.text();
         }
-        
-        console.error("API Error Response:", errorDetails);
-        throw new Error(`API error: ${response.status} - ${errorDetails}`);
+        console.error("API Error Response:", errorText);
+        throw new Error(`API error: ${response.status} - ${errorText}`);
       }
       
       const data = await response.json();

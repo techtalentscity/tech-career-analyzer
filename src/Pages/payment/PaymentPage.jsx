@@ -36,7 +36,7 @@ const PaymentPage = () => {
           createSubscription: function(data, actions) {
             return actions.subscription.create({
               /* Creates the subscription */
-              plan_id: 'P-9PC51909K3266754PNAV5OZA'
+              plan_id: 'P-1SJ06972879554110NAWHRWI'
             });
           },
           onApprove: function(data, actions) {
@@ -46,7 +46,7 @@ const PaymentPage = () => {
             // Optional success message for the subscriber
             // alert(data.subscriptionID);
           }
-        }).render('#paypal-button-container-P-9PC51909K3266754PNAV5OZA');
+        }).render('#paypal-button-container-P-1SJ06972879554110NAWHRWI');
       }
     };
     
@@ -122,7 +122,7 @@ const PaymentPage = () => {
                 </ul>
               </div>
               
-              <div id="paypal-button-container-P-9PC51909K3266754PNAV5OZA"></div>
+              <div id="paypal-button-container-P-1SJ06972879554110NAWHRWI"></div>
             </>
           ) : (
             <div>

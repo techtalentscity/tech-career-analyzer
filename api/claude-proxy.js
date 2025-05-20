@@ -81,7 +81,7 @@ export default async function handler(req, res) {
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': process.env.CLAUDE_API_KEY,
-        'anthropic-version': '2023-12-01' // Updated to more recent version
+        'anthropic-version': '2023-06-01' // Keeping the original version that works
       },
       body: JSON.stringify(requestBody)
     });

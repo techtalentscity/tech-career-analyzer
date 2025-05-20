@@ -21,8 +21,6 @@ const CareerDashboard = () => {
   const [jobSearchStrategies, setJobSearchStrategies] = useState([]);
   const [careerGrowthResources, setCareerGrowthResources] = useState([]);
   const [careerPathVisualizations, setCareerPathVisualizations] = useState([]);
-  // Added state for learning resources
-  const [learningResources, setLearningResources] = useState([]);
   
   const [userData, setUserData] = useState({
     name: '',
@@ -78,7 +76,6 @@ const CareerDashboard = () => {
           const jobSearch = extractJobSearchStrategies(analysisText);
           const careerGrowth = extractCareerGrowthResources(analysisText);
           const pathVisualizations = extractCareerPathVisualizations(analysisText);
-          const resources = extractLearningResources(analysisText); // Add extraction of learning resources
           
           setCareerPaths(paths);
           setSkillsGap(skills);
@@ -92,7 +89,6 @@ const CareerDashboard = () => {
           setJobSearchStrategies(jobSearch);
           setCareerGrowthResources(careerGrowth);
           setCareerPathVisualizations(pathVisualizations);
-          setLearningResources(resources); // Set learning resources state
           
           if (location.state.formData) {
             const formData = location.state.formData;
@@ -141,7 +137,6 @@ const CareerDashboard = () => {
             const jobSearch = extractJobSearchStrategies(analysisText);
             const careerGrowth = extractCareerGrowthResources(analysisText);
             const pathVisualizations = extractCareerPathVisualizations(analysisText);
-            const resources = extractLearningResources(analysisText); // Add extraction of learning resources
             
             setCareerPaths(paths);
             setSkillsGap(skills);
@@ -155,7 +150,6 @@ const CareerDashboard = () => {
             setJobSearchStrategies(jobSearch);
             setCareerGrowthResources(careerGrowth);
             setCareerPathVisualizations(pathVisualizations);
-            setLearningResources(resources); // Set learning resources state
             
             const submission = storageService.getSubmissionById(storedAnalysis.submissionId);
             if (submission) {
@@ -271,75 +265,6 @@ const CareerDashboard = () => {
     return careerPaths;
   };
 
-  // NEW: Extract learning resources from analysis text
-  const extractLearningResources = (text) => {
-    if (!text) return [];
-    
-    const resources = [];
-    const lines = text.split('\n');
-    let inLearningResourcesSection = false;
-    let currentSkill = '';
-    let currentResourceType = '';
-    
-    lines.forEach((line, index) => {
-      // Identify the skills gap section which contains learning resources
-      if (line.includes("SKILLS GAP ANALYSIS")) {
-        inLearningResourcesSection = true;
-        return;
-      }
-      
-      if (line.includes("LEARNING ROADMAP") || line.includes("PERSONALIZED LEARNING ROADMAP")) {
-        inLearningResourcesSection = false;
-        return;
-      }
-      
-      if (inLearningResourcesSection) {
-        // Detect skill name
-        if (line.match(/^[a-z]\)\s+([^:]+):/i)) {
-          const skillMatch = line.match(/^[a-z]\)\s+([^:]+):/i);
-          if (skillMatch) {
-            currentSkill = skillMatch[1].trim();
-          }
-          return;
-        }
-        
-        // Detect learning resource types
-        if (line.includes("Online Courses:")) {
-          currentResourceType = "Online Courses";
-          return;
-        } else if (line.includes("Projects:")) {
-          currentResourceType = "Projects";
-          return;
-        } else if (line.includes("Books/Documentation:")) {
-          currentResourceType = "Books/Documentation";
-          return;
-        } else if (line.includes("Certifications:")) {
-          currentResourceType = "Certifications";
-          return;
-        }
-        
-        // Extract individual resources
-        if (currentSkill && currentResourceType && line.trim().startsWith('-')) {
-          const resourceText = line.replace(/^-\s+/, '').trim();
-          if (resourceText) {
-            resources.push({
-              skill: currentSkill,
-              type: currentResourceType,
-              description: resourceText,
-              // Extract links if present
-              link: resourceText.match(/\(([^)]+)\)/) ? resourceText.match(/\(([^)]+)\)/)[1] : '',
-              difficulty: resourceText.toLowerCase().includes('beginner') ? 'Beginner' : 
-                         resourceText.toLowerCase().includes('intermediate') ? 'Intermediate' : 
-                         resourceText.toLowerCase().includes('advanced') ? 'Advanced' : 'All Levels'
-            });
-          }
-        }
-      }
-    });
-    
-    return resources;
-  };
-  
   // Extract networking strategy from analysis text
   const extractNetworkingStrategy = (text) => {
     if (!text) return [];
@@ -1248,87 +1173,6 @@ const CareerDashboard = () => {
     );
   };
 
-  // NEW: Learning Resources Component
-  const LearningResourcesSection = ({ resources }) => {
-    if (!resources || resources.length === 0) {
-      return null;
-    }
-    
-    // Group resources by skill
-    const resourcesBySkill = {};
-    resources.forEach(resource => {
-      if (!resourcesBySkill[resource.skill]) {
-        resourcesBySkill[resource.skill] = [];
-      }
-      resourcesBySkill[resource.skill].push(resource);
-    });
-    
-    return (
-      <div className="mb-6 bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-bold mb-4">Learning Resources</h2>
-        <p className="text-gray-600 mb-6">
-          Recommended courses, projects, books, and certifications to help you develop the necessary skills.
-        </p>
-        
-        {Object.keys(resourcesBySkill).map((skill, idx) => (
-          <div key={idx} className="mb-6">
-            <h3 className="text-lg font-semibold mb-3 text-blue-700">{skill}</h3>
-            <div className="space-y-4">
-              {resourcesBySkill[skill].map((resource, index) => (
-                <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center">
-                      {resource.type === "Online Courses" && (
-                        <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                      )}
-                      {resource.type === "Projects" && (
-                        <svg className="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                        </svg>
-                      )}
-                      {resource.type === "Books/Documentation" && (
-                        <svg className="w-5 h-5 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                      )}
-                      {resource.type === "Certifications" && (
-                        <svg className="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                      )}
-                      <span className="font-semibold">{resource.type}</span>
-                    </div>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      resource.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' :
-                      resource.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                      resource.difficulty === 'Advanced' ? 'bg-red-100 text-red-800' :
-                      'bg-blue-100 text-blue-800'
-                    }`}>
-                      {resource.difficulty}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-gray-700">{resource.description}</p>
-                  {resource.link && (
-                    <a 
-                      href={resource.link.startsWith('http') ? resource.link : `https://${resource.link}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="inline-block mt-2 text-blue-600 hover:underline"
-                    >
-                      Access Resource →
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   // NEW: Portfolio Building Guidance Component
   const PortfolioGuidanceSection = ({ tips }) => {
     if (!tips || tips.length === 0) {
@@ -1478,21 +1322,6 @@ const CareerDashboard = () => {
           description: topGaps[0].description
         });
       }
-    }
-    
-    // Use learning resources if available
-    if (learningResources && learningResources.length > 0) {
-      const resource = learningResources[0];
-      steps.push({
-        icon: (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-        ),
-        color: 'text-blue-600',
-        title: `Study ${resource.skill}`,
-        description: `${resource.type}: ${resource.description.substring(0, 80)}${resource.description.length > 80 ? '...' : ''}`
-      });
     }
     
     // Use interview preparation tips if available
@@ -1695,11 +1524,6 @@ const CareerDashboard = () => {
               ))}
             </div>
           </div>
-        )}
-
-        {/* Learning Resources - NEW SECTION */}
-        {learningResources.length > 0 && (
-          <LearningResourcesSection resources={learningResources} />
         )}
         
         {/* Current Tools Proficiency */}

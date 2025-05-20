@@ -13,12 +13,9 @@ import Login from './Pages/auth/Login';
 import CareerHome from './Pages/career/CareerHome';
 import CareerTest from './Pages/career/CareerTest';
 import CareerDashboard from './Pages/career/CareerDashboard';
-import CareerResources from './Pages/career/CareerResources';
-import SimpleResources from './Pages/career/SimpleResources'; // Added SimpleResources import
 
 // Payment Page
 import PaymentPage from './Pages/payment/PaymentPage';
-
 // Import services - these are imported for initialization
 import './services/googleFormService'; // Import the Google Form service
 
@@ -47,11 +44,6 @@ function App() {
           <Route path="/career/dashboard" element={
             <ProtectedRoute>
               <CareerDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/career/resources" element={
-            <ProtectedRoute>
-              <CareerResources />
             </ProtectedRoute>
           } />
           

@@ -75,9 +75,9 @@ class GeminiApiService {
         const parsedData = JSON.parse(responseText);
         
         // Save to storage
-        const userId = storageService.getCurrentUserId();
-        if (userId) {
-          storageService.saveLearningResources(userId, parsedData);
+        const userEmail = storageService.getCurrentUserEmail();
+        if (userEmail) {
+          storageService.saveLearningResources(userEmail, parsedData);
         }
         
         return parsedData;
@@ -163,9 +163,9 @@ class GeminiApiService {
         const parsedData = JSON.parse(responseText);
         
         // Save to storage
-        const userId = storageService.getCurrentUserId();
-        if (userId) {
-          storageService.saveInterviewQuestions(userId, parsedData);
+        const userEmail = storageService.getCurrentUserEmail();
+        if (userEmail) {
+          storageService.saveInterviewQuestions(userEmail, parsedData);
         }
         
         return parsedData;

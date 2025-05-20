@@ -16,7 +16,12 @@ const CareerDashboard = () => {
   const [networkingStrategy, setNetworkingStrategy] = useState([]);
   const [personalBranding, setPersonalBranding] = useState([]);
   const [interviewPrep, setInterviewPrep] = useState([]);
-  // Removed marketTrends state
+  // Added new sections from enhanced API
+  const [portfolioGuidance, setPortfolioGuidance] = useState([]);
+  const [jobSearchStrategies, setJobSearchStrategies] = useState([]);
+  const [careerGrowthResources, setCareerGrowthResources] = useState([]);
+  const [careerPathVisualizations, setCareerPathVisualizations] = useState([]);
+  
   const [userData, setUserData] = useState({
     name: '',
     email: '',
@@ -66,12 +71,24 @@ const CareerDashboard = () => {
           const branding = extractPersonalBranding(analysisText);
           const interview = extractInterviewPrep(analysisText);
           
+          // Extract new sections data
+          const portfolio = extractPortfolioGuidance(analysisText);
+          const jobSearch = extractJobSearchStrategies(analysisText);
+          const careerGrowth = extractCareerGrowthResources(analysisText);
+          const pathVisualizations = extractCareerPathVisualizations(analysisText);
+          
           setCareerPaths(paths);
           setSkillsGap(skills);
           // Set the extracted strategies
           setNetworkingStrategy(networking);
           setPersonalBranding(branding);
           setInterviewPrep(interview);
+          
+          // Set new sections data
+          setPortfolioGuidance(portfolio);
+          setJobSearchStrategies(jobSearch);
+          setCareerGrowthResources(careerGrowth);
+          setCareerPathVisualizations(pathVisualizations);
           
           if (location.state.formData) {
             const formData = location.state.formData;
@@ -115,12 +132,24 @@ const CareerDashboard = () => {
             const branding = extractPersonalBranding(analysisText);
             const interview = extractInterviewPrep(analysisText);
             
+            // Extract new sections data
+            const portfolio = extractPortfolioGuidance(analysisText);
+            const jobSearch = extractJobSearchStrategies(analysisText);
+            const careerGrowth = extractCareerGrowthResources(analysisText);
+            const pathVisualizations = extractCareerPathVisualizations(analysisText);
+            
             setCareerPaths(paths);
             setSkillsGap(skills);
             // Set the extracted strategies
             setNetworkingStrategy(networking);
             setPersonalBranding(branding);
             setInterviewPrep(interview);
+            
+            // Set new sections data
+            setPortfolioGuidance(portfolio);
+            setJobSearchStrategies(jobSearch);
+            setCareerGrowthResources(careerGrowth);
+            setCareerPathVisualizations(pathVisualizations);
             
             const submission = storageService.getSubmissionById(storedAnalysis.submissionId);
             if (submission) {
@@ -366,6 +395,229 @@ const CareerDashboard = () => {
     
     // Only return interview preparation tips found in the analysis
     return interviewTips;
+  };
+
+  // NEW: Extract portfolio building guidance from analysis text
+  const extractPortfolioGuidance = (text) => {
+    if (!text) return [];
+    
+    const portfolioTips = [];
+    const lines = text.split('\n');
+    let inPortfolioSection = false;
+    
+    lines.forEach((line, index) => {
+      if (line.includes("PORTFOLIO BUILDING GUIDANCE")) {
+        inPortfolioSection = true;
+        portfolioTips.push({
+          title: line.trim(),
+          type: 'section_title'
+        });
+        return;
+      }
+      
+      if (inPortfolioSection && (
+        line.includes("JOB SEARCH STRATEGIES") || 
+        line.includes("CAREER GROWTH RESOURCES") ||
+        line.includes("NETWORKING STRATEGY") || 
+        line.includes("PERSONAL BRANDING")
+      )) {
+        inPortfolioSection = false;
+        return;
+      }
+      
+      if (inPortfolioSection && line.trim() !== '') {
+        if (line.trim().startsWith('-')) {
+          const tipText = line.replace(/^-\s+/, '').trim();
+          portfolioTips.push({
+            text: tipText,
+            type: 'tip'
+          });
+        } else if (line.includes('[Portfolio Content]') || 
+                  line.includes('[Portfolio Presentation]') || 
+                  line.includes('[Project Selection]') || 
+                  line.includes('[Feedback and Iteration]')) {
+          const category = line.match(/\[(.*?)\]/)?.[1] || 'General';
+          const content = line.replace(/\[.*?\]:\s*/, '').trim();
+          
+          portfolioTips.push({
+            category,
+            text: content,
+            type: 'category_tip'
+          });
+        }
+      }
+    });
+    
+    return portfolioTips;
+  };
+
+  // NEW: Extract job search strategies from analysis text
+  const extractJobSearchStrategies = (text) => {
+    if (!text) return [];
+    
+    const jobSearchTips = [];
+    const lines = text.split('\n');
+    let inJobSearchSection = false;
+    
+    lines.forEach((line, index) => {
+      if (line.includes("JOB SEARCH STRATEGIES")) {
+        inJobSearchSection = true;
+        jobSearchTips.push({
+          title: line.trim(),
+          type: 'section_title'
+        });
+        return;
+      }
+      
+      if (inJobSearchSection && (
+        line.includes("CAREER GROWTH RESOURCES") || 
+        line.includes("PORTFOLIO BUILDING GUIDANCE") ||
+        line.includes("NETWORKING STRATEGY")
+      )) {
+        inJobSearchSection = false;
+        return;
+      }
+      
+      if (inJobSearchSection && line.trim() !== '') {
+        if (line.trim().startsWith('-')) {
+          const tipText = line.replace(/^-\s+/, '').trim();
+          jobSearchTips.push({
+            text: tipText,
+            type: 'tip'
+          });
+        } else if (line.includes('[Job Search Platforms]') || 
+                  line.includes('[Networking for Jobs]') || 
+                  line.includes('[Targeted Applications]') || 
+                  line.includes('[Company Research]')) {
+          const category = line.match(/\[(.*?)\]/)?.[1] || 'General';
+          const content = line.replace(/\[.*?\]:\s*/, '').trim();
+          
+          jobSearchTips.push({
+            category,
+            text: content,
+            type: 'category_tip'
+          });
+        }
+      }
+    });
+    
+    return jobSearchTips;
+  };
+
+  // NEW: Extract career growth resources from analysis text
+  const extractCareerGrowthResources = (text) => {
+    if (!text) return [];
+    
+    const careerGrowthTips = [];
+    const lines = text.split('\n');
+    let inCareerGrowthSection = false;
+    
+    lines.forEach((line, index) => {
+      if (line.includes("CAREER GROWTH RESOURCES")) {
+        inCareerGrowthSection = true;
+        careerGrowthTips.push({
+          title: line.trim(),
+          type: 'section_title'
+        });
+        return;
+      }
+      
+      if (inCareerGrowthSection && (
+        line.includes("JOB SEARCH STRATEGIES") || 
+        line.includes("PORTFOLIO BUILDING GUIDANCE") ||
+        line.includes("NETWORKING STRATEGY")
+      )) {
+        inCareerGrowthSection = false;
+        return;
+      }
+      
+      if (inCareerGrowthSection && line.trim() !== '') {
+        if (line.trim().startsWith('-')) {
+          const tipText = line.replace(/^-\s+/, '').trim();
+          careerGrowthTips.push({
+            text: tipText,
+            type: 'tip'
+          });
+        } else if (line.includes('[Industry Publications and Influencers]') || 
+                  line.includes('[Advanced Learning Platforms]') || 
+                  line.includes('[Community and Contributions]') || 
+                  line.includes('[Setting Expert-Level Goals]')) {
+          const category = line.match(/\[(.*?)\]/)?.[1] || 'General';
+          const content = line.replace(/\[.*?\]:\s*/, '').trim();
+          
+          careerGrowthTips.push({
+            category,
+            text: content,
+            type: 'category_tip'
+          });
+        }
+      }
+    });
+    
+    return careerGrowthTips;
+  };
+
+  // NEW: Extract career path visualizations from analysis text
+  const extractCareerPathVisualizations = (text) => {
+    if (!text) return [];
+    
+    const pathVisualizations = [];
+    const lines = text.split('\n');
+    let inCareerVisualizationSection = false;
+    let jsonContent = '';
+    let currentPath = '';
+    
+    lines.forEach((line, index) => {
+      // Find career path visualization sections
+      if (line.includes("Career Path Visualization")) {
+        inCareerVisualizationSection = true;
+        // Try to capture which career path this visualization belongs to
+        const previousLines = lines.slice(Math.max(0, index - 10), index);
+        for (let i = previousLines.length - 1; i >= 0; i--) {
+          const match = previousLines[i].match(/^[a-z]\)\s+(.*?)\s+\((\d+)%\s+match/i);
+          if (match) {
+            currentPath = match[1].trim();
+            break;
+          }
+        }
+        return;
+      }
+      
+      // Look for JSON code blocks
+      if (inCareerVisualizationSection && line.includes('```json')) {
+        jsonContent = '';
+        return;
+      }
+      
+      if (inCareerVisualizationSection && line.includes('```') && jsonContent) {
+        try {
+          // Clean up potential issues with JSON formatting
+          const cleanedJson = jsonContent
+            .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // Ensure property names are quoted
+            .replace(/'/g, '"'); // Replace single quotes with double quotes
+          
+          const stagesData = JSON.parse(cleanedJson);
+          
+          pathVisualizations.push({
+            careerPath: currentPath,
+            stages: stagesData
+          });
+        } catch (error) {
+          console.error('Failed to parse career path visualization JSON:', error);
+        }
+        
+        inCareerVisualizationSection = false;
+        jsonContent = '';
+        currentPath = '';
+        return;
+      }
+      
+      if (inCareerVisualizationSection && jsonContent !== undefined) {
+        jsonContent += line + '\n';
+      }
+    });
+    
+    return pathVisualizations;
   };
 
   // Extract skills gap data from analysis text
@@ -789,6 +1041,66 @@ const CareerDashboard = () => {
     );
   };
 
+  // NEW: Career Path Visualization Component
+  const CareerPathVisualizationChart = ({ visualization }) => {
+    if (!visualization || !visualization.stages || visualization.stages.length === 0) {
+      return null;
+    }
+    
+    return (
+      <div className="mb-8 bg-white p-6 rounded-lg shadow-sm">
+        <h3 className="text-lg font-semibold mb-4">Career Path: {visualization.careerPath}</h3>
+        <div className="overflow-x-auto">
+          <div className="min-w-max flex space-x-4">
+            {visualization.stages.map((stage, index) => (
+              <div key={index} className="w-64 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                <div className="flex items-center mb-3">
+                  <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mr-2">
+                    {index + 1}
+                  </div>
+                  <h4 className="font-bold text-md">{stage.title}</h4>
+                </div>
+                <p className="text-blue-800 font-medium mb-2">{stage.role}</p>
+                <p className="text-xs text-gray-500 mb-3">Time to reach: {stage.timeToReach}</p>
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold">Required Skills:</p>
+                  <ul className="text-sm space-y-1">
+                    {(stage.skills || []).map((skill, skillIndex) => {
+                      const importanceMatch = skill.match(/(.*)\s+\((High|Medium|Low)\)/i);
+                      let skillName = skill;
+                      let importance = 'Medium';
+                      
+                      if (importanceMatch) {
+                        skillName = importanceMatch[1].trim();
+                        importance = importanceMatch[2];
+                      }
+                      
+                      return (
+                        <li key={skillIndex} className="flex items-center">
+                          <span className={`w-2 h-2 rounded-full mr-2 ${
+                            importance.toLowerCase() === 'high' ? 'bg-red-500' :
+                            importance.toLowerCase() === 'medium' ? 'bg-yellow-500' : 'bg-blue-500'
+                          }`}></span>
+                          <span>{skillName}</span>
+                          <span className={`ml-1 text-xs ${
+                            importance.toLowerCase() === 'high' ? 'text-red-600' :
+                            importance.toLowerCase() === 'medium' ? 'text-yellow-600' : 'text-blue-600'
+                          }`}>
+                            ({importance})
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Networking Strategy Component
   const NetworkingStrategySection = ({ strategies }) => {
     if (!strategies || strategies.length === 0) {
@@ -861,6 +1173,81 @@ const CareerDashboard = () => {
     );
   };
 
+  // NEW: Portfolio Building Guidance Component
+  const PortfolioGuidanceSection = ({ tips }) => {
+    if (!tips || tips.length === 0) {
+      return null;
+    }
+    
+    const portfolioTips = tips.filter(item => item.type === 'category_tip' || item.type === 'tip');
+    
+    return (
+      <div className="mb-6 bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-bold mb-4">Portfolio Building Guidance</h2>
+        <div className="space-y-5">
+          {portfolioTips.map((tip, index) => (
+            <div key={index} className="bg-gray-50 rounded-lg p-4">
+              {tip.category && (
+                <h3 className="font-semibold text-blue-700 mb-2">{tip.category}</h3>
+              )}
+              <p>{tip.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // NEW: Job Search Strategies Component
+  const JobSearchStrategiesSection = ({ tips }) => {
+    if (!tips || tips.length === 0) {
+      return null;
+    }
+    
+    const jobSearchTips = tips.filter(item => item.type === 'category_tip' || item.type === 'tip');
+    
+    return (
+      <div className="mb-6 bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-bold mb-4">Job Search Strategies</h2>
+        <div className="space-y-5">
+          {jobSearchTips.map((tip, index) => (
+            <div key={index} className="bg-gray-50 rounded-lg p-4">
+              {tip.category && (
+                <h3 className="font-semibold text-blue-700 mb-2">{tip.category}</h3>
+              )}
+              <p>{tip.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // NEW: Career Growth Resources Component
+  const CareerGrowthResourcesSection = ({ tips }) => {
+    if (!tips || tips.length === 0) {
+      return null;
+    }
+    
+    const careerGrowthTips = tips.filter(item => item.type === 'category_tip' || item.type === 'tip');
+    
+    return (
+      <div className="mb-6 bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-bold mb-4">Career Growth Resources</h2>
+        <div className="space-y-5">
+          {careerGrowthTips.map((tip, index) => (
+            <div key={index} className="bg-gray-50 rounded-lg p-4">
+              {tip.category && (
+                <h3 className="font-semibold text-blue-700 mb-2">{tip.category}</h3>
+              )}
+              <p>{tip.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   // Generate next steps based on user data and analysis - UPDATED with improved approach
   const generateNextSteps = () => {
     const steps = [];
@@ -899,6 +1286,23 @@ const CareerDashboard = () => {
       }
     }
     
+    // Use portfolio building guidance if available
+    if (portfolioGuidance && portfolioGuidance.length > 0) {
+      const portfolioTips = portfolioGuidance.filter(item => item.type === 'category_tip' || item.type === 'tip');
+      if (portfolioTips.length > 0) {
+        steps.push({
+          icon: (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+          ),
+          color: 'text-green-600',
+          title: 'Build Your Portfolio',
+          description: portfolioTips[0].text.substring(0, 100) + (portfolioTips[0].text.length > 100 ? '...' : '')
+        });
+      }
+    }
+    
     // Based on skills gap
     if (skillsGap && skillsGap.length > 0) {
       const topGaps = skillsGap
@@ -933,6 +1337,23 @@ const CareerDashboard = () => {
           color: 'text-green-600',
           title: 'Prepare for Interviews',
           description: interviewTips[0].text
+        });
+      }
+    }
+    
+    // Use job search strategies if available
+    if (jobSearchStrategies && jobSearchStrategies.length > 0) {
+      const jobSearchTips = jobSearchStrategies.filter(item => item.type === 'category_tip' || item.type === 'tip');
+      if (jobSearchTips.length > 0) {
+        steps.push({
+          icon: (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          ),
+          color: 'text-indigo-600',
+          title: 'Plan Your Job Search',
+          description: jobSearchTips[0].text.substring(0, 100) + (jobSearchTips[0].text.length > 100 ? '...' : '')
         });
       }
     }
@@ -1074,6 +1495,22 @@ const CareerDashboard = () => {
           </div>
         )}
         
+        {/* Career Path Visualizations */}
+        {careerPathVisualizations.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold mb-6">Career Path Progression</h2>
+            <p className="text-gray-600 mb-6">
+              Visualize your career progression trajectory in your recommended paths.
+            </p>
+            {careerPathVisualizations.map((visualization, index) => (
+              <CareerPathVisualizationChart 
+                key={index} 
+                visualization={visualization}
+              />
+            ))}
+          </div>
+        )}
+        
         {/* Skills Gap Analysis */}
         {skillsGap.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -1107,6 +1544,19 @@ const CareerDashboard = () => {
           </div>
           <TimelineChart milestones={timelineMilestones} />
         </div>
+        
+        {/* Additional Sections */}
+        {portfolioGuidance.length > 0 && (
+          <PortfolioGuidanceSection tips={portfolioGuidance} />
+        )}
+        
+        {jobSearchStrategies.length > 0 && (
+          <JobSearchStrategiesSection tips={jobSearchStrategies} />
+        )}
+        
+        {careerGrowthResources.length > 0 && (
+          <CareerGrowthResourcesSection tips={careerGrowthResources} />
+        )}
         
         {/* Complete Analysis */}
         <div className="bg-white rounded-lg shadow-md p-6 md:p-8 mb-6">

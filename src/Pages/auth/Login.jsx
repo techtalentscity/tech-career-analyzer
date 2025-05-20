@@ -11,7 +11,7 @@ const Login = () => {
   useEffect(() => {
     // Only redirect if user is both logged in AND authorized
     if (currentUser && isAuthorized) {
-      navigate("/career/test");
+      navigate('/career/test');
     }
   }, [currentUser, isAuthorized, navigate]);
 
@@ -19,7 +19,7 @@ const Login = () => {
     try {
       setError(""); // Clear any previous errors
       await signInWithGoogle();
-      // The navigation will happen automatically via the useEffect if authorized
+      // Navigation happens in the useEffect if authorized
     } catch (error) {
       console.error("Login failed", error);
       setError("Failed to sign in. Please try again.");
@@ -33,6 +33,10 @@ const Login = () => {
       console.error("Logout failed", error);
       setError("Failed to sign out. Please try again.");
     }
+  };
+
+  const goToPayment = () => {
+    navigate('/payment');
   };
 
   return (
@@ -50,17 +54,42 @@ const Login = () => {
           </div>
         )}
 
-        {/* Unauthorized message */}
+        {/* Unauthorized message - IMPROVED */}
         {currentUser && !isAuthorized && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-center">
-            <p className="font-bold mb-1">Unauthorized Access</p>
-            <p>Your account ({currentUser.email}) is not authorized to access this application.</p>
-            <p className="mt-2">Please contact the administrator at techtalentscity@gmail.com</p>
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded mb-6">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-lg font-medium">Unauthorized Access</h3>
+                <div className="mt-2">
+                  <p>Your account ({currentUser.email}) is not authorized to access this application.</p>
+                  <p className="mt-1">You need to purchase a subscription to continue.</p>
+                </div>
+                <div className="mt-4">
+                  <button 
+                    onClick={goToPayment}
+                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors w-full mb-3"
+                  >
+                    Go to Payment Page
+                  </button>
+                  <button 
+                    onClick={handleSignOut}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded transition-colors w-full"
+                  >
+                    Sign Out and Try Another Account
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Only show sign in button if not already signed in or if unauthorized */}
-        {(!currentUser || !isAuthorized) && (
+        {/* Only show sign in button if not already signed in */}
+        {!currentUser && (
           <button
             onClick={handleGoogleSignIn}
             className="w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded-lg shadow-sm hover:shadow-md transition-all flex items-center justify-center space-x-2 mb-4"
@@ -84,16 +113,6 @@ const Login = () => {
               />
             </svg>
             <span className="ml-2">Sign in with Google</span>
-          </button>
-        )}
-
-        {/* Sign out button if signed in but unauthorized */}
-        {currentUser && !isAuthorized && (
-          <button
-            onClick={handleSignOut}
-            className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition-all mt-4"
-          >
-            Sign Out and Try Another Account
           </button>
         )}
 

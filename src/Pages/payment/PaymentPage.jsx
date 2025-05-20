@@ -8,6 +8,8 @@ import { useAuth } from '../../context/AuthContext';
 const PaymentPage = () => {
   const [isPaid, setIsPaid] = useState(false);
   const [subscriptionId, setSubscriptionId] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [scriptError, setScriptError] = useState(false);
   const { currentUser, signInWithGoogle, isAuthorized } = useAuth();
   const navigate = useNavigate();
 
@@ -18,43 +20,77 @@ const PaymentPage = () => {
       return;
     }
     
-    // Load PayPal script
-    const script = document.createElement('script');
-    script.src = "https://www.paypal.com/sdk/js?client-id=AVwbq-J1IvhiWpiIyMuHMP46iLeiiMe2reeKPCQ6jtKo9I70oEZnVNbpGUZNd_dgDr_6Quf_LjBOX9UJ&vault=true&intent=subscription";
-    script.setAttribute('data-sdk-integration-source', 'button-factory');
-    script.async = true;
-    
-    script.onload = () => {
-      if (window.paypal) {
-        window.paypal.Buttons({
-          style: {
-            shape: 'pill',
-            color: 'silver',
-            layout: 'horizontal',
-            label: 'subscribe'
-          },
-          createSubscription: function(data, actions) {
-            return actions.subscription.create({
-              /* Creates the subscription */
-              plan_id: 'P-1SJ06972879554110NAWHRWI'
-            });
-          },
-          onApprove: function(data, actions) {
-            // Payment successful
-            setIsPaid(true);
-            setSubscriptionId(data.subscriptionID);
-            // Optional success message for the subscriber
-            // alert(data.subscriptionID);
-          }
-        }).render('#paypal-button-container-P-1SJ06972879554110NAWHRWI');
+    const loadPayPalScript = () => {
+      setIsLoading(true);
+      
+      // Remove any existing PayPal scripts to avoid conflicts
+      const existingScript = document.querySelector('script[src*="paypal.com/sdk/js"]');
+      if (existingScript) {
+        document.body.removeChild(existingScript);
       }
+      
+      // Create a fresh script element
+      const script = document.createElement('script');
+      script.src = "https://www.paypal.com/sdk/js?client-id=AVwbq-J1IvhiWpiIyMuHMP46iLeiiMe2reeKPCQ6jtKo9I70oEZnVNbpGUZNd_dgDr_6Quf_LjBOX9UJ&vault=true&intent=subscription";
+      script.setAttribute('data-sdk-integration-source', 'button-factory');
+      script.async = true;
+      
+      script.onload = () => {
+        setIsLoading(false);
+        if (window.paypal) {
+          try {
+            // Make sure the container exists before rendering
+            const paypalContainer = document.getElementById('paypal-button-container');
+            if (!paypalContainer) {
+              console.error("PayPal container not found");
+              setScriptError(true);
+              return;
+            }
+            
+            window.paypal.Buttons({
+              style: {
+                shape: 'pill',
+                color: 'silver',
+                layout: 'vertical', // Changed to vertical for better mobile display
+                label: 'subscribe'
+              },
+              createSubscription: function(data, actions) {
+                return actions.subscription.create({
+                  plan_id: 'P-1SJ06972879554110NAWHRWI'
+                });
+              },
+              onApprove: function(data, actions) {
+                // Payment successful
+                setIsPaid(true);
+                setSubscriptionId(data.subscriptionID);
+              },
+              onError: function(err) {
+                console.error("PayPal button error:", err);
+                setScriptError(true);
+              }
+            }).render('#paypal-button-container');
+          } catch (error) {
+            console.error("Error rendering PayPal buttons:", error);
+            setScriptError(true);
+          }
+        }
+      };
+      
+      script.onerror = () => {
+        console.error("PayPal script failed to load");
+        setIsLoading(false);
+        setScriptError(true);
+      };
+      
+      document.body.appendChild(script);
     };
     
-    document.body.appendChild(script);
+    loadPayPalScript();
     
     return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
+      const paypalScript = document.querySelector('script[src*="paypal.com/sdk/js"]');
+      if (paypalScript && document.body.contains(paypalScript)) {
+        document.body.removeChild(paypalScript);
       }
     };
   }, [currentUser, isAuthorized, navigate]);
@@ -93,16 +129,25 @@ const PaymentPage = () => {
     }
   };
 
+  // Try again if script loading failed
+  const handleRetry = () => {
+    setScriptError(false);
+    setIsLoading(true);
+    
+    // Force reload the page to restart the script loading
+    window.location.reload();
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 flex items-center justify-center">
-      <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl p-8 md:p-12 max-w-md w-full">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Tech Career Analysis</h2>
-          <p className="text-gray-600 mb-6">Get your personalized career roadmap</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 flex items-center justify-center px-4 py-8">
+      <div className="bg-white/90 backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-xl p-5 md:p-8 w-full max-w-md mx-auto">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Tech Career Analysis</h2>
+          <p className="text-gray-600 mb-4 md:mb-6">Get your personalized career roadmap</p>
           
           {!isPaid ? (
             <>
-              <div className="bg-indigo-50 rounded-lg p-4 mb-6">
+              <div className="bg-indigo-50 rounded-lg p-4 mb-4 md:mb-6">
                 <p className="text-gray-700">
                   <span className="font-bold">$60</span> - 30-day access
                 </p>
@@ -122,11 +167,29 @@ const PaymentPage = () => {
                 </ul>
               </div>
               
-              <div id="paypal-button-container-P-1SJ06972879554110NAWHRWI"></div>
+              {isLoading ? (
+                <div className="flex justify-center items-center p-4">
+                  <div className="animate-spin h-6 w-6 border-2 border-indigo-500 rounded-full border-t-transparent"></div>
+                  <span className="ml-2 text-gray-600">Loading payment options...</span>
+                </div>
+              ) : scriptError ? (
+                <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-4">
+                  <p className="font-bold">There was a problem loading PayPal</p>
+                  <p className="mb-2 text-sm">Please check your connection and try again.</p>
+                  <button 
+                    onClick={handleRetry}
+                    className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-sm transition-colors"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : (
+                <div id="paypal-button-container" className="w-full"></div>
+              )}
             </>
           ) : (
             <div>
-              <div className="bg-green-100 text-green-700 p-4 rounded-lg mb-6">
+              <div className="bg-green-100 text-green-700 p-4 rounded-lg mb-4 md:mb-6">
                 <p className="font-bold">Payment Successful!</p>
                 <p>Please sign in with Google to access your career analysis.</p>
               </div>

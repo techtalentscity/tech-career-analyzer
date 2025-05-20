@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import storageService from '../../services/storageService';
 import { toast } from 'react-toastify';
-import MarketTrendsSection from '../../components/MarketTrendsSection';
 
 const CareerDashboard = () => {
   const location = useLocation();
@@ -13,12 +12,11 @@ const CareerDashboard = () => {
   const [analysis, setAnalysis] = useState('');
   const [careerPaths, setCareerPaths] = useState([]);
   const [skillsGap, setSkillsGap] = useState([]);
-  // Added market trends state back
-  const [marketTrends, setMarketTrends] = useState([]);
-  // Other state variables for recommendations
+  // Added missing state variables for recommendations
   const [networkingStrategy, setNetworkingStrategy] = useState([]);
   const [personalBranding, setPersonalBranding] = useState([]);
   const [interviewPrep, setInterviewPrep] = useState([]);
+  // Removed marketTrends state
   const [userData, setUserData] = useState({
     name: '',
     email: '',
@@ -63,8 +61,6 @@ const CareerDashboard = () => {
           // Extract data from analysis
           const paths = extractCareerPaths(analysisText);
           const skills = extractSkillsGap(analysisText);
-          // Added extraction of market trends
-          const trends = extractMarketTrends(analysisText);
           // Added extraction of additional strategies
           const networking = extractNetworkingStrategy(analysisText);
           const branding = extractPersonalBranding(analysisText);
@@ -72,7 +68,6 @@ const CareerDashboard = () => {
           
           setCareerPaths(paths);
           setSkillsGap(skills);
-          setMarketTrends(trends);
           // Set the extracted strategies
           setNetworkingStrategy(networking);
           setPersonalBranding(branding);
@@ -115,8 +110,6 @@ const CareerDashboard = () => {
             // Extract data from analysis
             const paths = extractCareerPaths(analysisText);
             const skills = extractSkillsGap(analysisText);
-            // Added extraction of market trends
-            const trends = extractMarketTrends(analysisText);
             // Added extraction of additional strategies
             const networking = extractNetworkingStrategy(analysisText);
             const branding = extractPersonalBranding(analysisText);
@@ -124,7 +117,6 @@ const CareerDashboard = () => {
             
             setCareerPaths(paths);
             setSkillsGap(skills);
-            setMarketTrends(trends);
             // Set the extracted strategies
             setNetworkingStrategy(networking);
             setPersonalBranding(branding);
@@ -176,102 +168,6 @@ const CareerDashboard = () => {
     
     loadData();
   }, [location, navigate]);
-
-  // NEW: Extract market trends from analysis text
-  const extractMarketTrends = (text) => {
-    if (!text) return [];
-    
-    const marketTrends = [];
-    const lines = text.split('\n');
-    
-    const marketTrendSections = [
-      'JOB MARKET OUTLOOK',
-      'SALARY TRENDS',
-      'EMERGING TECHNOLOGIES',
-      'INDUSTRY SECTOR ANALYSIS',
-      'REGIONAL OPPORTUNITIES'
-    ];
-    
-    let currentSection = null;
-    let sectionContent = '';
-    
-    lines.forEach((line, index) => {
-      // Check if this line starts a new market trend section
-      const foundSection = marketTrendSections.find(section => 
-        line.toUpperCase().includes(section)
-      );
-      
-      if (foundSection) {
-        // If we were already collecting a section, save it
-        if (currentSection) {
-          marketTrends.push({
-            aspect: currentSection,
-            details: sectionContent.trim()
-          });
-        }
-        
-        // Start new section
-        currentSection = foundSection;
-        sectionContent = '';
-      }
-      // If we're in a section and the next line would start another major section, save current section
-      else if (currentSection && (
-        line.includes('NETWORKING STRATEGY') || 
-        line.includes('PERSONAL BRANDING') ||
-        line.includes('INTERVIEW PREPARATION') ||
-        line.includes('LEARNING ROADMAP') || 
-        line.includes('SKILLS GAP ANALYSIS') || 
-        line.includes('TRANSITION STRATEGY')
-      )) {
-        marketTrends.push({
-          aspect: currentSection,
-          details: sectionContent.trim()
-        });
-        currentSection = null;
-      }
-      // Otherwise add content to current section if we're in one
-      else if (currentSection) {
-        // Skip empty lines at the beginning of a section
-        if (sectionContent === '' && line.trim() === '') {
-          return;
-        }
-        
-        // Add this line to the current section content
-        sectionContent += line + '\n';
-      }
-    });
-    
-    // Don't forget to add the last section if we were collecting one
-    if (currentSection) {
-      marketTrends.push({
-        aspect: currentSection,
-        details: sectionContent.trim()
-      });
-    }
-    
-    // If we don't have real data, create mock data for testing visualizations
-    if (marketTrends.length === 0) {
-      // Sample data for testing
-      marketTrends.push({
-        aspect: 'JOB MARKET OUTLOOK',
-        details: 'The tech job market is experiencing strong growth with a 15% increase in demand for software developers and data scientists.'
-      });
-      marketTrends.push({
-        aspect: 'SALARY TRENDS',
-        details: 'Entry-level salaries range from $70,000-$90,000, mid-level from $95,000-$120,000, and senior positions from $130,000-$180,000.'
-      });
-      marketTrends.push({
-        aspect: 'EMERGING TECHNOLOGIES',
-        details: 'Key technologies including AI, Machine Learning, Python, React, and Cloud Services are seeing rapid adoption.'
-      });
-      marketTrends.push({
-        aspect: 'INDUSTRY SECTOR ANALYSIS',
-        details: 'The strongest hiring is in Healthcare, Finance, Technology, and E-commerce sectors.'
-      });
-    }
-    
-    return marketTrends;
-  };
 
   // Handle feedback form changes
   const handleFeedbackChange = (e) => {
@@ -965,7 +861,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Generate next steps based on user data and analysis
+  // Generate next steps based on user data and analysis - UPDATED with improved approach
   const generateNextSteps = () => {
     const steps = [];
     
@@ -1178,14 +1074,6 @@ const CareerDashboard = () => {
           </div>
         )}
         
-        {/* Market Trends Section - NEW */}
-        {marketTrends.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6">Market Analysis</h2>
-            <MarketTrendsSection marketTrends={marketTrends} careerPaths={careerPaths} />
-          </div>
-        )}
-        
         {/* Skills Gap Analysis */}
         {skillsGap.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -1220,31 +1108,6 @@ const CareerDashboard = () => {
           <TimelineChart milestones={timelineMilestones} />
         </div>
         
-        {/* Networking & Personal Branding Section - NEW */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-bold mb-6">Strategy & Recommendations</h2>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Networking Strategy */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Networking Strategy</h3>
-              <NetworkingStrategySection strategies={networkingStrategy} />
-            </div>
-            
-            {/* Personal Branding */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Personal Branding</h3>
-              <PersonalBrandingSection tips={personalBranding} />
-            </div>
-          </div>
-          
-          {/* Interview Preparation */}
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold mb-4">Interview Preparation</h3>
-            <InterviewPrepSection tips={interviewPrep} />
-          </div>
-        </div>
-        
         {/* Complete Analysis */}
         <div className="bg-white rounded-lg shadow-md p-6 md:p-8 mb-6">
           <h2 className="text-2xl font-bold mb-6">Detailed Analysis</h2>
@@ -1253,7 +1116,7 @@ const CareerDashboard = () => {
           </div>
         </div>
         
-        {/* Next Steps - Dynamic based on user analysis */}
+        {/* Next Steps - Dynamic based on user analysis - UPDATED with improved approach */}
         <div className="bg-blue-50 rounded-lg p-6 mt-8">
           <h2 className="text-xl font-bold mb-4">Recommended Next Steps</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

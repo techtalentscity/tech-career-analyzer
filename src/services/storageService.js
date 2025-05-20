@@ -43,9 +43,16 @@ class StorageService {
       let submissionId = null;
 
       if (analysisData.userId) {
-        const userSubmissions = submissions
-          .filter(s => s.email === analysisData.userId || s.userId === analysisData.userId)
-          .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+        // Fixed potential TDZ issue by avoiding arrow function with 's' parameter
+        const userSubmissions = [];
+        for (let i = 0; i < submissions.length; i++) {
+          const sub = submissions[i];
+          if (sub.email === analysisData.userId || sub.userId === analysisData.userId) {
+            userSubmissions.push(sub);
+          }
+        }
+        userSubmissions.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+        
         if (userSubmissions.length > 0) {
           submissionId = userSubmissions[0].id;
         }
@@ -71,7 +78,10 @@ class StorageService {
     try {
       const analyses = JSON.parse(localStorage.getItem(ANALYSES_KEY) || '[]');
       if (analyses.length === 0) return null;
-      return analyses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+      // Create a copy and then sort to avoid potential issues
+      const sortedAnalyses = [...analyses];
+      sortedAnalyses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      return sortedAnalyses[0];
     } catch (error) {
       console.error('Error getting latest analysis:', error);
       return null;
@@ -86,9 +96,18 @@ class StorageService {
       if (formattedAnalysis) return formattedAnalysis;
 
       const analyses = JSON.parse(localStorage.getItem(ANALYSES_KEY) || '[]');
-      const userAnalyses = analyses
-        .filter(a => a.userId === userId)
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      // Fixed potential TDZ issue by avoiding arrow function with 'a' parameter
+      const userAnalyses = [];
+      for (let i = 0; i < analyses.length; i++) {
+        const analysis = analyses[i];
+        if (analysis.userId === userId) {
+          userAnalyses.push(analysis);
+        }
+      }
+      
+      // Sort the filtered analyses
+      userAnalyses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
       if (userAnalyses.length > 0) {
         return userAnalyses[0].analysis || userAnalyses[0].raw;
       }
@@ -102,7 +121,13 @@ class StorageService {
   getSubmissionById(id) {
     try {
       const submissions = JSON.parse(localStorage.getItem(SUBMISSIONS_KEY) || '[]');
-      return submissions.find(s => s.id === id) || null;
+      // Avoid using find with arrow function to prevent potential TDZ issues
+      for (let i = 0; i < submissions.length; i++) {
+        if (submissions[i].id === id) {
+          return submissions[i];
+        }
+      }
+      return null;
     } catch (error) {
       console.error('Error getting submission by ID:', error);
       return null;
@@ -174,7 +199,12 @@ class StorageService {
           keysToRemove.push(key);
         }
       }
-      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
+      // Avoid using forEach with arrow function to prevent potential TDZ issues
+      for (let j = 0; j < keysToRemove.length; j++) {
+        localStorage.removeItem(keysToRemove[j]);
+      }
+      
       return keysToRemove.length;
     } catch (error) {
       console.error('Error clearing all formatted analyses:', error);
@@ -242,8 +272,10 @@ class StorageService {
 
   getCurrentUserId() {
     try {
-      const userData = JSON.parse(localStorage.getItem(CURRENT_USER_KEY));
-      return userData?.email || null;
+      const userData = localStorage.getItem(CURRENT_USER_KEY);
+      if (!userData) return null;
+      const parsedData = JSON.parse(userData);
+      return parsedData && parsedData.email ? parsedData.email : null;
     } catch (error) {
       console.error('Error getting current user ID:', error);
       return null;
@@ -252,8 +284,11 @@ class StorageService {
 
   getCurrentUserEmail() {
     try {
-      const userData = JSON.parse(localStorage.getItem(USER_KEY));
-      if (userData?.email) return userData.email;
+      const userData = localStorage.getItem(USER_KEY);
+      if (userData) {
+        const parsedData = JSON.parse(userData);
+        if (parsedData && parsedData.email) return parsedData.email;
+      }
       return this.getCurrentUserId();
     } catch (error) {
       console.error('Error getting current user email:', error);

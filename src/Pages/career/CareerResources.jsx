@@ -48,8 +48,8 @@ const CareerResources = () => {
               }
             }
           }
-        } catch (error) {
-          console.error("Error in analysis retrieval:", error);
+        } catch (err) {
+          console.error("Error in analysis retrieval:", err);
         }
 
         if (!analysis) {
@@ -67,9 +67,9 @@ const CareerResources = () => {
         } else {
           await loadInterviewQuestions(currentUser.email, careerPathData);
         }
-      } catch (error) {
-        console.error("Failed to load resources", error);
-        setError(`Error loading resources: ${error.message}`);
+      } catch (err) {
+        console.error("Failed to load resources", err);
+        setError(`Error loading resources: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -82,40 +82,44 @@ const CareerResources = () => {
     setActiveTab(tab);
   };
 
+  // IMPORTANT - Fixed potential TDZ issue in extractCareerDataFromAnalysis
   const extractCareerDataFromAnalysis = (analysis) => {
     if (!analysis || typeof analysis !== 'string') {
       console.warn("Invalid analysis format:", analysis);
       return { careerPath: "Software Developer", skills: ["Programming", "Data Structures", "Algorithms"] };
     }
 
-    // Using explicit variables instead of regex matches to avoid potential TDZ issues
+    // Default values
     let careerPath = "Software Developer";
-    const careerPathMatch = analysis.match(/CAREER PATH RECOMMENDATIONS:[\s\S]*?a\)\s*([^(]+)\s*\(\d+%\s*match\)/i);
-    if (careerPathMatch && careerPathMatch.length > 1) {
-      careerPath = careerPathMatch[1].trim();
-    }
-
-    // Default skills
     let skills = ["Programming", "Data Structures", "Algorithms"];
     
     try {
+      // Safely extract career path
+      const careerPathMatch = analysis.match(/CAREER PATH RECOMMENDATIONS:[\s\S]*?a\)\s*([^(]+)\s*\(\d+%\s*match\)/i);
+      if (careerPathMatch && careerPathMatch[1]) {
+        careerPath = careerPathMatch[1].trim();
+      }
+
+      // Safely extract skills
       const skillsGapSection = analysis.match(/SKILLS GAP ANALYSIS:[\s\S]*?LEARNING ROADMAP:/i);
-      if (skillsGapSection && skillsGapSection.length > 0) {
-        const sectionText = skillsGapSection[0];
-        const skillMatches = sectionText.match(/\d+\.\s*([^:]+):/g);
-        
+      if (skillsGapSection && skillsGapSection[0]) {
+        const skillMatches = skillsGapSection[0].match(/\d+\.\s*([^:]+):/g);
         if (skillMatches && skillMatches.length > 0) {
-          // Process each match separately to avoid using map with arrow functions
-          skills = [];
-          for (let i = 0; i < skillMatches.length; i++) {
-            let match = skillMatches[i];
-            match = match.replace(/\d+\.\s*/, '').replace(':', '').trim();
-            skills.push(match);
+          const extractedSkills = [];
+          // Using a different variable name and var keyword
+          var j;
+          for (j = 0; j < skillMatches.length; j++) {
+            const matchStr = skillMatches[j];
+            const cleanedMatch = matchStr.replace(/\d+\.\s*/, '').replace(':', '').trim();
+            extractedSkills.push(cleanedMatch);
+          }
+          if (extractedSkills.length > 0) {
+            skills = extractedSkills;
           }
         }
       }
     } catch (err) {
-      console.error("Error extracting skills:", err);
+      console.error("Error extracting data from analysis:", err);
     }
 
     return { careerPath, skills };
@@ -150,9 +154,9 @@ const CareerResources = () => {
       } else {
         throw new Error("Learning resources service is not available");
       }
-    } catch (error) {
-      console.error("Failed to load learning resources", error);
-      throw error;
+    } catch (err) {
+      console.error("Failed to load learning resources", err);
+      throw err;
     }
   };
 
@@ -185,9 +189,9 @@ const CareerResources = () => {
       } else {
         throw new Error("Interview questions service is not available");
       }
-    } catch (error) {
-      console.error("Failed to load interview questions", error);
-      throw error;
+    } catch (err) {
+      console.error("Failed to load interview questions", err);
+      throw err;
     }
   };
 

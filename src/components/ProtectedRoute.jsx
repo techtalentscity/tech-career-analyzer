@@ -13,7 +13,8 @@ const ProtectedRoute = ({ children }) => {
   
   // Then check if user is authorized
   if (!isAuthorized) {
-    return <Navigate to="/login" />;
+    // Changed: Redirect to payment page instead of login
+    return <Navigate to="/payment" />;
   }
   
   // If both authenticated and authorized, render the protected content

@@ -60,11 +60,8 @@ export const AuthProvider = ({ children }) => {
         const authorized = await checkAuthorization(user);
         setIsAuthorized(authorized);
         
-        // Sign out if not authorized
-        if (!authorized) {
-          await signOut(auth);
-          setCurrentUser(null);
-        }
+        // REMOVED: Don't automatically sign out unauthorized users
+        // This allows them to see the unauthorized message
       }
       
       setLoading(false);

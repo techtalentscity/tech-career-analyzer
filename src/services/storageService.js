@@ -11,7 +11,6 @@ const USER_KEY = 'user'; // Added new key for compatibility
 
 class StorageService {
   constructor() {
-    // Initialize local storage if not already done
     if (!localStorage.getItem(SUBMISSIONS_KEY)) {
       localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify([]));
     }
@@ -20,24 +19,16 @@ class StorageService {
     }
   }
 
-  /**
-   * Save career test form submission
-   * @param {Object} formData - Form data to save
-   * @returns {Object} - Saved submission with ID
-   */
   saveCareerTest(formData) {
     try {
       const submissions = JSON.parse(localStorage.getItem(SUBMISSIONS_KEY) || '[]');
-      
       const submission = {
         id: this._generateId(),
         submittedAt: new Date().toISOString(),
         ...formData
       };
-      
       submissions.push(submission);
       localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(submissions));
-      
       return submission;
     } catch (error) {
       console.error('Error saving career test:', error);
@@ -45,40 +36,30 @@ class StorageService {
     }
   }
 
-  /**
-   * Save career analysis results
-   * @param {Object} analysisData - Analysis data with userId and analysis text
-   * @returns {Object} - Saved analysis with ID
-   */
   saveCareerAnalysis(analysisData) {
     try {
       const analyses = JSON.parse(localStorage.getItem(ANALYSES_KEY) || '[]');
-      
-      // Find the corresponding submission
       const submissions = JSON.parse(localStorage.getItem(SUBMISSIONS_KEY) || '[]');
       let submissionId = null;
-      
+
       if (analysisData.userId) {
-        // Find the most recent submission for this user
         const userSubmissions = submissions
           .filter(s => s.email === analysisData.userId || s.userId === analysisData.userId)
           .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
-        
         if (userSubmissions.length > 0) {
           submissionId = userSubmissions[0].id;
         }
       }
-      
+
       const analysis = {
         id: this._generateId(),
         createdAt: new Date().toISOString(),
-        submissionId: submissionId,
+        submissionId,
         ...analysisData
       };
-      
+
       analyses.push(analysis);
       localStorage.setItem(ANALYSES_KEY, JSON.stringify(analyses));
-      
       return analysis;
     } catch (error) {
       console.error('Error saving career analysis:', error);
@@ -86,56 +67,31 @@ class StorageService {
     }
   }
 
-  /**
-   * Get the latest analysis (regardless of user)
-   * @returns {Object|null} - Latest analysis or null if none found
-   */
   getLatestAnalysis() {
     try {
       const analyses = JSON.parse(localStorage.getItem(ANALYSES_KEY) || '[]');
-      
-      if (analyses.length === 0) {
-        return null;
-      }
-      
-      // Sort by date (newest first) and return the first
-      return analyses
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+      if (analyses.length === 0) return null;
+      return analyses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
     } catch (error) {
       console.error('Error getting latest analysis:', error);
       return null;
     }
   }
 
-  /**
-   * Get career analysis for a specific user
-   * @param {string} userId - User email or ID
-   * @returns {string|null} - Career analysis or null if not found
-   */
   getCareerAnalysis(userId) {
     try {
-      if (!userId) {
-        return null;
-      }
-      
-      // First try to get the formatted analysis which is probably what we want
+      if (!userId) return null;
+
       const formattedAnalysis = this.getFormattedAnalysis(userId);
-      if (formattedAnalysis) {
-        return formattedAnalysis;
-      }
-      
-      // If no formatted analysis, look through the analyses for this user
+      if (formattedAnalysis) return formattedAnalysis;
+
       const analyses = JSON.parse(localStorage.getItem(ANALYSES_KEY) || '[]');
-      
-      // Find the most recent analysis for this user
       const userAnalyses = analyses
         .filter(a => a.userId === userId)
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      
       if (userAnalyses.length > 0) {
         return userAnalyses[0].analysis || userAnalyses[0].raw;
       }
-      
       return null;
     } catch (error) {
       console.error('Error getting career analysis:', error);
@@ -143,11 +99,6 @@ class StorageService {
     }
   }
 
-  /**
-   * Get submission by ID
-   * @param {string} id - Submission ID
-   * @returns {Object|null} - Submission or null if not found
-   */
   getSubmissionById(id) {
     try {
       const submissions = JSON.parse(localStorage.getItem(SUBMISSIONS_KEY) || '[]');
@@ -158,30 +109,16 @@ class StorageService {
     }
   }
 
-  /**
-   * Save formatted analysis to localStorage for faster rendering
-   * @param {string} userId - User email or ID 
-   * @param {string} formattedAnalysis - Raw analysis text
-   * @returns {boolean} - Success status
-   */
   saveFormattedAnalysis(userId, formattedAnalysis) {
     try {
-      if (!userId || !formattedAnalysis) {
-        return false;
-      }
-      
-      // Create a storage key based on the user's email/ID
+      if (!userId || !formattedAnalysis) return false;
+
       const storageKey = `${FORMATTED_ANALYSES_PREFIX}${userId}`;
-      
-      // Create a storage object with timestamp to handle cache invalidation
       const storageObject = {
         timestamp: new Date().getTime(),
         content: formattedAnalysis
       };
-      
-      // Save to localStorage
       localStorage.setItem(storageKey, JSON.stringify(storageObject));
-      
       return true;
     } catch (error) {
       console.error('Error saving formatted analysis:', error);
@@ -189,42 +126,23 @@ class StorageService {
     }
   }
 
-  /**
-   * Get formatted analysis from localStorage
-   * @param {string} userId - User email or ID
-   * @returns {string|null} - Formatted analysis or null if not found/expired
-   */
   getFormattedAnalysis(userId) {
     try {
-      if (!userId) {
-        return null;
-      }
-      
-      // Create the storage key
+      if (!userId) return null;
       const storageKey = `${FORMATTED_ANALYSES_PREFIX}${userId}`;
-      
-      // Get the stored item
       const storedData = localStorage.getItem(storageKey);
-      
-      if (!storedData) {
-        return null;
-      }
-      
-      // Parse the stored data
+      if (!storedData) return null;
+
       const parsedData = JSON.parse(storedData);
-      
-      // Check if the data is still fresh (less than 24 hours old)
       const currentTime = new Date().getTime();
       const dataAge = currentTime - parsedData.timestamp;
-      const maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-      
+      const maxAge = 24 * 60 * 60 * 1000;
+
       if (dataAge > maxAge) {
-        // Data is stale, remove it and return null
         localStorage.removeItem(storageKey);
         return null;
       }
-      
-      // Return the content
+
       return parsedData.content;
     } catch (error) {
       console.error('Error retrieving formatted analysis:', error);
@@ -232,17 +150,9 @@ class StorageService {
     }
   }
 
-  /**
-   * Clear formatted analysis cache
-   * @param {string} userId - User email or ID
-   * @returns {boolean} - Success status
-   */
   clearFormattedAnalysis(userId) {
     try {
-      if (!userId) {
-        return false;
-      }
-      
+      if (!userId) return false;
       const storageKey = `${FORMATTED_ANALYSES_PREFIX}${userId}`;
       localStorage.removeItem(storageKey);
       return true;
@@ -252,25 +162,16 @@ class StorageService {
     }
   }
 
-  /**
-   * Clear all formatted analyses caches (useful when upgrading app version)
-   * @returns {number} - Number of cache entries cleared
-   */
   clearAllFormattedAnalyses() {
     try {
       const keysToRemove = [];
-      
-      // Find all keys with the formatted analyses prefix
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith(FORMATTED_ANALYSES_PREFIX)) {
           keysToRemove.push(key);
         }
       }
-      
-      // Remove all found keys
       keysToRemove.forEach(key => localStorage.removeItem(key));
-      
       return keysToRemove.length;
     } catch (error) {
       console.error('Error clearing all formatted analyses:', error);
@@ -278,18 +179,10 @@ class StorageService {
     }
   }
 
-  /**
-   * Save learning resources to local storage
-   * @param {string} userId User identifier
-   * @param {Object} resources Learning resources data
-   * @returns {boolean} Success status
-   */
+  // ✅ Moved this method above the one that uses it
   saveLearningSources(userId, resources) {
     try {
-      if (!userId) {
-        return false;
-      }
-      
+      if (!userId) return false;
       localStorage.setItem(`${LEARNING_RESOURCES_PREFIX}${userId}`, JSON.stringify(resources));
       return true;
     } catch (error) {
@@ -298,26 +191,13 @@ class StorageService {
     }
   }
 
-  /**
-   * Save learning resources to local storage (alias with userEmail parameter)
-   * @param {string} userEmail User email identifier
-   * @param {Object} resources Learning resources data
-   */
   saveLearningResources(userEmail, resources) {
     return this.saveLearningSources(userEmail, resources);
   }
 
-  /**
-   * Get learning resources from local storage
-   * @param {string} userId User identifier
-   * @returns {Object|null} Learning resources data
-   */
   getLearningResources(userId) {
     try {
-      if (!userId) {
-        return null;
-      }
-      
+      if (!userId) return null;
       const data = localStorage.getItem(`${LEARNING_RESOURCES_PREFIX}${userId}`);
       return data ? JSON.parse(data) : null;
     } catch (error) {
@@ -326,30 +206,14 @@ class StorageService {
     }
   }
 
-  /**
-   * Check if learning resources exist in storage
-   * @param {string} userId User identifier
-   * @returns {boolean} True if resources exist
-   */
   hasLearningResources(userId) {
-    if (!userId) {
-      return false;
-    }
+    if (!userId) return false;
     return !!localStorage.getItem(`${LEARNING_RESOURCES_PREFIX}${userId}`);
   }
 
-  /**
-   * Save interview questions to local storage
-   * @param {string} userId User identifier
-   * @param {Object} questions Interview questions data
-   * @returns {boolean} Success status
-   */
   saveInterviewQuestions(userId, questions) {
     try {
-      if (!userId) {
-        return false;
-      }
-      
+      if (!userId) return false;
       localStorage.setItem(`${INTERVIEW_QUESTIONS_PREFIX}${userId}`, JSON.stringify(questions));
       return true;
     } catch (error) {
@@ -358,17 +222,9 @@ class StorageService {
     }
   }
 
-  /**
-   * Get interview questions from local storage
-   * @param {string} userId User identifier
-   * @returns {Object|null} Interview questions data
-   */
   getInterviewQuestions(userId) {
     try {
-      if (!userId) {
-        return null;
-      }
-      
+      if (!userId) return null;
       const data = localStorage.getItem(`${INTERVIEW_QUESTIONS_PREFIX}${userId}`);
       return data ? JSON.parse(data) : null;
     } catch (error) {
@@ -377,22 +233,11 @@ class StorageService {
     }
   }
 
-  /**
-   * Check if interview questions exist in storage
-   * @param {string} userId User identifier
-   * @returns {boolean} True if questions exist
-   */
   hasInterviewQuestions(userId) {
-    if (!userId) {
-      return false;
-    }
+    if (!userId) return false;
     return !!localStorage.getItem(`${INTERVIEW_QUESTIONS_PREFIX}${userId}`);
   }
 
-  /**
-   * Get current user ID
-   * @returns {string|null} User ID or null if not available
-   */
   getCurrentUserId() {
     try {
       const userData = JSON.parse(localStorage.getItem(CURRENT_USER_KEY));
@@ -403,19 +248,10 @@ class StorageService {
     }
   }
 
-  /**
-   * Get current user email (alternative implementation)
-   * @returns {string|null} User email or null if not available
-   */
   getCurrentUserEmail() {
     try {
-      // First try from the 'user' key (new implementation)
       const userData = JSON.parse(localStorage.getItem(USER_KEY));
-      if (userData?.email) {
-        return userData.email;
-      }
-      
-      // Fallback to the existing method
+      if (userData?.email) return userData.email;
       return this.getCurrentUserId();
     } catch (error) {
       console.error('Error getting current user email:', error);
@@ -423,11 +259,6 @@ class StorageService {
     }
   }
 
-  /**
-   * Generate a simple ID
-   * @returns {string} - Random ID
-   * @private
-   */
   _generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
   }

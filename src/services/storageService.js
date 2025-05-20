@@ -162,10 +162,13 @@ class StorageService {
     }
   }
 
+  // Fixed the TDZ issue by declaring i outside the for loop initialization
   clearAllFormattedAnalyses() {
     try {
       const keysToRemove = [];
-      for (let i = 0; i < localStorage.length; i++) {
+      // Declare i before the loop to avoid TDZ issues
+      let i;
+      for (i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith(FORMATTED_ANALYSES_PREFIX)) {
           keysToRemove.push(key);
@@ -179,7 +182,6 @@ class StorageService {
     }
   }
 
-  // ✅ Moved this method above the one that uses it
   saveLearningSources(userId, resources) {
     try {
       if (!userId) return false;

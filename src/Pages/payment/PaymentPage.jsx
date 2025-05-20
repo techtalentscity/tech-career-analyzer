@@ -43,6 +43,8 @@ const PaymentPage = () => {
             // Payment successful
             setIsPaid(true);
             setSubscriptionId(data.subscriptionID);
+            // Optional success message for the subscriber
+            // alert(data.subscriptionID);
           }
         }).render('#paypal-button-container-P-9PC51909K3266754PNAV5OZA');
       }

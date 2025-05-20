@@ -54,7 +54,7 @@ export default async function handler(req, res) {
     console.log('Claude API Request:', {
       model: req.body.model,
       messageCount: req.body.messages.length,
-      maxTokens: req.body.max_tokens || 'default'
+      maxTokens: req.body.max_tokens || '8192 (default)'
     });
     
     // Check API key
@@ -70,7 +70,7 @@ export default async function handler(req, res) {
     const requestBody = {
       model: req.body.model,
       messages: req.body.messages,
-      max_tokens: req.body.max_tokens || 4096,
+      max_tokens: req.body.max_tokens || 8192,  // Updated to 8192 from 4096
       temperature: req.body.temperature !== undefined ? req.body.temperature : 0.7,
       system: req.body.system || ''
     };
@@ -81,14 +81,25 @@ export default async function handler(req, res) {
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': process.env.CLAUDE_API_KEY,
-        'anthropic-version': '2023-06-01' // Consider using a more recent version if available
+        'anthropic-version': '2023-12-01' // Updated to more recent version
       },
       body: JSON.stringify(requestBody)
     });
     
     // Check if the response is successful
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      // Get error as text first to avoid "body already read" errors
+      const errorText = await response.text();
+      let errorData;
+      
+      try {
+        // Try to parse as JSON
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        // If not valid JSON, use text as message
+        errorData = { message: errorText };
+      }
+      
       console.error('Claude API Error:', {
         status: response.status,
         statusText: response.statusText,
@@ -97,13 +108,25 @@ export default async function handler(req, res) {
       
       return res.status(response.status).json({
         error: 'Claude API error',
-        details: errorData.error?.message || response.statusText,
+        details: errorData.error?.message || errorData.message || response.statusText,
         status: response.status
       });
     }
     
     // Successfully received response from Claude API
-    const data = await response.json();
+    // Parse response as text first to avoid "body already read" errors
+    const responseText = await response.text();
+    let data;
+    
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Error parsing Claude API response:', parseError);
+      return res.status(500).json({
+        error: 'Failed to parse Claude API response',
+        details: 'The API returned an invalid JSON response'
+      });
+    }
     
     // Log response structure for debugging
     console.log('Claude API Response Structure:', {
@@ -116,7 +139,6 @@ export default async function handler(req, res) {
     // Enhance the response if needed for backward compatibility
     if (data.content && Array.isArray(data.content) && data.content.length > 0) {
       // Modern Claude API format - keep as is
-      // But add a log to help debug the structure
       console.log('Content structure:', {
         type: data.content[0].type,
         hasText: !!data.content[0].text

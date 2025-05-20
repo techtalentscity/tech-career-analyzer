@@ -603,8 +603,8 @@ const CareerHome = () => {
         </section>
       </div>
 
-      {/* Custom styles */}
-      <style jsx>{`
+      {/* Custom styles - FIXED: Removed 'jsx' attribute to fix ESLint error */}
+      <style>{`
         @keyframes fade-up {
           from {
             opacity: 0;

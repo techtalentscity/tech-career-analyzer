@@ -4,6 +4,9 @@
 const SUBMISSIONS_KEY = 'tech_talents_submissions';
 const ANALYSES_KEY = 'tech_talents_analyses';
 const FORMATTED_ANALYSES_PREFIX = 'tech_talents_formatted_analysis_';
+const LEARNING_RESOURCES_PREFIX = 'learning_resources_';
+const INTERVIEW_QUESTIONS_PREFIX = 'interview_questions_';
+const CURRENT_USER_KEY = 'current_user';
 
 class StorageService {
   constructor() {
@@ -235,6 +238,122 @@ class StorageService {
     } catch (error) {
       console.error('Error clearing all formatted analyses:', error);
       return 0;
+    }
+  }
+
+  /**
+   * Save learning resources to local storage
+   * @param {string} userId User identifier
+   * @param {Object} resources Learning resources data
+   * @returns {boolean} Success status
+   */
+  saveLearningSources(userId, resources) {
+    try {
+      if (!userId) {
+        return false;
+      }
+      
+      localStorage.setItem(`${LEARNING_RESOURCES_PREFIX}${userId}`, JSON.stringify(resources));
+      return true;
+    } catch (error) {
+      console.error('Error saving learning resources to storage:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get learning resources from local storage
+   * @param {string} userId User identifier
+   * @returns {Object|null} Learning resources data
+   */
+  getLearningResources(userId) {
+    try {
+      if (!userId) {
+        return null;
+      }
+      
+      const data = localStorage.getItem(`${LEARNING_RESOURCES_PREFIX}${userId}`);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Error getting learning resources from storage:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Check if learning resources exist in storage
+   * @param {string} userId User identifier
+   * @returns {boolean} True if resources exist
+   */
+  hasLearningResources(userId) {
+    if (!userId) {
+      return false;
+    }
+    return !!localStorage.getItem(`${LEARNING_RESOURCES_PREFIX}${userId}`);
+  }
+
+  /**
+   * Save interview questions to local storage
+   * @param {string} userId User identifier
+   * @param {Object} questions Interview questions data
+   * @returns {boolean} Success status
+   */
+  saveInterviewQuestions(userId, questions) {
+    try {
+      if (!userId) {
+        return false;
+      }
+      
+      localStorage.setItem(`${INTERVIEW_QUESTIONS_PREFIX}${userId}`, JSON.stringify(questions));
+      return true;
+    } catch (error) {
+      console.error('Error saving interview questions to storage:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get interview questions from local storage
+   * @param {string} userId User identifier
+   * @returns {Object|null} Interview questions data
+   */
+  getInterviewQuestions(userId) {
+    try {
+      if (!userId) {
+        return null;
+      }
+      
+      const data = localStorage.getItem(`${INTERVIEW_QUESTIONS_PREFIX}${userId}`);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Error getting interview questions from storage:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Check if interview questions exist in storage
+   * @param {string} userId User identifier
+   * @returns {boolean} True if questions exist
+   */
+  hasInterviewQuestions(userId) {
+    if (!userId) {
+      return false;
+    }
+    return !!localStorage.getItem(`${INTERVIEW_QUESTIONS_PREFIX}${userId}`);
+  }
+
+  /**
+   * Get current user ID
+   * @returns {string|null} User ID or null if not available
+   */
+  getCurrentUserId() {
+    try {
+      const userData = JSON.parse(localStorage.getItem(CURRENT_USER_KEY));
+      return userData?.email || null;
+    } catch (error) {
+      console.error('Error getting current user ID:', error);
+      return null;
     }
   }
 

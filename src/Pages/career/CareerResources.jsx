@@ -31,16 +31,17 @@ const CareerResources = () => {
           return;
         }
 
-        let analysis;
+        let analysis = null;
 
         try {
+          // Safer method checking
           if (typeof storageService.getCareerAnalysis === 'function') {
             analysis = await storageService.getCareerAnalysis(currentUser.email);
           }
 
-          if (!analysis) {
+          if (!analysis && typeof storageService.getFormattedAnalysis === 'function') {
             analysis = await storageService.getFormattedAnalysis(currentUser.email);
-            if (!analysis) {
+            if (!analysis && typeof storageService.getLatestAnalysis === 'function') {
               const latestAnalysis = await storageService.getLatestAnalysis();
               if (latestAnalysis) {
                 analysis = latestAnalysis.analysis || latestAnalysis.raw;
@@ -75,61 +76,70 @@ const CareerResources = () => {
     };
 
     loadAnalysisAndResources();
-  }, [currentUser]);
+  }, [currentUser, activeTab]);
 
   const handleTabChange = async (tab) => {
     setActiveTab(tab);
-
-    if (!currentUser || !currentUser.email) return;
-
-    const careerPathData = extractCareerDataFromAnalysis(careerAnalysis);
-
-    if (tab === 'learning' && !resources) {
-      setLoading(true);
-      try {
-        await loadLearningResources(currentUser.email, careerPathData);
-      } catch (error) {
-        setError(`Error loading learning resources: ${error.message}`);
-      } finally {
-        setLoading(false);
-      }
-    } else if (tab === 'interview' && !interviewQA) {
-      setLoading(true);
-      try {
-        await loadInterviewQuestions(currentUser.email, careerPathData);
-      } catch (error) {
-        setError(`Error loading interview questions: ${error.message}`);
-      } finally {
-        setLoading(false);
-      }
-    }
   };
 
   const extractCareerDataFromAnalysis = (analysis) => {
+    if (!analysis || typeof analysis !== 'string') {
+      console.warn("Invalid analysis format:", analysis);
+      return { careerPath: "Software Developer", skills: ["Programming", "Data Structures", "Algorithms"] };
+    }
+
     const careerPathMatch = analysis.match(/CAREER PATH RECOMMENDATIONS:[\s\S]*?a\)\s*([^(]+)\s*\(\d+%\s*match\)/i);
     const careerPath = careerPathMatch ? careerPathMatch[1].trim() : "Software Developer";
 
     const skillsGapSection = analysis.match(/SKILLS GAP ANALYSIS:[\s\S]*?LEARNING ROADMAP:/i);
-    const skills = (() => {
-      if (!skillsGapSection) return ["Programming", "Data Structures", "Algorithms"];
-      const matches = skillsGapSection[0].match(/\d+\.\s*([^:]+):/g);
-      if (!matches) return ["Programming", "Data Structures", "Algorithms"];
-      return matches.map(match =>
-        match.replace(/\d+\.\s*/, '').replace(':', '').trim()
-      );
-    })();
+    
+    // Safer skills extraction
+    let skills = ["Programming", "Data Structures", "Algorithms"];
+    
+    try {
+      if (skillsGapSection && skillsGapSection[0]) {
+        const matches = skillsGapSection[0].match(/\d+\.\s*([^:]+):/g);
+        if (matches && matches.length > 0) {
+          skills = matches.map(match =>
+            match.replace(/\d+\.\s*/, '').replace(':', '').trim()
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Error extracting skills:", err);
+    }
 
     return { careerPath, skills };
   };
 
   const loadLearningResources = async (userEmail, careerPathData) => {
     try {
-      if (storageService.hasLearningResources(userEmail)) {
-        setResources(await storageService.getLearningResources(userEmail));
-      } else {
+      if (!userEmail) {
+        throw new Error("User email is required to load resources");
+      }
+
+      // Check if method exists and if resources exist
+      if (typeof storageService.hasLearningResources === 'function' && 
+          storageService.hasLearningResources(userEmail)) {
+        const loadedResources = await storageService.getLearningResources(userEmail);
+        if (loadedResources) {
+          setResources(loadedResources);
+          return;
+        }
+      }
+
+      // Fallback to API
+      if (typeof geminiApiService.getLearningResources === 'function') {
         const newResources = await geminiApiService.getLearningResources(careerPathData);
-        await storageService.saveLearningResources(userEmail, newResources);
+        
+        // Save only if the method exists
+        if (typeof storageService.saveLearningResources === 'function') {
+          await storageService.saveLearningResources(userEmail, newResources);
+        }
+        
         setResources(newResources);
+      } else {
+        throw new Error("Learning resources service is not available");
       }
     } catch (error) {
       console.error("Failed to load learning resources", error);
@@ -139,12 +149,32 @@ const CareerResources = () => {
 
   const loadInterviewQuestions = async (userEmail, careerPathData) => {
     try {
-      if (storageService.hasInterviewQuestions(userEmail)) {
-        setInterviewQA(await storageService.getInterviewQuestions(userEmail));
-      } else {
+      if (!userEmail) {
+        throw new Error("User email is required to load interview questions");
+      }
+
+      // Check if method exists and if questions exist
+      if (typeof storageService.hasInterviewQuestions === 'function' && 
+          storageService.hasInterviewQuestions(userEmail)) {
+        const loadedQuestions = await storageService.getInterviewQuestions(userEmail);
+        if (loadedQuestions) {
+          setInterviewQA(loadedQuestions);
+          return;
+        }
+      }
+
+      // Fallback to API
+      if (typeof geminiApiService.getInterviewQuestions === 'function') {
         const newInterviewQA = await geminiApiService.getInterviewQuestions(careerPathData);
-        await storageService.saveInterviewQuestions(userEmail, newInterviewQA);
+        
+        // Save only if the method exists
+        if (typeof storageService.saveInterviewQuestions === 'function') {
+          await storageService.saveInterviewQuestions(userEmail, newInterviewQA);
+        }
+        
         setInterviewQA(newInterviewQA);
+      } else {
+        throw new Error("Interview questions service is not available");
       }
     } catch (error) {
       console.error("Failed to load interview questions", error);

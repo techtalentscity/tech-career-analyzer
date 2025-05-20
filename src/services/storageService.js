@@ -7,6 +7,7 @@ const FORMATTED_ANALYSES_PREFIX = 'tech_talents_formatted_analysis_';
 const LEARNING_RESOURCES_PREFIX = 'learning_resources_';
 const INTERVIEW_QUESTIONS_PREFIX = 'interview_questions_';
 const CURRENT_USER_KEY = 'current_user';
+const USER_KEY = 'user'; // Added new key for compatibility
 
 class StorageService {
   constructor() {
@@ -262,6 +263,15 @@ class StorageService {
   }
 
   /**
+   * Save learning resources to local storage (alias with userEmail parameter)
+   * @param {string} userEmail User email identifier
+   * @param {Object} resources Learning resources data
+   */
+  saveLearningResources(userEmail, resources) {
+    return this.saveLearningSources(userEmail, resources);
+  }
+
+  /**
    * Get learning resources from local storage
    * @param {string} userId User identifier
    * @returns {Object|null} Learning resources data
@@ -353,6 +363,26 @@ class StorageService {
       return userData?.email || null;
     } catch (error) {
       console.error('Error getting current user ID:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get current user email (alternative implementation)
+   * @returns {string|null} User email or null if not available
+   */
+  getCurrentUserEmail() {
+    try {
+      // First try from the 'user' key (new implementation)
+      const userData = JSON.parse(localStorage.getItem(USER_KEY));
+      if (userData?.email) {
+        return userData.email;
+      }
+      
+      // Fallback to the existing method
+      return this.getCurrentUserId();
+    } catch (error) {
+      console.error('Error getting current user email:', error);
       return null;
     }
   }

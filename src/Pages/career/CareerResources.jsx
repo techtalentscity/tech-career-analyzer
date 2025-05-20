@@ -88,21 +88,30 @@ const CareerResources = () => {
       return { careerPath: "Software Developer", skills: ["Programming", "Data Structures", "Algorithms"] };
     }
 
+    // Using explicit variables instead of regex matches to avoid potential TDZ issues
+    let careerPath = "Software Developer";
     const careerPathMatch = analysis.match(/CAREER PATH RECOMMENDATIONS:[\s\S]*?a\)\s*([^(]+)\s*\(\d+%\s*match\)/i);
-    const careerPath = careerPathMatch ? careerPathMatch[1].trim() : "Software Developer";
+    if (careerPathMatch && careerPathMatch.length > 1) {
+      careerPath = careerPathMatch[1].trim();
+    }
 
-    const skillsGapSection = analysis.match(/SKILLS GAP ANALYSIS:[\s\S]*?LEARNING ROADMAP:/i);
-    
-    // Safer skills extraction
+    // Default skills
     let skills = ["Programming", "Data Structures", "Algorithms"];
     
     try {
-      if (skillsGapSection && skillsGapSection[0]) {
-        const matches = skillsGapSection[0].match(/\d+\.\s*([^:]+):/g);
-        if (matches && matches.length > 0) {
-          skills = matches.map(match =>
-            match.replace(/\d+\.\s*/, '').replace(':', '').trim()
-          );
+      const skillsGapSection = analysis.match(/SKILLS GAP ANALYSIS:[\s\S]*?LEARNING ROADMAP:/i);
+      if (skillsGapSection && skillsGapSection.length > 0) {
+        const sectionText = skillsGapSection[0];
+        const skillMatches = sectionText.match(/\d+\.\s*([^:]+):/g);
+        
+        if (skillMatches && skillMatches.length > 0) {
+          // Process each match separately to avoid using map with arrow functions
+          skills = [];
+          for (let i = 0; i < skillMatches.length; i++) {
+            let match = skillMatches[i];
+            match = match.replace(/\d+\.\s*/, '').replace(':', '').trim();
+            skills.push(match);
+          }
         }
       }
     } catch (err) {

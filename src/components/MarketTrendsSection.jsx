@@ -1,5 +1,4 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
   // If no market trends data is available, show a clear message
@@ -147,7 +146,7 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
   // Extract industries
   const industries = industryTrend?.topIndustries || extractIndustries(industryTrend?.details || '');
 
-  // Prepare data for Job Market chart
+  // Prepare data for Job Market cards
   const prepareJobMarketData = () => {
     if (!careerPaths || careerPaths.length === 0) return [];
     
@@ -157,13 +156,13 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
     }));
   };
 
-  // Prepare data for salary chart
+  // Prepare data for salary cards
   const prepareSalaryData = () => {
     if (!salaryTrend) return [];
     
     const { entry, mid, senior } = extractSalaryRanges(salaryTrend.details);
     
-    // Convert salary ranges to numeric values for charting
+    // Convert salary ranges to numeric values for easier display
     const extractValue = (range) => {
       const match = range.match(/\$([0-9,]+)/g);
       if (match && match.length >= 2) {
@@ -175,13 +174,13 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
     };
     
     return [
-      { name: "Entry Level", value: extractValue(entry) },
-      { name: "Mid Level", value: extractValue(mid) },
-      { name: "Senior Level", value: extractValue(senior) }
+      { name: "Entry Level", value: extractValue(entry), range: entry },
+      { name: "Mid Level", value: extractValue(mid), range: mid },
+      { name: "Senior Level", value: extractValue(senior), range: senior }
     ];
   };
 
-  // Prepare data for industry chart
+  // Prepare data for industry cards
   const prepareIndustryData = () => {
     if (!industries || industries.length === 0) return [];
     
@@ -212,8 +211,26 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
     });
   };
 
-  // Generate color array for charts
+  // Generate color array for cards
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#a35ff2'];
+
+  // Define color classes for different ranges
+  const getValueColorClass = (value, type) => {
+    if (type === 'salary') {
+      if (value > 100000) return 'bg-green-100 border-green-400 text-green-800';
+      if (value > 70000) return 'bg-blue-100 border-blue-400 text-blue-800';
+      return 'bg-yellow-100 border-yellow-400 text-yellow-800';
+    }
+    
+    if (type === 'match' || type === 'growth') {
+      if (value >= 80) return 'bg-green-100 border-green-400 text-green-800';
+      if (value >= 60) return 'bg-blue-100 border-blue-400 text-blue-800';
+      if (value >= 40) return 'bg-yellow-100 border-yellow-400 text-yellow-800';
+      return 'bg-gray-100 border-gray-400 text-gray-800';
+    }
+    
+    return 'bg-gray-100 border-gray-400 text-gray-800';
+  };
 
   // Prepare chart and table data
   const jobMarketData = prepareJobMarketData();
@@ -227,6 +244,25 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
   if (!salaryTrend) missingTrends.push('Salary Trends');
   if (!techTrend) missingTrends.push('Emerging Technologies');
   if (!industryTrend) missingTrends.push('Industry Sector Analysis');
+
+  // Card components
+  const DataCard = ({ title, value, subtitle, colorClass, icon, extraInfo }) => (
+    <div className={`rounded-lg border p-4 shadow-sm ${colorClass}`}>
+      <div className="flex justify-between items-start">
+        <div>
+          <p className="text-sm font-medium">{title}</p>
+          <h4 className="text-2xl font-bold mt-1">{value}</h4>
+          {subtitle && <p className="text-sm mt-1">{subtitle}</p>}
+          {extraInfo && <p className="text-xs mt-2">{extraInfo}</p>}
+        </div>
+        {icon && (
+          <div className="p-2 rounded-full bg-white bg-opacity-60">
+            {icon}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -248,7 +284,7 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
         </div>
       )}
 
-      {/* Job Market Outlook as Graph */}
+      {/* Job Market Outlook as Cards */}
       {jobMarketTrend && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold text-blue-800 mb-4">Job Market Outlook</h3>
@@ -257,26 +293,27 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
           </div>
           
           {jobMarketData.length > 0 && (
-            <div className="h-72 mt-6">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={jobMarketData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis label={{ value: 'Match Percentage', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip formatter={(value) => [`${value}%`, 'Match']} />
-                  <Legend />
-                  <Bar dataKey="value" name="Match Percentage" fill="#0088FE" />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+              {jobMarketData.map((job, index) => (
+                <DataCard 
+                  key={index}
+                  title={job.name}
+                  value={`${job.value}%`}
+                  subtitle="Match Percentage"
+                  colorClass={getValueColorClass(job.value, 'match')}
+                  icon={
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  }
+                />
+              ))}
             </div>
           )}
         </div>
       )}
 
-      {/* Salary Trends as Graph */}
+      {/* Salary Trends as Cards */}
       {salaryTrend && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold text-blue-800 mb-4">Salary Trends</h3>
@@ -285,20 +322,22 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
           </div>
           
           {salaryData.length > 0 && (
-            <div className="h-72 mt-6">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={salaryData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis label={{ value: 'Salary ($)', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, 'Average Salary']} />
-                  <Legend />
-                  <Bar dataKey="value" name="Average Salary" fill="#00C49F" />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              {salaryData.map((salary, index) => (
+                <DataCard 
+                  key={index}
+                  title={salary.name}
+                  value={`$${salary.value.toLocaleString()}`}
+                  subtitle="Average Salary"
+                  extraInfo={`Range: ${salary.range}`}
+                  colorClass={getValueColorClass(salary.value, 'salary')}
+                  icon={
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  }
+                />
+              ))}
             </div>
           )}
         </div>
@@ -318,7 +357,7 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
         </div>
       )}
 
-      {/* Emerging Technologies as Table */}
+      {/* Emerging Technologies as Table - Keep as is */}
       {techTrend && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold text-blue-800 mb-4">Emerging Technologies</h3>
@@ -375,7 +414,7 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
         </div>
       )}
 
-      {/* Industry Sector Analysis as Graph */}
+      {/* Industry Sector Analysis as Cards */}
       {industryTrend && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold text-blue-800 mb-4">Top Hiring Industries</h3>
@@ -384,25 +423,21 @@ const MarketTrendsSection = ({ marketTrends, careerPaths }) => {
           </div>
           
           {industryData.length > 0 && (
-            <div className="h-72 mt-6">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={industryData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  layout="vertical"
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="name" type="category" width={150} />
-                  <Tooltip formatter={(value) => [`${value}%`, 'Growth Rate']} />
-                  <Legend />
-                  <Bar dataKey="value" name="Industry Growth" fill="#8884d8">
-                    {industryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+              {industryData.map((industry, index) => (
+                <DataCard 
+                  key={index}
+                  title={industry.name}
+                  value={`${industry.value}%`}
+                  subtitle="Industry Growth"
+                  colorClass={getValueColorClass(industry.value, 'growth')}
+                  icon={
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  }
+                />
+              ))}
             </div>
           )}
         </div>

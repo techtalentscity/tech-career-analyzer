@@ -92,7 +92,7 @@ const CareerHome = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [expandedFAQ, setExpandedFAQ] = useState(null);
   const sampleResultsRef = useRef(null);
-  const { currentUser } = useAuth(); // Add this line to get authentication state
+  const { currentUser, isAuthorized } = useAuth(); // Updated to include isAuthorized
 
   useEffect(() => {
     setIsVisible(true);
@@ -100,11 +100,17 @@ const CareerHome = () => {
 
   const handleStartTest = () => {
     if (currentUser) {
-      // User is logged in, go directly to test
-      navigate('/career/test');
+      // User is logged in, check if they're authorized
+      if (isAuthorized) {
+        // User is logged in and authorized (has paid), go to test
+        navigate('/career/test');
+      } else {
+        // User is logged in but not authorized (hasn't paid), go to payment
+        navigate('/payment');
+      }
     } else {
-      // User is not logged in, go to login page
-      navigate('/login');
+      // User is not logged in, go to payment page
+      navigate('/payment');
     }
   };
 

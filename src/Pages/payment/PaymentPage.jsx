@@ -104,7 +104,7 @@ const PaymentPage = () => {
             <>
               <div className="bg-indigo-50 rounded-lg p-4 mb-6">
                 <p className="text-gray-700">
-                  <span className="font-bold">$100</span> - 30-day access
+                  <span className="font-bold">$60</span> - 30-day access
                 </p>
                 <ul className="text-left mt-2">
                   <li className="flex items-start text-sm">

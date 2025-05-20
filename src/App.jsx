@@ -3,25 +3,17 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 // Authentication Components
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './Pages/auth/Login';
-
 // Career Test Components
 import CareerHome from './Pages/career/CareerHome';
 import CareerTest from './Pages/career/CareerTest';
 import CareerDashboard from './Pages/career/CareerDashboard';
-import CareerAnalysis from './Pages/career/CareerAnalysis';
-
-// Dashboard Components
-import Dashboard from './Pages/Dashboard';
-import ResourcesDashboard from './Pages/ResourcesDashboard';
-
+import CareerResources from './Pages/career/CareerResources'; // Add this import
 // Payment Page
 import PaymentPage from './Pages/payment/PaymentPage';
-
 // Import services - these are imported for initialization
 import './services/googleFormService'; // Import the Google Form service
 
@@ -52,23 +44,9 @@ function App() {
               <CareerDashboard />
             </ProtectedRoute>
           } />
-          <Route path="/career/analysis/:analysisId" element={
+          <Route path="/career/resources" element={
             <ProtectedRoute>
-              <CareerAnalysis />
-            </ProtectedRoute>
-          } />
-          
-          {/* Dashboard routes */}
-          <Route path="/dashboard/:userId" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          
-          {/* Resources dashboard */}
-          <Route path="/resources/:userId" element={
-            <ProtectedRoute>
-              <ResourcesDashboard />
+              <CareerResources />
             </ProtectedRoute>
           } />
           

@@ -276,7 +276,7 @@ const CareerHome = () => {
           </div>
         </section>
 
-        {/* Pricing Section - UPDATED PRICE */}
+        {/* Pricing Section - UPDATED PRICE TO $60 */}
         <section className="mb-20 text-center">
           <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl p-8 md:p-12 max-w-3xl mx-auto relative overflow-hidden">
             <div className="absolute top-0 right-0 bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-2 transform rotate-45 translate-x-10 translate-y-3">
@@ -288,7 +288,7 @@ const CareerHome = () => {
             
             <div className="flex justify-center items-center mb-6">
               <span className="text-gray-400 line-through text-2xl mr-4">$149</span>
-              <span className="text-4xl font-bold text-indigo-600">$100</span>
+              <span className="text-4xl font-bold text-indigo-600">$60</span>
             </div>
             
             <ul className="text-left max-w-md mx-auto mb-8 space-y-2">
@@ -364,7 +364,7 @@ const CareerHome = () => {
           </div>
         </section>
 
-        {/* Value Comparison - UPDATED PRICE */}
+        {/* Value Comparison - UPDATED PRICE TO $60 */}
         <section className="mb-20">
           <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Why Choose Our Analysis</h2>
           
@@ -372,7 +372,7 @@ const CareerHome = () => {
             <div className="grid md:grid-cols-3">
               <div className="p-8 bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
                 <h3 className="text-xl font-bold mb-4">Our AI Career Analysis</h3>
-                <div className="text-3xl font-bold mb-4">$100</div>
+                <div className="text-3xl font-bold mb-4">$60</div>
                 <p className="mb-6 text-indigo-100">One-time payment for 30-day access</p>
                 <ul className="space-y-3">
                   <li className="flex items-start">

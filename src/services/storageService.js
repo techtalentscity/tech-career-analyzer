@@ -108,6 +108,42 @@ class StorageService {
   }
 
   /**
+   * Get career analysis for a specific user
+   * @param {string} userId - User email or ID
+   * @returns {string|null} - Career analysis or null if not found
+   */
+  getCareerAnalysis(userId) {
+    try {
+      if (!userId) {
+        return null;
+      }
+      
+      // First try to get the formatted analysis which is probably what we want
+      const formattedAnalysis = this.getFormattedAnalysis(userId);
+      if (formattedAnalysis) {
+        return formattedAnalysis;
+      }
+      
+      // If no formatted analysis, look through the analyses for this user
+      const analyses = JSON.parse(localStorage.getItem(ANALYSES_KEY) || '[]');
+      
+      // Find the most recent analysis for this user
+      const userAnalyses = analyses
+        .filter(a => a.userId === userId)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+      if (userAnalyses.length > 0) {
+        return userAnalyses[0].analysis || userAnalyses[0].raw;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error getting career analysis:', error);
+      return null;
+    }
+  }
+
+  /**
    * Get submission by ID
    * @param {string} id - Submission ID
    * @returns {Object|null} - Submission or null if not found

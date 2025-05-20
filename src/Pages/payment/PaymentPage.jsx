@@ -8,13 +8,20 @@ import { useAuth } from '../../context/AuthContext';
 const PaymentPage = () => {
   const [isPaid, setIsPaid] = useState(false);
   const [subscriptionId, setSubscriptionId] = useState('');
-  const { currentUser, signInWithGoogle } = useAuth();
+  const { currentUser, signInWithGoogle, isAuthorized } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check if user is already authorized and redirect if needed
+    if (currentUser && isAuthorized) {
+      navigate('/career/test');
+      return;
+    }
+    
     // Load PayPal script
     const script = document.createElement('script');
     script.src = "https://www.paypal.com/sdk/js?client-id=AVwbq-J1IvhiWpiIyMuHMP46iLeiiMe2reeKPCQ6jtKo9I70oEZnVNbpGUZNd_dgDr_6Quf_LjBOX9UJ&vault=true&intent=subscription";
+    script.setAttribute('data-sdk-integration-source', 'button-factory');
     script.async = true;
     
     script.onload = () => {
@@ -28,7 +35,8 @@ const PaymentPage = () => {
           },
           createSubscription: function(data, actions) {
             return actions.subscription.create({
-              plan_id: 'P-8M416101G0045512RNAV4AIY'
+              /* Creates the subscription */
+              plan_id: 'P-9PC51909K3266754PNAV5OZA'
             });
           },
           onApprove: function(data, actions) {
@@ -36,7 +44,7 @@ const PaymentPage = () => {
             setIsPaid(true);
             setSubscriptionId(data.subscriptionID);
           }
-        }).render('#paypal-button-container');
+        }).render('#paypal-button-container-P-9PC51909K3266754PNAV5OZA');
       }
     };
     
@@ -47,7 +55,7 @@ const PaymentPage = () => {
         document.body.removeChild(script);
       }
     };
-  }, []);
+  }, [currentUser, isAuthorized, navigate]);
 
   // Register the user after payment and sign-in
   useEffect(() => {
@@ -112,7 +120,7 @@ const PaymentPage = () => {
                 </ul>
               </div>
               
-              <div id="paypal-button-container"></div>
+              <div id="paypal-button-container-P-9PC51909K3266754PNAV5OZA"></div>
             </>
           ) : (
             <div>

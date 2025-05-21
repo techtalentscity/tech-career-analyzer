@@ -162,7 +162,7 @@ const CareerHome = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const sampleResultsRef = useRef(null);
   const platformFeaturesRef = useRef(null);
-  const { currentUser, isAuthorized } = useAuth();
+  const { currentUser, isAuthorized, signOut, signInWithGoogle } = useAuth();
 
   useEffect(() => {
     setIsVisible(true);
@@ -216,7 +216,7 @@ const CareerHome = () => {
                     <span className="text-sm text-gray-600">{currentUser.displayName || currentUser.email}</span>
                   </div>
                   <button 
-                    onClick={() => useAuth().signOut()} 
+                    onClick={signOut} 
                     className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm transition-colors"
                   >
                     Logout
@@ -224,7 +224,7 @@ const CareerHome = () => {
                 </div>
               ) : (
                 <button 
-                  onClick={() => useAuth().signInWithGoogle()} 
+                  onClick={signInWithGoogle} 
                   className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
                 >
                   <span className="mr-2">G</span>
@@ -263,7 +263,7 @@ const CareerHome = () => {
                       <span className="text-sm text-gray-600">{currentUser.displayName || currentUser.email}</span>
                     </div>
                     <button 
-                      onClick={() => useAuth().signOut()} 
+                      onClick={signOut} 
                       className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm transition-colors w-full text-left"
                     >
                       Logout
@@ -271,7 +271,7 @@ const CareerHome = () => {
                   </div>
                 ) : (
                   <button 
-                    onClick={() => useAuth().signInWithGoogle()} 
+                    onClick={signInWithGoogle} 
                     className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
                   >
                     <span className="mr-2">G</span>

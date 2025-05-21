@@ -15,6 +15,7 @@ import CareerTest from './Pages/career/CareerTest';
 import CareerDashboard from './Pages/career/CareerDashboard';
 import Learning from './Pages/career/Learning';
 import Interviews from './Pages/career/Interviews';
+import CareerGuide from './Pages/career/CareerGuide';
 
 // Payment Page
 import PaymentPage from './Pages/payment/PaymentPage';
@@ -59,6 +60,11 @@ function App() {
           <Route path="/career/interviews" element={
             <ProtectedRoute>
               <Interviews />
+            </ProtectedRoute>
+          } />
+          <Route path="/career/guide" element={
+            <ProtectedRoute>
+              <CareerGuide />
             </ProtectedRoute>
           } />
           

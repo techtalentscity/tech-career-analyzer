@@ -12,7 +12,7 @@ const CareerContact = () => {
     isSuccess: false
   });
   const formRef = useRef(null);
-  const { currentUser } = useAuth();
+  const { currentUser, signOut, signInWithGoogle } = useAuth();
 
   // Form field values
   const [firstName, setFirstName] = useState('');
@@ -112,7 +112,7 @@ const CareerContact = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 overflow-hidden flex flex-col">
       {/* Header */}
-      <header className="bg-white shadow-md sticky top-0 z-50">
+      <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-6 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -137,7 +137,7 @@ const CareerContact = () => {
                     <span className="text-sm text-gray-600">{currentUser.displayName || currentUser.email}</span>
                   </div>
                   <button 
-                    onClick={() => useAuth().signOut()} 
+                    onClick={signOut} 
                     className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm transition-colors"
                   >
                     Logout
@@ -145,7 +145,7 @@ const CareerContact = () => {
                 </div>
               ) : (
                 <button 
-                  onClick={() => useAuth().signInWithGoogle()} 
+                  onClick={signInWithGoogle} 
                   className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
                 >
                   <span className="mr-2">G</span>
@@ -184,7 +184,7 @@ const CareerContact = () => {
                       <span className="text-sm text-gray-600">{currentUser.displayName || currentUser.email}</span>
                     </div>
                     <button 
-                      onClick={() => useAuth().signOut()} 
+                      onClick={signOut} 
                       className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm transition-colors w-full text-left"
                     >
                       Logout
@@ -192,7 +192,7 @@ const CareerContact = () => {
                   </div>
                 ) : (
                   <button 
-                    onClick={() => useAuth().signInWithGoogle()} 
+                    onClick={signInWithGoogle} 
                     className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
                   >
                     <span className="mr-2">G</span>
@@ -206,7 +206,7 @@ const CareerContact = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow">
+      <main className="flex-grow pt-16">
         <div className="container mx-auto px-6 py-12 max-w-5xl">
           {/* Page Title */}
           <div className="mb-12 text-center">

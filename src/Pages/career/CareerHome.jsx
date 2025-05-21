@@ -265,63 +265,6 @@ const CareerHome = () => {
           </div>
         </section>
 
-        {/* Platform Features Section */}
-        <section ref={platformFeaturesRef} className="mb-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800">Complete Career Development Platform</h2>
-          <p className="text-center text-gray-600 text-lg mb-12 max-w-3xl mx-auto">
-            Beyond assessment results, access our comprehensive suite of tools designed to support every aspect of your tech career journey
-          </p>
-          
-          <div className="grid md:grid-cols-2 gap-8 mb-10">
-            {PLATFORM_FEATURES.map((feature, index) => (
-              <div 
-                key={index}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden transform hover:-translate-y-1 transition-all duration-300"
-              >
-                <div className="relative h-44 bg-gradient-to-r from-indigo-50 to-purple-50 flex items-center justify-center">
-                  <div className={`w-16 h-16 rounded-full ${feature.color} flex items-center justify-center text-3xl`}>
-                    {feature.icon}
-                  </div>
-                  
-                  {/* We'll use placeholder design elements instead of actual images */}
-                  <div className="absolute inset-0 opacity-10 flex items-center justify-center">
-                    <div className="w-full h-full bg-gradient-to-r from-indigo-100 to-purple-100 flex items-center justify-center">
-                      <div className={`text-8xl opacity-20 ${feature.color}`}>{feature.icon}</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Top Learning Resources Preview */}
-        <section className="mb-20 bg-white rounded-3xl shadow-lg p-8">
-          <h2 className="text-2xl md:text-3xl font-bold mb-8 text-gray-800">Featured Learning Resources</h2>
-          
-          <div className="grid md:grid-cols-3 gap-6">
-            {TOP_COURSES.map((course, index) => (
-              <div key={index} className="bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
-                <div className="h-32 bg-gradient-to-r from-blue-50 to-indigo-50 flex items-center justify-center">
-                  <div className="text-4xl">{index === 0 ? "💻" : index === 1 ? "🔄" : "🎓"}</div>
-                </div>
-                <div className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-gray-800">{course.title}</h3>
-                    <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">{course.rating} ★</span>
-                  </div>
-                  <div className="text-gray-500 text-sm mb-3">{course.provider} • {course.instructor}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* Success Stats */}
         <section className="mb-20 py-8">
           <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
@@ -338,56 +281,6 @@ const CareerHome = () => {
             <div className="bg-white rounded-xl p-6 shadow-lg text-center transform hover:-translate-y-1 transition-all duration-300">
               <div className="text-4xl font-bold text-indigo-600 mb-2">0.1%</div>
               <p className="text-gray-700">Investment of your potential first-year tech salary</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Interview Resources Preview */}
-        <section className="mb-20 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-3xl p-8 shadow-md">
-          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Ace Your Technical Interviews</h2>
-          <p className="text-gray-600 max-w-2xl mb-8">Comprehensive resources and practice tools for technical, behavioral, and coding interviews</p>
-          
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="bg-white p-4 rounded-lg shadow">
-              <div className="flex items-center mb-3">
-                <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3">LC</div>
-                <h3 className="font-bold">LeetCode</h3>
-                <span className="ml-auto text-xs font-medium text-purple-600 px-2 py-1 bg-purple-50 rounded-full">Very High</span>
-              </div>
-              <p className="text-sm text-gray-600 mb-3">Platform with over 2,000 coding problems, community discussions, and interview preparation resources.</p>
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="px-2 py-1 bg-gray-100 rounded-full">Algorithms</span>
-                <span className="px-2 py-1 bg-gray-100 rounded-full">Data Structures</span>
-                <span className="px-2 py-1 bg-gray-100 rounded-full">Problem Solving</span>
-              </div>
-            </div>
-            
-            <div className="bg-white p-4 rounded-lg shadow">
-              <div className="flex items-center mb-3">
-                <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold mr-3">SD</div>
-                <h3 className="font-bold">System Design</h3>
-                <span className="ml-auto text-xs font-medium text-blue-600 px-2 py-1 bg-blue-50 rounded-full">High</span>
-              </div>
-              <p className="text-sm text-gray-600 mb-3">Guide on how to approach system design interviews, with detailed examples and best practices.</p>
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="px-2 py-1 bg-gray-100 rounded-full">System Design</span>
-                <span className="px-2 py-1 bg-gray-100 rounded-full">Architecture</span>
-                <span className="px-2 py-1 bg-gray-100 rounded-full">Scalability</span>
-              </div>
-            </div>
-            
-            <div className="bg-white p-4 rounded-lg shadow">
-              <div className="flex items-center mb-3">
-                <div className="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold mr-3">BI</div>
-                <h3 className="font-bold">Behavioral Interviews</h3>
-                <span className="ml-auto text-xs font-medium text-green-600 px-2 py-1 bg-green-50 rounded-full">Medium</span>
-              </div>
-              <p className="text-sm text-gray-600 mb-3">Comprehensive preparation guide for behavioral questions, with STAR method examples and practice scenarios.</p>
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="px-2 py-1 bg-gray-100 rounded-full">Soft Skills</span>
-                <span className="px-2 py-1 bg-gray-100 rounded-full">STAR Method</span>
-                <span className="px-2 py-1 bg-gray-100 rounded-full">Communication</span>
-              </div>
             </div>
           </div>
         </section>
@@ -427,57 +320,6 @@ const CareerHome = () => {
                 </div>
               </div>
               <p className="text-gray-700">"What impressed me most was the networking strategy and personal branding sections. The actionable advice helped me position my experience for tech roles effectively."</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Career Guide Preview */}
-        <section className="mb-20 bg-gradient-to-r from-teal-50 to-emerald-50 rounded-3xl shadow-lg p-8">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-800">Comprehensive Career Development Guide</h2>
-          <p className="text-gray-600 mb-8 max-w-3xl">Navigate your career in technology with expert advice on learning, growth, and strategic career planning.</p>
-          
-          <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-            <div className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center text-center">
-              <div className="text-2xl mb-2">👨‍💻</div>
-              <h3 className="font-medium text-sm">Learning to Code</h3>
-            </div>
-            <div className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center text-center">
-              <div className="text-2xl mb-2">⭐</div>
-              <h3 className="font-medium text-sm">Becoming an Expert</h3>
-            </div>
-            <div className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center text-center">
-              <div className="text-2xl mb-2">📈</div>
-              <h3 className="font-medium text-sm">Career Development</h3>
-            </div>
-            <div className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center text-center">
-              <div className="text-2xl mb-2">🏢</div>
-              <h3 className="font-medium text-sm">Tech Companies</h3>
-            </div>
-            <div className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center text-center">
-              <div className="text-2xl mb-2">🔄</div>
-              <h3 className="font-medium text-sm">Staying Relevant</h3>
-            </div>
-            <div className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center text-center">
-              <div className="text-2xl mb-2">📊</div>
-              <h3 className="font-medium text-sm">Company Choice Impact</h3>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="flex items-start">
-              <div className="text-4xl mr-4 opacity-50">❝</div>
-              <div>
-                <p className="italic text-gray-700 mb-4">
-                  "Don't compare yourself with others. The only person you should try to be better than is who you were yesterday."
-                </p>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 font-bold mr-3">QL</div>
-                  <div>
-                    <div className="font-medium">Quincy Larson</div>
-                    <div className="text-sm text-gray-500">Founder, freeCodeCamp</div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </section>

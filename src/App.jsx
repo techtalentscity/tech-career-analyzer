@@ -17,6 +17,10 @@ import Learning from './Pages/career/Learning';
 import Interviews from './Pages/career/Interviews';
 import CareerGuide from './Pages/career/CareerGuide';
 
+// New Public Pages
+import CareerAbout from './Pages/career/CareerAbout';
+import CareerContact from './Pages/career/CareerContact';
+
 // Payment Page
 import PaymentPage from './Pages/payment/PaymentPage';
 
@@ -38,8 +42,12 @@ function App() {
           {/* Payment route */}
           <Route path="/payment" element={<PaymentPage />} />
           
-          {/* Career assessment routes */}
+          {/* Public Career Pages */}
           <Route path="/career" element={<CareerHome />} />
+          <Route path="/about" element={<CareerAbout />} />
+          <Route path="/contact" element={<CareerContact />} />
+          
+          {/* Protected Career assessment routes */}
           <Route path="/career/test" element={
             <ProtectedRoute>
               <CareerTest />

@@ -18,18 +18,30 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
   
-  // Check if user is authorized
+  // Check if user is authorized (has paid)
   const checkAuthorization = async (user) => {
-    if (!user) return false;
+    if (!user) {
+      setIsAuthorized(false);
+      return false;
+    }
     
     try {
-      // Check if user's email exists in authorizedUsers collection
-      const userRef = doc(db, "authorizedUsers", user.email);
-      const docSnap = await getDoc(userRef);
+      // Check if user's email exists in paidUsers collection
+      const userEmail = user.email;
+      const paidUserRef = doc(db, "paidUsers", userEmail);
+      const paidUserDoc = await getDoc(paidUserRef);
       
-      return docSnap.exists();
+      // If the user has a valid payment record, authorize them
+      if (paidUserDoc.exists() && paidUserDoc.data().isPaid) {
+        setIsAuthorized(true);
+        return true;
+      } else {
+        setIsAuthorized(false);
+        return false;
+      }
     } catch (error) {
       console.error("Error checking authorization:", error);
+      setIsAuthorized(false);
       return false;
     }
   };
@@ -39,7 +51,9 @@ export const AuthProvider = ({ children }) => {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      return result.user;
+      // After successful sign in, check authorization
+      await checkAuthorization(result.user);
+      return result;
     } catch (error) {
       console.error("Error signing in with Google", error);
       throw error;
@@ -47,8 +61,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Sign out
-  const logout = () => {
-    return signOut(auth);
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      setIsAuthorized(false);
+    } catch (error) {
+      console.error("Error signing out", error);
+      throw error;
+    }
   };
 
   // Observer for auth state changes
@@ -57,11 +77,11 @@ export const AuthProvider = ({ children }) => {
       setCurrentUser(user);
       
       if (user) {
-        const authorized = await checkAuthorization(user);
-        setIsAuthorized(authorized);
-        
-        // REMOVED: Don't automatically sign out unauthorized users
-        // This allows them to see the unauthorized message
+        // Check if user is authorized (has paid)
+        await checkAuthorization(user);
+      } else {
+        // User signed out, reset authorization
+        setIsAuthorized(false);
       }
       
       setLoading(false);
@@ -75,6 +95,7 @@ export const AuthProvider = ({ children }) => {
     isAuthorized,
     signInWithGoogle,
     logout,
+    checkAuthorization, // Export this so components can refresh authorization status
   };
 
   return (

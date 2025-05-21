@@ -1,6 +1,6 @@
 // src/Pages/career/CareerHome.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 // Constants
@@ -159,6 +159,7 @@ const CareerHome = () => {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [expandedFAQ, setExpandedFAQ] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const sampleResultsRef = useRef(null);
   const platformFeaturesRef = useRef(null);
   const { currentUser, isAuthorized } = useAuth();
@@ -188,18 +189,104 @@ const CareerHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 overflow-hidden">
-      {/* Optional: You can add a small auth status indicator here */}
-      {currentUser && (
-        <div className="absolute top-4 right-4 z-10">
-          <div className="bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-md text-sm flex items-center">
-            <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-            <span>Signed in as {currentUser.displayName || currentUser.email}</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 overflow-hidden flex flex-col">
+      {/* Header */}
+      <header className="bg-white shadow-md sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Link to="/" className="flex items-center">
+                <span className="text-2xl font-bold text-indigo-600 mr-2">🚀</span>
+                <span className="text-xl font-bold text-gray-800">Favored Online</span>
+              </Link>
+            </div>
+            
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link to="/" className="text-indigo-600 font-medium transition-colors border-b-2 border-indigo-600">Home</Link>
+              <Link to="/about" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">About</Link>
+              <Link to="/contact" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Contact</Link>
+              
+              {currentUser ? (
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center">
+                    {currentUser.photoURL && (
+                      <img src={currentUser.photoURL} alt="Profile" className="w-8 h-8 rounded-full mr-2" />
+                    )}
+                    <span className="text-sm text-gray-600">{currentUser.displayName || currentUser.email}</span>
+                  </div>
+                  <button 
+                    onClick={() => useAuth().signOut()} 
+                    className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => useAuth().signInWithGoogle()} 
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+                >
+                  <span className="mr-2">G</span>
+                  Login with Google
+                </button>
+              )}
+            </nav>
+            
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+                className="text-gray-700 hover:text-indigo-600 focus:outline-none"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+                </svg>
+              </button>
+            </div>
           </div>
+          
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden mt-3 pb-3 border-t border-gray-200">
+              <div className="flex flex-col space-y-3 mt-3">
+                <Link to="/" className="text-indigo-600 font-medium transition-colors">Home</Link>
+                <Link to="/about" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">About</Link>
+                <Link to="/contact" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Contact</Link>
+                
+                {currentUser ? (
+                  <div className="flex flex-col space-y-3 pt-3 border-t border-gray-100">
+                    <div className="flex items-center">
+                      {currentUser.photoURL && (
+                        <img src={currentUser.photoURL} alt="Profile" className="w-6 h-6 rounded-full mr-2" />
+                      )}
+                      <span className="text-sm text-gray-600">{currentUser.displayName || currentUser.email}</span>
+                    </div>
+                    <button 
+                      onClick={() => useAuth().signOut()} 
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm transition-colors w-full text-left"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => useAuth().signInWithGoogle()} 
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+                  >
+                    <span className="mr-2">G</span>
+                    Login with Google
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
-      )}
-      
-      <div className="container mx-auto px-6 py-12 max-w-7xl">
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-grow">
+        <div className="container mx-auto px-6 py-12 max-w-7xl">
         {/* Hero Section */}
         <section 
           className={`relative mb-20 transition-all duration-1000 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
@@ -699,6 +786,20 @@ const CareerHome = () => {
           </div>
         </section>
       </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-gray-800 text-white py-6">
+        <div className="container mx-auto px-6 text-center">
+          <div className="flex items-center justify-center mb-3">
+            <span className="text-2xl font-bold text-white mr-2">🚀</span>
+            <span className="text-xl font-bold">Favored Online</span>
+          </div>
+          <p className="text-gray-400 text-sm">
+            © {new Date().getFullYear()} Favored Online. All rights reserved.
+          </p>
+        </div>
+      </footer>
 
       {/* Custom styles */}
       <style jsx>{`

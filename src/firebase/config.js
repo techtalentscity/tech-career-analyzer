@@ -4,21 +4,24 @@ import { getAuth } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration
+// Your web app's Firebase configuration for Favored Online project
 const firebaseConfig = {
-  apiKey: "AIzaSyDuub4FXpY2s5Q4l3_anc8IQCLyO53NQ6I",
-  authDomain: "techtalents-city.firebaseapp.com",
-  projectId: "techtalents-city",
-  storageBucket: "techtalents-city.firebasestorage.app",
-  messagingSenderId: "429056041618",
-  appId: "1:429056041618:web:edda30a3a6e4489772bc4b",
-  measurementId: "G-C5J4YS08SB"
+  apiKey: "AIzaSyDgVyHTsiJXDkRJ_osP6EAcQSMIHRndSDg",
+  authDomain: "favored-online-f3e8b.firebaseapp.com",
+  projectId: "favored-online-f3e8b",
+  storageBucket: "favored-online-f3e8b.firebasestorage.app",
+  messagingSenderId: "786977722322",
+  appId: "1:786977722322:web:7d2dad47e024f17b2c020b",
+  measurementId: "G-PHPCMW9FQK"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Initialize Firebase services
 const auth = getAuth(app);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
 
+// Export the services for use in your app
 export { auth, analytics, db };

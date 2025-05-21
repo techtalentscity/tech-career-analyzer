@@ -50,32 +50,28 @@ const PLATFORM_FEATURES = [
     description: "Track your tech career journey with a comprehensive overview of your profile, skills, and recommended next steps",
     icon: "📊",
     color: "bg-blue-100 text-blue-600",
-    image: "/images/dashboard-preview.png",
-    path: "/career/dashboard"
+    image: "/images/dashboard-preview.png"
   },
   {
     title: "Curated Learning Resources",
     description: "Access top-rated courses and certifications matched to your specific career path and skill gaps",
     icon: "📚",
     color: "bg-green-100 text-green-600",
-    image: "/images/learning-preview.png",
-    path: "/career/learning"
+    image: "/images/learning-preview.png"
   },
   {
     title: "Interview Preparation",
     description: "Prepare for technical, behavioral, and coding interviews with our comprehensive resources and practice tools",
     icon: "💬",
     color: "bg-purple-100 text-purple-600",
-    image: "/images/interviews-preview.png",
-    path: "/career/interviews"
+    image: "/images/interviews-preview.png"
   },
   {
     title: "Career Development Guide",
     description: "Navigate your tech career with expert advice on learning to code, becoming an expert, and strategic career planning",
     icon: "📋",
     color: "bg-teal-100 text-teal-600",
-    image: "/images/guide-preview.png",
-    path: "/career/guide"
+    image: "/images/guide-preview.png"
   }
 ];
 
@@ -191,14 +187,6 @@ const CareerHome = () => {
     platformFeaturesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const navigateToFeature = (path) => {
-    if (currentUser && isAuthorized) {
-      navigate(path);
-    } else {
-      navigate('/payment');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 overflow-hidden">
       {/* Optional: You can add a small auth status indicator here */}
@@ -288,8 +276,7 @@ const CareerHome = () => {
             {PLATFORM_FEATURES.map((feature, index) => (
               <div 
                 key={index}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden transform hover:-translate-y-1 transition-all duration-300 cursor-pointer"
-                onClick={() => navigateToFeature(feature.path)}
+                className="bg-white rounded-2xl shadow-lg overflow-hidden transform hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="relative h-44 bg-gradient-to-r from-indigo-50 to-purple-50 flex items-center justify-center">
                   <div className={`w-16 h-16 rounded-full ${feature.color} flex items-center justify-center text-3xl`}>
@@ -306,15 +293,7 @@ const CareerHome = () => {
                 
                 <div className="p-6">
                   <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                  <p className="text-gray-600 mb-4">{feature.description}</p>
-                  <div className="flex justify-end">
-                    <span className="text-indigo-600 font-medium flex items-center">
-                      Explore 
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </span>
-                  </div>
+                  <p className="text-gray-600">{feature.description}</p>
                 </div>
               </div>
             ))}
@@ -337,27 +316,9 @@ const CareerHome = () => {
                     <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">{course.rating} ★</span>
                   </div>
                   <div className="text-gray-500 text-sm mb-3">{course.provider} • {course.instructor}</div>
-                  <button 
-                    onClick={() => navigateToFeature('/career/learning')}
-                    className="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-medium py-2 rounded-lg transition-colors text-sm"
-                  >
-                    View in Learning Resources →
-                  </button>
                 </div>
               </div>
             ))}
-          </div>
-          
-          <div className="mt-6 text-center">
-            <button 
-              onClick={() => navigateToFeature('/career/learning')}
-              className="text-indigo-600 font-medium hover:text-indigo-800 flex items-center justify-center mx-auto"
-            >
-              View All Learning Resources
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
           </div>
         </section>
 
@@ -383,21 +344,8 @@ const CareerHome = () => {
 
         {/* Interview Resources Preview */}
         <section className="mb-20 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-3xl p-8 shadow-md">
-          <div className="flex flex-col md:flex-row items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold mb-2 text-gray-800">Ace Your Technical Interviews</h2>
-              <p className="text-gray-600 max-w-2xl">Comprehensive resources and practice tools for technical, behavioral, and coding interviews</p>
-            </div>
-            <button 
-              onClick={() => navigateToFeature('/career/interviews')}
-              className="mt-4 md:mt-0 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium flex items-center shadow-md"
-            >
-              <span>Explore Interview Resources</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
-          </div>
+          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Ace Your Technical Interviews</h2>
+          <p className="text-gray-600 max-w-2xl mb-8">Comprehensive resources and practice tools for technical, behavioral, and coding interviews</p>
           
           <div className="grid md:grid-cols-3 gap-4">
             <div className="bg-white p-4 rounded-lg shadow">
@@ -531,15 +479,6 @@ const CareerHome = () => {
                 </div>
               </div>
             </div>
-          </div>
-          
-          <div className="mt-6 text-center">
-            <button 
-              onClick={() => navigateToFeature('/career/guide')}
-              className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3 rounded-lg font-bold shadow-md transition-colors"
-            >
-              Explore Career Guide
-            </button>
           </div>
         </section>
 

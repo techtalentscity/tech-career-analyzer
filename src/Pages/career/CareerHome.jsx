@@ -285,45 +285,6 @@ const CareerHome = () => {
           </div>
         </section>
 
-        {/* Social Proof */}
-        <section className="mb-20 bg-gray-50 py-12 rounded-3xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800">Success Stories</h2>
-          <p className="text-center text-gray-600 mb-10">Join thousands who have successfully transitioned to tech careers</p>
-          
-          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto px-6">
-            <div className="bg-white rounded-xl p-6 shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold">IO</div>
-                <div className="ml-4">
-                  <div className="font-bold">Isaac O.</div>
-                  <div className="text-sm text-gray-500">Design & Tech Ops Coordinator</div>
-                </div>
-              </div>
-              <p className="text-gray-700">"The personalized learning roadmap was incredibly detailed. It broke down complex tech concepts into manageable monthly goals that fit my schedule."</p>
-            </div>
-            <div className="bg-white rounded-xl p-6 shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">TA</div>
-                <div className="ml-4">
-                  <div className="font-bold">Temitope A.</div>
-                  <div className="text-sm text-gray-500">Project Manager</div>
-                </div>
-              </div>
-              <p className="text-gray-700">"The skills gap analysis was eye-opening. It identified exactly which technical skills I needed to focus on and which of my existing abilities were most valuable."</p>
-            </div>
-            <div className="bg-white rounded-xl p-6 shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">OO</div>
-                <div className="ml-4">
-                  <div className="font-bold">Oyebolade O.</div>
-                  <div className="text-sm text-gray-500">Technical Program Manager</div>
-                </div>
-              </div>
-              <p className="text-gray-700">"What impressed me most was the networking strategy and personal branding sections. The actionable advice helped me position my experience for tech roles effectively."</p>
-            </div>
-          </div>
-        </section>
-
         {/* What's Included Section */}
         <section className="mb-20" aria-label="Features">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800">What You Get</h2>
@@ -648,6 +609,45 @@ const CareerHome = () => {
               <p className="text-sm text-indigo-700 text-center">
                 Our AI analyzes 50+ factors from your background to create a truly personalized transition plan
               </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Social Proof */}
+        <section className="mb-20 bg-gray-50 py-12 rounded-3xl">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800">Success Stories</h2>
+          <p className="text-center text-gray-600 mb-10">Join thousands who have successfully transitioned to tech careers</p>
+          
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto px-6">
+            <div className="bg-white rounded-xl p-6 shadow-md">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold">IO</div>
+                <div className="ml-4">
+                  <div className="font-bold">Isaac O.</div>
+                  <div className="text-sm text-gray-500">Design & Tech Ops Coordinator</div>
+                </div>
+              </div>
+              <p className="text-gray-700">"The personalized learning roadmap was incredibly detailed. It broke down complex tech concepts into manageable monthly goals that fit my schedule."</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-md">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">TA</div>
+                <div className="ml-4">
+                  <div className="font-bold">Temitope A.</div>
+                  <div className="text-sm text-gray-500">Project Manager</div>
+                </div>
+              </div>
+              <p className="text-gray-700">"The skills gap analysis was eye-opening. It identified exactly which technical skills I needed to focus on and which of my existing abilities were most valuable."</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-md">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">OO</div>
+                <div className="ml-4">
+                  <div className="font-bold">Oyebolade O.</div>
+                  <div className="text-sm text-gray-500">Technical Program Manager</div>
+                </div>
+              </div>
+              <p className="text-gray-700">"What impressed me most was the networking strategy and personal branding sections. The actionable advice helped me position my experience for tech roles effectively."</p>
             </div>
           </div>
         </section>

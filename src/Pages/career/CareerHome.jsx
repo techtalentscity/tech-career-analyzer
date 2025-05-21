@@ -191,7 +191,7 @@ const CareerHome = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 overflow-hidden flex flex-col">
       {/* Header */}
-      <header className="bg-white shadow-md sticky top-0 z-50">
+      <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-6 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -285,7 +285,7 @@ const CareerHome = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow">
+      <main className="flex-grow pt-16">
         <div className="container mx-auto px-6 py-12 max-w-7xl">
         {/* Hero Section */}
         <section 

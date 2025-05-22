@@ -14,16 +14,16 @@ const PaymentPage = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [debugInfo, setDebugInfo] = useState('');
+  const [loadAttempts, setLoadAttempts] = useState(0);
   const { currentUser, signInWithGoogle, isAuthorized } = useAuth();
   const navigate = useNavigate();
 
-  // Updated PayPal Configuration
+  // PayPal Configuration
   const PAYPAL_PLAN_ID = 'P-5C894909UL250092PNAXH4YQ';
   const PAYPAL_CLIENT_ID = 'ARzy2f1cC_tYmAvWKXfF3jR1TXj-6eKH5f2SVUHIziG2ip1lc7pdLCSB_jEnPwt0tKhN-9SuCgO8EXcx';
   const CONTAINER_ID = 'paypal-button-container';
 
   useEffect(() => {
-    // If user is already authenticated and authorized, redirect to career test
     if (currentUser && isAuthorized) {
       navigate('/career/test');
       return;
@@ -32,7 +32,6 @@ const PaymentPage = () => {
     loadPayPalScript();
   }, [currentUser, isAuthorized, navigate]);
 
-  // Separate effect to initialize PayPal when both script is loaded and email is valid
   useEffect(() => {
     if (paypalLoaded && isEmailValid) {
       initializePayPal();
@@ -40,33 +39,80 @@ const PaymentPage = () => {
   }, [paypalLoaded, isEmailValid]);
 
   const loadPayPalScript = () => {
-    // Check if PayPal script already exists
-    const existingScript = document.querySelector('script[src*="paypal.com/sdk/js"]');
-    if (existingScript) {
-      setDebugInfo('PayPal script already exists');
-      if (window.paypal) {
-        setPaypalLoaded(true);
-        setDebugInfo('PayPal SDK already loaded');
-      }
+    // Check if already loaded
+    if (window.paypal) {
+      setPaypalLoaded(true);
+      setDebugInfo('PayPal SDK already available');
       return;
     }
-    
-    setDebugInfo('Loading PayPal script...');
+
+    // Remove any existing scripts first
+    const existingScripts = document.querySelectorAll('script[src*="paypal.com"]');
+    existingScripts.forEach(script => script.remove());
+
+    setDebugInfo('Attempting to load PayPal SDK...');
+    setLoadAttempts(prev => prev + 1);
+
     const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription`;
+    
+    // Try different approaches based on environment
+    const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
+    
+    if (isProduction) {
+      script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription&disable-funding=credit,card`;
+    } else {
+      // For development, try with more permissive settings
+      script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription&debug=true`;
+    }
+    
     script.setAttribute('data-sdk-integration-source', 'button-factory');
-    
+    script.async = true;
+    script.defer = true;
+
+    // Set up timeout
+    const timeout = setTimeout(() => {
+      setError('PayPal SDK loading timeout. Please check your internet connection.');
+      setDebugInfo('PayPal SDK loading timeout');
+    }, 15000); // 15 second timeout
+
     script.onload = () => {
-      setDebugInfo('PayPal script loaded successfully');
-      setPaypalLoaded(true);
+      clearTimeout(timeout);
+      if (window.paypal) {
+        setPaypalLoaded(true);
+        setDebugInfo('PayPal SDK loaded successfully');
+        setError('');
+      } else {
+        setError('PayPal SDK loaded but not available');
+        setDebugInfo('PayPal SDK loaded but window.paypal not found');
+      }
     };
-    
-    script.onerror = () => {
-      setError('Failed to load PayPal SDK');
-      setDebugInfo('PayPal script failed to load');
+
+    script.onerror = (e) => {
+      clearTimeout(timeout);
+      console.error('PayPal script loading error:', e);
+      setError('Failed to load PayPal SDK. This may be due to network issues or domain restrictions.');
+      setDebugInfo(`PayPal script load error. Attempt ${loadAttempts + 1}`);
+      
+      // Retry logic
+      if (loadAttempts < 2) {
+        setTimeout(() => {
+          setDebugInfo('Retrying PayPal SDK load...');
+          loadPayPalScript();
+        }, 3000);
+      }
     };
-    
-    document.head.appendChild(script);
+
+    // Try appending to head first, then body if that fails
+    try {
+      document.head.appendChild(script);
+    } catch (e) {
+      try {
+        document.body.appendChild(script);
+      } catch (e2) {
+        setError('Unable to inject PayPal script');
+        setDebugInfo('Script injection failed');
+      }
+    }
   };
 
   const validateEmail = (email) => {
@@ -79,60 +125,53 @@ const PaymentPage = () => {
     setEmail(newEmail);
     const valid = validateEmail(newEmail);
     setIsEmailValid(valid);
-    setError(''); // Clear any previous errors
+    setError('');
     
-    if (valid) {
-      setDebugInfo('Email is valid, PayPal button should appear');
-    } else {
-      setDebugInfo('Email validation pending...');
+    if (valid && paypalLoaded) {
+      setDebugInfo('Email valid, initializing PayPal...');
     }
   };
 
   const initializePayPal = () => {
     if (!window.paypal) {
       setError('PayPal SDK not available');
-      setDebugInfo('PayPal SDK not available');
+      setDebugInfo('PayPal SDK not available for initialization');
       return;
     }
 
     if (!isEmailValid) {
-      setDebugInfo('Email not valid, PayPal button not initialized');
+      setDebugInfo('Email not valid, skipping PayPal initialization');
       return;
     }
 
-    // Clear any existing PayPal buttons
     const container = document.getElementById(CONTAINER_ID);
     if (container) {
       container.innerHTML = '';
     }
 
-    setDebugInfo('Initializing PayPal button...');
+    setDebugInfo('Initializing PayPal Buttons...');
 
     try {
       window.paypal.Buttons({
         style: {
           shape: 'pill',
-          color: 'silver',
+          color: 'gold',
           layout: 'horizontal',
-          label: 'subscribe'
+          label: 'subscribe',
+          height: 40
         },
         createSubscription: function(data, actions) {
-          if (!isEmailValid) {
-            setError('Please enter a valid email address before proceeding with payment');
-            return Promise.reject(new Error('Email validation failed'));
-          }
-          
-          setDebugInfo('Creating subscription...');
+          console.log('Creating subscription for plan:', PAYPAL_PLAN_ID);
           return actions.subscription.create({
             'plan_id': PAYPAL_PLAN_ID
           });
         },
         onApprove: function(data, actions) {
+          console.log('Payment approved:', data);
           setDebugInfo('Payment approved, processing...');
           setIsLoading(true);
           setSubscriptionId(data.subscriptionID);
           
-          // Save payment info to Firestore using the paidUsers collection
           savePaymentInfo(email, data.subscriptionID)
             .then(() => {
               setIsPaid(true);
@@ -146,30 +185,34 @@ const PaymentPage = () => {
               setIsLoading(false);
             });
         },
+        onCancel: function(data) {
+          console.log('Payment cancelled:', data);
+          setDebugInfo('Payment was cancelled');
+        },
         onError: function(err) {
+          console.error('PayPal error:', err);
           setError('There was an error processing your payment. Please try again.');
-          setDebugInfo('PayPal error: ' + err.message);
-          console.error('PayPal Error:', err);
+          setDebugInfo('PayPal payment error: ' + (err.message || 'Unknown error'));
         }
       }).render(`#${CONTAINER_ID}`)
       .then(() => {
         setDebugInfo('PayPal button rendered successfully');
+        setError('');
       })
       .catch(err => {
-        setError('Failed to render PayPal button');
-        setDebugInfo('PayPal render error: ' + err.message);
         console.error('PayPal render error:', err);
+        setError('Failed to render PayPal button');
+        setDebugInfo('PayPal render error: ' + (err.message || 'Unknown error'));
       });
     } catch (err) {
-      setError('Failed to initialize PayPal');
-      setDebugInfo('PayPal initialization error: ' + err.message);
       console.error('PayPal initialization error:', err);
+      setError('Failed to initialize PayPal');
+      setDebugInfo('PayPal initialization error: ' + (err.message || 'Unknown error'));
     }
   };
 
   const savePaymentInfo = async (email, subscriptionId) => {
     try {
-      // Save to paidUsers collection using email as document ID
       await setDoc(doc(db, "paidUsers", email), {
         email: email,
         subscriptionId: subscriptionId,
@@ -194,20 +237,25 @@ const PaymentPage = () => {
       setIsLoading(true);
       const user = await signInWithGoogle();
       
-      // Verify the email matches
       if (user.user.email.toLowerCase() !== email.toLowerCase()) {
         setError('Please sign in with the same email you used for payment: ' + email);
         setIsLoading(false);
         return;
       }
       
-      // Successful login with correct email - the AuthContext will handle authorization
       navigate('/career/test');
     } catch (error) {
       setError('Login failed. Please try again.');
       console.error('Login error:', error);
       setIsLoading(false);
     }
+  };
+
+  // Manual PayPal redirect for backup
+  const handleManualPayment = () => {
+    const paypalUrl = `https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=${PAYPAL_PLAN_ID}`;
+    window.open(paypalUrl, '_blank');
+    setDebugInfo('Redirected to PayPal manual subscription');
   };
 
   return (
@@ -279,50 +327,6 @@ const PaymentPage = () => {
               </button>
             </div>
           </div>
-          
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <div className="md:hidden mt-3 pb-3 border-t border-gray-200">
-              <div className="flex flex-col space-y-3 mt-3">
-                <Link to="/" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Home</Link>
-                <Link to="/about" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">About</Link>
-                <Link to="/contact" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Contact</Link>
-                
-                {currentUser ? (
-                  <div className="flex flex-col space-y-3 pt-3 border-t border-gray-100">
-                    <div className="flex items-center">
-                      {currentUser.photoURL && (
-                        <img src={currentUser.photoURL} alt="Profile" className="w-6 h-6 rounded-full mr-2" />
-                      )}
-                      <span className="text-sm text-gray-600">{currentUser.displayName || currentUser.email}</span>
-                    </div>
-                    {isAuthorized && (
-                      <Link 
-                        to="/career/dashboard" 
-                        className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg text-sm transition-colors text-center"
-                      >
-                        Dashboard
-                      </Link>
-                    )}
-                    <button 
-                      onClick={() => navigate('/logout')} 
-                      className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm transition-colors w-full text-left"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                ) : (
-                  <button 
-                    onClick={() => navigate('/login')} 
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
-                  >
-                    <span className="mr-2">G</span>
-                    Login with Google
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </header>
 
@@ -333,7 +337,7 @@ const PaymentPage = () => {
             <h2 className="text-3xl font-bold text-gray-800 mb-2">Tech Career Analysis</h2>
             <p className="text-gray-600 mb-6">Get your personalized career roadmap</p>
 
-            {/* Debug Info (remove this in production) */}
+            {/* Debug Info */}
             {debugInfo && (
               <div className="bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded text-xs mb-4">
                 Debug: {debugInfo}
@@ -342,13 +346,14 @@ const PaymentPage = () => {
 
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
+                <p className="font-semibold">Error</p>
+                <p className="text-sm">{error}</p>
               </div>
             )}
 
             {!isPaid ? (
               <>
-                {/* Email Input Section */}
+                {/* Email Input */}
                 <div className="mb-6">
                   <label htmlFor="email" className="block text-left text-sm font-medium text-gray-700 mb-2">
                     Email address (will be used for login):
@@ -371,6 +376,7 @@ const PaymentPage = () => {
                   )}
                 </div>
 
+                {/* Pricing */}
                 <div className="bg-indigo-50 rounded-lg p-4 mb-6 text-left">
                   <p className="text-gray-700 mb-2">
                     <span className="font-bold">$60</span> - 30-day access
@@ -405,25 +411,52 @@ const PaymentPage = () => {
 
                 {/* PayPal Button Container */}
                 <div className="mb-4">
-                  <div id={CONTAINER_ID} className="w-full min-h-[50px] flex justify-center items-center border-2 border-dashed border-gray-200 rounded-lg">
-                    {!paypalLoaded && (
-                      <p className="text-gray-500 text-sm">Loading PayPal...</p>
-                    )}
-                    {paypalLoaded && !isEmailValid && (
-                      <p className="text-gray-500 text-sm">Enter valid email to show payment button</p>
-                    )}
-                  </div>
+                  {isEmailValid ? (
+                    <>
+                      <div id={CONTAINER_ID} className="w-full min-h-[50px] flex justify-center items-center mb-4">
+                        {!paypalLoaded && (
+                          <p className="text-gray-500 text-sm">Loading PayPal...</p>
+                        )}
+                      </div>
+                      
+                      {/* Backup Manual Payment Button */}
+                      {(!paypalLoaded || error) && (
+                        <div className="space-y-3">
+                          <div className="border-t border-gray-200 pt-4">
+                            <p className="text-sm text-gray-600 mb-3">Alternative payment method:</p>
+                            <button
+                              onClick={handleManualPayment}
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                            >
+                              Subscribe via PayPal Website
+                            </button>
+                            <p className="text-xs text-gray-500 mt-2">
+                              This will open PayPal in a new window. After payment, return here to complete setup.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Retry Button */}
+                      {error && loadAttempts < 3 && (
+                        <button
+                          onClick={() => {
+                            setError('');
+                            setDebugInfo('');
+                            loadPayPalScript();
+                          }}
+                          className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded text-sm mt-2"
+                        >
+                          Retry Loading PayPal
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <div className="border-2 border-dashed border-gray-200 rounded-lg p-8">
+                      <p className="text-gray-500 text-sm">Enter a valid email address to enable payment</p>
+                    </div>
+                  )}
                 </div>
-                
-                {/* Manual PayPal Button (backup) */}
-                {isEmailValid && paypalLoaded && (
-                  <button
-                    onClick={initializePayPal}
-                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded text-sm mb-4"
-                  >
-                    Refresh PayPal Button
-                  </button>
-                )}
               </>
             ) : (
               <div>
@@ -445,7 +478,7 @@ const PaymentPage = () => {
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                     </svg>
-                    <span className="ml-2">
+                    <span>
                       {isLoading ? "Signing in..." : "Sign in with Google"}
                     </span>
                   </button>
@@ -458,7 +491,7 @@ const PaymentPage = () => {
               </div>
             )}
 
-            {/* Navigation Links */}
+            {/* Navigation */}
             <div className="mt-6 pt-4 border-t border-gray-200">
               <button
                 onClick={() => navigate('/career')}

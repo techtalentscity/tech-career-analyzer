@@ -162,7 +162,7 @@ const CareerHome = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const sampleResultsRef = useRef(null);
   const platformFeaturesRef = useRef(null);
-  const { currentUser, isAuthorized, signOut, signInWithGoogle } = useAuth();
+  const { currentUser, isAuthorized } = useAuth();
 
   useEffect(() => {
     setIsVisible(true);
@@ -196,7 +196,11 @@ const CareerHome = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <Link to="/" className="flex items-center">
-                <span className="text-2xl font-bold text-indigo-600 mr-2">🚀</span>
+                <img 
+                  src="/src/Images/512X512.png" 
+                  alt="Favored Online Logo" 
+                  className="w-8 h-8 mr-2"
+                />
                 <span className="text-xl font-bold text-gray-800">Favored Online</span>
               </Link>
             </div>
@@ -215,8 +219,16 @@ const CareerHome = () => {
                     )}
                     <span className="text-sm text-gray-600">{currentUser.displayName || currentUser.email}</span>
                   </div>
+                  {isAuthorized && (
+                    <Link 
+                      to="/career/dashboard" 
+                      className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg text-sm transition-colors"
+                    >
+                      Dashboard
+                    </Link>
+                  )}
                   <button 
-                    onClick={signOut} 
+                    onClick={() => navigate('/logout')} 
                     className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm transition-colors"
                   >
                     Logout
@@ -224,7 +236,7 @@ const CareerHome = () => {
                 </div>
               ) : (
                 <button 
-                  onClick={signInWithGoogle} 
+                  onClick={() => navigate('/login')} 
                   className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
                 >
                   <span className="mr-2">G</span>
@@ -262,8 +274,16 @@ const CareerHome = () => {
                       )}
                       <span className="text-sm text-gray-600">{currentUser.displayName || currentUser.email}</span>
                     </div>
+                    {isAuthorized && (
+                      <Link 
+                        to="/career/dashboard" 
+                        className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg text-sm transition-colors text-center"
+                      >
+                        Dashboard
+                      </Link>
+                    )}
                     <button 
-                      onClick={signOut} 
+                      onClick={() => navigate('/logout')} 
                       className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm transition-colors w-full text-left"
                     >
                       Logout
@@ -271,7 +291,7 @@ const CareerHome = () => {
                   </div>
                 ) : (
                   <button 
-                    onClick={signInWithGoogle} 
+                    onClick={() => navigate('/login')} 
                     className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
                   >
                     <span className="mr-2">G</span>
@@ -792,7 +812,11 @@ const CareerHome = () => {
       <footer className="bg-gray-800 text-white py-6">
         <div className="container mx-auto px-6 text-center">
           <div className="flex items-center justify-center mb-3">
-            <span className="text-2xl font-bold text-white mr-2">🚀</span>
+            <img 
+              src="/src/Images/512X512.png" 
+              alt="Favored Online Logo" 
+              className="w-8 h-8 mr-2"
+            />
             <span className="text-xl font-bold">Favored Online</span>
           </div>
           <p className="text-gray-400 text-sm">

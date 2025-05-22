@@ -18,10 +18,10 @@ const PaymentPage = () => {
   const { currentUser, signInWithGoogle, isAuthorized } = useAuth();
   const navigate = useNavigate();
 
-  // PayPal Configuration
+  // PayPal Configuration - EXACT as provided
   const PAYPAL_PLAN_ID = 'P-5C894909UL250092PNAXH4YQ';
   const PAYPAL_CLIENT_ID = 'ARzy2f1cC_tYmAvWKXfF3jR1TXj-6eKH5f2SVUHIziG2ip1lc7pdLCSB_jEnPwt0tKhN-9SuCgO8EXcx';
-  const CONTAINER_ID = 'paypal-button-container';
+  const CONTAINER_ID = 'paypal-button-container-P-5C894909UL250092PNAXH4YQ'; // Exact container ID
 
   useEffect(() => {
     if (currentUser && isAuthorized) {
@@ -50,30 +50,21 @@ const PaymentPage = () => {
     const existingScripts = document.querySelectorAll('script[src*="paypal.com"]');
     existingScripts.forEach(script => script.remove());
 
-    setDebugInfo('Attempting to load PayPal SDK...');
+    setDebugInfo(`Attempting to load PayPal SDK... Attempt ${loadAttempts + 1}`);
     setLoadAttempts(prev => prev + 1);
 
     const script = document.createElement('script');
     
-    // Try different approaches based on environment
-    const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
-    
-    if (isProduction) {
-      script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription&disable-funding=credit,card`;
-    } else {
-      // For development, try with more permissive settings
-      script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription&debug=true`;
-    }
-    
+    // EXACT SDK URL as provided
+    script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription`;
     script.setAttribute('data-sdk-integration-source', 'button-factory');
     script.async = true;
-    script.defer = true;
 
     // Set up timeout
     const timeout = setTimeout(() => {
-      setError('PayPal SDK loading timeout. Please check your internet connection.');
-      setDebugInfo('PayPal SDK loading timeout');
-    }, 15000); // 15 second timeout
+      setError('PayPal SDK loading timeout. Please try the manual subscription option below.');
+      setDebugInfo(`PayPal script load error. Attempt ${loadAttempts}`);
+    }, 15000);
 
     script.onload = () => {
       clearTimeout(timeout);
@@ -90,10 +81,10 @@ const PaymentPage = () => {
     script.onerror = (e) => {
       clearTimeout(timeout);
       console.error('PayPal script loading error:', e);
-      setError('Failed to load PayPal SDK. This may be due to network issues or domain restrictions.');
-      setDebugInfo(`PayPal script load error. Attempt ${loadAttempts + 1}`);
+      setError('Failed to load PayPal SDK. Please use the manual subscription option below.');
+      setDebugInfo(`PayPal script load error. Attempt ${loadAttempts}`);
       
-      // Retry logic
+      // Retry logic (up to 2 retries)
       if (loadAttempts < 2) {
         setTimeout(() => {
           setDebugInfo('Retrying PayPal SDK load...');
@@ -102,17 +93,7 @@ const PaymentPage = () => {
       }
     };
 
-    // Try appending to head first, then body if that fails
-    try {
-      document.head.appendChild(script);
-    } catch (e) {
-      try {
-        document.body.appendChild(script);
-      } catch (e2) {
-        setError('Unable to inject PayPal script');
-        setDebugInfo('Script injection failed');
-      }
-    }
+    document.head.appendChild(script);
   };
 
   const validateEmail = (email) => {
@@ -152,22 +133,23 @@ const PaymentPage = () => {
     setDebugInfo('Initializing PayPal Buttons...');
 
     try {
+      // EXACT PayPal configuration as provided
       window.paypal.Buttons({
         style: {
           shape: 'pill',
-          color: 'gold',
+          color: 'silver',
           layout: 'horizontal',
-          label: 'subscribe',
-          height: 40
+          label: 'subscribe'
         },
         createSubscription: function(data, actions) {
-          console.log('Creating subscription for plan:', PAYPAL_PLAN_ID);
           return actions.subscription.create({
-            'plan_id': PAYPAL_PLAN_ID
+            /* Creates the subscription */
+            plan_id: PAYPAL_PLAN_ID
           });
         },
         onApprove: function(data, actions) {
-          console.log('Payment approved:', data);
+          // Modified to save to Firestore instead of just alert
+          console.log('Subscription approved:', data);
           setDebugInfo('Payment approved, processing...');
           setIsLoading(true);
           setSubscriptionId(data.subscriptionID);
@@ -194,7 +176,7 @@ const PaymentPage = () => {
           setError('There was an error processing your payment. Please try again.');
           setDebugInfo('PayPal payment error: ' + (err.message || 'Unknown error'));
         }
-      }).render(`#${CONTAINER_ID}`)
+      }).render(`#${CONTAINER_ID}`) // Renders the PayPal button
       .then(() => {
         setDebugInfo('PayPal button rendered successfully');
         setError('');
@@ -218,7 +200,7 @@ const PaymentPage = () => {
         subscriptionId: subscriptionId,
         isPaid: true,
         paymentDate: new Date().toISOString(),
-        planType: "monthly",
+        planType: "subscription", // Updated to reflect it's a subscription
       });
       return true;
     } catch (error) {
@@ -251,11 +233,15 @@ const PaymentPage = () => {
     }
   };
 
-  // Manual PayPal redirect for backup
-  const handleManualPayment = () => {
-    const paypalUrl = `https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=${PAYPAL_PLAN_ID}`;
-    window.open(paypalUrl, '_blank');
+  // Manual subscription redirect for backup
+  const handleManualSubscription = () => {
+    // Direct link to subscribe to the specific plan
+    const subscriptionUrl = `https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=${PAYPAL_PLAN_ID}`;
+    window.open(subscriptionUrl, '_blank');
     setDebugInfo('Redirected to PayPal manual subscription');
+    
+    // Show instructions for returning
+    setError('After completing payment on PayPal, return to this page and refresh to continue setup.');
   };
 
   return (
@@ -379,7 +365,7 @@ const PaymentPage = () => {
                 {/* Pricing */}
                 <div className="bg-indigo-50 rounded-lg p-4 mb-6 text-left">
                   <p className="text-gray-700 mb-2">
-                    <span className="font-bold">$60</span> - 30-day access
+                    <span className="font-bold">$60</span> - Monthly Subscription
                   </p>
                   <ul className="space-y-1 text-sm">
                     <li className="flex items-start">
@@ -409,7 +395,7 @@ const PaymentPage = () => {
                   </ul>
                 </div>
 
-                {/* PayPal Button Container */}
+                {/* PayPal Button Container - EXACT container ID */}
                 <div className="mb-4">
                   {isEmailValid ? (
                     <>
@@ -419,19 +405,19 @@ const PaymentPage = () => {
                         )}
                       </div>
                       
-                      {/* Backup Manual Payment Button */}
+                      {/* Backup Manual Subscription Button */}
                       {(!paypalLoaded || error) && (
                         <div className="space-y-3">
                           <div className="border-t border-gray-200 pt-4">
                             <p className="text-sm text-gray-600 mb-3">Alternative payment method:</p>
                             <button
-                              onClick={handleManualPayment}
+                              onClick={handleManualSubscription}
                               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors"
                             >
                               Subscribe via PayPal Website
                             </button>
                             <p className="text-xs text-gray-500 mt-2">
-                              This will open PayPal in a new window. After payment, return here to complete setup.
+                              This will open PayPal in a new window for monthly subscription setup.
                             </p>
                           </div>
                         </div>
@@ -461,7 +447,7 @@ const PaymentPage = () => {
             ) : (
               <div>
                 <div className="bg-green-100 text-green-700 p-4 rounded-lg mb-6">
-                  <p className="font-bold">Payment Successful!</p>
+                  <p className="font-bold">Subscription Successful!</p>
                   <p>Subscription ID: {subscriptionId}</p>
                   <p className="mt-2">Please sign in with Google using: <strong>{email}</strong></p>
                 </div>

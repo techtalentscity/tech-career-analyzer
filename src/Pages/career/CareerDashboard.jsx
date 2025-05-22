@@ -4,6 +4,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import storageService from '../../services/storageService';
 import { toast } from 'react-toastify';
+// NEW IMPORTS FOR MARKET INSIGHTS
+import MarketInsights from '../components/MarketInsights';
+import videoInsightsService from '../services/videoInsightsService';
 
 const CareerDashboard = () => {
   const location = useLocation();
@@ -21,6 +24,8 @@ const CareerDashboard = () => {
   const [jobSearchStrategies, setJobSearchStrategies] = useState([]);
   const [careerGrowthResources, setCareerGrowthResources] = useState([]);
   const [careerPathVisualizations, setCareerPathVisualizations] = useState([]);
+  // NEW STATE FOR MARKET INSIGHTS
+  const [showMarketInsights, setShowMarketInsights] = useState(false);
   
   const [userData, setUserData] = useState({
     name: '',
@@ -1405,7 +1410,7 @@ const CareerDashboard = () => {
         {/* Quick Actions Section */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
             <button 
               onClick={() => window.print()}
               className="flex items-center justify-center py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
@@ -1434,6 +1439,17 @@ const CareerDashboard = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
               Learning
+            </button>
+            
+            {/* NEW: Market Insights Button */}
+            <button 
+              onClick={() => setShowMarketInsights(!showMarketInsights)}
+              className="flex items-center justify-center py-3 px-4 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2-2V7a2 2 0 012-2h2a2 2 0 002 2v2a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 00-2 2h-2a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2z" />
+              </svg>
+              {showMarketInsights ? 'Hide' : 'Market'} Insights
             </button>
             
             <button 
@@ -1516,6 +1532,13 @@ const CareerDashboard = () => {
             </div>
           </div>
         </div>
+        
+        {/* NEW: Market Insights Section - Conditional Display */}
+        {showMarketInsights && (
+          <div className="mb-6">
+            <MarketInsights userProfile={userData} />
+          </div>
+        )}
         
         {/* Career Path Matches Visualization */}
         {careerPaths.length > 0 && (

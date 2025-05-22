@@ -1509,7 +1509,7 @@ const CareerDashboard = () => {
     return roadmap;
   };
 
-  // UPDATED: Market Trends extraction with enhanced unique content
+  // UPDATED: Market Trends extraction with NO duplicates and enhanced content
   const extractMarketTrendsImproved = (text) => {
     if (!text) return [];
     
@@ -1561,10 +1561,10 @@ const CareerDashboard = () => {
       }
     });
     
-    // Add enhanced default trends if none found - NO DUPLICATES
+    // Add ONLY unique enhanced default trends if none found - NO DUPLICATES
     if (trends.length === 0) {
-      console.log('No market trends found, adding enhanced defaults...');
-      const defaultTrends = [
+      console.log('No market trends found, adding unique defaults...');
+      const uniqueTrends = [
         {
           title: 'REGIONAL OPPORTUNITIES',
           description: 'Geographic distribution of tech opportunities and emerging markets.',
@@ -1591,16 +1591,23 @@ const CareerDashboard = () => {
         }
       ];
       
-      trends.push(...defaultTrends);
+      trends.push(...uniqueTrends);
     }
     
-    // Remove duplicates by title
-    const uniqueTrends = trends.filter((trend, index, self) => 
-      index === self.findIndex(t => t.title === trend.title)
-    );
+    // Ensure NO duplicates by title - keep only first occurrence
+    const seenTitles = new Set();
+    const finalTrends = trends.filter(trend => {
+      const normalizedTitle = trend.title.toUpperCase().trim();
+      if (seenTitles.has(normalizedTitle)) {
+        console.log('🚫 Removing duplicate trend:', normalizedTitle);
+        return false;
+      }
+      seenTitles.add(normalizedTitle);
+      return true;
+    });
     
-    console.log('Total unique market trends extracted:', uniqueTrends.length);
-    return uniqueTrends.slice(0, 4); // Limit to 4 unique trends
+    console.log('Total UNIQUE market trends extracted:', finalTrends.length);
+    return finalTrends.slice(0, 4); // Limit to exactly 4 unique trends
   };
 
   // NEW: Job Market Outlook extraction
@@ -1886,58 +1893,260 @@ const CareerDashboard = () => {
     return interviewTips;
   };
 
-  // Generic helper function for section extraction
-  const extractGenericSection = (text, keywords, sectionName) => {
-    if (!text) return [];
-    
+  // UPDATED: Clean extraction functions for Resources tab - no unwanted content
+
+  // Improved extraction functions for Resources tab - filtered content
+  const extractPortfolioGuidanceImproved = (text) => {
+    console.log('Extracting portfolio/transition strategy guidance...');
     const items = [];
     const lines = text.split('\n');
     let inSection = false;
     
+    const portfolioKeywords = ['PORTFOLIO', 'PROJECTS', 'TRANSITION STRATEGY', 'CAREER TRANSITION'];
+    
     lines.forEach((line) => {
-      if (keywords.some(keyword => line.toUpperCase().includes(keyword))) {
+      if (portfolioKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
         inSection = true;
-        items.push({
-          title: line.trim(),
-          type: 'section_title'
-        });
         return;
       }
       
-      if (inSection && (line.toUpperCase().includes('NETWORKING') || 
-          line.toUpperCase().includes('INTERVIEW') || line.toUpperCase().includes('PERSONAL BRANDING'))) {
+      // Exit section when hitting other major sections
+      if (inSection && (
+        line.toUpperCase().includes('NETWORKING') || 
+        line.toUpperCase().includes('INTERVIEW') || 
+        line.toUpperCase().includes('PERSONAL BRANDING') ||
+        line.toUpperCase().includes('MARKET TRENDS') ||
+        line.toUpperCase().includes('JOB MARKET OUTLOOK') ||
+        line.toUpperCase().includes('LEARNING ROADMAP')
+      )) {
         inSection = false;
         return;
       }
       
       if (inSection && line.trim() !== '') {
+        // Filter out unwanted section headers
+        const lineUpper = line.toUpperCase();
+        if (lineUpper.includes('TRANSITION STRATEGY') || 
+            lineUpper.includes('MARKET TRENDS ANALYSIS') || 
+            lineUpper.includes('JOB MARKET OUTLOOK')) {
+          return;
+        }
+        
         if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
           const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          if (itemText.length > 10) {
+          if (itemText.length > 15) {
             items.push({
               text: itemText,
-              type: 'tip'
+              type: 'tip',
+              category: 'Transition Strategy'
             });
           }
         }
       }
     });
     
-    console.log(`${sectionName} items found:`, items.filter(i => i.type === 'tip').length);
+    // Add default transition strategy tips if none found
+    if (items.filter(i => i.type === 'tip').length === 0) {
+      const defaultTips = [
+        'Identify transferable skills from your current role to tech positions',
+        'Build a portfolio showcasing projects relevant to your target career path',
+        'Network with professionals in your desired field through LinkedIn and industry events',
+        'Consider taking online courses or bootcamps to gain credibility in your new field',
+        'Start applying your new skills to solve problems in your current role'
+      ];
+      
+      defaultTips.forEach(tip => {
+        items.push({
+          text: tip,
+          type: 'tip',
+          category: 'Transition Strategy'
+        });
+      });
+    }
+    
+    console.log('Portfolio/transition guidance items found:', items.filter(i => i.type === 'tip').length);
     return items;
   };
 
-  // Improved extraction functions for other sections
-  const extractPortfolioGuidanceImproved = (text) => {
-    return extractGenericSection(text, ['PORTFOLIO', 'PROJECTS'], 'portfolio guidance');
-  };
-
   const extractJobSearchStrategiesImproved = (text) => {
-    return extractGenericSection(text, ['JOB SEARCH', 'JOB HUNTING', 'APPLICATIONS'], 'job search strategies');
+    console.log('Extracting job search strategies...');
+    const items = [];
+    const lines = text.split('\n');
+    let inSection = false;
+    
+    const jobSearchKeywords = ['JOB SEARCH', 'JOB HUNTING', 'APPLICATIONS', 'JOB APPLICATION'];
+    
+    lines.forEach((line) => {
+      if (jobSearchKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
+        inSection = true;
+        return;
+      }
+      
+      // Exit section when hitting other major sections  
+      if (inSection && (
+        line.toUpperCase().includes('NETWORKING') || 
+        line.toUpperCase().includes('INTERVIEW') || 
+        line.toUpperCase().includes('PERSONAL BRANDING') ||
+        line.toUpperCase().includes('LEARNING ROADMAP') ||
+        line.toUpperCase().includes('PORTFOLIO')
+      )) {
+        inSection = false;
+        return;
+      }
+      
+      if (inSection && line.trim() !== '') {
+        // Filter out learning roadmap content
+        const lineUpper = line.toUpperCase();
+        if (lineUpper.includes('LEARNING ROADMAP') || 
+            lineUpper.includes('STUDY PLAN') ||
+            lineUpper.includes('LEARNING PATH')) {
+          return;
+        }
+        
+        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
+          const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
+          if (itemText.length > 15) {
+            items.push({
+              text: itemText,
+              type: 'tip',
+              category: 'Job Search'
+            });
+          }
+        }
+      }
+    });
+    
+    // Add default job search strategies if none found
+    if (items.filter(i => i.type === 'tip').length === 0) {
+      const defaultTips = [
+        'Tailor your resume to highlight relevant skills and projects for each application',
+        'Use job boards like LinkedIn, Indeed, and AngelList to find opportunities',
+        'Apply directly through company websites for better visibility',
+        'Follow up on applications with personalized messages to hiring managers',
+        'Practice coding challenges and technical interview questions regularly'
+      ];
+      
+      defaultTips.forEach(tip => {
+        items.push({
+          text: tip,
+          type: 'tip',
+          category: 'Job Search'
+        });
+      });
+    }
+    
+    console.log('Job search strategies found:', items.filter(i => i.type === 'tip').length);
+    return items;
   };
 
   const extractCareerGrowthResourcesImproved = (text) => {
-    return extractGenericSection(text, ['CAREER GROWTH', 'RESOURCES', 'LEARNING'], 'career growth resources');
+    console.log('Extracting strengths analysis...');
+    const items = [];
+    const lines = text.split('\n');
+    let inSection = false;
+    
+    const strengthsKeywords = ['CAREER GROWTH', 'RESOURCES', 'STRENGTHS', 'STRENGTHS ANALYSIS'];
+    
+    lines.forEach((line) => {
+      if (strengthsKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
+        inSection = true;
+        return;
+      }
+      
+      // Exit section when hitting other major sections
+      if (inSection && (
+        line.toUpperCase().includes('NETWORKING') || 
+        line.toUpperCase().includes('INTERVIEW') || 
+        line.toUpperCase().includes('PERSONAL BRANDING') ||
+        line.toUpperCase().includes('JOB SEARCH')
+      )) {
+        inSection = false;
+        return;
+      }
+      
+      if (inSection && line.trim() !== '') {
+        // Filter out strengths analysis section headers
+        const lineUpper = line.toUpperCase();
+        if (lineUpper.includes('STRENGTHS ANALYSIS:') || 
+            lineUpper === 'STRENGTHS ANALYSIS') {
+          return;
+        }
+        
+        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
+          const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
+          if (itemText.length > 15) {
+            items.push({
+              text: itemText,
+              type: 'tip',
+              category: 'Strengths'
+            });
+          }
+        }
+      }
+    });
+    
+    // Add default strengths analysis if none found
+    if (items.filter(i => i.type === 'tip').length === 0) {
+      const userStrengths = generateUserStrengthsAnalysis();
+      userStrengths.forEach(strength => {
+        items.push({
+          text: strength,
+          type: 'tip',
+          category: 'Strengths'
+        });
+      });
+    }
+    
+    console.log('Strengths analysis items found:', items.filter(i => i.type === 'tip').length);
+    return items;
+  };
+
+  // Generate personalized strengths analysis based on user data
+  const generateUserStrengthsAnalysis = () => {
+    const strengths = [];
+    
+    // Analyze experience level
+    if (userData.experienceLevel === 'Advanced' || userData.experienceLevel === 'Intermediate') {
+      strengths.push(`Your ${userData.experienceLevel.toLowerCase()} experience level gives you a solid foundation for career transition`);
+    }
+    
+    // Analyze study field
+    if (userData.studyField && userData.studyField !== 'Not specified') {
+      if (userData.studyField.toLowerCase().includes('engineering') || 
+          userData.studyField.toLowerCase().includes('computer') ||
+          userData.studyField.toLowerCase().includes('science')) {
+        strengths.push(`Your ${userData.studyField} background provides strong analytical and problem-solving skills`);
+      } else {
+        strengths.push(`Your ${userData.studyField} background brings unique perspective to technology roles`);
+      }
+    }
+    
+    // Analyze tools and technologies
+    if (userData.toolsUsed && userData.toolsUsed.length > 0 && !userData.toolsUsed.includes('None')) {
+      const tools = userData.toolsUsed.slice(0, 3).join(', ');
+      strengths.push(`Experience with ${tools} demonstrates your technical aptitude and learning ability`);
+    }
+    
+    // Analyze transferable skills
+    if (userData.transferableSkills && userData.transferableSkills !== 'Not specified') {
+      strengths.push(`Your transferable skills in ${userData.transferableSkills} will be valuable in tech roles`);
+    }
+    
+    // Analyze career interests alignment
+    if (userData.careerPathsInterest && userData.careerPathsInterest.length > 0) {
+      strengths.push(`Clear interest in ${userData.careerPathsInterest[0]} shows focused career direction and motivation`);
+    }
+    
+    // Default strengths if none identified
+    if (strengths.length === 0) {
+      strengths.push(
+        'Motivation to transition into tech demonstrates adaptability and growth mindset',
+        'Willingness to learn new skills shows commitment to professional development',
+        'Taking career assessment indicates proactive approach to career planning'
+      );
+    }
+    
+    return strengths.slice(0, 5);
   };
 
   const extractCareerPathVisualizationsImproved = (text) => {
@@ -2489,7 +2698,7 @@ const CareerDashboard = () => {
               </div>
             </div>
 
-            {/* UPDATED: Resource Sections with new titles */}
+            {/* UPDATED: Resource Sections with cleaned content */}
             {portfolioGuidance.length > 0 && (
               <div className="bg-white rounded-2xl p-8 shadow-lg">
                 <h3 className="text-xl font-bold mb-6 flex items-center">
@@ -2499,9 +2708,6 @@ const CareerDashboard = () => {
                 <div className="space-y-4">
                   {portfolioGuidance.filter(item => item.type === 'tip').slice(0, 5).map((tip, index) => (
                     <div key={index} className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
-                      {tip.category && (
-                        <h4 className="font-semibold text-blue-700 mb-2">{tip.category}</h4>
-                      )}
                       <p className="text-gray-700">{tip.text}</p>
                     </div>
                   ))}
@@ -2518,9 +2724,6 @@ const CareerDashboard = () => {
                 <div className="space-y-4">
                   {jobSearchStrategies.filter(item => item.type === 'tip').slice(0, 5).map((tip, index) => (
                     <div key={index} className="bg-gradient-to-r from-green-50 to-teal-50 rounded-lg p-4">
-                      {tip.category && (
-                        <h4 className="font-semibold text-green-700 mb-2">{tip.category}</h4>
-                      )}
                       <p className="text-gray-700">{tip.text}</p>
                     </div>
                   ))}
@@ -2537,9 +2740,6 @@ const CareerDashboard = () => {
                 <div className="space-y-4">
                   {careerGrowthResources.filter(item => item.type === 'tip').slice(0, 5).map((tip, index) => (
                     <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4">
-                      {tip.category && (
-                        <h4 className="font-semibold text-purple-700 mb-2">{tip.category}</h4>
-                      )}
                       <p className="text-gray-700">{tip.text}</p>
                     </div>
                   ))}

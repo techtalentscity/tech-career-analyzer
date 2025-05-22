@@ -1509,7 +1509,7 @@ const CareerDashboard = () => {
     return roadmap;
   };
 
-  // UPDATED: Market Trends extraction with NO duplicates and enhanced content
+  // UPDATED: Market Trends extraction with ONLY 2 unique cards + salary/industry analysis
   const extractMarketTrendsImproved = (text) => {
     if (!text) return [];
     
@@ -1561,43 +1561,45 @@ const CareerDashboard = () => {
       }
     });
     
-    // Add ONLY unique enhanced default trends if none found - NO DUPLICATES
+    // Add ONLY 2 unique enhanced default trends + extracted salary/industry data
     if (trends.length === 0) {
-      console.log('No market trends found, adding unique defaults...');
+      console.log('No market trends found, adding 2 unique defaults + analysis-based content...');
+      
+      // Extract salary and industry data from the analysis
+      const salaryData = extractSalaryTrendsFromAnalysis(text);
+      const industryData = extractIndustrySectorFromAnalysis(text);
+      
       const uniqueTrends = [
         {
-          title: 'REGIONAL OPPORTUNITIES',
-          description: 'Geographic distribution of tech opportunities and emerging markets.',
-          category: 'Geographic Trends',
-          relevance: 'High'
-        },
-        {
-          title: 'EMERGING TECHNOLOGIES',
-          description: 'Cutting-edge technologies creating new career opportunities.',
-          category: 'Technology Innovation',
-          relevance: 'High'
-        },
-        {
           title: 'SALARY TRENDS',
-          description: 'Current compensation trends and salary growth across tech roles.',
+          description: 'Compensation analysis based on your career path',
           category: 'Compensation Analysis',
-          relevance: 'High'
+          relevance: 'High',
+          salaryData: salaryData
         },
         {
-          title: 'INDUSTRY DEMAND',
-          description: 'Market demand patterns and skill requirements in the tech industry.',
-          category: 'Market Analysis',
-          relevance: 'High'
+          title: 'INDUSTRY SECTOR ANALYSIS',
+          description: 'Industry insights tailored to your career transition',
+          category: 'Industry Analysis',
+          relevance: 'High',
+          industryData: industryData
         }
       ];
       
       trends.push(...uniqueTrends);
     }
     
-    // Ensure NO duplicates by title - keep only first occurrence
+    // Ensure NO duplicates and limit to exactly 2 cards
     const seenTitles = new Set();
     const finalTrends = trends.filter(trend => {
       const normalizedTitle = trend.title.toUpperCase().trim();
+      // Skip regional opportunities and emerging technologies to avoid duplicates
+      if (normalizedTitle.includes('REGIONAL OPPORTUNITIES') || 
+          normalizedTitle.includes('EMERGING TECHNOLOGIES')) {
+        console.log('🚫 Skipping duplicate/unwanted trend:', normalizedTitle);
+        return false;
+      }
+      
       if (seenTitles.has(normalizedTitle)) {
         console.log('🚫 Removing duplicate trend:', normalizedTitle);
         return false;
@@ -1607,7 +1609,170 @@ const CareerDashboard = () => {
     });
     
     console.log('Total UNIQUE market trends extracted:', finalTrends.length);
-    return finalTrends.slice(0, 4); // Limit to exactly 4 unique trends
+    return finalTrends.slice(0, 2); // Limit to exactly 2 unique trends
+  };
+
+  // Extract salary information from the user's analysis
+  const extractSalaryTrendsFromAnalysis = (analysisText) => {
+    console.log('🔍 Extracting salary data from analysis...');
+    const salaryInfo = {
+      ranges: [],
+      insights: [],
+      growth: ''
+    };
+    
+    const lines = analysisText.split('\n');
+    let inSalarySection = false;
+    
+    // Look for salary-related sections
+    const salaryKeywords = ['SALARY', 'COMPENSATION', 'PAY', 'INCOME', 'EARNINGS'];
+    
+    lines.forEach(line => {
+      const lineUpper = line.toUpperCase();
+      
+      // Check if we're in a salary section
+      if (salaryKeywords.some(keyword => lineUpper.includes(keyword))) {
+        inSalarySection = true;
+      }
+      
+      // Extract salary ranges (e.g., "$80,000 - $120,000", "$95K-$180K")
+      const salaryPattern = /\$[\d,]+(?:K|,000)?\s*[-–]\s*\$[\d,]+(?:K|,000)?/g;
+      const salaryMatches = line.match(salaryPattern);
+      if (salaryMatches) {
+        salaryMatches.forEach(salary => {
+          if (!salaryInfo.ranges.includes(salary)) {
+            salaryInfo.ranges.push(salary);
+          }
+        });
+      }
+      
+      // Extract salary insights from the analysis
+      if (inSalarySection && line.trim() !== '') {
+        if (lineUpper.includes('GROWTH') || lineUpper.includes('INCREASE') || lineUpper.includes('TREND')) {
+          salaryInfo.growth = line.trim();
+        }
+        
+        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
+          const insight = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
+          if (insight.length > 20 && !salaryInfo.insights.includes(insight)) {
+            salaryInfo.insights.push(insight);
+          }
+        }
+      }
+      
+      // Exit salary section
+      if (inSalarySection && (lineUpper.includes('NETWORKING') || 
+          lineUpper.includes('SKILLS') || lineUpper.includes('ROADMAP'))) {
+        inSalarySection = false;
+      }
+    });
+    
+    // If no specific salary data found, create based on user's career path
+    if (salaryInfo.ranges.length === 0 && careerPaths.length > 0) {
+      const topCareer = careerPaths[0].title;
+      salaryInfo.ranges = generateCareerSalaryRanges(topCareer);
+      salaryInfo.insights.push(`Salary ranges for ${topCareer} positions based on experience level`);
+    }
+    
+    console.log('💰 Extracted salary data:', salaryInfo);
+    return salaryInfo;
+  };
+
+  // Extract industry sector analysis from the user's analysis
+  const extractIndustrySectorFromAnalysis = (analysisText) => {
+    console.log('🔍 Extracting industry sector data from analysis...');
+    const industryInfo = {
+      sectors: [],
+      opportunities: [],
+      trends: []
+    };
+    
+    const lines = analysisText.split('\n');
+    let inIndustrySection = false;
+    
+    // Look for industry-related sections
+    const industryKeywords = ['INDUSTRY', 'SECTOR', 'MARKET', 'BUSINESS', 'COMPANIES'];
+    
+    lines.forEach(line => {
+      const lineUpper = line.toUpperCase();
+      
+      // Check if we're in an industry section
+      if (industryKeywords.some(keyword => lineUpper.includes(keyword + ' ANALYSIS') || 
+          lineUpper.includes(keyword + ' TRENDS') || lineUpper.includes(keyword + ' SECTORS'))) {
+        inIndustrySection = true;
+      }
+      
+      if (inIndustrySection && line.trim() !== '') {
+        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
+          const item = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
+          if (item.length > 15) {
+            if (lineUpper.includes('SECTOR') || lineUpper.includes('INDUSTRY')) {
+              industryInfo.sectors.push(item);
+            } else if (lineUpper.includes('OPPORTUNITY') || lineUpper.includes('GROWTH')) {
+              industryInfo.opportunities.push(item);
+            } else {
+              industryInfo.trends.push(item);
+            }
+          }
+        }
+      }
+      
+      // Exit industry section
+      if (inIndustrySection && (lineUpper.includes('NETWORKING') || 
+          lineUpper.includes('SKILLS') || lineUpper.includes('SALARY'))) {
+        inIndustrySection = false;
+      }
+    });
+    
+    // If no specific industry data found, create based on user's career interests
+    if (industryInfo.sectors.length === 0 && userData.careerPathsInterest) {
+      industryInfo.sectors = generateIndustryAnalysis(userData.careerPathsInterest);
+      industryInfo.opportunities.push('Growing demand for tech professionals across all industries');
+      industryInfo.trends.push('Digital transformation driving technology adoption');
+    }
+    
+    console.log('🏭 Extracted industry data:', industryInfo);
+    return industryInfo;
+  };
+
+  // Generate salary ranges based on career path
+  const generateCareerSalaryRanges = (careerTitle) => {
+    const salaryMap = {
+      'Software Developer': ['$95,000 - $180,000', '$65,000 - $120,000 (Entry)', '$140,000 - $220,000 (Senior)'],
+      'Data Scientist': ['$100,000 - $200,000', '$70,000 - $130,000 (Entry)', '$150,000 - $250,000 (Senior)'],
+      'Machine Learning Engineer': ['$120,000 - $220,000', '$85,000 - $150,000 (Entry)', '$170,000 - $280,000 (Senior)'],
+      'UX/UI Designer': ['$85,000 - $160,000', '$55,000 - $100,000 (Entry)', '$120,000 - $200,000 (Senior)'],
+      'Product Manager': ['$110,000 - $190,000', '$75,000 - $130,000 (Entry)', '$150,000 - $250,000 (Senior)'],
+      'DevOps Engineer': ['$100,000 - $185,000', '$70,000 - $125,000 (Entry)', '$140,000 - $230,000 (Senior)'],
+      'Cybersecurity Analyst': ['$90,000 - $175,000', '$60,000 - $110,000 (Entry)', '$130,000 - $210,000 (Senior)']
+    };
+    
+    return salaryMap[careerTitle] || ['$80,000 - $150,000', '$55,000 - $95,000 (Entry)', '$120,000 - $200,000 (Senior)'];
+  };
+
+  // Generate industry analysis based on user interests
+  const generateIndustryAnalysis = (careerInterests) => {
+    const sectors = [];
+    
+    careerInterests.forEach(interest => {
+      if (interest.toLowerCase().includes('software') || interest.toLowerCase().includes('development')) {
+        sectors.push('Technology companies (Google, Microsoft, Meta) - High demand for software engineers');
+        sectors.push('Financial services - Digital banking and fintech growth');
+      } else if (interest.toLowerCase().includes('data')) {
+        sectors.push('Healthcare - Data-driven medical research and patient analytics');
+        sectors.push('E-commerce - Customer behavior analysis and recommendations');
+      } else if (interest.toLowerCase().includes('design')) {
+        sectors.push('Consumer products - User experience design for apps and websites');
+        sectors.push('Digital agencies - Creative and user interface design services');
+      }
+    });
+    
+    if (sectors.length === 0) {
+      sectors.push('Technology sector - Consistent growth and innovation opportunities');
+      sectors.push('Healthcare technology - Emerging field with significant potential');
+    }
+    
+    return sectors.slice(0, 4);
   };
 
   // NEW: Job Market Outlook extraction
@@ -1995,11 +2160,14 @@ const CareerDashboard = () => {
       }
       
       if (inSection && line.trim() !== '') {
-        // Filter out learning roadmap content
+        // Filter out unwanted content sections
         const lineUpper = line.toUpperCase();
         if (lineUpper.includes('LEARNING ROADMAP') || 
             lineUpper.includes('STUDY PLAN') ||
-            lineUpper.includes('LEARNING PATH')) {
+            lineUpper.includes('LEARNING PATH') ||
+            lineUpper.includes('TRANSITION STRATEGY:') ||
+            lineUpper.includes('TRANSITION STRATEGY')) {
+          console.log('🚫 Filtering out unwanted content:', line.trim());
           return;
         }
         

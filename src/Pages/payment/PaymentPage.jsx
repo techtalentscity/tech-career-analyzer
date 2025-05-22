@@ -12,12 +12,15 @@ const PaymentPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [paypalLoaded, setPaypalLoaded] = useState(false);
+  const [debugInfo, setDebugInfo] = useState('');
   const { currentUser, signInWithGoogle, isAuthorized } = useAuth();
   const navigate = useNavigate();
 
   // Updated PayPal Configuration
   const PAYPAL_PLAN_ID = 'P-5C894909UL250092PNAXH4YQ';
   const PAYPAL_CLIENT_ID = 'ARzy2f1cC_tYmAvWKXfF3jR1TXj-6eKH5f2SVUHIziG2ip1lc7pdLCSB_jEnPwt0tKhN-9SuCgO8EXcx';
+  const CONTAINER_ID = 'paypal-button-container';
 
   useEffect(() => {
     // If user is already authenticated and authorized, redirect to career test
@@ -26,24 +29,45 @@ const PaymentPage = () => {
       return;
     }
     
-    // Inject PayPal script only once
+    loadPayPalScript();
+  }, [currentUser, isAuthorized, navigate]);
+
+  // Separate effect to initialize PayPal when both script is loaded and email is valid
+  useEffect(() => {
+    if (paypalLoaded && isEmailValid) {
+      initializePayPal();
+    }
+  }, [paypalLoaded, isEmailValid]);
+
+  const loadPayPalScript = () => {
+    // Check if PayPal script already exists
     const existingScript = document.querySelector('script[src*="paypal.com/sdk/js"]');
-    if (existingScript) return;
+    if (existingScript) {
+      setDebugInfo('PayPal script already exists');
+      if (window.paypal) {
+        setPaypalLoaded(true);
+        setDebugInfo('PayPal SDK already loaded');
+      }
+      return;
+    }
     
+    setDebugInfo('Loading PayPal script...');
     const script = document.createElement('script');
     script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription`;
     script.setAttribute('data-sdk-integration-source', 'button-factory');
-    script.addEventListener('load', initializePayPal);
-    document.body.appendChild(script);
     
-    return () => {
-      // Clean up script when component unmounts
-      const paypalScript = document.querySelector('script[src*="paypal.com/sdk/js"]');
-      if (paypalScript) {
-        document.body.removeChild(paypalScript);
-      }
+    script.onload = () => {
+      setDebugInfo('PayPal script loaded successfully');
+      setPaypalLoaded(true);
     };
-  }, [currentUser, isAuthorized, navigate]);
+    
+    script.onerror = () => {
+      setError('Failed to load PayPal SDK');
+      setDebugInfo('PayPal script failed to load');
+    };
+    
+    document.head.appendChild(script);
+  };
 
   const validateEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -53,12 +77,38 @@ const PaymentPage = () => {
   const handleEmailChange = (e) => {
     const newEmail = e.target.value;
     setEmail(newEmail);
-    setIsEmailValid(validateEmail(newEmail));
+    const valid = validateEmail(newEmail);
+    setIsEmailValid(valid);
     setError(''); // Clear any previous errors
+    
+    if (valid) {
+      setDebugInfo('Email is valid, PayPal button should appear');
+    } else {
+      setDebugInfo('Email validation pending...');
+    }
   };
 
   const initializePayPal = () => {
-    if (window.paypal) {
+    if (!window.paypal) {
+      setError('PayPal SDK not available');
+      setDebugInfo('PayPal SDK not available');
+      return;
+    }
+
+    if (!isEmailValid) {
+      setDebugInfo('Email not valid, PayPal button not initialized');
+      return;
+    }
+
+    // Clear any existing PayPal buttons
+    const container = document.getElementById(CONTAINER_ID);
+    if (container) {
+      container.innerHTML = '';
+    }
+
+    setDebugInfo('Initializing PayPal button...');
+
+    try {
       window.paypal.Buttons({
         style: {
           shape: 'pill',
@@ -72,11 +122,13 @@ const PaymentPage = () => {
             return Promise.reject(new Error('Email validation failed'));
           }
           
+          setDebugInfo('Creating subscription...');
           return actions.subscription.create({
             'plan_id': PAYPAL_PLAN_ID
           });
         },
         onApprove: function(data, actions) {
+          setDebugInfo('Payment approved, processing...');
           setIsLoading(true);
           setSubscriptionId(data.subscriptionID);
           
@@ -86,6 +138,7 @@ const PaymentPage = () => {
               setIsPaid(true);
               setIsLoading(false);
               setError('');
+              setDebugInfo('Payment processed successfully');
             })
             .catch(err => {
               setError('Payment recorded but there was an error updating your account. Please contact support.');
@@ -95,9 +148,22 @@ const PaymentPage = () => {
         },
         onError: function(err) {
           setError('There was an error processing your payment. Please try again.');
+          setDebugInfo('PayPal error: ' + err.message);
           console.error('PayPal Error:', err);
         }
-      }).render('#paypal-button-container-P-5C894909UL250092PNAXH4YQ');
+      }).render(`#${CONTAINER_ID}`)
+      .then(() => {
+        setDebugInfo('PayPal button rendered successfully');
+      })
+      .catch(err => {
+        setError('Failed to render PayPal button');
+        setDebugInfo('PayPal render error: ' + err.message);
+        console.error('PayPal render error:', err);
+      });
+    } catch (err) {
+      setError('Failed to initialize PayPal');
+      setDebugInfo('PayPal initialization error: ' + err.message);
+      console.error('PayPal initialization error:', err);
     }
   };
 
@@ -109,7 +175,7 @@ const PaymentPage = () => {
         subscriptionId: subscriptionId,
         isPaid: true,
         paymentDate: new Date().toISOString(),
-        planType: "monthly", // or whatever plan type this is
+        planType: "monthly",
       });
       return true;
     } catch (error) {
@@ -267,6 +333,13 @@ const PaymentPage = () => {
             <h2 className="text-3xl font-bold text-gray-800 mb-2">Tech Career Analysis</h2>
             <p className="text-gray-600 mb-6">Get your personalized career roadmap</p>
 
+            {/* Debug Info (remove this in production) */}
+            {debugInfo && (
+              <div className="bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded text-xs mb-4">
+                Debug: {debugInfo}
+              </div>
+            )}
+
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                 {error}
@@ -292,6 +365,9 @@ const PaymentPage = () => {
                   />
                   {!isEmailValid && email && (
                     <p className="text-red-500 text-sm mt-1">Please enter a valid email address</p>
+                  )}
+                  {isEmailValid && (
+                    <p className="text-green-500 text-sm mt-1">✓ Valid email address</p>
                   )}
                 </div>
 
@@ -327,12 +403,26 @@ const PaymentPage = () => {
                   </ul>
                 </div>
 
-                <div id="paypal-button-container-P-5C894909UL250092PNAXH4YQ" className="w-full flex justify-center" />
+                {/* PayPal Button Container */}
+                <div className="mb-4">
+                  <div id={CONTAINER_ID} className="w-full min-h-[50px] flex justify-center items-center border-2 border-dashed border-gray-200 rounded-lg">
+                    {!paypalLoaded && (
+                      <p className="text-gray-500 text-sm">Loading PayPal...</p>
+                    )}
+                    {paypalLoaded && !isEmailValid && (
+                      <p className="text-gray-500 text-sm">Enter valid email to show payment button</p>
+                    )}
+                  </div>
+                </div>
                 
-                {!isEmailValid && (
-                  <p className="text-gray-500 text-sm mt-2">
-                    Please enter a valid email address to enable payment
-                  </p>
+                {/* Manual PayPal Button (backup) */}
+                {isEmailValid && paypalLoaded && (
+                  <button
+                    onClick={initializePayPal}
+                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded text-sm mb-4"
+                  >
+                    Refresh PayPal Button
+                  </button>
                 )}
               </>
             ) : (

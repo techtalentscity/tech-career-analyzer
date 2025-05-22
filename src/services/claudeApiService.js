@@ -1,15 +1,16 @@
-// src/services/claudeApiService.js with fixes
-import { CLAUDE_API_CONFIG, CLAUDE_PROMPTS } from '../config/claudeApiConfig';
+// src/services/claudeApiService.js - Enhanced with Video Insights
+import { CLAUDE_API_CONFIG, CLAUDE_PROMPTS, VIDEO_INSIGHTS, getContextualAdvice } from '../config/claudeApiConfig';
 import storageService from './storageService';
+import videoInsightsService from './videoInsightsService';
 
 class ClaudeApiService {
   /**
-   * Generate form field suggestions based on typical tech enthusiast profile
+   * Generate form field suggestions based on video insights and typical tech enthusiast profile
    * @returns {Promise<string>} The suggested form responses
    */
   async getFormSuggestions() {
     try {
-      console.log("Calling Claude API for form suggestions");
+      console.log("Calling Claude API for form suggestions with video insights");
       
       const requestBody = {
         model: CLAUDE_API_CONFIG.models.default,
@@ -27,7 +28,6 @@ class ClaudeApiService {
         max_tokens: requestBody.max_tokens
       });
       
-      // CRITICAL FIX: Using the correct API endpoint '/api/claude-proxy'
       const response = await fetch('/api/claude-proxy', {
         method: 'POST',
         headers: {
@@ -54,22 +54,112 @@ class ClaudeApiService {
   }
 
   /**
+   * Enhanced form suggestions with video insights fallback
+   * @param {Object} partialFormData - Any existing form data to build upon
+   * @returns {Object} Enhanced form suggestions
+   */
+  async getEnhancedFormSuggestions(partialFormData = {}) {
+    try {
+      // Try to get AI suggestions first
+      const aiSuggestions = await this.getFormSuggestions();
+      return this.parseAISuggestions(aiSuggestions, partialFormData);
+    } catch (error) {
+      console.warn('AI suggestions failed, falling back to video insights:', error);
+      
+      // Fallback to video insights-based suggestions
+      return this.getVideoInsightBasedSuggestions(partialFormData);
+    }
+  }
+
+  /**
+   * Get form suggestions based on video insights (fallback method)
+   * @param {Object} partialFormData - Any existing form data
+   * @returns {Object} Form suggestions based on video analysis
+   */
+  getVideoInsightBasedSuggestions(partialFormData = {}) {
+    const trendingSkills = videoInsightsService.getTrendingSkills();
+    const careerAdvice = videoInsightsService.getCareerAdvicePatterns();
+    const industryInsights = videoInsightsService.getIndustryGrowthInsights();
+    
+    // Generate suggestions based on video insights
+    const suggestions = {
+      // Education suggestions
+      educationLevel: partialFormData.educationLevel || "Bachelor's Degree",
+      studyField: partialFormData.studyField || "Computer Science",
+      
+      // Experience suggestions based on video insights
+      currentRole: partialFormData.currentRole || "Software Developer",
+      yearsExperience: partialFormData.yearsExperience || "3-5 years",
+      
+      // Job experience with trending technologies
+      jobTechnologies: partialFormData.jobTechnologies || 
+        `${trendingSkills.slice(0, 3).map(s => s.name).join(', ')}, Git, SQL`,
+      
+      // Motivation based on video analysis patterns
+      techMotivation: partialFormData.techMotivation || 
+        "Growing demand for AI/ML skills and opportunities for remote work in the tech industry",
+      
+      techPassion: partialFormData.techPassion || 
+        "Problem-solving with technology and continuous learning in emerging fields like AI and data science",
+      
+      // Tech interests based on trending skills
+      techInterests: partialFormData.techInterests || 
+        `${trendingSkills.slice(0, 4).map(s => s.name).join(', ')}`,
+      
+      // Career paths based on video analysis
+      careerPathsInterest: partialFormData.careerPathsInterest || 
+        ['Software Development', 'Data Analysis/Science', 'AI/Machine Learning'],
+      
+      // Industry preferences from video insights
+      industryPreference: partialFormData.industryPreference || 
+        industryInsights.slice(0, 2).map(i => i.industry),
+      
+      // Tools based on trending skills
+      toolsUsed: partialFormData.toolsUsed || 
+        ['Python', 'JavaScript', 'Git', 'VS Code'],
+      
+      // Timeline based on video analysis (6-18 months is typical)
+      transitionTimeline: partialFormData.transitionTimeline || '6-12 months',
+      
+      // Time commitment
+      timeCommitment: partialFormData.timeCommitment || '10-15 hours',
+      
+      // Guidance based on common video advice
+      guidanceNeeded: partialFormData.guidanceNeeded || 
+        'Learning roadmap, networking strategies, and portfolio building guidance',
+      
+      // Future goal incorporating video insights
+      futureGoal: partialFormData.futureGoal || 
+        'Complete foundational skills training and land first tech role in a growth industry like FinTech or Healthcare Technology'
+    };
+    
+    return suggestions;
+  }
+
+  /**
+   * Parse AI suggestions and enhance with video insights
+   */
+  parseAISuggestions(aiSuggestions, partialFormData) {
+    // This method would parse the AI response and combine it with video insights
+    // For now, return the AI suggestions as-is, but you could enhance this
+    return aiSuggestions;
+  }
+
+  /**
    * Analyze the submitted form data and generate career path recommendations
+   * Enhanced with video insights
    * @param {Object} formData The user's form responses
    * @returns {Promise<string>} The career path analysis and recommendations
    */
   async analyzeCareerPath(formData) {
     try {
-      console.log("Calling Claude API for career analysis");
+      console.log("Calling Claude API for career analysis with video insights");
       
-      // Log important new fields to help with debugging
-      console.log("Key form data fields:", {
-        educationLevel: formData.educationLevel || 'Not provided',
-        studyField: formData.studyField || 'Not provided',
-        publications: formData.publications ? 'Provided' : 'Not provided'
-      });
+      // Get contextual advice from video insights
+      const contextualAdvice = getContextualAdvice(formData);
       
-      // Use the updated prompt from configuration that highlights important questions
+      console.log("Contextual advice from video insights:", contextualAdvice);
+      
       const requestBody = {
         model: CLAUDE_API_CONFIG.models.default,
         max_tokens: CLAUDE_API_CONFIG.maxTokens.careerAnalysis,
@@ -86,7 +176,6 @@ class ClaudeApiService {
         max_tokens: requestBody.max_tokens
       });
       
-      // CRITICAL FIX: Using the correct API endpoint '/api/claude-proxy'
       const response = await fetch('/api/claude-proxy', {
         method: 'POST',
         headers: {
@@ -100,11 +189,9 @@ class ClaudeApiService {
       if (!response.ok) {
         let errorText;
         try {
-          // Try to parse as JSON first
           const errorJson = await response.json();
           errorText = JSON.stringify(errorJson);
         } catch {
-          // If not JSON, get as text
           errorText = await response.text();
         }
         console.error("API Error Response:", errorText);
@@ -114,76 +201,150 @@ class ClaudeApiService {
       const data = await response.json();
       console.log("Received successful response from Claude API");
       
-      // DEBUGGING: Log the actual response text
       const responseText = data.content[0].text;
-      console.log("=== CLAUDE RESPONSE START ===");
-      console.log(responseText);
-      console.log("=== CLAUDE RESPONSE END ===");
       
-      // Log first 500 characters to see format
-      console.log("First 500 chars:", responseText.substring(0, 500));
+      // Enhance the analysis with video insights
+      const enhancedAnalysis = this.enhanceAnalysisWithVideoInsights(responseText, formData, contextualAdvice);
       
-      // Check if Skills Gap section exists
-      const hasSkillsGap = responseText.includes("SKILLS GAP ANALYSIS");
-      console.log("Has Skills Gap section:", hasSkillsGap);
-      
-      if (hasSkillsGap) {
-        // Extract just the Skills Gap section for debugging
-        const skillsGapStart = responseText.indexOf("SKILLS GAP ANALYSIS");
-        const skillsGapEnd = responseText.indexOf("LEARNING ROADMAP") || responseText.indexOf("TRANSITION STRATEGY");
-        if (skillsGapEnd > skillsGapStart) {
-          const skillsGapSection = responseText.substring(skillsGapStart, skillsGapEnd);
-          console.log("=== SKILLS GAP SECTION ===");
-          console.log(skillsGapSection);
-          console.log("=== END SKILLS GAP ===");
-        }
-      }
-      
-      // Verify that the response includes relevant content about education and publications
-      const containsEducationRef = responseText.toLowerCase().includes('education') || 
-                                  responseText.toLowerCase().includes('degree') ||
-                                  responseText.toLowerCase().includes('study');
-      
-      const containsPublicationsRef = formData.publications ? 
-                                      responseText.toLowerCase().includes('publication') || 
-                                      responseText.toLowerCase().includes('research') : true;
-      
-      if (formData.educationLevel && !containsEducationRef) {
-        console.warn("Warning: Response does not mention education despite education level being provided");
-      }
-      
-      if (formData.publications && !containsPublicationsRef) {
-        console.warn("Warning: Response does not mention publications despite publications being provided");
-      }
-      
-      // CRITICAL FIX: Now saving the analysis to storage after successful API call
+      // Save analysis to storage
       try {
-        // Save analysis to storage using the correct method
         const analysisData = {
           userId: formData.email || String(new Date().getTime()),
-          analysis: responseText,
-          raw: responseText // Store the raw analysis text
+          analysis: enhancedAnalysis,
+          raw: responseText,
+          videoInsights: contextualAdvice
         };
         
-        // Use the correct method from storageService
         storageService.saveCareerAnalysis(analysisData);
         
-        // Also save formatted version for faster rendering if email is available
         if (formData.email) {
-          storageService.saveFormattedAnalysis(formData.email, responseText);
+          storageService.saveFormattedAnalysis(formData.email, enhancedAnalysis);
         }
         
-        console.log('Analysis saved to local storage');
+        console.log('Enhanced analysis saved to local storage');
       } catch (storageError) {
         console.error('Error saving analysis to storage:', storageError);
-        // Continue execution even if storage fails
       }
       
-      return responseText;
+      return enhancedAnalysis;
     } catch (error) {
       console.error('Error getting career analysis from Claude API:', error);
       throw error;
     }
+  }
+
+  /**
+   * Enhance the Claude analysis with video insights
+   * @param {string} analysis - Original analysis from Claude
+   * @param {Object} formData - User form data
+   * @param {Array} contextualAdvice - Advice from video insights
+   * @returns {string} Enhanced analysis
+   */
+  enhanceAnalysisWithVideoInsights(analysis, formData, contextualAdvice) {
+    let enhancedAnalysis = analysis;
+    
+    // Add video insights footer
+    const videoInsightsFooter = `
+
+## INSIGHTS FROM TECH CAREER EXPERT ANALYSIS
+
+**Based on analysis of 16 comprehensive tech career guidance videos:**
+
+### Key Market Trends (2025)
+${VIDEO_INSIGHTS.market_trends.slice(0, 5).map(trend => `- ${trend}`).join('\n')}
+
+### Your Personalized Action Steps
+${this.getPersonalizedActionSteps(formData).map(step => `- ${step}`).join('\n')}
+
+### Industry Expert Advice
+${VIDEO_INSIGHTS.career_advice_patterns.slice(0, 3).map(advice => 
+  `**${advice.theme}** (mentioned in ${advice.frequency}/16 videos): ${advice.description}`
+).join('\n\n')}
+
+### Recommended Communities
+Based on the video analysis, consider joining these tech communities:
+- **DSN (Data Science Nigeria)** - For data science and AI/ML networking
+- **I4G (Ingressive For Good)** - For general tech career support
+- **Omdena** - For collaborative AI projects and portfolio building
+
+---
+*This analysis incorporates insights from 16 hours of expert tech career guidance videos, analyzed using AI to provide you with evidence-based recommendations.*
+`;
+
+    enhancedAnalysis += videoInsightsFooter;
+    
+    return enhancedAnalysis;
+  }
+
+  /**
+   * Get personalized action steps based on user profile and video insights
+   * @param {Object} formData - User form data
+   * @returns {Array} Personalized action steps
+   */
+  getPersonalizedActionSteps(formData) {
+    const experienceLevel = formData.experienceLevel || 'Complete beginner';
+    const careerInterests = formData.careerPathsInterest || [];
+    
+    // Map experience level to video insights categories
+    const levelMapping = {
+      'Complete beginner': 'Entry-Level',
+      'Some exposure': 'Entry-Level',
+      'Beginner': 'Entry-Level',
+      'Intermediate': 'Mid-Career',
+      'Advanced': 'Senior-Level'
+    };
+    
+    const mappedLevel = levelMapping[experienceLevel] || 'Entry-Level';
+    const levelSteps = VIDEO_INSIGHTS.actionable_steps_by_level[mappedLevel] || [];
+    
+    // Get trending skills relevant to user's interests
+    const trendingSkills = VIDEO_INSIGHTS.trending_skills
+      .filter(skill => {
+        return careerInterests.some(interest => {
+          if (interest.includes('Data') && (skill.name === 'Python' || skill.name === 'Data Science' || skill.name === 'AI/ML')) return true;
+          if (interest.includes('Software') && (skill.name === 'JavaScript' || skill.name === 'Python')) return true;
+          if (interest.includes('DevOps') && skill.name === 'DevOps') return true;
+          if (interest.includes('AI') && skill.name === 'AI/ML') return true;
+          return false;
+        });
+      })
+      .slice(0, 3)
+      .map(skill => `Focus on learning ${skill.name} (${skill.growth_trend} growth trend)`);
+    
+    // Combine level-appropriate steps with trending skills
+    const personalizedSteps = [
+      ...levelSteps.slice(0, 5),
+      ...trendingSkills,
+      'Join tech communities mentioned in expert videos (DSN, I4G, Omdena)',
+      'Build a portfolio showcasing projects in your areas of interest'
+    ];
+    
+    return personalizedSteps.slice(0, 8); // Return top 8 steps
+  }
+
+  /**
+   * Get market insights for specific career path
+   * @param {string} careerPath - The career path to analyze
+   * @returns {Object} Market insights for the career path
+   */
+  getCareerPathInsights(careerPath) {
+    const pathInsight = VIDEO_INSIGHTS.career_path_insights.find(
+      path => path.path === careerPath
+    );
+    
+    const relevantSkills = VIDEO_INSIGHTS.trending_skills.filter(skill => {
+      // Logic to match skills to career paths
+      if (careerPath.includes('Data') && (skill.name === 'Python' || skill.name === 'Data Science')) return true;
+      if (careerPath.includes('Software') && (skill.name === 'JavaScript' || skill.name === 'Python')) return true;
+      if (careerPath.includes('AI') && skill.name === 'AI/ML') return true;
+      return false;
+    });
+    
+    return {
+      pathDetails: pathInsight,
+      relevantSkills: relevantSkills,
+      industryOpportunities: VIDEO_INSIGHTS.industry_opportunities
+    };
   }
 }
 

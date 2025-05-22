@@ -17,7 +17,7 @@ const CareerAbout = () => {
             <div className="flex items-center">
               <Link to="/" className="flex items-center">
                 <img 
-                  src="/src/Images/512X512.png" 
+                  src="/Images/512X512.png" 
                   alt="Favored Online Logo" 
                   className="w-8 h-8 mr-2"
                 />
@@ -282,7 +282,7 @@ const CareerAbout = () => {
         <div className="container mx-auto px-6 text-center">
           <div className="flex items-center justify-center mb-3">
             <img 
-              src="/src/Images/512X512.png" 
+              src="/Images/512X512.png" 
               alt="Favored Online Logo" 
               className="w-8 h-8 mr-2"
             />

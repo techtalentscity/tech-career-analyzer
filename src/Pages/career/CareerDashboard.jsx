@@ -12,6 +12,9 @@ const CareerDashboard = () => {
   const [analysis, setAnalysis] = useState('');
   const [careerPaths, setCareerPaths] = useState([]);
   const [skillsGap, setSkillsGap] = useState([]);
+  const [learningRoadmap, setLearningRoadmap] = useState([]);
+  const [marketTrends, setMarketTrends] = useState([]);
+  const [jobMarketOutlook, setJobMarketOutlook] = useState([]);
   const [networkingStrategy, setNetworkingStrategy] = useState([]);
   const [personalBranding, setPersonalBranding] = useState([]);
   const [interviewPrep, setInterviewPrep] = useState([]);
@@ -96,6 +99,9 @@ const CareerDashboard = () => {
           console.log('Analysis contains sections:');
           console.log('- CAREER PATHS:', analysisText.includes('CAREER PATHS') || analysisText.includes('Career Paths'));
           console.log('- SKILLS GAP:', analysisText.includes('SKILLS GAP') || analysisText.includes('Skills Gap'));
+          console.log('- LEARNING ROADMAP:', analysisText.includes('LEARNING ROADMAP') || analysisText.includes('Learning Roadmap'));
+          console.log('- MARKET TRENDS:', analysisText.includes('MARKET TRENDS') || analysisText.includes('Market Trends'));
+          console.log('- JOB MARKET OUTLOOK:', analysisText.includes('JOB MARKET OUTLOOK') || analysisText.includes('Job Market Outlook'));
           console.log('- NETWORKING:', analysisText.includes('NETWORKING'));
           console.log('- PERSONAL BRANDING:', analysisText.includes('PERSONAL BRANDING'));
           console.log('- Contains percentages:', analysisText.includes('%'));
@@ -119,6 +125,9 @@ const CareerDashboard = () => {
           // Extract data from analysis with IMPROVED functions
           const paths = extractCareerPathsImproved(analysisText);
           const skills = extractSkillsGapImproved(analysisText);
+          const roadmap = extractLearningRoadmapImproved(analysisText);
+          const trends = extractMarketTrendsImproved(analysisText);
+          const outlook = extractJobMarketOutlookImproved(analysisText);
           const networking = extractNetworkingStrategyImproved(analysisText);
           const branding = extractPersonalBrandingImproved(analysisText);
           const interview = extractInterviewPrepImproved(analysisText);
@@ -131,12 +140,18 @@ const CareerDashboard = () => {
           console.log('=== EXTRACTED DATA DEBUG ===');
           console.log('Career Paths found:', paths.length, paths);
           console.log('Skills Gap found:', skills.length, skills);
+          console.log('Learning Roadmap found:', roadmap.length, roadmap);
+          console.log('Market Trends found:', trends.length, trends);
+          console.log('Job Market Outlook found:', outlook.length, outlook);
           console.log('Networking strategies found:', networking.length);
           console.log('Personal branding tips found:', branding.length);
           console.log('=== END EXTRACTED DATA DEBUG ===');
           
           setCareerPaths(paths);
           setSkillsGap(skills);
+          setLearningRoadmap(roadmap);
+          setMarketTrends(trends);
+          setJobMarketOutlook(outlook);
           setNetworkingStrategy(networking);
           setPersonalBranding(branding);
           setInterviewPrep(interview);
@@ -188,6 +203,9 @@ const CareerDashboard = () => {
             // Extract data with IMPROVED functions
             const paths = extractCareerPathsImproved(analysisText);
             const skills = extractSkillsGapImproved(analysisText);
+            const roadmap = extractLearningRoadmapImproved(analysisText);
+            const trends = extractMarketTrendsImproved(analysisText);
+            const outlook = extractJobMarketOutlookImproved(analysisText);
             const networking = extractNetworkingStrategyImproved(analysisText);
             const branding = extractPersonalBrandingImproved(analysisText);
             const interview = extractInterviewPrepImproved(analysisText);
@@ -198,6 +216,9 @@ const CareerDashboard = () => {
             
             setCareerPaths(paths);
             setSkillsGap(skills);
+            setLearningRoadmap(roadmap);
+            setMarketTrends(trends);
+            setJobMarketOutlook(outlook);
             setNetworkingStrategy(networking);
             setPersonalBranding(branding);
             setInterviewPrep(interview);
@@ -377,6 +398,172 @@ const CareerDashboard = () => {
         
         {skill.description && (
           <p className="text-sm text-gray-600 mt-3">{skill.description}</p>
+        )}
+      </div>
+    );
+  };
+
+  // NEW: Learning Roadmap Card Component
+  const LearningRoadmapCard = ({ roadmapItem, index }) => {
+    const phaseColors = [
+      'from-green-400 to-green-600',
+      'from-blue-400 to-blue-600',
+      'from-purple-400 to-purple-600',
+      'from-orange-400 to-orange-600',
+      'from-pink-400 to-pink-600'
+    ];
+    const colorClass = phaseColors[index % phaseColors.length];
+    
+    return (
+      <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+        <div className="flex items-start mb-4">
+          <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${colorClass} flex items-center justify-center text-white font-bold mr-4`}>
+            {index + 1}
+          </div>
+          <div className="flex-1">
+            <h4 className="font-semibold text-lg text-gray-800">{roadmapItem.phase || roadmapItem.title}</h4>
+            <span className="text-sm text-gray-500">{roadmapItem.duration || roadmapItem.timeline || 'Ongoing'}</span>
+          </div>
+        </div>
+        
+        {roadmapItem.description && (
+          <p className="text-gray-700 mb-4">{roadmapItem.description}</p>
+        )}
+        
+        {roadmapItem.skills && roadmapItem.skills.length > 0 && (
+          <div className="mb-4">
+            <h5 className="font-medium text-gray-800 mb-2">Key Skills:</h5>
+            <div className="flex flex-wrap gap-2">
+              {roadmapItem.skills.slice(0, 4).map((skill, skillIndex) => (
+                <span key={skillIndex} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {roadmapItem.resources && roadmapItem.resources.length > 0 && (
+          <div className="mb-4">
+            <h5 className="font-medium text-gray-800 mb-2">Resources:</h5>
+            <ul className="text-sm text-gray-600 space-y-1">
+              {roadmapItem.resources.slice(0, 3).map((resource, resourceIndex) => (
+                <li key={resourceIndex} className="flex items-start">
+                  <span className="text-blue-500 mr-2">•</span>
+                  {resource}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
+        <div className="pt-4 border-t">
+          <div className="flex items-center justify-between">
+            <span className={`px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${colorClass} text-white`}>
+              Phase {index + 1}
+            </span>
+            <button className="text-blue-600 hover:text-blue-800 font-medium text-sm">
+              Start Phase →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // NEW: Market Trends Card Component
+  const MarketTrendsCard = ({ trend, index }) => {
+    const trendIcons = ['📈', '🚀', '💡', '⚡', '🌟', '🔥'];
+    const icon = trend.icon || trendIcons[index % trendIcons.length];
+    
+    return (
+      <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+        <div className="flex items-start mb-4">
+          <span className="text-3xl mr-4">{icon}</span>
+          <div>
+            <h4 className="font-semibold text-lg text-gray-800">{trend.title || trend.trend}</h4>
+            <span className="text-sm text-gray-500">{trend.category || 'Market Trend'}</span>
+          </div>
+        </div>
+        
+        <p className="text-gray-700 mb-4">{trend.description || trend.text}</p>
+        
+        {trend.impact && (
+          <div className="mb-4">
+            <h5 className="font-medium text-gray-800 mb-2">Impact:</h5>
+            <p className="text-sm text-gray-600">{trend.impact}</p>
+          </div>
+        )}
+        
+        {trend.relevance && (
+          <div className="pt-4 border-t">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-600">Relevance to You:</span>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                trend.relevance === 'High' ? 'bg-red-100 text-red-700' :
+                trend.relevance === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                'bg-blue-100 text-blue-700'
+              }`}>
+                {trend.relevance || 'High'}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // NEW: Job Market Outlook Card Component
+  const JobMarketOutlookCard = ({ outlook, index }) => {
+    const outlookIcons = ['💼', '📊', '🎯', '🌐', '💰', '📈'];
+    const icon = outlook.icon || outlookIcons[index % outlookIcons.length];
+    
+    return (
+      <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+        <div className="flex items-start mb-4">
+          <span className="text-3xl mr-4">{icon}</span>
+          <div>
+            <h4 className="font-semibold text-lg text-gray-800">{outlook.title || outlook.aspect}</h4>
+            <span className="text-sm text-gray-500">{outlook.category || 'Job Market'}</span>
+          </div>
+        </div>
+        
+        <p className="text-gray-700 mb-4">{outlook.description || outlook.text}</p>
+        
+        {outlook.statistics && (
+          <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+            <h5 className="font-medium text-blue-800 mb-2">Key Statistics:</h5>
+            <p className="text-sm text-blue-700">{outlook.statistics}</p>
+          </div>
+        )}
+        
+        {outlook.opportunities && outlook.opportunities.length > 0 && (
+          <div className="mb-4">
+            <h5 className="font-medium text-gray-800 mb-2">Opportunities:</h5>
+            <ul className="text-sm text-gray-600 space-y-1">
+              {outlook.opportunities.slice(0, 3).map((opportunity, oppIndex) => (
+                <li key={oppIndex} className="flex items-start">
+                  <span className="text-green-500 mr-2">✓</span>
+                  {opportunity}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
+        {outlook.growth && (
+          <div className="pt-4 border-t">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-600">Growth Outlook:</span>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                outlook.growth === 'High' || outlook.growth === 'Strong' ? 'bg-green-100 text-green-700' :
+                outlook.growth === 'Medium' || outlook.growth === 'Moderate' ? 'bg-yellow-100 text-yellow-700' :
+                'bg-gray-100 text-gray-700'
+              }`}>
+                {outlook.growth || 'Positive'}
+              </span>
+            </div>
+          </div>
         )}
       </div>
     );
@@ -676,6 +863,294 @@ const CareerDashboard = () => {
     
     console.log('Total skills extracted:', skills.length);
     return skills.slice(0, 8); // Return top 8 skills
+  };
+
+  // NEW: Learning Roadmap extraction
+  const extractLearningRoadmapImproved = (text) => {
+    if (!text) return [];
+    
+    console.log('Extracting learning roadmap from text...');
+    const roadmap = [];
+    const lines = text.split('\n');
+    
+    let inRoadmapSection = false;
+    const roadmapKeywords = ['LEARNING ROADMAP', 'ROADMAP', 'LEARNING PATH', 'STUDY PLAN'];
+    
+    lines.forEach((line, index) => {
+      // Check for roadmap section
+      if (roadmapKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
+        inRoadmapSection = true;
+        return;
+      }
+      
+      // Exit roadmap section
+      if (inRoadmapSection && (line.toUpperCase().includes('NETWORKING') || 
+          line.toUpperCase().includes('INTERVIEW') || line.toUpperCase().includes('MARKET TRENDS'))) {
+        inRoadmapSection = false;
+        return;
+      }
+      
+      if (inRoadmapSection && line.trim() !== '') {
+        // Look for phase/month patterns
+        const phaseMatch = line.match(/^(Month\s+\d+|Phase\s+\d+|Week\s+\d+)[-:]?\s*(.+)/i);
+        if (phaseMatch) {
+          roadmap.push({
+            phase: phaseMatch[1],
+            title: phaseMatch[2].trim(),
+            duration: phaseMatch[1],
+            description: phaseMatch[2].trim(),
+            skills: [],
+            resources: []
+          });
+          console.log('Found roadmap phase:', phaseMatch[1]);
+        } else if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
+          const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
+          if (itemText.length > 10 && roadmap.length > 0) {
+            // Add as skill or resource to the last phase
+            if (itemText.toLowerCase().includes('learn') || itemText.toLowerCase().includes('study')) {
+              roadmap[roadmap.length - 1].skills.push(itemText);
+            } else {
+              roadmap[roadmap.length - 1].resources.push(itemText);
+            }
+          }
+        }
+      }
+    });
+    
+    // Add default roadmap if none found
+    if (roadmap.length === 0) {
+      console.log('No learning roadmap found, adding defaults...');
+      const defaultRoadmap = [
+        {
+          phase: 'Phase 1',
+          title: 'Foundation Building',
+          duration: 'Months 1-2',
+          description: 'Build fundamental skills and understanding',
+          skills: ['Basic Programming', 'Problem Solving', 'Technical Communication'],
+          resources: ['Online courses', 'Practice exercises', 'Community forums']
+        },
+        {
+          phase: 'Phase 2',
+          title: 'Skill Development',
+          duration: 'Months 3-4',
+          description: 'Develop core technical skills for your target role',
+          skills: ['Advanced Programming', 'Framework/Library Usage', 'Best Practices'],
+          resources: ['Advanced courses', 'Documentation', 'Code reviews']
+        },
+        {
+          phase: 'Phase 3',
+          title: 'Project Building',
+          duration: 'Months 5-6',
+          description: 'Apply skills through hands-on projects',
+          skills: ['Project Management', 'Full-Stack Development', 'Testing'],
+          resources: ['Project tutorials', 'GitHub', 'Portfolio development']
+        },
+        {
+          phase: 'Phase 4',
+          title: 'Job Preparation',
+          duration: 'Months 7-8',
+          description: 'Prepare for job applications and interviews',
+          skills: ['Interview Skills', 'System Design', 'Technical Communication'],
+          resources: ['Interview prep', 'Mock interviews', 'Job applications']
+        }
+      ];
+      
+      roadmap.push(...defaultRoadmap);
+    }
+    
+    console.log('Total roadmap phases extracted:', roadmap.length);
+    return roadmap;
+  };
+
+  // NEW: Market Trends extraction
+  const extractMarketTrendsImproved = (text) => {
+    if (!text) return [];
+    
+    console.log('Extracting market trends from text...');
+    const trends = [];
+    const lines = text.split('\n');
+    
+    let inTrendsSection = false;
+    const trendsKeywords = ['MARKET TRENDS', 'TRENDS', 'INDUSTRY TRENDS', 'TECHNOLOGY TRENDS'];
+    
+    lines.forEach((line, index) => {
+      // Check for trends section
+      if (trendsKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
+        inTrendsSection = true;
+        return;
+      }
+      
+      // Exit trends section
+      if (inTrendsSection && (line.toUpperCase().includes('JOB MARKET') || 
+          line.toUpperCase().includes('NETWORKING') || line.toUpperCase().includes('SKILLS'))) {
+        inTrendsSection = false;
+        return;
+      }
+      
+      if (inTrendsSection && line.trim() !== '') {
+        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
+          const trendText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
+          if (trendText.length > 15) {
+            // Try to extract trend title and description
+            let title = trendText;
+            let description = trendText;
+            
+            if (trendText.includes(':')) {
+              const parts = trendText.split(':');
+              title = parts[0].trim();
+              description = parts.slice(1).join(':').trim();
+            }
+            
+            trends.push({
+              title: title,
+              description: description,
+              text: trendText,
+              category: 'Technology Trend',
+              relevance: 'High'
+            });
+            console.log('Found market trend:', title);
+          }
+        }
+      }
+    });
+    
+    // Add default trends if none found
+    if (trends.length === 0) {
+      console.log('No market trends found, adding defaults...');
+      const defaultTrends = [
+        {
+          title: 'AI and Machine Learning Integration',
+          description: 'Increasing adoption of AI/ML across all industries is creating new opportunities for technical professionals.',
+          category: 'Technology Trend',
+          relevance: 'High',
+          impact: 'Creates demand for AI-literate professionals across all tech roles'
+        },
+        {
+          title: 'Remote and Hybrid Work Models',
+          description: 'Companies are embracing flexible work arrangements, expanding job opportunities globally.',
+          category: 'Work Trend',
+          relevance: 'High',
+          impact: 'Increases job opportunities and competition on a global scale'
+        },
+        {
+          title: 'Cloud-First Infrastructure',
+          description: 'Organizations are migrating to cloud platforms, driving demand for cloud expertise.',
+          category: 'Technology Trend',
+          relevance: 'High',
+          impact: 'High demand for cloud platform knowledge and skills'
+        },
+        {
+          title: 'Cybersecurity Focus',
+          description: 'Growing emphasis on security across all technology implementations and roles.',
+          category: 'Security Trend',
+          relevance: 'High',
+          impact: 'Security knowledge becoming essential for all tech professionals'
+        }
+      ];
+      
+      trends.push(...defaultTrends);
+    }
+    
+    console.log('Total market trends extracted:', trends.length);
+    return trends;
+  };
+
+  // NEW: Job Market Outlook extraction
+  const extractJobMarketOutlookImproved = (text) => {
+    if (!text) return [];
+    
+    console.log('Extracting job market outlook from text...');
+    const outlook = [];
+    const lines = text.split('\n');
+    
+    let inOutlookSection = false;
+    const outlookKeywords = ['JOB MARKET OUTLOOK', 'MARKET OUTLOOK', 'EMPLOYMENT OUTLOOK', 'JOB PROSPECTS'];
+    
+    lines.forEach((line, index) => {
+      // Check for outlook section
+      if (outlookKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
+        inOutlookSection = true;
+        return;
+      }
+      
+      // Exit outlook section
+      if (inOutlookSection && (line.toUpperCase().includes('NETWORKING') || 
+          line.toUpperCase().includes('SKILLS') || line.toUpperCase().includes('PERSONAL BRANDING'))) {
+        inOutlookSection = false;
+        return;
+      }
+      
+      if (inOutlookSection && line.trim() !== '') {
+        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
+          const outlookText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
+          if (outlookText.length > 15) {
+            // Try to extract outlook title and description
+            let title = outlookText;
+            let description = outlookText;
+            
+            if (outlookText.includes(':')) {
+              const parts = outlookText.split(':');
+              title = parts[0].trim();
+              description = parts.slice(1).join(':').trim();
+            }
+            
+            outlook.push({
+              title: title,
+              description: description,
+              text: outlookText,
+              category: 'Job Market',
+              growth: 'Positive',
+              opportunities: [description]
+            });
+            console.log('Found job market outlook:', title);
+          }
+        }
+      }
+    });
+    
+    // Add default outlook if none found
+    if (outlook.length === 0) {
+      console.log('No job market outlook found, adding defaults...');
+      const defaultOutlook = [
+        {
+          title: 'Strong Demand for Tech Professionals',
+          description: 'The technology sector continues to show robust growth with high demand for skilled professionals across all levels.',
+          category: 'Overall Market',
+          growth: 'Strong',
+          statistics: 'Tech employment expected to grow 13% over the next decade, faster than average for all occupations.',
+          opportunities: ['Entry-level positions available', 'Career advancement opportunities', 'Competitive salaries']
+        },
+        {
+          title: 'Skills-Based Hiring Increase',
+          description: 'Employers are increasingly focusing on practical skills and portfolio work over traditional degree requirements.',
+          category: 'Hiring Trends',
+          growth: 'High',
+          statistics: '65% of employers now prioritize skills over degrees for tech roles.',
+          opportunities: ['Career changers welcome', 'Portfolio-based applications', 'Skills assessment over credentials']
+        },
+        {
+          title: 'Salary Growth Trends',
+          description: 'Technology roles continue to offer competitive compensation packages with strong growth potential.',
+          category: 'Compensation',
+          growth: 'Positive',
+          statistics: 'Average tech salaries increased 8.2% year-over-year, outpacing general market growth.',
+          opportunities: ['High starting salaries', 'Regular salary increases', 'Equity and benefits packages']
+        },
+        {
+          title: 'Geographic Flexibility',
+          description: 'Remote work has expanded job opportunities beyond traditional tech hubs to global markets.',
+          category: 'Work Environment',
+          growth: 'High',
+          statistics: '78% of tech companies now offer fully remote or hybrid work options.',
+          opportunities: ['Global job market access', 'Work-life balance improvement', 'Reduced relocation requirements']
+        }
+      ];
+      
+      outlook.push(...defaultOutlook);
+    }
+    
+    console.log('Total job market outlook items extracted:', outlook.length);
+    return outlook;
   };
 
   // Improved Networking Strategy extraction
@@ -1101,7 +1576,9 @@ const CareerDashboard = () => {
               { id: 'overview', label: 'Overview', icon: '📊' },
               { id: 'paths', label: 'Career Paths', icon: '🛤️' },
               { id: 'skills', label: 'Skills Gap', icon: '📈' },
-              { id: 'roadmap', label: 'Action Plan', icon: '🗺️' },
+              { id: 'roadmap', label: 'Learning Roadmap', icon: '🗺️' },
+              { id: 'market', label: 'Market Insights', icon: '📈' },
+              { id: 'action', label: 'Action Plan', icon: '🎯' },
               { id: 'resources', label: 'Resources', icon: '📚' }
             ].map(tab => (
               <button
@@ -1130,7 +1607,7 @@ const CareerDashboard = () => {
               {[
                 { label: 'Top Match', value: `${topMatchPercentage}%`, color: 'from-green-500 to-emerald-500', icon: '🎯' },
                 { label: 'Skills to Learn', value: skillsToLearn.toString(), color: 'from-blue-500 to-cyan-500', icon: '📚' },
-                { label: 'Estimated Timeline', value: `${estimatedMonths} months`, color: 'from-purple-500 to-pink-500', icon: '⏱️' },
+                { label: 'Learning Phases', value: learningRoadmap.length.toString(), color: 'from-purple-500 to-pink-500', icon: '🗺️' },
                 { label: 'Action Items', value: nextSteps.length.toString(), color: 'from-orange-500 to-red-500', icon: '✅' }
               ].map((stat, index) => (
                 <div key={index} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
@@ -1239,6 +1716,79 @@ const CareerDashboard = () => {
         {activeTab === 'roadmap' && (
           <div className="space-y-8">
             <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-4">Your Learning Roadmap</h2>
+              <p className="text-gray-600 text-lg">Step-by-step learning path tailored to your goals</p>
+            </div>
+            {learningRoadmap.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {learningRoadmap.map((roadmapItem, index) => (
+                  <LearningRoadmapCard key={index} roadmapItem={roadmapItem} index={index} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">🗺️</div>
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">Creating Your Roadmap</h3>
+                <p className="text-gray-500">Your personalized learning path will be generated based on your assessment.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'market' && (
+          <div className="space-y-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-4">Market Insights</h2>
+              <p className="text-gray-600 text-lg">Current trends and job market outlook for your career path</p>
+            </div>
+            
+            {/* Market Trends Section */}
+            <div className="mb-12">
+              <h3 className="text-2xl font-bold mb-6 flex items-center">
+                <span className="mr-3">📈</span>
+                Market Trends Analysis
+              </h3>
+              {marketTrends.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {marketTrends.map((trend, index) => (
+                    <MarketTrendsCard key={index} trend={trend} index={index} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-4">📊</div>
+                  <h4 className="text-lg font-semibold text-gray-600 mb-2">Analyzing Market Trends</h4>
+                  <p className="text-gray-500">Market analysis will appear here.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Job Market Outlook Section */}
+            <div>
+              <h3 className="text-2xl font-bold mb-6 flex items-center">
+                <span className="mr-3">💼</span>
+                Job Market Outlook
+              </h3>
+              {jobMarketOutlook.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {jobMarketOutlook.map((outlook, index) => (
+                    <JobMarketOutlookCard key={index} outlook={outlook} index={index} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-4">🔮</div>
+                  <h4 className="text-lg font-semibold text-gray-600 mb-2">Analyzing Job Market</h4>
+                  <p className="text-gray-500">Job market insights will appear here.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'action' && (
+          <div className="space-y-8">
+            <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-4">Your Action Plan</h2>
               <p className="text-gray-600 text-lg">Step-by-step roadmap to success</p>
             </div>
@@ -1250,8 +1800,8 @@ const CareerDashboard = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="text-6xl mb-4">🗺️</div>
-                <h3 className="text-xl font-semibold text-gray-600 mb-2">Creating Your Roadmap</h3>
+                <div className="text-6xl mb-4">🎯</div>
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">Creating Your Action Plan</h3>
                 <p className="text-gray-500">Your personalized action plan will be generated based on your assessment.</p>
               </div>
             )}

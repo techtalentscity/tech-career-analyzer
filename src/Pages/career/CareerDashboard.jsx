@@ -303,6 +303,29 @@ const CareerDashboard = () => {
     ];
     const colorClass = colorClasses[index % colorClasses.length];
     
+    // Get specific recommendation based on user data
+    const getPersonalizedRecommendation = () => {
+      const userInterests = userData.careerPathsInterest || [];
+      const isUserInterested = userInterests.some(interest => 
+        path.title.toLowerCase().includes(interest.toLowerCase()) || 
+        interest.toLowerCase().includes(path.title.toLowerCase())
+      );
+      
+      if (path.match >= 85) {
+        return isUserInterested ? 
+          "Perfect match with your interests!" : 
+          "Highly recommended based on your background";
+      } else if (path.match >= 75) {
+        return isUserInterested ? 
+          "Great fit for your goals" : 
+          "Strong potential given your experience";
+      } else if (path.match >= 65) {
+        return "Worth exploring with additional training";
+      } else {
+        return "Consider after building foundational skills";
+      }
+    };
+    
     return (
       <div className="group relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden">
         <div className={`absolute inset-0 bg-gradient-to-br ${colorClass} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
@@ -330,6 +353,12 @@ const CareerDashboard = () => {
             </div>
           </div>
           
+          <div className="mb-4">
+            <p className="text-sm text-gray-600 italic">
+              "{getPersonalizedRecommendation()}"
+            </p>
+          </div>
+          
           <div className="flex items-center justify-between">
             <span className={`px-3 py-1 rounded-full text-xs font-medium ${
               path.match >= 80 ? 'bg-green-100 text-green-700' :
@@ -339,9 +368,9 @@ const CareerDashboard = () => {
               {path.match >= 80 ? 'Excellent Match' : path.match >= 70 ? 'Good Match' : 'Consider'}
             </span>
             
-            <button className="text-blue-600 hover:text-blue-800 font-medium text-sm group-hover:underline transition-all">
-              Learn More →
-            </button>
+            <div className="text-xs text-gray-500">
+              Based on your {userData.studyField || 'background'} experience
+            </div>
           </div>
         </div>
       </div>
@@ -569,7 +598,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Enhanced Action Card Component
+  // Enhanced Action Card Component - now shows personalization
   const ActionCard = ({ step, index }) => {
     const priorityColors = {
       high: 'from-red-500 to-pink-500',
@@ -581,13 +610,22 @@ const CareerDashboard = () => {
     const icon = step.icon || icons[index % icons.length];
 
     return (
-      <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-blue-500">
+      <div className={`bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
+        step.personalized ? 'border-l-4 border-blue-500' : 'border-l-4 border-gray-300'
+      }`}>
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center">
             <span className="text-3xl mr-3">{icon}</span>
             <div>
-              <h4 className="font-semibold text-lg text-gray-800">{step.title || step.text}</h4>
-              <p className="text-sm text-gray-600">{step.timeline || 'Ongoing'}</p>
+              <h4 className="font-semibold text-lg text-gray-800">{step.title}</h4>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-sm text-gray-600">{step.timeline}</p>
+                {step.personalized && (
+                  <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                    Personalized
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <div className={`px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${priorityColors[step.priority || 'medium']} text-white`}>
@@ -595,11 +633,18 @@ const CareerDashboard = () => {
           </div>
         </div>
         
-        <p className="text-gray-700 mb-4">{step.description || step.text}</p>
+        <p className="text-gray-700 mb-4 leading-relaxed">{step.text}</p>
         
-        <button className="w-full mt-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-4 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
-          Start Now
-        </button>
+        <div className="flex gap-2">
+          <button className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-4 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
+            Start Now
+          </button>
+          {step.personalized && (
+            <button className="px-4 py-2 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-all">
+              Details
+            </button>
+          )}
+        </div>
       </div>
     );
   };
@@ -683,21 +728,22 @@ const CareerDashboard = () => {
 
   // IMPROVED EXTRACTION FUNCTIONS
 
-  // Improved Career Paths extraction with more flexible patterns
+  // ENHANCED: More aggressive career paths extraction - tries multiple approaches
   const extractCareerPathsImproved = (text) => {
     if (!text) return [];
     
-    console.log('Extracting career paths from text...');
+    console.log('🔍 Aggressively extracting career paths from text...');
     const lines = text.split('\n');
     const careerPaths = [];
     
-    // Multiple patterns to try
+    // APPROACH 1: Standard patterns with percentages
     const patterns = [
-      /^[a-z]\)\s+(.*?)\s+\((\d+)%\s+match/i,  // Original pattern: a) Career Path (85% match)
-      /^(\d+)\.\s+(.*?)\s+\((\d+)%/i,           // Numbered: 1. Career Path (85%)
-      /^[-•]\s+(.*?)\s+[-:]\s+(\d+)%/i,         // Bullet: - Career Path - 85%
-      /^(.*?)\s+[-:]\s+(\d+)%\s+match/i,        // Simple: Career Path : 85% match
-      /^(.*?):\s+(\d+)%/i                       // Career Path: 85%
+      /^[a-z]\)\s+(.*?)\s+\((\d+)%\s*match\)/i,  // a) Career Path (85% match)
+      /^(\d+)\.\s+(.*?)\s+\((\d+)%\)/i,           // 1. Career Path (85%)
+      /^[-•]\s+(.*?)\s+[-:]\s+(\d+)%/i,           // - Career Path - 85%
+      /^(.*?)\s+[-:]\s+(\d+)%\s*match/i,          // Career Path : 85% match
+      /^(.*?):\s+(\d+)%/i,                        // Career Path: 85%
+      /(\w+[\w\s\/]*)\s*[-–]\s*(\d+)%/i           // Software Development – 85%
     ];
     
     lines.forEach(line => {
@@ -706,7 +752,6 @@ const CareerDashboard = () => {
         if (match) {
           let title, matchScore;
           
-          // Handle different match groups based on pattern
           if (pattern === patterns[0] || pattern === patterns[2] || pattern === patterns[3]) {
             title = match[1].trim();
             matchScore = parseInt(match[2], 10);
@@ -718,151 +763,333 @@ const CareerDashboard = () => {
             matchScore = parseInt(match[2], 10);
           }
           
-          if (title && !isNaN(matchScore) && matchScore > 0 && matchScore <= 100) {
-            careerPaths.push({
-              title: title,
-              match: matchScore
-            });
-            console.log('Found career path:', title, matchScore + '%');
-            break; // Move to next line once we find a match
+          if (title && !isNaN(matchScore) && matchScore > 0 && matchScore <= 100 && title.length > 3) {
+            careerPaths.push({ title, match: matchScore });
+            console.log('✅ Found career path:', title, matchScore + '%');
+            break;
           }
         }
       }
     });
     
-    // If no structured matches found, look for common career terms with any percentages nearby
-    if (careerPaths.length === 0) {
-      console.log('No structured career paths found, trying alternative extraction...');
-      const careerTerms = [
-        'Software Development', 'Data Science', 'Data Analysis', 'UX/UI Design', 'UI/UX Design',
-        'Product Management', 'Cybersecurity', 'Cloud Engineering', 'DevOps', 'AI', 'Machine Learning',
-        'Frontend Development', 'Backend Development', 'Full Stack', 'Mobile Development',
-        'Quality Assurance', 'Technical Writing', 'Business Analysis'
+    // APPROACH 2: Look for career recommendations without percentages
+    if (careerPaths.length < 3) {
+      console.log('🔄 Trying alternative extraction - looking for recommendations...');
+      const recommendationPatterns = [
+        /recommend[ed]?\s+for\s+(.*?)(?:\.|,|$)/i,
+        /consider\s+(.*?)(?:\.|,|$)/i,
+        /excellent\s+fit\s+for\s+(.*?)(?:\.|,|$)/i,
+        /strong\s+match\s+for\s+(.*?)(?:\.|,|$)/i
       ];
       
-      const textUpper = text.toUpperCase();
-      careerTerms.forEach(term => {
-        if (textUpper.includes(term.toUpperCase())) {
-          // Look for percentages near this term
-          const termIndex = textUpper.indexOf(term.toUpperCase());
-          const surroundingText = text.substring(Math.max(0, termIndex - 100), termIndex + 200);
-          const percentMatch = surroundingText.match(/(\d+)%/);
-          const percentage = percentMatch ? parseInt(percentMatch[1], 10) : Math.floor(Math.random() * 30) + 60; // Random 60-89% if no percentage found
-          
-          careerPaths.push({
-            title: term,
-            match: percentage
-          });
-          console.log('Found career term:', term, percentage + '%');
-        }
-      });
-    }
-    
-    // Sort by match percentage (highest first)
-    careerPaths.sort((a, b) => b.match - a.match);
-    
-    console.log('Total career paths extracted:', careerPaths.length);
-    return careerPaths.slice(0, 6); // Return top 6
-  };
-
-  // Improved Skills Gap extraction
-  const extractSkillsGapImproved = (text) => {
-    if (!text) return [];
-    
-    console.log('Extracting skills gap from text...');
-    const skills = [];
-    const lines = text.split('\n');
-    
-    // Look for skills in various formats
-    const skillPatterns = [
-      /^\d+\.\s+([^:]+):\s*(.+)/,           // 1. Skill Name: Description
-      /^[-•]\s+([^:]+):\s*(.+)/,            // - Skill Name: Description
-      /^([A-Z][A-Za-z\s\/]+):\s+(.+)/,      // Skill Name: Description (starts with capital)
-      /^\s*([A-Z][A-Za-z\s\/]+)\s*[-–]\s*(.+)/ // Skill Name - Description
-    ];
-    
-    let inSkillsSection = false;
-    
-    lines.forEach((line, index) => {
-      // Check if we're in skills section
-      if (line.toUpperCase().includes('SKILLS') || line.toUpperCase().includes('LEARNING') || 
-          line.toUpperCase().includes('COMPETENCIES') || line.toUpperCase().includes('ABILITIES')) {
-        inSkillsSection = true;
-        console.log('Found skills section at line:', index);
-        return;
-      }
-      
-      // Exit skills section
-      if (inSkillsSection && (line.toUpperCase().includes('NETWORKING') || 
-          line.toUpperCase().includes('INTERVIEW') || line.toUpperCase().includes('PERSONAL BRANDING'))) {
-        inSkillsSection = false;
-        return;
-      }
-      
-      if (inSkillsSection || skills.length < 3) { // Continue looking even outside section if we haven't found enough
-        for (const pattern of skillPatterns) {
+      lines.forEach(line => {
+        recommendationPatterns.forEach(pattern => {
           const match = line.match(pattern);
           if (match) {
-            const skillName = match[1].trim();
-            const description = match[2] ? match[2].trim() : '';
-            
-            // Skip if skill name is too generic or short
-            if (skillName.length > 2 && !skillName.toLowerCase().includes('section') && 
-                !skillName.toLowerCase().includes('analysis')) {
-              
-              // Determine skill levels based on description or defaults
-              let currentLevel = 1;
-              let requiredLevel = 4;
-              
-              if (description.toLowerCase().includes('beginner') || description.toLowerCase().includes('basic')) {
-                requiredLevel = 2;
-              } else if (description.toLowerCase().includes('intermediate')) {
-                requiredLevel = 3;
-              } else if (description.toLowerCase().includes('advanced')) {
-                requiredLevel = 4;
-              } else if (description.toLowerCase().includes('expert')) {
-                requiredLevel = 5;
-              }
-              
-              skills.push({
-                name: skillName,
-                description: description,
-                currentLevel: currentLevel,
-                requiredLevel: requiredLevel,
-                gap: requiredLevel - currentLevel,
-                category: 'Technical Skills'
-              });
-              
-              console.log('Found skill:', skillName);
-              break;
+            const title = match[1].trim();
+            if (title.length > 5 && !careerPaths.some(p => p.title.toLowerCase().includes(title.toLowerCase()))) {
+              careerPaths.push({ title, match: Math.floor(Math.random() * 20) + 70 });
+              console.log('✅ Found recommendation:', title);
             }
           }
-        }
-      }
-    });
-    
-    // If no skills found, create default skills based on user interests
-    if (skills.length === 0) {
-      console.log('No skills found in analysis, creating defaults...');
-      const defaultSkills = [
-        { name: 'Programming Fundamentals', currentLevel: 1, requiredLevel: 4, category: 'Technical' },
-        { name: 'Problem Solving', currentLevel: 2, requiredLevel: 4, category: 'Core Skills' },
-        { name: 'Communication', currentLevel: 3, requiredLevel: 4, category: 'Soft Skills' },
-        { name: 'Technical Tools', currentLevel: 1, requiredLevel: 3, category: 'Tools' },
-        { name: 'Industry Knowledge', currentLevel: 1, requiredLevel: 3, category: 'Domain' }
-      ];
-      
-      defaultSkills.forEach(skill => {
-        skills.push({
-          ...skill,
-          description: `Important skill for your career transition`,
-          gap: skill.requiredLevel - skill.currentLevel
         });
       });
     }
     
-    console.log('Total skills extracted:', skills.length);
-    return skills.slice(0, 8); // Return top 8 skills
+    // APPROACH 3: Smart fallback using user's actual interests
+    if (careerPaths.length === 0) {
+      console.log('🎯 Using user interests as fallback...');
+      if (userData.careerPathsInterest && userData.careerPathsInterest.length > 0) {
+        userData.careerPathsInterest.forEach((interest, index) => {
+          // Calculate match based on user's experience and tools
+          let baseMatch = 70;
+          
+          // Boost match based on experience level
+          if (userData.experienceLevel === 'Advanced') baseMatch += 15;
+          else if (userData.experienceLevel === 'Intermediate') baseMatch += 10;
+          else if (userData.experienceLevel === 'Beginner') baseMatch += 5;
+          
+          // Boost match if user has relevant tools
+          if (userData.toolsUsed && userData.toolsUsed.length > 1 && !userData.toolsUsed.includes('None')) {
+            baseMatch += 5;
+          }
+          
+          // Boost match if education is relevant
+          if (userData.studyField && (
+            userData.studyField.toLowerCase().includes('computer') ||
+            userData.studyField.toLowerCase().includes('engineering') ||
+            userData.studyField.toLowerCase().includes('science')
+          )) {
+            baseMatch += 8;
+          }
+          
+          // Add some variation and ensure it doesn't exceed 100
+          const finalMatch = Math.min(baseMatch + Math.floor(Math.random() * 10) - index * 3, 95);
+          
+          careerPaths.push({
+            title: interest,
+            match: finalMatch
+          });
+          console.log('✅ User interest match:', interest, finalMatch + '%');
+        });
+      }
+    }
+    
+    // APPROACH 4: Final fallback with analysis-based scoring
+    if (careerPaths.length === 0) {
+      console.log('🔄 Final fallback - analyzing text for tech terms...');
+      const techTerms = {
+        'Software Development': ['software', 'programming', 'coding', 'developer'],
+        'Data Science': ['data', 'analytics', 'statistics', 'machine learning'],
+        'UX/UI Design': ['design', 'user', 'interface', 'experience'],
+        'Product Management': ['product', 'management', 'strategy', 'business'],
+        'DevOps': ['devops', 'infrastructure', 'deployment', 'automation'],
+        'Cybersecurity': ['security', 'cyber', 'protection', 'threat']
+      };
+      
+      const textLower = text.toLowerCase();
+      Object.entries(techTerms).forEach(([career, terms]) => {
+        const score = terms.reduce((count, term) => {
+          const matches = (textLower.match(new RegExp(term, 'g')) || []).length;
+          return count + matches;
+        }, 0);
+        
+        if (score > 0) {
+          const match = Math.min(60 + score * 5, 85);
+          careerPaths.push({ title: career, match });
+          console.log('✅ Text analysis match:', career, match + '%');
+        }
+      });
+    }
+    
+    // Sort by match percentage and return top paths
+    careerPaths.sort((a, b) => b.match - a.match);
+    const finalPaths = careerPaths.slice(0, 6);
+    
+    console.log(`🎉 Total career paths extracted: ${finalPaths.length}`);
+    return finalPaths;
+  };
+
+  // ENHANCED: More intelligent skills gap extraction
+  const extractSkillsGapImproved = (text) => {
+    if (!text) return [];
+    
+    console.log('🔍 Aggressively extracting skills gap from text...');
+    const skills = [];
+    const lines = text.split('\n');
+    
+    // APPROACH 1: Look for structured skill descriptions
+    const skillPatterns = [
+      /^\d+\.\s+([^:]+):\s*(.+)/,                    // 1. Skill Name: Description
+      /^[-•*]\s+([^:]+):\s*(.+)/,                    // - Skill Name: Description
+      /^([A-Z][A-Za-z\s\/\(\)]+):\s+(.+)/,           // Skill Name: Description (starts with capital)
+      /^\s*([A-Z][A-Za-z\s\/\(\)]+)\s*[-–]\s*(.+)/,  // Skill Name - Description
+      /need\s+to\s+learn\s+([^.]+)/i,                // need to learn X
+      /should\s+focus\s+on\s+([^.]+)/i,              // should focus on X
+      /important\s+to\s+master\s+([^.]+)/i           // important to master X
+    ];
+    
+    let inSkillsSection = false;
+    const skillsKeywords = ['SKILLS', 'LEARNING', 'COMPETENCIES', 'ABILITIES', 'REQUIREMENTS', 'NEEDED'];
+    
+    lines.forEach((line, index) => {
+      // Check if we're in skills section
+      if (skillsKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
+        inSkillsSection = true;
+        console.log('📍 Found skills section at line:', index);
+        return;
+      }
+      
+      // Exit skills section  
+      if (inSkillsSection && (line.toUpperCase().includes('NETWORKING') || 
+          line.toUpperCase().includes('INTERVIEW') || line.toUpperCase().includes('MARKET'))) {
+        inSkillsSection = false;
+        return;
+      }
+      
+      // Try to extract skills from current line
+      for (const pattern of skillPatterns) {
+        const match = line.match(pattern);
+        if (match) {
+          const skillName = match[1].trim();
+          const description = match[2] ? match[2].trim() : skillName;
+          
+          // Validate skill name
+          if (isValidSkill(skillName)) {
+            const skill = createSkillObject(skillName, description);
+            skills.push(skill);
+            console.log('✅ Found skill:', skillName);
+            break;
+          }
+        }
+      }
+    });
+    
+    // APPROACH 2: Look for skills mentioned in context (even outside skills section)
+    if (skills.length < 3) {
+      console.log('🔄 Looking for skills in full text context...');
+      const contextPatterns = [
+        /learn\s+([A-Z][A-Za-z\s]+)(?:\s+and|\s+or|,|\.|$)/g,
+        /master\s+([A-Z][A-Za-z\s]+)(?:\s+and|\s+or|,|\.|$)/g,
+        /proficiency\s+in\s+([A-Z][A-Za-z\s]+)(?:\s+and|\s+or|,|\.|$)/g,
+        /experience\s+with\s+([A-Z][A-Za-z\s]+)(?:\s+and|\s+or|,|\.|$)/g,
+        /knowledge\s+of\s+([A-Z][A-Za-z\s]+)(?:\s+and|\s+or|,|\.|$)/g
+      ];
+      
+      contextPatterns.forEach(pattern => {
+        let match;
+        while ((match = pattern.exec(text)) !== null) {
+          const skillName = match[1].trim();
+          if (isValidSkill(skillName) && !skills.some(s => s.name.toLowerCase().includes(skillName.toLowerCase()))) {
+            const skill = createSkillObject(skillName, `Important for your career transition`);
+            skills.push(skill);
+            console.log('✅ Found contextual skill:', skillName);
+          }
+        }
+      });
+    }
+    
+    // APPROACH 3: Create user-specific skills based on their interests and experience
+    if (skills.length < 4) {
+      console.log('🎯 Creating personalized skills based on user data...');
+      const userSkills = generateUserSpecificSkills();
+      userSkills.forEach(skill => {
+        if (!skills.some(s => s.name.toLowerCase().includes(skill.name.toLowerCase()))) {
+          skills.push(skill);
+          console.log('✅ Added personalized skill:', skill.name);
+        }
+      });
+    }
+    
+    console.log(`🎉 Total skills extracted: ${skills.length}`);
+    return skills.slice(0, 8);
+  };
+  
+  // Helper function to validate if a string is a valid skill
+  const isValidSkill = (skillName) => {
+    if (!skillName || skillName.length < 3) return false;
+    
+    const invalidTerms = ['section', 'analysis', 'summary', 'overview', 'recommendation', 'conclusion'];
+    const nameLower = skillName.toLowerCase();
+    
+    return !invalidTerms.some(term => nameLower.includes(term)) && 
+           skillName.length <= 50 && 
+           /^[A-Za-z\s\/\(\)\-\.]+$/.test(skillName);
+  };
+  
+  // Helper function to create skill object with intelligent level assessment
+  const createSkillObject = (skillName, description) => {
+    const experienceLevelMap = {
+      'Complete beginner': 0,
+      'Some exposure': 1,
+      'Beginner': 1,
+      'Intermediate': 2,
+      'Advanced': 3
+    };
+    
+    let currentLevel = experienceLevelMap[userData.experienceLevel] || 1;
+    let requiredLevel = 4;
+    let category = 'Technical Skills';
+    
+    // Adjust levels based on description content
+    const descLower = description.toLowerCase();
+    if (descLower.includes('basic') || descLower.includes('fundamental')) {
+      requiredLevel = 2;
+    } else if (descLower.includes('intermediate') || descLower.includes('solid')) {
+      requiredLevel = 3;
+    } else if (descLower.includes('advanced') || descLower.includes('deep')) {
+      requiredLevel = 4;
+    } else if (descLower.includes('expert') || descLower.includes('mastery')) {
+      requiredLevel = 5;
+    }
+    
+    // Boost current level if user has relevant tools/experience
+    if (userData.toolsUsed && userData.toolsUsed.length > 0) {
+      userData.toolsUsed.forEach(tool => {
+        if (skillName.toLowerCase().includes(tool.toLowerCase()) || 
+            tool.toLowerCase().includes(skillName.toLowerCase())) {
+          currentLevel = Math.min(currentLevel + 1, 4);
+        }
+      });
+    }
+    
+    // Categorize skills
+    if (skillName.toLowerCase().includes('communication') || 
+        skillName.toLowerCase().includes('teamwork') ||
+        skillName.toLowerCase().includes('leadership')) {
+      category = 'Soft Skills';
+    } else if (skillName.toLowerCase().includes('design') || 
+               skillName.toLowerCase().includes('ui') ||
+               skillName.toLowerCase().includes('ux')) {
+      category = 'Design';
+    } else if (skillName.toLowerCase().includes('data') || 
+               skillName.toLowerCase().includes('analytics')) {
+      category = 'Data & Analytics';
+    }
+    
+    return {
+      name: skillName,
+      description: description,
+      currentLevel: currentLevel,
+      requiredLevel: requiredLevel,
+      gap: requiredLevel - currentLevel,
+      category: category
+    };
+  };
+  
+  // Generate skills specific to user's career interests and background
+  const generateUserSpecificSkills = () => {
+    const skills = [];
+    
+    if (userData.careerPathsInterest && userData.careerPathsInterest.length > 0) {
+      const pathSkillsMap = {
+        'Software Development': [
+          { name: 'Programming Languages', desc: `Master ${userData.careerPathsInterest.includes('Frontend Development') ? 'JavaScript and React' : 'Python and JavaScript'} for development` },
+          { name: 'Version Control (Git)', desc: 'Essential for collaborative software development' },
+          { name: 'Problem Solving', desc: 'Critical thinking and algorithmic problem solving' },
+          { name: 'Software Architecture', desc: 'Understanding system design and best practices' }
+        ],
+        'Data Science': [
+          { name: 'Python Programming', desc: 'Primary language for data science and analysis' },
+          { name: 'Statistical Analysis', desc: 'Understanding of statistics and data interpretation' },
+          { name: 'Machine Learning', desc: 'Algorithms and model building techniques' },
+          { name: 'Data Visualization', desc: 'Creating clear and insightful data presentations' }
+        ],
+        'UX/UI Design': [
+          { name: 'Design Thinking', desc: 'User-centered design process and methodology' },
+          { name: 'Prototyping Tools', desc: 'Figma, Sketch, or Adobe XD proficiency' },
+          { name: 'User Research', desc: 'Methods for understanding user needs and behaviors' },
+          { name: 'Visual Design Principles', desc: 'Color theory, typography, and layout design' }
+        ],
+        'Product Management': [
+          { name: 'Product Strategy', desc: 'Defining product vision and roadmap' },
+          { name: 'Market Research', desc: 'Understanding market needs and competitive landscape' },
+          { name: 'Data Analysis', desc: 'Using metrics to drive product decisions' },
+          { name: 'Cross-functional Leadership', desc: 'Managing teams without direct authority' }
+        ],
+        'DevOps': [
+          { name: 'Cloud Platforms', desc: 'AWS, Azure, or Google Cloud expertise' },
+          { name: 'Infrastructure as Code', desc: 'Terraform, CloudFormation, or similar tools' },
+          { name: 'CI/CD Pipelines', desc: 'Automated deployment and testing processes' },
+          { name: 'Monitoring & Logging', desc: 'System observability and troubleshooting' }
+        ],
+        'Cybersecurity': [
+          { name: 'Network Security', desc: 'Understanding of network protocols and security' },
+          { name: 'Threat Analysis', desc: 'Identifying and mitigating security vulnerabilities' },
+          { name: 'Security Frameworks', desc: 'Knowledge of industry security standards' },
+          { name: 'Incident Response', desc: 'Managing and responding to security breaches' }
+        ]
+      };
+      
+      userData.careerPathsInterest.forEach(interest => {
+        const relevantSkills = pathSkillsMap[interest] || [];
+        relevantSkills.forEach(skill => {
+          skills.push(createSkillObject(skill.name, skill.desc));
+        });
+      });
+    }
+    
+    return skills.slice(0, 6);
   };
 
   // NEW: Learning Roadmap extraction
@@ -1397,87 +1624,159 @@ const CareerDashboard = () => {
     return [];
   };
 
-  // Generate next steps based on user data and analysis
+  // Generate PERSONALIZED next steps based on user data and analysis
   const generateNextSteps = () => {
     const steps = [];
+    console.log('Generating personalized next steps for user:', userData.name);
     
+    // PRIORITY 1: Based on user's experience level and timeline
+    if (userData.experienceLevel === 'Complete beginner' || userData.experienceLevel === 'Some exposure') {
+      const timelineText = userData.transitionTimeline === 'Less than 6 months' ? 'Start immediately with' : 'Begin with';
+      steps.push({
+        title: `${timelineText} Foundation Skills`,
+        text: `Focus on ${userData.careerPathsInterest?.[0] || 'programming'} fundamentals. Given your ${userData.experienceLevel.toLowerCase()} level, start with basic concepts and practice daily.`,
+        priority: 'high',
+        icon: '🎯',
+        timeline: userData.transitionTimeline || '2-4 weeks',
+        personalized: true
+      });
+    }
+    
+    // PRIORITY 2: Based on user's top career interest and current background
+    if (userData.careerPathsInterest && userData.careerPathsInterest.length > 0) {
+      const topInterest = userData.careerPathsInterest[0];
+      const currentField = userData.studyField || userData.currentRole || 'your current field';
+      
+      steps.push({
+        title: `Transition from ${currentField} to ${topInterest}`,
+        text: `Leverage your ${userData.transferableSkills || 'existing experience'} while building ${topInterest.toLowerCase()} specific skills. Focus on projects that bridge both areas.`,
+        priority: 'high',
+        icon: '🚀',
+        timeline: `${userData.timeCommitment} weekly`,
+        personalized: true
+      });
+    }
+    
+    // PRIORITY 3: Based on user's timeline and commitment
+    if (userData.transitionTimeline === 'Less than 6 months') {
+      steps.push({
+        title: 'Accelerated Learning Plan',
+        text: `With your ${userData.timeCommitment} weekly commitment and 6-month timeline, focus on high-impact skills and immediate portfolio building.`,
+        priority: 'high',
+        icon: '⚡',
+        timeline: 'Daily practice needed',
+        personalized: true
+      });
+    } else if (userData.transitionTimeline === '1-2 years' || userData.transitionTimeline === '2+ years') {
+      steps.push({
+        title: 'Strategic Long-term Development',
+        text: `Use your ${userData.transitionTimeline} timeline to build deep expertise. Consider advanced certifications and comprehensive projects.`,
+        priority: 'medium',
+        icon: '📚',
+        timeline: userData.transitionTimeline,
+        personalized: true
+      });
+    }
+    
+    // PRIORITY 4: Based on user's tools experience
+    if (userData.toolsUsed && userData.toolsUsed.length > 0 && !userData.toolsUsed.includes('None')) {
+      const tools = userData.toolsUsed.slice(0, 2).join(' and ');
+      steps.push({
+        title: `Advance Your ${tools} Skills`,
+        text: `Since you already use ${tools}, build advanced projects showcasing these tools for your ${userData.careerPathsInterest?.[0] || 'target'} career path.`,
+        priority: 'medium',
+        icon: '🔧',
+        timeline: '2-3 weeks',
+        personalized: true
+      });
+    }
+    
+    // PRIORITY 5: Based on networking needs from analysis
     if (networkingStrategy && networkingStrategy.length > 0) {
       const networkingStrategies = networkingStrategy.filter(item => item.type === 'strategy');
       if (networkingStrategies.length > 0) {
         steps.push({
-          title: 'Build Your Network',
+          title: `Network in ${userData.careerPathsInterest?.[0] || 'Tech'} Community`,
           text: networkingStrategies[0].text,
-          priority: 'high',
-          icon: '🤝'
-        });
-      }
-    }
-    
-    if (personalBranding && personalBranding.length > 0) {
-      const brandingTips = personalBranding.filter(item => item.type === 'tip');
-      if (brandingTips.length > 0) {
-        steps.push({
-          title: 'Develop Your Brand',
-          text: brandingTips[0].text,
-          priority: 'high',
-          icon: '💼'
-        });
-      }
-    }
-    
-    if (portfolioGuidance && portfolioGuidance.length > 0) {
-      const portfolioTips = portfolioGuidance.filter(item => item.type === 'category_tip' || item.type === 'tip');
-      if (portfolioTips.length > 0) {
-        steps.push({
-          title: 'Build Your Portfolio',
-          text: portfolioTips[0].text.substring(0, 100) + (portfolioTips[0].text.length > 100 ? '...' : ''),
-          priority: 'high',
-          icon: '🎨'
-        });
-      }
-    }
-    
-    if (skillsGap && skillsGap.length > 0) {
-      const topGaps = skillsGap
-        .filter(skill => skill.gap > 1)
-        .sort((a, b) => b.gap - a.gap)
-        .slice(0, 1);
-        
-      if (topGaps.length > 0) {
-        steps.push({
-          title: `Learn ${topGaps[0].name}`,
-          text: topGaps[0].description,
-          priority: 'high',
-          icon: '📚'
-        });
-      }
-    }
-    
-    if (interviewPrep && interviewPrep.length > 0) {
-      const interviewTips = interviewPrep.filter(item => item.type === 'tip');
-      if (interviewTips.length > 0) {
-        steps.push({
-          title: 'Prepare for Interviews',
-          text: interviewTips[0].text,
           priority: 'medium',
-          icon: '🎯'
+          icon: '🤝',
+          timeline: 'Ongoing',
+          personalized: true
         });
       }
     }
     
-    if (jobSearchStrategies && jobSearchStrategies.length > 0) {
-      const jobSearchTips = jobSearchStrategies.filter(item => item.type === 'category_tip' || item.type === 'tip');
-      if (jobSearchTips.length > 0) {
-        steps.push({
-          title: 'Plan Your Job Search',
-          text: jobSearchTips[0].text.substring(0, 100) + (jobSearchTips[0].text.length > 100 ? '...' : ''),
-          priority: 'medium',
-          icon: '🔍'
-        });
+    // PRIORITY 6: Portfolio building based on user's interests
+    if (userData.careerPathsInterest && userData.careerPathsInterest.length > 0) {
+      const interests = userData.careerPathsInterest.slice(0, 2).join(' and ');
+      steps.push({
+        title: `Build ${interests} Portfolio`,
+        text: `Create 2-3 projects showcasing ${interests.toLowerCase()} skills. Include projects that demonstrate your transition from ${userData.currentRole || 'your background'}.`,
+        priority: 'high',
+        icon: '💼',
+        timeline: `${userData.timeCommitment} over 4-6 weeks`,
+        personalized: true
+      });
+    }
+    
+    // PRIORITY 7: Interview prep based on target salary and role
+    if (userData.targetSalary && userData.careerPathsInterest?.[0]) {
+      steps.push({
+        title: `Prepare for ${userData.careerPathsInterest[0]} Interviews`,
+        text: `Practice ${userData.careerPathsInterest[0].toLowerCase()} interview questions and technical challenges. Target roles in ${userData.targetSalary} range.`,
+        priority: 'medium',
+        icon: '🎤',
+        timeline: '1-2 weeks before applying',
+        personalized: true
+      });
+    }
+    
+    // FALLBACK: Only use analysis-based steps if we have few personalized ones
+    if (steps.filter(s => s.personalized).length < 3) {
+      // Add from analysis if available
+      if (personalBranding && personalBranding.length > 0) {
+        const brandingTips = personalBranding.filter(item => item.type === 'tip');
+        if (brandingTips.length > 0) {
+          steps.push({
+            title: 'Develop Your Personal Brand',
+            text: brandingTips[0].text,
+            priority: 'medium',
+            icon: '✨',
+            timeline: '2-3 weeks',
+            personalized: false
+          });
+        }
+      }
+      
+      if (skillsGap && skillsGap.length > 0) {
+        const topGaps = skillsGap
+          .filter(skill => skill.gap > 1)
+          .sort((a, b) => b.gap - a.gap)
+          .slice(0, 1);
+          
+        if (topGaps.length > 0) {
+          steps.push({
+            title: `Master ${topGaps[0].name}`,
+            text: topGaps[0].description || `This skill is crucial for your ${userData.careerPathsInterest?.[0] || 'target'} career path.`,
+            priority: 'high',
+            icon: '📈',
+            timeline: '3-4 weeks',
+            personalized: false
+          });
+        }
       }
     }
     
-    return steps.slice(0, 6);
+    // Sort by priority and return top 6
+    const priorityOrder = { high: 1, medium: 2, low: 3 };
+    const sortedSteps = steps.sort((a, b) => {
+      if (a.personalized && !b.personalized) return -1;
+      if (!a.personalized && b.personalized) return 1;
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    });
+    
+    console.log(`Generated ${sortedSteps.length} personalized steps, ${steps.filter(s => s.personalized).length} are user-specific`);
+    return sortedSteps.slice(0, 6);
   };
 
   // Create timeline visualization data
@@ -1648,20 +1947,47 @@ const CareerDashboard = () => {
               </div>
             </div>
 
-            {/* Top Next Steps Preview */}
+            {/* Top Next Steps Preview - Enhanced with personalization indicator */}
             <div className="bg-white rounded-2xl p-8 shadow-lg">
-              <h2 className="text-2xl font-bold mb-6 flex items-center">
-                <span className="mr-3">⚡</span>
-                Priority Actions
-              </h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold flex items-center">
+                  <span className="mr-3">⚡</span>
+                  Priority Actions
+                </h2>
+                <div className="flex items-center text-sm text-blue-600">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                  Tailored to your {userData.careerPathsInterest?.[0] || 'tech'} goals
+                </div>
+              </div>
+              <div className="mb-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                <p className="text-sm text-blue-800">
+                  <strong>Personalized for {userData.name}:</strong> Based on your {userData.experienceLevel?.toLowerCase()} experience level, 
+                  {userData.transitionTimeline ? ` ${userData.transitionTimeline.toLowerCase()} timeline,` : ''} and interest in {userData.careerPathsInterest?.slice(0, 2).join(' and ') || 'technology'}.
+                </p>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {nextSteps.slice(0, 4).map((step, index) => (
-                  <div key={index} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 hover:shadow-md transition-all duration-300">
-                    <div className="flex items-center mb-3">
-                      <span className="text-2xl mr-3">{step.icon}</span>
-                      <h3 className="font-semibold text-gray-800">{step.title}</h3>
+                  <div key={index} className={`${step.personalized ? 'bg-gradient-to-br from-blue-50 to-purple-50' : 'bg-gradient-to-br from-gray-50 to-gray-100'} rounded-xl p-6 hover:shadow-md transition-all duration-300`}>
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center">
+                        <span className="text-2xl mr-3">{step.icon}</span>
+                        <h3 className="font-semibold text-gray-800">{step.title}</h3>
+                      </div>
+                      {step.personalized && (
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                          Custom
+                        </span>
+                      )}
                     </div>
-                    <p className="text-sm text-gray-600">{step.text?.substring(0, 80) + (step.text?.length > 80 ? '...' : '')}</p>
+                    <p className="text-sm text-gray-600 mb-2">{step.text?.substring(0, 120) + (step.text?.length > 120 ? '...' : '')}</p>
+                    <div className="flex items-center justify-between mt-3">
+                      <span className="text-xs text-gray-500">{step.timeline}</span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        step.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {step.priority?.toUpperCase()}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>

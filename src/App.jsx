@@ -8,6 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './Pages/auth/Login';
+import Logout from './Pages/auth/Logout'; // Added Logout component
 
 // Career Test Components
 import CareerHome from './Pages/career/CareerHome';
@@ -38,6 +39,7 @@ function App() {
           
           {/* Auth routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/logout" element={<Logout />} /> {/* Added Logout route */}
           
           {/* Payment route */}
           <Route path="/payment" element={<PaymentPage />} />

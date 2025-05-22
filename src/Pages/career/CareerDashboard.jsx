@@ -2,8 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import MarketInsights from '../../components/MarketInsights';
-import videoInsightsService from '../../services/videoInsightsService';
 import storageService from '../../services/storageService';
 import { toast } from 'react-toastify';
 
@@ -23,8 +21,6 @@ const CareerDashboard = () => {
   const [jobSearchStrategies, setJobSearchStrategies] = useState([]);
   const [careerGrowthResources, setCareerGrowthResources] = useState([]);
   const [careerPathVisualizations, setCareerPathVisualizations] = useState([]);
-  // NEW: Market Insights state
-  const [showMarketInsights, setShowMarketInsights] = useState(false);
   
   const [userData, setUserData] = useState({
     name: '',
@@ -1105,6 +1101,78 @@ const CareerDashboard = () => {
     );
   };
 
+  // Networking Strategy Component
+  const NetworkingStrategySection = ({ strategies }) => {
+    if (!strategies || strategies.length === 0) {
+      return null;
+    }
+    
+    const strategyItems = strategies.filter(item => item.type === 'strategy');
+    
+    return (
+      <div className="mb-6">
+        <div className="bg-gray-50 rounded-lg p-4">
+          <ul className="space-y-3">
+            {strategyItems.map((item, index) => (
+              <li key={index} className="flex items-start">
+                <span className="text-blue-600 mr-2 mt-1">•</span>
+                <span>{item.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
+  // Personal Branding Component
+  const PersonalBrandingSection = ({ tips }) => {
+    if (!tips || tips.length === 0) {
+      return null;
+    }
+    
+    const brandingTips = tips.filter(item => item.type === 'tip');
+    
+    return (
+      <div className="mb-6">
+        <div className="bg-gray-50 rounded-lg p-4">
+          <ul className="space-y-3">
+            {brandingTips.map((tip, index) => (
+              <li key={index} className="flex items-start">
+                <span className="text-blue-600 mr-2 mt-1">•</span>
+                <span>{tip.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
+  // Interview Preparation Component
+  const InterviewPrepSection = ({ tips }) => {
+    if (!tips || tips.length === 0) {
+      return null;
+    }
+    
+    const interviewTips = tips.filter(item => item.type === 'tip');
+    
+    return (
+      <div className="mb-6">
+        <div className="bg-gray-50 rounded-lg p-4">
+          <ul className="space-y-3">
+            {interviewTips.map((tip, index) => (
+              <li key={index} className="flex items-start">
+                <span className="text-blue-600 mr-2 mt-1">•</span>
+                <span>{tip.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
   // NEW: Portfolio Building Guidance Component
   const PortfolioGuidanceSection = ({ tips }) => {
     if (!tips || tips.length === 0) {
@@ -1256,6 +1324,54 @@ const CareerDashboard = () => {
       }
     }
     
+    // Use interview preparation tips if available
+    if (interviewPrep && interviewPrep.length > 0) {
+      const interviewTips = interviewPrep.filter(item => item.type === 'tip');
+      if (interviewTips.length > 0) {
+        steps.push({
+          icon: (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+          ),
+          color: 'text-green-600',
+          title: 'Prepare for Interviews',
+          description: interviewTips[0].text
+        });
+      }
+    }
+    
+    // Use job search strategies if available
+    if (jobSearchStrategies && jobSearchStrategies.length > 0) {
+      const jobSearchTips = jobSearchStrategies.filter(item => item.type === 'category_tip' || item.type === 'tip');
+      if (jobSearchTips.length > 0) {
+        steps.push({
+          icon: (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          ),
+          color: 'text-indigo-600',
+          title: 'Plan Your Job Search',
+          description: jobSearchTips[0].text.substring(0, 100) + (jobSearchTips[0].text.length > 100 ? '...' : '')
+        });
+      }
+    }
+    
+    // Based on current role (only if available)
+    if (userData.currentRole && userData.currentRole !== 'Not specified') {
+      steps.push({
+        icon: (
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        ),
+        color: 'text-indigo-600',
+        title: 'Leverage Current Experience',
+        description: `Apply your ${userData.currentRole} skills to tech projects`
+      });
+    }
+    
     // Return the steps that were generated from actual user data
     return steps.slice(0, 4);
   };
@@ -1286,10 +1402,10 @@ const CareerDashboard = () => {
       
       {/* Main Content */}
       <div className="container mx-auto py-8 px-4">
-        {/* Quick Actions Section - Updated to include Market Insights as 7th button */}
+        {/* Quick Actions Section */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <button 
               onClick={() => window.print()}
               className="flex items-center justify-center py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
@@ -1351,17 +1467,6 @@ const CareerDashboard = () => {
               </svg>
               Join Projects
             </a>
-
-            {/* NEW: Market Insights Button */}
-            <button 
-              onClick={() => setShowMarketInsights(!showMarketInsights)}
-              className="flex items-center justify-center py-3 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2-2V7a2 2 0 012-2h2a2 2 0 002 2v2a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 00-2 2h-2a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2z" />
-              </svg>
-              Market Insights
-            </button>
           </div>
         </div>
 
@@ -1411,13 +1516,6 @@ const CareerDashboard = () => {
             </div>
           </div>
         </div>
-        
-        {/* NEW: Market Insights Section */}
-        {showMarketInsights && (
-          <div className="mb-6">
-            <MarketInsights userProfile={userData} />
-          </div>
-        )}
         
         {/* Career Path Matches Visualization */}
         {careerPaths.length > 0 && (

@@ -1,243 +1,386 @@
 // src/data/videoInsights.js
-// Processed insights from 16 tech career guidance videos
+// Enhanced with comprehensive analysis from JSON data files
 
+// Import both JSON files (now in src/data/ directory)
+import comprehensiveTechCareersJson from './COMPREHENSIVE_TECH_CAREER_VIDEOS_ANALYSIS_20250522_162024.json';
+import growTechCareersJson from './COMPREHENSIVE_GROW_TECH_CAREERS_ANALYSIS_20250522_173825.json';
+
+class VideoAnalysisDataManager {
+  constructor() {
+    this.rawData = {
+      comprehensive: comprehensiveTechCareersJson,
+      growth: growTechCareersJson
+    };
+  }
+
+  // Process and merge data from both JSON files
+  processData() {
+    const comprehensive = this.rawData.comprehensive;
+    const growth = this.rawData.growth;
+
+    return {
+      project_info: this.extractProjectInfo(comprehensive, growth),
+      detailed_video_analyses: this.mergeVideoAnalyses(comprehensive, growth),
+      trending_skills: this.extractTrendingSkills(comprehensive, growth),
+      career_advice_patterns: this.extractCareerAdvicePatterns(comprehensive, growth),
+      actionable_steps_by_level: this.extractActionableSteps(comprehensive, growth),
+      career_path_insights: this.extractCareerPaths(comprehensive, growth),
+      market_trends: this.extractMarketTrends(comprehensive, growth)
+    };
+  }
+
+  extractProjectInfo(comprehensive, growth) {
+    return {
+      title: comprehensive?.project_metadata?.title || "Comprehensive Tech Career Video Analysis",
+      description: comprehensive?.project_metadata?.description || "Complete analysis of tech career guidance videos",
+      total_videos_analyzed: (comprehensive?.project_metadata?.successful_analyses || 0) + 
+                            (growth?.project_metadata?.successful_analyses || 0),
+      detailed_analysis_videos: (comprehensive?.project_metadata?.successful_extractions || 0) + 
+                               (growth?.project_metadata?.successful_extractions || 0),
+      processing_date: comprehensive?.project_metadata?.processing_date || growth?.project_metadata?.processing_date || "2025-05-22",
+      methodology: comprehensive?.project_metadata?.analysis_methodology?.consensus_approach || 
+                  "Multi-prompt self-consistency for career growth analysis",
+      data_sources: {
+        comprehensive_analysis: comprehensive?.project_metadata?.title || "Comprehensive Tech Career Analysis",
+        growth_analysis: growth?.project_metadata?.title || "Growth Tech Career Analysis"
+      }
+    };
+  }
+
+  mergeVideoAnalyses(comprehensive, growth) {
+    const merged = {};
+    
+    // Merge video analyses from comprehensive dataset
+    if (comprehensive?.video_analyses) {
+      Object.entries(comprehensive.video_analyses).forEach(([videoId, analysis]) => {
+        merged[videoId] = {
+          ...analysis,
+          source: 'comprehensive',
+          title: analysis.final_video_summary?.title || analysis.title,
+          url: analysis.final_video_summary?.url || analysis.url,
+          focus: analysis.final_video_summary?.focus || "Career Growth and Professional Development",
+          key_themes: analysis.final_video_summary?.key_themes || analysis.key_themes || [],
+          comprehensive_summary: analysis.final_video_summary?.comprehensive_summary || analysis.summary,
+          actionable_insights: analysis.final_video_summary?.actionable_insights || analysis.insights || [],
+          target_audience: analysis.final_video_summary?.target_audience || "Tech professionals",
+          career_paths: analysis.final_video_summary?.career_paths || []
+        };
+      });
+    }
+
+    // Merge video analyses from growth dataset
+    if (growth?.video_analyses) {
+      Object.entries(growth.video_analyses).forEach(([videoId, analysis]) => {
+        if (!merged[videoId]) {
+          merged[videoId] = {
+            ...analysis,
+            source: 'growth',
+            title: analysis.final_video_summary?.title || analysis.title,
+            url: analysis.final_video_summary?.url || analysis.url,
+            focus: analysis.final_video_summary?.focus || "Career Growth and Professional Development",
+            key_themes: analysis.final_video_summary?.key_themes || analysis.key_themes || [],
+            comprehensive_summary: analysis.final_video_summary?.comprehensive_summary || analysis.summary,
+            actionable_insights: analysis.final_video_summary?.actionable_insights || analysis.insights || [],
+            target_audience: analysis.final_video_summary?.target_audience || "Tech professionals",
+            career_paths: analysis.final_video_summary?.career_paths || []
+          };
+        }
+      });
+    }
+
+    return merged;
+  }
+
+  extractTrendingSkills(comprehensive, growth) {
+    const skillsMap = new Map();
+    
+    // Extract skills from both datasets
+    [comprehensive, growth].forEach(dataset => {
+      if (dataset?.trending_skills) {
+        dataset.trending_skills.forEach(skill => {
+          const key = skill.name || skill.skill;
+          if (skillsMap.has(key)) {
+            const existing = skillsMap.get(key);
+            existing.frequency += skill.frequency || 1;
+            existing.mentions = (existing.mentions || 1) + 1;
+          } else {
+            skillsMap.set(key, {
+              name: key,
+              frequency: skill.frequency || 1,
+              growth_trend: skill.growth_trend || 'Stable',
+              category: skill.category || 'General',
+              importance_score: skill.importance_score || 70,
+              related_roles: skill.related_roles || [],
+              learning_resources: skill.learning_resources || [],
+              mentions: 1
+            });
+          }
+        });
+      }
+    });
+
+    return Array.from(skillsMap.values())
+      .sort((a, b) => (b.importance_score || 0) - (a.importance_score || 0));
+  }
+
+  extractCareerAdvicePatterns(comprehensive, growth) {
+    const patterns = [];
+    
+    [comprehensive, growth].forEach(dataset => {
+      if (dataset?.career_advice_patterns) {
+        dataset.career_advice_patterns.forEach(pattern => {
+          patterns.push({
+            theme: pattern.theme || pattern.category,
+            frequency: pattern.frequency || 1,
+            description: pattern.description || pattern.summary,
+            key_points: pattern.key_points || pattern.points || [],
+            practical_steps: pattern.practical_steps || pattern.steps || [],
+            success_metrics: pattern.success_metrics || pattern.metrics || [],
+            source: dataset.project_metadata?.title || 'Unknown'
+          });
+        });
+      }
+    });
+
+    return patterns;
+  }
+
+  extractActionableSteps(comprehensive, growth) {
+    const stepsByLevel = {
+      'Entry-Level': {
+        core_focus: 'Foundation Building',
+        time_investment: '3-6 months per skill',
+        steps: []
+      },
+      'Mid-Career': {
+        core_focus: 'Specialization & Leadership',
+        time_investment: '6-12 months per major skill',
+        steps: []
+      },
+      'Senior-Level': {
+        core_focus: 'Strategic Leadership',
+        time_investment: '12+ months per initiative',
+        steps: []
+      }
+    };
+
+    [comprehensive, growth].forEach(dataset => {
+      if (dataset?.actionable_steps_by_level) {
+        Object.entries(dataset.actionable_steps_by_level).forEach(([level, data]) => {
+          if (stepsByLevel[level] && data.steps) {
+            stepsByLevel[level].steps.push(...data.steps);
+          }
+        });
+      }
+    });
+
+    return stepsByLevel;
+  }
+
+  extractCareerPaths(comprehensive, growth) {
+    const pathsMap = new Map();
+
+    [comprehensive, growth].forEach(dataset => {
+      if (dataset?.career_path_insights) {
+        dataset.career_path_insights.forEach(path => {
+          const key = path.path || path.title;
+          if (!pathsMap.has(key)) {
+            pathsMap.set(key, {
+              path: key,
+              demand: path.demand || 'Medium',
+              skills: path.skills || [],
+              timeline: path.timeline || '6-12 months',
+              salary_range: path.salary_range || {},
+              growth_potential: path.growth_potential || 'Good',
+              market_outlook: path.market_outlook || 'Stable',
+              key_companies: path.key_companies || []
+            });
+          }
+        });
+      }
+    });
+
+    return Array.from(pathsMap.values());
+  }
+
+  extractMarketTrends(comprehensive, growth) {
+    const trends = [];
+
+    [comprehensive, growth].forEach(dataset => {
+      if (dataset?.market_trends) {
+        dataset.market_trends.forEach(trend => {
+          trends.push({
+            trend: trend.trend || trend.title,
+            impact: trend.impact || 'Medium',
+            timeline: trend.timeline || '2025-2026',
+            action_items: trend.action_items || trend.actions || []
+          });
+        });
+      }
+    });
+
+    return trends;
+  }
+
+  getFallbackData() {
+    // Return the original hardcoded data as fallback
+    return {
+      project_info: {
+        title: "Tech Career Video Analysis (Fallback)",
+        description: "Fallback data when JSON files cannot be loaded",
+        total_videos_analyzed: 0,
+        processing_date: "2025-05-22"
+      },
+      detailed_video_analyses: {},
+      trending_skills: [],
+      career_advice_patterns: [],
+      actionable_steps_by_level: {},
+      career_path_insights: [],
+      market_trends: []
+    };
+  }
+}
+
+// Initialize the data manager
+const dataManager = new VideoAnalysisDataManager();
+
+// Process the data (using direct imports by default)
 export const videoAnalysisData = {
-  project_info: {
-    title: "Comprehensive Tech Career Video Analysis",
-    description: "Complete analysis of 16 tech career guidance YouTube videos",
-    total_videos_analyzed: 16,
-    processing_date: "2025-05-22",
-    total_actionable_steps: 128
+  ...dataManager.processData(),
+  
+  // Utility functions for data analysis
+  getSkillsByCategory: function(category) {
+    return this.trending_skills.filter(skill => skill.category === category);
   },
 
-  // Key skills mentioned across all videos with frequency
-  trending_skills: [
-    { name: 'AI/ML', frequency: 12, growth_trend: 'Very High', category: 'Emerging Tech' },
-    { name: 'Python', frequency: 8, growth_trend: 'High', category: 'Programming' },
-    { name: 'Data Science', frequency: 9, growth_trend: 'High', category: 'Analytics' },
-    { name: 'Cloud Computing', frequency: 8, growth_trend: 'Very High', category: 'Infrastructure' },
-    { name: 'DevOps', frequency: 7, growth_trend: 'High', category: 'Infrastructure' },
-    { name: 'JavaScript', frequency: 6, growth_trend: 'Stable', category: 'Programming' },
-    { name: 'Cybersecurity', frequency: 5, growth_trend: 'High', category: 'Security' },
-    { name: 'Java', frequency: 6, growth_trend: 'Stable', category: 'Programming' },
-    { name: 'UX/UI Design', frequency: 4, growth_trend: 'Moderate', category: 'Design' },
-    { name: 'Project Management', frequency: 10, growth_trend: 'Stable', category: 'Leadership' }
-  ],
-
-  // Common themes across all videos
-  career_advice_patterns: [
-    {
-      theme: 'Continuous Learning',
-      frequency: 16,
-      description: 'Lifelong learning and staying updated with technology trends',
-      key_points: [
-        'Technology evolves rapidly, requiring constant skill updates',
-        'Online courses and certifications are essential',
-        'Daily learning habits lead to career success',
-        'Industry publications and blogs are valuable resources'
-      ]
-    },
-    {
-      theme: 'Networking and Mentorship',
-      frequency: 14,
-      description: 'Building professional networks and finding mentors',
-      key_points: [
-        'Professional networks are crucial for career opportunities',
-        'Mentorship accelerates career growth',
-        'Tech communities provide valuable support',
-        'Online platforms like LinkedIn are essential'
-      ]
-    },
-    {
-      theme: 'Skills Over Education',
-      frequency: 12,
-      description: 'Practical skills matter more than formal education',
-      key_points: [
-        'Portfolio projects demonstrate real capabilities',
-        'Hands-on experience is highly valued',
-        'Self-taught skills are respected in tech',
-        'Bootcamps can be as valuable as degrees'
-      ]
-    },
-    {
-      theme: 'Personal Branding',
-      frequency: 8,
-      description: 'Building online presence and professional brand',
-      key_points: [
-        'GitHub profiles showcase technical skills',
-        'LinkedIn optimization increases visibility',
-        'Content creation establishes expertise',
-        'Online portfolios are essential for job hunting'
-      ]
-    }
-  ],
-
-  // Industry insights from video analysis
-  industry_opportunities: [
-    {
-      sector: 'FinTech',
-      growth_rating: 'Very High',
-      mentions: 6,
-      key_technologies: ['Blockchain', 'Mobile Development', 'Security', 'APIs'],
-      opportunities: ['Digital payments', 'Cryptocurrency', 'Financial apps', 'Regulatory tech']
-    },
-    {
-      sector: 'Healthcare Technology',
-      growth_rating: 'High',
-      mentions: 4,
-      key_technologies: ['Telemedicine', 'IoT', 'AI/ML', 'Mobile Health'],
-      opportunities: ['Remote monitoring', 'AI diagnostics', 'Health apps', 'Medical devices']
-    },
-    {
-      sector: 'Renewable Energy',
-      growth_rating: 'High',
-      mentions: 3,
-      key_technologies: ['IoT', 'Data Analytics', 'Smart Grids', 'Mobile Apps'],
-      opportunities: ['Energy management', 'Smart home tech', 'Grid optimization', 'Sustainability tracking']
-    },
-    {
-      sector: 'E-commerce',
-      growth_rating: 'Moderate',
-      mentions: 5,
-      key_technologies: ['Web Development', 'Mobile Apps', 'Analytics', 'Cloud Computing'],
-      opportunities: ['Platform development', 'Mobile commerce', 'Supply chain tech', 'Customer analytics']
-    }
-  ],
-
-  // Actionable steps extracted from videos, categorized by career stage
-  actionable_steps_by_level: {
-    'Entry-Level': [
-      'Start with foundational courses in chosen tech area',
-      'Build 2-3 portfolio projects to demonstrate skills',
-      'Join tech communities like DSN, I4G, and Omdena',
-      'Focus on learning one programming language thoroughly',
-      'Apply for internships to gain practical experience',
-      'Get comfortable with version control (Git/GitHub)',
-      'Practice coding challenges and algorithm problems',
-      'Find a mentor in your target field',
-      'Create a professional LinkedIn profile',
-      'Attend virtual meetups and tech events',
-      'Start with free online courses and tutorials',
-      'Build a simple personal website or portfolio',
-      'Learn basic command line and development tools',
-      'Join online coding communities and forums',
-      'Practice explaining technical concepts clearly'
-    ],
-    'Mid-Career': [
-      'Specialize in a specific technology or domain',
-      'Take on leadership roles in technical projects',
-      'Contribute to open source projects regularly',
-      'Write technical articles or blog posts',
-      'Speak at local meetups or virtual events',
-      'Pursue advanced certifications in your field',
-      'Mentor junior developers or career changers',
-      'Build expertise in adjacent technologies',
-      'Develop project management skills',
-      'Create comprehensive portfolio showcasing growth',
-      'Network with other mid-level professionals',
-      'Stay updated with industry trends and tools',
-      'Participate in hackathons and coding competitions',
-      'Consider freelance or consulting opportunities',
-      'Build relationships with recruiters and hiring managers'
-    ],
-    'Senior-Level': [
-      'Lead technical architecture and design decisions',
-      'Manage and grow development teams',
-      'Drive adoption of new technologies and methodologies',
-      'Contribute to technical strategy and planning',
-      'Build relationships with C-level executives',
-      'Speak at major conferences and industry events',
-      'Author technical papers or industry reports',
-      'Mentor other senior professionals',
-      'Evaluate business impact of technical decisions',
-      'Stay ahead of emerging technology trends',
-      'Build strategic partnerships with other companies',
-      'Contribute to industry standards and best practices',
-      'Lead digital transformation initiatives',
-      'Develop and execute long-term technical vision',
-      'Foster innovation culture within organizations'
-    ]
+  getCareerPathsByDemand: function(demandLevel) {
+    return this.career_path_insights.filter(path => path.demand === demandLevel);
   },
 
-  // Common career paths and their requirements
-  career_path_insights: [
-    {
-      path: 'Software Development',
-      demand: 'Very High',
-      skills: ['Programming', 'Problem Solving', 'System Design', 'Testing'],
-      timeline: '6-12 months for entry level',
-      salary_range: '$60k-$150k+',
-      growth_potential: 'Excellent'
-    },
-    {
-      path: 'Data Science',
-      demand: 'High',
-      skills: ['Statistics', 'Python/R', 'Machine Learning', 'Data Visualization'],
-      timeline: '8-18 months for entry level',
-      salary_range: '$70k-$180k+',
-      growth_potential: 'Very High'
-    },
-    {
-      path: 'DevOps Engineering',
-      demand: 'Very High',
-      skills: ['Cloud Platforms', 'Automation', 'Infrastructure', 'CI/CD'],
-      timeline: '6-15 months for entry level',
-      salary_range: '$75k-$170k+',
-      growth_potential: 'Excellent'
-    },
-    {
-      path: 'Cybersecurity',
-      demand: 'High',
-      skills: ['Network Security', 'Risk Assessment', 'Compliance', 'Incident Response'],
-      timeline: '8-18 months for entry level',
-      salary_range: '$65k-$160k+',
-      growth_potential: 'Very High'
-    },
-    {
-      path: 'UX/UI Design',
-      demand: 'Moderate',
-      skills: ['Design Thinking', 'Prototyping', 'User Research', 'Design Tools'],
-      timeline: '4-12 months for entry level',
-      salary_range: '$55k-$130k+',
-      growth_potential: 'Good'
-    }
-  ],
+  getActionableStepsByLevel: function(level) {
+    return this.actionable_steps_by_level[level] || null;
+  },
 
-  // Key insights for career changers
-  transition_insights: [
-    {
-      category: 'Timeline Expectations',
-      insight: 'Most successful transitions take 6-18 months with consistent effort',
-      supporting_evidence: 'Mentioned in 12 of 16 videos'
-    },
-    {
-      category: 'Learning Approach',
-      insight: 'Project-based learning is more effective than theory-only study',
-      supporting_evidence: 'Emphasized in 14 of 16 videos'
-    },
-    {
-      category: 'Job Search Strategy',
-      insight: 'Networking and referrals are more important than cold applications',
-      supporting_evidence: 'Highlighted in 13 of 16 videos'
-    },
-    {
-      category: 'Skill Prioritization',
-      insight: 'Focus on depth in one area before breadth across many technologies',
-      supporting_evidence: 'Recommended in 11 of 16 videos'
-    }
-  ],
+  getAdviceByTheme: function(theme) {
+    return this.career_advice_patterns.find(pattern => 
+      pattern.theme.toLowerCase().includes(theme.toLowerCase())
+    );
+  },
 
-  // Market trends identified from video analysis
-  market_trends: [
-    'Remote work creating global opportunities',
-    'AI/ML integration across all industries',
-    'Cloud-first architecture becoming standard',
-    'Emphasis on full-stack capabilities',
-    'Growing importance of soft skills',
-    'Shift towards agile and DevOps practices',
-    'Increased focus on cybersecurity',
-    'Rise of low-code/no-code platforms',
-    'Growing demand for data literacy',
-    'Importance of continuous learning culture'
-  ]
+  getVideoSummary: function(videoId) {
+    return this.detailed_video_analyses?.[videoId]?.comprehensive_summary || null;
+  },
+
+  // New utility functions for enhanced functionality
+  getSkillsByImportance: function(minScore = 80) {
+    return this.trending_skills.filter(skill => skill.importance_score >= minScore);
+  },
+
+  getVideosByTheme: function(theme) {
+    return Object.entries(this.detailed_video_analyses)
+      .filter(([_, analysis]) => 
+        analysis.key_themes?.some(t => 
+          t.toLowerCase().includes(theme.toLowerCase())
+        )
+      )
+      .map(([id, analysis]) => ({ id, ...analysis }));
+  },
+
+  getTrendsByImpact: function(impactLevel = 'High') {
+    return this.market_trends.filter(trend => trend.impact === impactLevel);
+  }
 };
+
+// Export individual components for modular use
+export const {
+  project_info,
+  detailed_video_analyses,
+  trending_skills,
+  career_advice_patterns,
+  actionable_steps_by_level,
+  career_path_insights,
+  market_trends
+} = videoAnalysisData;
+
+// Enhanced helper functions
+export const CareerDataHelpers = {
+  // Get recommendations for a specific career level
+  getRecommendationsForLevel: (level) => {
+    const steps = videoAnalysisData.getActionableStepsByLevel(level);
+    const relevantSkills = trending_skills.filter(skill => 
+      skill.importance_score > 80
+    );
+    
+    return {
+      actionable_steps: steps,
+      priority_skills: relevantSkills,
+      estimated_timeline: steps?.time_investment || 'Variable'
+    };
+  },
+
+  // Get skills roadmap for a specific career path
+  getSkillsRoadmap: (careerPath) => {
+    const pathInfo = career_path_insights.find(path => 
+      path.path.toLowerCase().includes(careerPath.toLowerCase())
+    );
+    
+    if (!pathInfo) return null;
+    
+    return {
+      path: pathInfo.path,
+      required_skills: pathInfo.skills,
+      timeline: pathInfo.timeline,
+      salary_progression: pathInfo.salary_range,
+      market_demand: pathInfo.demand
+    };
+  },
+
+  // Get trending skills by importance
+  getTopSkills: (limit = 10) => {
+    return trending_skills
+      .sort((a, b) => (b.importance_score || 0) - (a.importance_score || 0))
+      .slice(0, limit);
+  },
+
+  // Get market trends by impact
+  getHighImpactTrends: () => {
+    return market_trends.filter(trend => 
+      trend.impact === 'High' || trend.impact === 'Very High'
+    );
+  },
+
+  // New helper functions for JSON data
+  getVideoAnalysisBySource: (source) => {
+    return Object.entries(detailed_video_analyses)
+      .filter(([_, analysis]) => analysis.source === source)
+      .reduce((acc, [id, analysis]) => ({ ...acc, [id]: analysis }), {});
+  },
+
+  getSkillFrequencyReport: () => {
+    return trending_skills
+      .sort((a, b) => (b.frequency || 0) - (a.frequency || 0))
+      .map(skill => ({
+        name: skill.name,
+        frequency: skill.frequency,
+        mentions: skill.mentions || 1,
+        category: skill.category
+      }));
+  },
+
+  getCareerPathComparison: (path1, path2) => {
+    const paths = [path1, path2].map(pathName => 
+      career_path_insights.find(path => 
+        path.path.toLowerCase().includes(pathName.toLowerCase())
+      )
+    );
+    
+    return {
+      comparison: paths,
+      commonSkills: paths[0]?.skills?.filter(skill => 
+        paths[1]?.skills?.includes(skill)
+      ) || []
+    };
+  }
+};
+
+export default videoAnalysisData;

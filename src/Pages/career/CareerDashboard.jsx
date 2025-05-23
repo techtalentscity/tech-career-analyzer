@@ -481,6 +481,26 @@ const CareerDashboard = () => {
   // END OF AUTHENTIC CAREER PATH GENERATION SYSTEM
   // ============================================================================
 
+  // Debug useEffect to track market trends changes
+  useEffect(() => {
+    console.log('🔍 Market trends state changed:', {
+      count: marketTrends.length,
+      trends: marketTrends.map(t => ({
+        title: t.title,
+        hasPersonalizedData: !!t.personalizedData,
+        userCareer: t.userCareer
+      }))
+    });
+  }, [marketTrends]);
+
+  // Debug useEffect to track career paths changes
+  useEffect(() => {
+    console.log('🔍 Career paths state changed:', {
+      count: careerPaths.length,
+      topCareer: careerPaths[0]?.title || 'None'
+    });
+  }, [careerPaths]);
+
   // Animation effect for counters
   useEffect(() => {
     if (careerPaths.length > 0) {
@@ -559,7 +579,7 @@ const CareerDashboard = () => {
           // Extract other data from analysis
           const skills = extractSkillsGapImproved(analysisText);
           const roadmap = extractLearningRoadmapImproved(analysisText);
-          const outlook = extractJobMarketOutlookImproved(analysisText);
+          // Job market outlook will be generated after career paths are available
           const networking = extractNetworkingStrategyImproved(analysisText);
           const branding = extractPersonalBrandingImproved(analysisText);
           const interview = extractInterviewPrepImproved(analysisText);
@@ -570,7 +590,7 @@ const CareerDashboard = () => {
           
           setSkillsGap(skills);
           setLearningRoadmap(roadmap);
-          setJobMarketOutlook(outlook);
+          // setJobMarketOutlook will be set after career paths generation
           setNetworkingStrategy(networking);
           setPersonalBranding(branding);
           setInterviewPrep(interview);
@@ -624,7 +644,7 @@ const CareerDashboard = () => {
             // Extract other data from analysis
             const skills = extractSkillsGapImproved(analysisText);
             const roadmap = extractLearningRoadmapImproved(analysisText);
-            const outlook = extractJobMarketOutlookImproved(analysisText);
+            // Job market outlook will be generated after career paths are available
             const networking = extractNetworkingStrategyImproved(analysisText);
             const branding = extractPersonalBrandingImproved(analysisText);
             const interview = extractInterviewPrepImproved(analysisText);
@@ -635,7 +655,7 @@ const CareerDashboard = () => {
             
             setSkillsGap(skills);
             setLearningRoadmap(roadmap);
-            setJobMarketOutlook(outlook);
+            // setJobMarketOutlook will be set after career paths generation
             setNetworkingStrategy(networking);
             setPersonalBranding(branding);
             setInterviewPrep(interview);
@@ -651,9 +671,9 @@ const CareerDashboard = () => {
           }
         }
         
-        // CRITICAL: Generate market trends AFTER everything is set up
+                  // CRITICAL: Generate market trends AND job outlook AFTER everything is set up
         if (processedUserData && generatedPaths && generatedPaths.length > 0) {
-          console.log('🎯 Generating market trends with:', {
+          console.log('🎯 Generating market trends and job outlook with:', {
             careerPaths: generatedPaths.length,
             topCareer: generatedPaths[0]?.title,
             userInterests: processedUserData.careerPathsInterest
@@ -662,10 +682,15 @@ const CareerDashboard = () => {
           const personalizedTrends = generatePersonalizedMarketTrendsWithPaths(generatedPaths, processedUserData);
           setMarketTrends(personalizedTrends);
           
+          const personalizedOutlook = generatePersonalizedJobMarketOutlook(generatedPaths, processedUserData);
+          setJobMarketOutlook(personalizedOutlook);
+          
           console.log('✅ Market trends generated:', personalizedTrends.length, personalizedTrends);
+          console.log('✅ Job market outlook generated:', personalizedOutlook.length, personalizedOutlook);
         } else {
           console.log('⚠️ No career paths or user data available for market trends');
           setMarketTrends(generateGenericMarketTrends());
+          setJobMarketOutlook(generateGenericJobMarketOutlook());
         }
         
       } catch (error) {
@@ -1130,46 +1155,224 @@ const CareerDashboard = () => {
     );
   };
 
-  // Job Market Outlook Card Component
+  // UPDATED: Job Market Outlook Card Component with personalized content
   const JobMarketOutlookCard = ({ outlook, index }) => {
+    console.log('🎯 Rendering JobMarketOutlookCard:', outlook.title, 'personalizedData:', !!outlook.personalizedData);
+    
     const outlookIcons = ['💼', '📊', '🎯', '🌐', '💰', '📈'];
     const icon = outlook.icon || outlookIcons[index % outlookIcons.length];
+    
+    // Enhanced content based on personalized outlook data
+    const getPersonalizedContent = () => {
+      const title = outlook.title || outlook.aspect;
+      
+      // Handle personalized salary trends outlook
+      if (title.includes('Salary') && outlook.personalizedData) {
+        console.log('💰 Rendering salary outlook with data:', outlook.personalizedData.trends?.length);
+        return {
+          title: outlook.title,
+          content: (
+            <div>
+              <p className="text-gray-700 mb-4">{outlook.description}</p>
+              <div className="bg-green-50 p-4 rounded-lg mb-4">
+                <h5 className="font-medium text-green-800 mb-3">📈 Current Trends:</h5>
+                <ul className="text-sm text-green-700 space-y-2">
+                  {outlook.personalizedData.trends.map((trend, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">•</span>
+                      {trend}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h5 className="font-medium text-blue-800 mb-2">🔮 Future Projections:</h5>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  {outlook.personalizedData.projections.map((projection, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="text-blue-500 mr-2 mt-0.5">→</span>
+                      {projection}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )
+        };
+      }
+      
+      // Handle personalized regional opportunities
+      if (title.includes('Regional') && outlook.personalizedData) {
+        console.log('🌍 Rendering regional outlook with data:', outlook.personalizedData.topRegions?.length);
+        return {
+          title: outlook.title,
+          content: (
+            <div>
+              <p className="text-gray-700 mb-4">{outlook.description}</p>
+              <div className="bg-purple-50 p-4 rounded-lg mb-4">
+                <h5 className="font-medium text-purple-800 mb-3">🏙️ Top Markets:</h5>
+                <ul className="text-sm text-purple-700 space-y-2">
+                  {outlook.personalizedData.topRegions.map((region, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="text-purple-500 mr-2 mt-0.5">📍</span>
+                      {region}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="bg-indigo-50 p-4 rounded-lg mb-4">
+                <h5 className="font-medium text-indigo-800 mb-2">🌱 Emerging Markets:</h5>
+                <ul className="text-sm text-indigo-700 space-y-1">
+                  {outlook.personalizedData.emerging.map((market, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="text-indigo-500 mr-2 mt-0.5">⭐</span>
+                      {market}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="bg-teal-50 p-3 rounded-lg">
+                <p className="text-sm text-teal-800">
+                  <strong>Remote Work:</strong> {outlook.personalizedData.remote}
+                </p>
+              </div>
+            </div>
+          )
+        };
+      }
+      
+      // Handle personalized emerging technologies
+      if (title.includes('Emerging') && outlook.personalizedData) {
+        console.log('🚀 Rendering tech trends with data:', outlook.personalizedData.technologies?.length);
+        return {
+          title: outlook.title,
+          content: (
+            <div>
+              <p className="text-gray-700 mb-4">{outlook.description}</p>
+              <div className="bg-orange-50 p-4 rounded-lg mb-4">
+                <h5 className="font-medium text-orange-800 mb-3">🚀 Key Technologies:</h5>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {outlook.personalizedData.technologies.map((tech, idx) => (
+                    <span key={idx} className="px-3 py-1 bg-orange-200 text-orange-800 rounded-full text-xs font-medium">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-red-50 p-4 rounded-lg mb-4">
+                <h5 className="font-medium text-red-800 mb-2">💡 Impact on Role:</h5>
+                <ul className="text-sm text-red-700 space-y-1">
+                  {outlook.personalizedData.impact.map((impact, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="text-red-500 mr-2 mt-0.5">•</span>
+                      {impact}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="bg-yellow-50 p-3 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  <strong>Timeline:</strong> {outlook.personalizedData.timeline}
+                </p>
+              </div>
+            </div>
+          )
+        };
+      }
+      
+      // Handle personalized industry demand
+      if (title.includes('Demand') && outlook.personalizedData) {
+        console.log('📈 Rendering demand outlook with data:', outlook.personalizedData.sectors?.length);
+        return {
+          title: outlook.title,
+          content: (
+            <div>
+              <p className="text-gray-700 mb-4">{outlook.description}</p>
+              <div className="bg-emerald-50 p-4 rounded-lg mb-4">
+                <h5 className="font-medium text-emerald-800 mb-2">📊 Market Demand:</h5>
+                <p className="text-sm text-emerald-700 font-medium mb-3">{outlook.personalizedData.demand}</p>
+                <h6 className="font-medium text-emerald-800 mb-2">Top Hiring Sectors:</h6>
+                <ul className="text-sm text-emerald-700 space-y-1">
+                  {outlook.personalizedData.sectors.map((sector, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="text-emerald-500 mr-2 mt-0.5">🏢</span>
+                      {sector}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="bg-cyan-50 p-4 rounded-lg">
+                <h5 className="font-medium text-cyan-800 mb-2">🚀 Growth Drivers:</h5>
+                <ul className="text-sm text-cyan-700 space-y-1">
+                  {outlook.personalizedData.drivers.map((driver, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="text-cyan-500 mr-2 mt-0.5">▶</span>
+                      {driver}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )
+        };
+      }
+      
+      // Fallback for generic outlook
+      console.log('📊 Using generic fallback for outlook:', title);
+      return {
+        title: title,
+        content: (
+          <div>
+            <p className="text-gray-700 mb-4">{outlook.description || outlook.text}</p>
+            
+            {outlook.statistics && (
+              <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                <h5 className="font-medium text-blue-800 mb-2">Key Statistics:</h5>
+                <p className="text-sm text-blue-700">{outlook.statistics}</p>
+              </div>
+            )}
+            
+            {outlook.opportunities && outlook.opportunities.length > 0 && (
+              <div className="mb-4">
+                <h5 className="font-medium text-gray-800 mb-2">Opportunities:</h5>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  {outlook.opportunities.slice(0, 3).map((opportunity, oppIndex) => (
+                    <li key={oppIndex} className="flex items-start">
+                      <span className="text-green-500 mr-2">✓</span>
+                      {opportunity}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )
+      };
+    };
+
+    const enhancedContent = getPersonalizedContent();
     
     return (
       <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
         <div className="flex items-start mb-4">
           <span className="text-3xl mr-4">{icon}</span>
-          <div>
-            <h4 className="font-semibold text-lg text-gray-800">{outlook.title || outlook.aspect}</h4>
-            <span className="text-sm text-gray-500">{outlook.category || 'Job Market'}</span>
+          <div className="flex-1">
+            <h4 className="font-semibold text-lg text-gray-800">{enhancedContent.title}</h4>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-sm text-gray-500">{outlook.category || 'Job Market'}</span>
+              {outlook.userCareer && (
+                <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                  {outlook.userCareer} Specific
+                </span>
+              )}
+            </div>
           </div>
         </div>
         
-        <p className="text-gray-700 mb-4">{outlook.description || outlook.text}</p>
-        
-        {outlook.statistics && (
-          <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-            <h5 className="font-medium text-blue-800 mb-2">Key Statistics:</h5>
-            <p className="text-sm text-blue-700">{outlook.statistics}</p>
-          </div>
-        )}
-        
-        {outlook.opportunities && outlook.opportunities.length > 0 && (
-          <div className="mb-4">
-            <h5 className="font-medium text-gray-800 mb-2">Opportunities:</h5>
-            <ul className="text-sm text-gray-600 space-y-1">
-              {outlook.opportunities.slice(0, 3).map((opportunity, oppIndex) => (
-                <li key={oppIndex} className="flex items-start">
-                  <span className="text-green-500 mr-2">✓</span>
-                  {opportunity}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {enhancedContent.content}
         
         {outlook.growth && (
-          <div className="pt-4 border-t">
+          <div className="pt-4 border-t mt-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-600">Growth Outlook:</span>
               <span className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -2232,102 +2435,275 @@ const CareerDashboard = () => {
     return sectors.slice(0, 4);
   };
 
-  // Job Market Outlook extraction
+  // UPDATED: Job Market Outlook extraction - now personalized like market trends
   const extractJobMarketOutlookImproved = (text) => {
-    if (!text) return [];
+    console.log('🎯 Generating PERSONALIZED job market outlook...');
+    // This will be replaced by the useEffect after career paths are available
+    return [];
+  };
+
+  // FIXED: Generate personalized job market outlook with career paths data
+  const generatePersonalizedJobMarketOutlook = (careerPaths, userData) => {
+    console.log('🎯 Generating PERSONALIZED job market outlook with career paths data...');
+    console.log('Career paths available:', careerPaths?.length || 0);
     
-    console.log('Extracting job market outlook from text...');
-    const outlook = [];
-    const lines = text.split('\n');
-    
-    let inOutlookSection = false;
-    const outlookKeywords = ['JOB MARKET OUTLOOK', 'MARKET OUTLOOK', 'EMPLOYMENT OUTLOOK', 'JOB PROSPECTS'];
-    
-    lines.forEach((line, index) => {
-      // Check for outlook section
-      if (outlookKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
-        inOutlookSection = true;
-        return;
-      }
-      
-      // Exit outlook section
-      if (inOutlookSection && (line.toUpperCase().includes('NETWORKING') || 
-          line.toUpperCase().includes('SKILLS') || line.toUpperCase().includes('PERSONAL BRANDING'))) {
-        inOutlookSection = false;
-        return;
-      }
-      
-      if (inOutlookSection && line.trim() !== '') {
-        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
-          const outlookText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          if (outlookText.length > 15) {
-            // Try to extract outlook title and description
-            let title = outlookText;
-            let description = outlookText;
-            
-            if (outlookText.includes(':')) {
-              const parts = outlookText.split(':');
-              title = parts[0].trim();
-              description = parts.slice(1).join(':').trim();
-            }
-            
-            outlook.push({
-              title: title,
-              description: description,
-              text: outlookText,
-              category: 'Job Market',
-              growth: 'Positive',
-              opportunities: [description]
-            });
-            console.log('Found job market outlook:', title);
-          }
-        }
-      }
-    });
-    
-    // Add default outlook if none found
-    if (outlook.length === 0) {
-      console.log('No job market outlook found, adding defaults...');
-      const defaultOutlook = [
-        {
-          title: 'Strong Demand for Tech Professionals',
-          description: 'The technology sector continues to show robust growth with high demand for skilled professionals across all levels.',
-          category: 'Overall Market',
-          growth: 'Strong',
-          statistics: 'Tech employment expected to grow 13% over the next decade, faster than average for all occupations.',
-          opportunities: ['Entry-level positions available', 'Career advancement opportunities', 'Competitive salaries']
-        },
-        {
-          title: 'Skills-Based Hiring Increase',
-          description: 'Employers are increasingly focusing on practical skills and portfolio work over traditional degree requirements.',
-          category: 'Hiring Trends',
-          growth: 'High',
-          statistics: '65% of employers now prioritize skills over degrees for tech roles.',
-          opportunities: ['Career changers welcome', 'Portfolio-based applications', 'Skills assessment over credentials']
-        },
-        {
-          title: 'Salary Growth Trends',
-          description: 'Technology roles continue to offer competitive compensation packages with strong growth potential.',
-          category: 'Compensation',
-          growth: 'Positive',
-          statistics: 'Average tech salaries increased 8.2% year-over-year, outpacing general market growth.',
-          opportunities: ['High starting salaries', 'Regular salary increases', 'Equity and benefits packages']
-        },
-        {
-          title: 'Geographic Flexibility',
-          description: 'Remote work has expanded job opportunities beyond traditional tech hubs to global markets.',
-          category: 'Work Environment',
-          growth: 'High',
-          statistics: '78% of tech companies now offer fully remote or hybrid work options.',
-          opportunities: ['Global job market access', 'Work-life balance improvement', 'Reduced relocation requirements']
-        }
-      ];
-      
-      outlook.push(...defaultOutlook);
+    if (!careerPaths || careerPaths.length === 0) {
+      console.log('⚠️ No career paths available, using generic job market outlook');
+      return generateGenericJobMarketOutlook();
     }
-    
-    console.log('Total job market outlook items extracted:', outlook.length);
+
+    const outlook = [];
+    const topCareer = careerPaths[0]; // User's top career match
+    const userInterests = userData.careerPathsInterest || [];
+
+    console.log('🎯 Generating job market outlook for top career:', topCareer.title);
+
+    // OUTLOOK 1: Personalized Salary Trends for their career
+    const salaryOutlook = {
+      title: `${topCareer.title} Salary Trends`,
+      description: `Current and projected salary trends for ${topCareer.title} professionals`,
+      category: 'Salary Trends',
+      growth: 'Strong',
+      icon: '💰',
+      personalizedData: generatePersonalizedSalaryOutlook(topCareer.title),
+      userCareer: topCareer.title
+    };
+    outlook.push(salaryOutlook);
+
+    // OUTLOOK 2: Regional Opportunities for their career
+    const regionalOutlook = {
+      title: `${topCareer.title} Regional Opportunities`,
+      description: `Geographic distribution and opportunities for ${topCareer.title} roles`,
+      category: 'Regional Opportunities',
+      growth: 'High',
+      icon: '🌍',
+      personalizedData: generatePersonalizedRegionalData(topCareer.title),
+      userCareer: topCareer.title
+    };
+    outlook.push(regionalOutlook);
+
+    // OUTLOOK 3: Emerging Technologies for their career
+    const techOutlook = {
+      title: `Emerging Technologies for ${topCareer.title}`,
+      description: `New technologies and trends impacting ${topCareer.title} professionals`,
+      category: 'Emerging Technologies',
+      growth: 'High',
+      icon: '🚀',
+      personalizedData: generatePersonalizedTechTrends(topCareer.title),
+      userCareer: topCareer.title
+    };
+    outlook.push(techOutlook);
+
+    // OUTLOOK 4: Industry Demand for their career
+    const demandOutlook = {
+      title: `${topCareer.title} Industry Demand`,
+      description: `Market demand and hiring trends for ${topCareer.title} positions`,
+      category: 'Industry Demand',
+      growth: 'Strong',
+      icon: '📈',
+      personalizedData: generatePersonalizedIndustryDemand(topCareer.title),
+      userCareer: topCareer.title
+    };
+    outlook.push(demandOutlook);
+
+    console.log(`✅ Generated ${outlook.length} personalized job market outlook items for ${topCareer.title}`);
     return outlook;
+  };
+
+  // Generate personalized salary outlook data
+  const generatePersonalizedSalaryOutlook = (careerTitle) => {
+    const salaryOutlookMap = {
+      'Software Developer': {
+        trends: ['Salaries increased 8.2% year-over-year', 'Remote work premium of 15-25%', 'Full-stack developers earn 20% more'],
+        projections: ['Continued growth expected through 2027', 'AI/ML skills commanding highest premiums', 'Entry-level salaries rising due to talent shortage'],
+        factors: ['Technology stack expertise', 'Years of experience', 'Geographic location', 'Company size and stage']
+      },
+      'Data Scientist': {
+        trends: ['Highest salary growth in tech at 11.5%', 'PhD holders earn 40% premium', 'Healthcare/Finance sectors pay most'],
+        projections: ['MLOps skills becoming essential', 'Domain expertise increasingly valued', 'Senior roles seeing 15%+ annual increases'],
+        factors: ['Advanced degree level', 'Industry specialization', 'Technical skill depth', 'Business impact experience']
+      },
+      'UX Designer': {
+        trends: ['Product design roles pay 25% premium', 'Tech companies offer highest packages', 'Portfolio quality drives negotiations'],
+        projections: ['Design systems expertise in high demand', 'Research skills becoming essential', 'Senior IC roles growing 12% annually'],
+        factors: ['Portfolio strength', 'Research experience', 'Technical collaboration', 'Business impact metrics']
+      },
+      'UI Designer': {
+        trends: ['Design systems experience increases salary 20%', 'Frontend skills add significant value', 'Mobile specialists earn premium rates'],
+        projections: ['Component library expertise growing', 'Animation skills increasingly valued', 'Cross-platform design in demand'],
+        factors: ['Technical design skills', 'System thinking ability', 'Cross-functional collaboration', 'Tool proficiency']
+      },
+      'Product Designer': {
+        trends: ['End-to-end design skills command premium', 'B2B experience pays 20% more', 'Leadership track sees highest growth'],
+        projections: ['Strategic design roles expanding', 'AI-assisted design changing landscape', 'Senior+ roles growing rapidly'],
+        factors: ['Strategic thinking ability', 'Leadership experience', 'Business acumen', 'Research methodology']
+      },
+      'Data Analyst': {
+        trends: ['Python/R skills increase salary 30%', 'Business intelligence roles growing', 'Domain expertise valued highly'],
+        projections: ['Advanced analytics skills essential', 'Storytelling with data crucial', 'Automation skills in demand'],
+        factors: ['Technical skill depth', 'Industry knowledge', 'Communication ability', 'Business understanding']
+      },
+      'Product Manager': {
+        trends: ['Technical PMs earn 30% more', 'B2B product experience premium', 'Data-driven skills essential'],
+        projections: ['AI/ML product expertise growing', 'Platform PM roles expanding', 'Growth PM specialization valuable'],
+        factors: ['Technical depth', 'Industry experience', 'Growth track record', 'Leadership ability']
+      },
+      'DevOps Engineer': {
+        trends: ['Cloud expertise essential for top salaries', 'Kubernetes skills command premium', 'Security focus adds value'],
+        projections: ['Platform engineering roles growing', 'AI/ML infrastructure in demand', 'Multi-cloud expertise valuable'],
+        factors: ['Cloud platform expertise', 'Automation skills', 'Security knowledge', 'Scale experience']
+      },
+      'Cybersecurity Analyst': {
+        trends: ['Certified professionals earn 25% more', 'Cloud security expertise premium', 'Incident response skills valued'],
+        projections: ['Zero-trust architecture skills growing', 'AI security becoming critical', 'Compliance expertise valuable'],
+        factors: ['Certification level', 'Specialization area', 'Industry experience', 'Technical depth']
+      }
+    };
+
+    return salaryOutlookMap[careerTitle] || salaryOutlookMap['Software Developer'];
+  };
+
+  // Generate personalized regional opportunities data
+  const generatePersonalizedRegionalData = (careerTitle) => {
+    const regionalDataMap = {
+      'Software Developer': {
+        topRegions: ['San Francisco Bay Area - $180K avg', 'Seattle - $165K avg', 'New York - $155K avg', 'Austin - $135K avg'],
+        emerging: ['Denver - 25% growth', 'Nashville - 30% growth', 'Miami - 35% growth'],
+        remote: '78% of companies offer remote work', 
+        insights: ['Remote positions expand market by 300%', 'Cost of living arbitrage opportunities', 'International remote work growing']
+      },
+      'Data Scientist': {
+        topRegions: ['San Francisco - $195K avg', 'Boston - $175K avg', 'Seattle - $170K avg', 'Washington DC - $160K avg'],
+        emerging: ['Research Triangle - 40% growth', 'Chicago - 28% growth', 'Atlanta - 32% growth'],
+        remote: '85% of data science roles support remote work',
+        insights: ['Healthcare hubs offer premium salaries', 'Financial centers highly competitive', 'Remote data work very common']
+      },
+      'UX Designer': {
+        topRegions: ['San Francisco - $145K avg', 'New York - $135K avg', 'Seattle - $125K avg', 'Los Angeles - $120K avg'],
+        emerging: ['Austin - 35% growth', 'Portland - 28% growth', 'Raleigh - 30% growth'],
+        remote: '65% of design roles offer remote options',
+        insights: ['Product companies pay most', 'Agency work more location-dependent', 'Freelance opportunities abundant']
+      },
+      'UI Designer': {
+        topRegions: ['San Francisco - $135K avg', 'New York - $125K avg', 'Los Angeles - $115K avg', 'Seattle - $120K avg'],
+        emerging: ['Austin - 32% growth', 'Denver - 28% growth', 'Portland - 25% growth'],
+        remote: '60% of UI roles support remote work',
+        insights: ['Gaming companies offer unique opportunities', 'E-commerce hubs very active', 'Mobile-first companies premium pay']
+      },
+      'Product Designer': {
+        topRegions: ['San Francisco - $155K avg', 'New York - $145K avg', 'Seattle - $140K avg', 'Boston - $130K avg'],
+        emerging: ['Austin - 38% growth', 'Research Triangle - 35% growth', 'Denver - 30% growth'],
+        remote: '70% of product design roles remote-friendly',
+        insights: ['B2B product hubs very competitive', 'Startup ecosystems offer equity upside', 'Enterprise companies value experience']
+      }
+    };
+
+    const baseData = {
+      topRegions: ['Technology hubs - Premium salaries', 'Major metropolitan areas - Strong demand', 'Emerging tech cities - Growth opportunities'],
+      emerging: ['Secondary markets - 25-35% growth', 'Remote-first opportunities expanding'],
+      remote: '70% of tech roles support remote work',
+      insights: ['Geographic flexibility increasing', 'Cost of living arbitrage opportunities', 'Global talent pool accessible']
+    };
+
+    return regionalDataMap[careerTitle] || baseData;
+  };
+
+  // Generate personalized emerging technology trends
+  const generatePersonalizedTechTrends = (careerTitle) => {
+    const techTrendsMap = {
+      'Software Developer': {
+        technologies: ['AI/ML Integration', 'Edge Computing', 'WebAssembly', 'Serverless Architecture'],
+        impact: ['AI coding assistants changing workflow', 'Edge computing enabling new app types', 'WebAssembly bridging performance gaps'],
+        opportunities: ['AI-assisted development tools', 'Edge application development', 'Performance-critical web apps', 'Hybrid cloud solutions'],
+        timeline: 'Most trends impacting roles within 1-2 years'
+      },
+      'Data Scientist': {
+        technologies: ['MLOps Platforms', 'AutoML', 'Edge AI', 'Quantum Computing'],
+        impact: ['MLOps automating model deployment', 'AutoML democratizing machine learning', 'Edge AI enabling real-time inference'],
+        opportunities: ['ML platform engineering', 'Automated model optimization', 'Real-time AI applications', 'Quantum algorithm research'],
+        timeline: 'Immediate impact on daily workflows'
+      },
+      'UX Designer': {
+        technologies: ['AI-Powered Design Tools', 'Voice UI', 'AR/VR Interfaces', 'Neomorphism'],
+        impact: ['AI generating design variations', 'Voice creating new interaction patterns', 'Spatial computing changing UX paradigms'],
+        opportunities: ['Conversational interface design', 'Spatial user experience', 'AI-assisted design workflows', 'Accessibility automation'],
+        timeline: 'Gradual adoption over 2-3 years'
+      },
+      'UI Designer': {
+        technologies: ['Design Systems 2.0', 'Component-driven Design', 'Design Tokens', 'Motion Design'],
+        impact: ['Systems becoming more sophisticated', 'Component libraries standard practice', 'Design tokens enabling consistency'],
+        opportunities: ['Design system architecture', 'Component library development', 'Design-to-code automation', 'Interactive prototyping'],
+        timeline: 'Rapid adoption across industry'
+      },
+      'Product Designer': {
+        technologies: ['Design Intelligence', 'User Behavior AI', 'Predictive UX', 'Design Analytics'],
+        impact: ['AI informing design decisions', 'Behavior prediction improving UX', 'Analytics driving design strategy'],
+        opportunities: ['AI-informed design strategy', 'Behavioral design optimization', 'Data-driven design systems', 'Predictive user experience'],
+        timeline: 'Emerging in forward-thinking companies'
+      }
+    };
+
+    const baseData = {
+      technologies: ['Artificial Intelligence', 'Cloud Computing', 'Automation Tools', 'Remote Collaboration'],
+      impact: ['AI augmenting human capabilities', 'Cloud enabling global collaboration', 'Automation improving efficiency'],
+      opportunities: ['AI-assisted workflows', 'Cloud-native solutions', 'Remote-first tools', 'Process automation'],
+      timeline: 'Continuous evolution and adoption'
+    };
+
+    return techTrendsMap[careerTitle] || baseData;
+  };
+
+  // Generate personalized industry demand data
+  const generatePersonalizedIndustryDemand = (careerTitle) => {
+    const demandDataMap = {
+      'Software Developer': {
+        demand: 'Extremely High - 1.4M new jobs by 2031',
+        sectors: ['Fintech - 40% growth', 'Healthcare Tech - 35% growth', 'E-commerce - 30% growth', 'Enterprise SaaS - 25% growth'],
+        drivers: ['Digital transformation acceleration', 'Mobile-first business models', 'Cloud migration initiatives', 'AI/ML integration needs'],
+        outlook: 'Strongest job market in technology sector'
+      },
+      'Data Scientist': {
+        demand: 'Outstanding - 11.5M jobs expected by 2026',
+        sectors: ['Healthcare Analytics - 45% growth', 'Financial Services - 40% growth', 'Retail Intelligence - 35% growth', 'Manufacturing IoT - 30% growth'],
+        drivers: ['Data-driven decision making', 'AI/ML implementation', 'Predictive analytics adoption', 'Real-time insights demand'],
+        outlook: 'Fastest growing role in technology'
+      },
+      'UX Designer': {
+        demand: 'Very Strong - 450K+ roles by 2030',
+        sectors: ['SaaS Products - 30% growth', 'E-commerce - 28% growth', 'Healthcare - 25% growth', 'Fintech - 22% growth'],
+        drivers: ['Digital experience competition', 'User-centric product development', 'Accessibility requirements', 'Mobile-first design needs'],
+        outlook: 'Essential for digital product success'
+      }
+    };
+
+    const baseData = {
+      demand: 'Strong - Technology roles growing 22% faster than average',
+      sectors: ['Technology Companies', 'Digital Transformation', 'Startup Ecosystem', 'Enterprise Solutions'],
+      drivers: ['Digital acceleration', 'Innovation requirements', 'Competitive advantages', 'User experience focus'],
+      outlook: 'Positive growth trajectory expected'
+    };
+
+    return demandDataMap[careerTitle] || baseData;
+  };
+
+  // Fallback generic job market outlook
+  const generateGenericJobMarketOutlook = () => {
+    return [
+      {
+        title: 'Technology Sector Growth',
+        description: 'Overall growth trends in the technology industry',
+        category: 'Industry Growth',
+        growth: 'Strong',
+        icon: '📈'
+      },
+      {
+        title: 'Skills-Based Hiring',
+        description: 'Shift towards skills-based hiring practices',
+        category: 'Hiring Trends',
+        growth: 'High',
+        icon: '🎯'
+      }
+    ];
   };
 
   // Improved Networking Strategy extraction
@@ -3241,7 +3617,7 @@ const CareerDashboard = () => {
         <div className="container mx-auto px-6">
           <div className="flex overflow-x-auto">
             {[
-              { id: 'home', label: 'Home', icon: '🏠', action: () => navigate('/') },
+              { id: 'home', icon: '🏠', action: () => navigate('/') },
               { id: 'overview', label: 'Overview', icon: '📊' },
               { id: 'paths', label: 'Career Paths', icon: '🛤️' },
               { id: 'skills', label: 'Skills Gap', icon: '📈' },
@@ -3553,8 +3929,24 @@ const CareerDashboard = () => {
             <div>
               <h3 className="text-2xl font-bold mb-6 flex items-center">
                 <span className="mr-3">💼</span>
-                Job Market Outlook
+                {careerPaths.length > 0 
+                  ? `${careerPaths[0].title} Job Market Outlook`
+                  : 'Job Market Outlook'
+                }
               </h3>
+              
+              {/* Debug info */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mb-4 p-3 bg-green-50 rounded-lg text-xs">
+                  <strong>Debug:</strong> Job market outlook: {jobMarketOutlook.length}, 
+                  Career paths: {careerPaths.length}, 
+                  Top career: {careerPaths[0]?.title || 'None'}
+                  {jobMarketOutlook.length > 0 && (
+                    <div>First outlook: {jobMarketOutlook[0].title}, Has personalizedData: {!!jobMarketOutlook[0].personalizedData}</div>
+                  )}
+                </div>
+              )}
+              
               {jobMarketOutlook.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {jobMarketOutlook.map((outlook, index) => (
@@ -3564,8 +3956,13 @@ const CareerDashboard = () => {
               ) : (
                 <div className="text-center py-8">
                   <div className="text-4xl mb-4">🔮</div>
-                  <h4 className="text-lg font-semibold text-gray-600 mb-2">Analyzing Job Market</h4>
-                  <p className="text-gray-500">Job market insights will appear here.</p>
+                  <h4 className="text-lg font-semibold text-gray-600 mb-2">Generating Job Market Analysis</h4>
+                  <p className="text-gray-500">
+                    {careerPaths.length > 0 
+                      ? `Creating job market insights for ${careerPaths[0].title}...`
+                      : 'Complete your career assessment to get personalized job market insights.'
+                    }
+                  </p>
                 </div>
               )}
             </div>

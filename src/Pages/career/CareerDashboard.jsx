@@ -5,6 +5,11 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import storageService from '../../services/storageService';
 import { toast } from 'react-toastify';
 
+// Enhanced component imports
+import MarketTrendsSection from '../../components/MarketTrendsSection';
+import SkillLearningResources from '../../components/SkillLearningResources';
+import SkillLevelChart from '../../components/SkillLevelChart';
+
 const CareerDashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -24,6 +29,9 @@ const CareerDashboard = () => {
   const [careerPathVisualizations, setCareerPathVisualizations] = useState([]);
   const [animatedValues, setAnimatedValues] = useState({});
   const [activeTab, setActiveTab] = useState('overview');
+  const [useLegacyMode, setUseLegacyMode] = useState(false);
+  const [recommendations, setRecommendations] = useState([]);
+  const [structuredData, setStructuredData] = useState(null);
   
   // Enhanced user data model matching technical spec
   const [userData, setUserData] = useState({
@@ -521,6 +529,12 @@ const CareerDashboard = () => {
       });
       
       setRecommendationMetadata(metadata);
+      setStructuredData({
+        overallConfidence: metadata.overallConfidence,
+        dataCompleteness: metadata.dataCompleteness,
+        recommendations: sortedRecommendations
+      });
+      
       return sortedRecommendations;
       
     } catch (error) {
@@ -1454,8 +1468,10 @@ const CareerDashboard = () => {
             // Generate advanced recommendations using the new system
             generatedPaths = await generateAdvancedCareerRecommendations(processedUserData);
             setCareerPaths(generatedPaths);
+            setRecommendations(generatedPaths);
             
             console.log('✅ Advanced career recommendations generated:', generatedPaths.length);
+            setUseLegacyMode(false);
           }
           
           // Extract other data from analysis
@@ -1519,8 +1535,10 @@ const CareerDashboard = () => {
               // Generate advanced recommendations
               generatedPaths = await generateAdvancedCareerRecommendations(processedUserData);
               setCareerPaths(generatedPaths);
+              setRecommendations(generatedPaths);
               
               console.log('✅ Stored advanced recommendations generated:', generatedPaths.length);
+              setUseLegacyMode(false);
             }
             
             // Extract other data
@@ -1736,7 +1754,7 @@ const CareerDashboard = () => {
   );
 
   // Enhanced Career Path Card with new recommendation data
-  const CareerPathCard = ({ path, index }) => {
+  const EnhancedCareerPathCard = ({ path, index, structuredMode = false, userData = {} }) => {
     const animatedValue = animatedValues[`path-${index}`] || 0;
     const colorClasses = [
       'from-purple-500 to-pink-500',
@@ -1773,12 +1791,14 @@ const CareerDashboard = () => {
         <div className="relative z-10">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl">{getTypeIcon(path.type)}</span>
-                <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                  {getTypeLabel(path.type)}
-                </span>
-              </div>
+              {structuredMode && (
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">{getTypeIcon(path.type)}</span>
+                  <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                    {getTypeLabel(path.type)}
+                  </span>
+                </div>
+              )}
               
               <h3 className="text-xl font-bold text-gray-800 group-hover:text-gray-900 transition-colors mb-2">
                 {path.title}
@@ -1788,23 +1808,27 @@ const CareerDashboard = () => {
                 {path.description}
               </p>
               
-              <p className="text-sm text-green-700 italic">
-                {path.reasoning}
-              </p>
+              {structuredMode && path.reasoning && (
+                <p className="text-sm text-green-700 italic">
+                  {path.reasoning}
+                </p>
+              )}
               
-              {/* Show algorithm confidence */}
-              <div className="mt-3 flex items-center gap-2">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  path.confidence === 'high' ? 'bg-green-100 text-green-700' :
-                  path.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                  'bg-red-100 text-red-700'
-                }`}>
-                  {path.confidence} confidence
-                </span>
-                <span className="text-xs text-gray-500">
-                  Algorithm: {path.metadata?.algorithm || 'v1.0'}
-                </span>
-              </div>
+              {/* Show algorithm confidence for structured mode */}
+              {structuredMode && (
+                <div className="mt-3 flex items-center gap-2">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    path.confidence === 'high' ? 'bg-green-100 text-green-700' :
+                    path.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-red-100 text-red-700'
+                  }`}>
+                    {path.confidence} confidence
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    Algorithm: {path.metadata?.algorithm || 'v1.0'}
+                  </span>
+                </div>
+              )}
             </div>
             <div className={`text-3xl font-bold bg-gradient-to-r ${colorClass} bg-clip-text text-transparent ml-4`}>
               {animatedValue}%
@@ -1813,7 +1837,9 @@ const CareerDashboard = () => {
           
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-600">Confidence Score</span>
+              <span className="text-sm font-medium text-gray-600">
+                {structuredMode ? 'Confidence Score' : 'Match Score'}
+              </span>
               <span className="text-sm text-gray-500">{animatedValue}/100</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
@@ -1867,7 +1893,7 @@ const CareerDashboard = () => {
               }`}>
                 {path.marketDemand} demand
               </span>
-              {path.metadata?.fallbackApplied && (
+              {structuredMode && path.metadata?.fallbackApplied && (
                 <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
                   Limited Data
                 </span>
@@ -2009,7 +2035,7 @@ const CareerDashboard = () => {
   };
 
   // Market Trends Card Component
-  const MarketTrendsCard = ({ trend, index }) => {
+  const MarketTrendsCard = ({ trend, index, structuredMode = false }) => {
     const trendIcons = {
       'SALARY OUTLOOK': '💰',
       'MARKET DEMAND': '📈',
@@ -2027,7 +2053,7 @@ const CareerDashboard = () => {
             <h4 className="font-semibold text-lg text-gray-800">{trend.title}</h4>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-sm text-gray-500">Market Analysis</span>
-              {trend.userCareer && (
+              {structuredMode && trend.userCareer && (
                 <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                   {trend.userCareer}
                 </span>
@@ -2082,7 +2108,7 @@ const CareerDashboard = () => {
   };
 
   // Job Market Outlook Card Component
-  const JobMarketOutlookCard = ({ outlook, index }) => {
+  const JobMarketOutlookCard = ({ outlook, index, structuredMode = false }) => {
     const outlookIcons = ['💼', '📊', '🎯', '🌐', '💰', '📈'];
     const icon = outlook.icon || outlookIcons[index % outlookIcons.length];
     
@@ -2094,7 +2120,7 @@ const CareerDashboard = () => {
             <h4 className="font-semibold text-lg text-gray-800">{outlook.title}</h4>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-sm text-gray-500">{outlook.category || 'Job Market'}</span>
-              {outlook.userCareer && (
+              {structuredMode && outlook.userCareer && (
                 <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                   {outlook.userCareer}
                 </span>
@@ -2254,7 +2280,10 @@ const CareerDashboard = () => {
               Welcome back, {userData.name}! 👋
             </h1>
             <p className="text-xl opacity-90 mb-6">
-              Advanced AI-powered career recommendations with {recommendationMetadata.overallConfidence}% overall confidence
+              {!useLegacyMode 
+                ? `Advanced AI-powered career recommendations with ${recommendationMetadata.overallConfidence}% overall confidence`
+                : 'Your personalized career guidance dashboard'
+              }
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-sm">
               {userData.currentRole && userData.currentRole !== 'Not specified' && (
@@ -2264,7 +2293,7 @@ const CareerDashboard = () => {
               )}
               {careerPaths.length > 0 && (
                 <div className="bg-white bg-opacity-20 px-4 py-2 rounded-full">
-                  🎯 Top Match: {careerPaths[0].title} ({careerPaths[0].confidenceScore}%)
+                  🎯 Top Match: {careerPaths[0].title} ({careerPaths[0].confidenceScore || careerPaths[0].match}%)
                 </div>
               )}
               {userData.transitionTimeline && (
@@ -2272,12 +2301,12 @@ const CareerDashboard = () => {
                   ⏰ Timeline: {userData.transitionTimeline}
                 </div>
               )}
-              {recommendationMetadata.dataCompleteness > 0 && (
+              {!useLegacyMode && recommendationMetadata.dataCompleteness > 0 && (
                 <div className="bg-green-500 bg-opacity-20 px-4 py-2 rounded-full border border-green-300">
                   ✅ {recommendationMetadata.dataCompleteness}% Profile Complete
                 </div>
               )}
-              {highConfidenceCount > 0 && (
+              {!useLegacyMode && highConfidenceCount > 0 && (
                 <div className="bg-purple-500 bg-opacity-20 px-4 py-2 rounded-full border border-purple-300">
                   🔬 {highConfidenceCount} High-Confidence Recommendations
                 </div>
@@ -2345,47 +2374,49 @@ const CareerDashboard = () => {
             </div>
 
             {/* Algorithm Quality Indicator */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg">
-              <h2 className="text-2xl font-bold mb-6 flex items-center">
-                <span className="mr-3">🔬</span>
-                AI Recommendation Quality
-              </h2>
-              <div className="mb-4">
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Overall Confidence Score</span>
-                  <span>{recommendationMetadata.overallConfidence}%</span>
+            {!useLegacyMode && (
+              <div className="bg-white rounded-2xl p-8 shadow-lg">
+                <h2 className="text-2xl font-bold mb-6 flex items-center">
+                  <span className="mr-3">🔬</span>
+                  AI Recommendation Quality
+                </h2>
+                <div className="mb-4">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span>Overall Confidence Score</span>
+                    <span>{recommendationMetadata.overallConfidence}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-1000"
+                      style={{ width: `${recommendationMetadata.overallConfidence}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div
-                    className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-1000"
-                    style={{ width: `${recommendationMetadata.overallConfidence}%` }}
-                  />
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div className="flex items-center">
+                    <span className={`w-3 h-3 rounded-full mr-2 ${recommendationMetadata.dataCompleteness > 70 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                    Data Quality: {recommendationMetadata.dataCompleteness}%
+                  </div>
+                  <div className="flex items-center">
+                    <span className={`w-3 h-3 rounded-full mr-2 ${careerPaths.length >= 3 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                    Recommendations: {careerPaths.length}
+                  </div>
+                  <div className="flex items-center">
+                    <span className={`w-3 h-3 rounded-full mr-2 ${highConfidenceCount > 0 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                    High Confidence: {highConfidenceCount}
+                  </div>
+                  <div className="flex items-center">
+                    <span className="w-3 h-3 rounded-full mr-2 bg-blue-500"></span>
+                    Algorithm: v{recommendationMetadata.algorithmVersion || '1.0'}
+                  </div>
                 </div>
+                {recommendationMetadata.processedAt && (
+                  <div className="mt-4 text-xs text-gray-500">
+                    Processed: {new Date(recommendationMetadata.processedAt).toLocaleString()}
+                  </div>
+                )}
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div className="flex items-center">
-                  <span className={`w-3 h-3 rounded-full mr-2 ${recommendationMetadata.dataCompleteness > 70 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-                  Data Quality: {recommendationMetadata.dataCompleteness}%
-                </div>
-                <div className="flex items-center">
-                  <span className={`w-3 h-3 rounded-full mr-2 ${careerPaths.length >= 3 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-                  Recommendations: {careerPaths.length}
-                </div>
-                <div className="flex items-center">
-                  <span className={`w-3 h-3 rounded-full mr-2 ${highConfidenceCount > 0 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-                  High Confidence: {highConfidenceCount}
-                </div>
-                <div className="flex items-center">
-                  <span className="w-3 h-3 rounded-full mr-2 bg-blue-500"></span>
-                  Algorithm: v{recommendationMetadata.algorithmVersion || '1.0'}
-                </div>
-              </div>
-              {recommendationMetadata.processedAt && (
-                <div className="mt-4 text-xs text-gray-500">
-                  Processed: {new Date(recommendationMetadata.processedAt).toLocaleString()}
-                </div>
-              )}
-            </div>
+            )}
 
             {/* Enhanced Progress Overview */}
             <div className="bg-white rounded-2xl p-8 shadow-lg">
@@ -2422,10 +2453,10 @@ const CareerDashboard = () => {
                 </h2>
                 <div className="flex items-center text-sm text-blue-600">
                   <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                  AI-Powered Recommendations
+                  {!useLegacyMode ? 'AI-Powered Recommendations' : 'Personalized Recommendations'}
                 </div>
               </div>
-              {careerPaths.length > 0 && (
+              {!useLegacyMode && careerPaths.length > 0 && (
                 <div className="mb-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
                   <p className="text-sm text-blue-800">
                     <strong>Personalized for {userData.name}:</strong> Based on your {careerPaths[0].type} recommendation 
@@ -2466,11 +2497,47 @@ const CareerDashboard = () => {
         {activeTab === 'paths' && (
           <div className="space-y-8">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-4">AI-Powered Career Recommendations</h2>
+              <h2 className="text-3xl font-bold mb-4">Your Career Recommendations</h2>
               <p className="text-gray-600 text-lg">
-                Advanced multi-algorithm analysis with {recommendationMetadata.overallConfidence}% overall confidence
+                {!useLegacyMode 
+                  ? `${recommendations.length} personalized recommendations based on your profile`
+                  : `Based on your stated interests: ${userData.careerPathsInterest?.join(', ') || 'Not specified'}`
+                }
               </p>
-              {careerPaths.length > 0 && (
+              
+              {/* Quality indicators for structured mode */}
+              {!useLegacyMode && structuredData && (
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <div className="text-2xl font-bold text-green-600">{structuredData.overallConfidence}%</div>
+                    <div className="text-sm text-green-700">Overall Confidence</div>
+                  </div>
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <div className="text-2xl font-bold text-blue-600">{structuredData.dataCompleteness}%</div>
+                    <div className="text-sm text-blue-700">Profile Completeness</div>
+                  </div>
+                  <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                    <div className="text-2xl font-bold text-purple-600">{structuredData.recommendations.length}</div>
+                    <div className="text-sm text-purple-700">Recommendations</div>
+                  </div>
+                </div>
+              )}
+              
+              {careerPaths.length === 0 && userData.careerPathsInterest?.length === 0 && (
+                <div className="mt-8 p-6 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <p className="text-yellow-800">
+                    <strong>No career interests found.</strong> Please retake the assessment and specify your career interests to get personalized recommendations.
+                  </p>
+                  <button 
+                    onClick={() => navigate('/career/test')}
+                    className="mt-4 bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 transition-colors"
+                  >
+                    Retake Assessment
+                  </button>
+                </div>
+              )}
+
+              {!useLegacyMode && careerPaths.length > 0 && (
                 <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200 max-w-3xl mx-auto">
                   <p className="text-sm text-blue-800">
                     <strong>🔬 Advanced Analysis:</strong> Our system analyzed your profile using three specialized algorithms:
@@ -2483,37 +2550,51 @@ const CareerDashboard = () => {
             
             {careerPaths.length > 0 ? (
               <div className="space-y-6">
-                {/* Algorithm Performance Summary */}
-                <div className="bg-white rounded-xl p-6 shadow-lg">
-                  <h3 className="text-lg font-bold mb-4">Algorithm Performance Summary</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {careerPaths.map((path, index) => (
-                      <div key={index} className="bg-gray-50 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium">{path.type}</span>
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            path.confidence === 'high' ? 'bg-green-100 text-green-700' :
-                            path.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-red-100 text-red-700'
-                          }`}>
-                            {path.confidenceScore}%
-                          </span>
+                {/* Algorithm Performance Summary for structured mode */}
+                {!useLegacyMode && (
+                  <div className="bg-white rounded-xl p-6 shadow-lg">
+                    <h3 className="text-lg font-bold mb-4">Algorithm Performance Summary</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {careerPaths.map((path, index) => (
+                        <div key={index} className="bg-gray-50 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">{path.type}</span>
+                            <span className={`px-2 py-1 rounded-full text-xs ${
+                              path.confidence === 'high' ? 'bg-green-100 text-green-700' :
+                              path.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                              {path.confidenceScore}%
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-600">{path.title}</p>
+                          <div className="mt-2 text-xs text-gray-500">
+                            Used: {path.metadata?.criteriaUsed?.length || 0} criteria
+                          </div>
                         </div>
-                        <p className="text-xs text-gray-600">{path.title}</p>
-                        <div className="mt-2 text-xs text-gray-500">
-                          Used: {path.metadata?.criteriaUsed?.length || 0} criteria
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Career Path Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {careerPaths.map((path, index) => (
-                    <CareerPathCard key={index} path={path} index={index} />
+                    <EnhancedCareerPathCard 
+                      key={index} 
+                      path={path} 
+                      index={index} 
+                      structuredMode={!useLegacyMode}
+                      userData={userData}
+                    />
                   ))}
                 </div>
+              </div>
+            ) : userData.careerPathsInterest?.length > 0 ? (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">Processing Your Interests</h3>
+                <p className="text-gray-500">Generating recommendations based on: {userData.careerPathsInterest.join(', ')}</p>
               </div>
             ) : (
               <div className="text-center py-12">
@@ -2529,15 +2610,37 @@ const CareerDashboard = () => {
           <div className="space-y-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-4">Skills Development Plan</h2>
-              <p className="text-gray-600 text-lg">Focus areas to reach your career goals</p>
+              <p className="text-gray-600 text-lg">
+                {useLegacyMode 
+                  ? 'Focus areas to reach your career goals' 
+                  : `Personalized skill analysis for ${recommendations[0]?.title || 'your target role'}`
+                }
+              </p>
+              {!useLegacyMode && structuredData && (
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400 max-w-2xl mx-auto">
+                  <p className="text-sm text-blue-800">
+                    <strong>🎯 Smart Analysis:</strong> Based on {structuredData.dataCompleteness}% profile completeness 
+                    with {structuredData.overallConfidence}% confidence
+                  </p>
+                </div>
+              )}
             </div>
-            {skillsGap.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {skillsGap.map((skill, index) => (
-                  <SkillCard key={index} skill={skill} index={index} />
-                ))}
-              </div>
-            ) : (
+            
+            {/* Skills Overview Chart */}
+            {skillsGap.length > 0 && (
+              <SkillLevelChart 
+                skillsData={skillsGap} 
+                structuredMode={!useLegacyMode}
+              />
+            )}
+            
+            {/* Detailed Skills Cards */}
+            <SkillLearningResources 
+              skillsGap={skillsGap} 
+              structuredMode={!useLegacyMode}
+            />
+            
+            {skillsGap.length === 0 && (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">📈</div>
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">Skills Analysis in Progress</h3>
@@ -2574,53 +2677,68 @@ const CareerDashboard = () => {
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-4">Market Insights</h2>
               <p className="text-gray-600 text-lg">
-                {careerPaths.length > 0 
-                  ? `Personalized market analysis for your top career match: ${careerPaths[0].title}`
+                {!useLegacyMode && recommendations.length > 0 
+                  ? `Personalized market analysis for ${recommendations[0].title}`
                   : 'Market trends and job outlook for your career path'
                 }
               </p>
+              {!useLegacyMode && recommendations.length > 0 && (
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400 max-w-2xl mx-auto">
+                  <p className="text-sm text-blue-800">
+                    <strong>🎯 Tailored Analysis:</strong> These insights are specifically generated for your top career recommendation 
+                    based on your interests in {userData.careerPathsInterest?.join(', ') || 'technology'}.
+                  </p>
+                </div>
+              )}
             </div>
             
             {/* Market Trends Section */}
             <div className="mb-12">
               <h3 className="text-2xl font-bold mb-6 flex items-center">
                 <span className="mr-3">📈</span>
-                Market Analysis
+                {!useLegacyMode && recommendations.length > 0 
+                  ? `${recommendations[0].title} Market Analysis`
+                  : 'Market Trends Analysis'
+                }
               </h3>
               
-              {marketTrends.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {marketTrends.map((trend, index) => (
-                    <MarketTrendsCard key={index} trend={trend} index={index} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="text-4xl mb-4">📊</div>
-                  <h4 className="text-lg font-semibold text-gray-600 mb-2">Generating Market Analysis</h4>
-                  <p className="text-gray-500">Creating personalized market insights...</p>
-                </div>
-              )}
+              <MarketTrendsSection 
+                marketTrends={marketTrends} 
+                structuredMode={!useLegacyMode}
+              />
             </div>
 
             {/* Job Market Outlook Section */}
             <div>
               <h3 className="text-2xl font-bold mb-6 flex items-center">
                 <span className="mr-3">💼</span>
-                Job Market Outlook
+                {!useLegacyMode && recommendations.length > 0 
+                  ? `${recommendations[0].title} Job Market Outlook`
+                  : 'Job Market Outlook'
+                }
               </h3>
               
               {jobMarketOutlook.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {jobMarketOutlook.map((outlook, index) => (
-                    <JobMarketOutlookCard key={index} outlook={outlook} index={index} />
+                    <JobMarketOutlookCard 
+                      key={index} 
+                      outlook={outlook} 
+                      index={index} 
+                      structuredMode={!useLegacyMode}
+                    />
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
                   <div className="text-4xl mb-4">🔮</div>
                   <h4 className="text-lg font-semibold text-gray-600 mb-2">Generating Job Market Analysis</h4>
-                  <p className="text-gray-500">Creating job market insights...</p>
+                  <p className="text-gray-500">
+                    {!useLegacyMode && recommendations.length > 0 
+                      ? `Creating job market insights for ${recommendations[0].title}...`
+                      : 'Complete your career assessment to get personalized job market insights.'
+                    }
+                  </p>
                 </div>
               )}
             </div>

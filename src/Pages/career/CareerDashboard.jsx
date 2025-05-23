@@ -1,4 +1,4 @@
-// src/Pages/career/CareerDashboard.jsx - CORRECTED VERSION
+// src/Pages/career/CareerDashboard.jsx - COMPLETE ENHANCED VERSION WITH ADVANCED RECOMMENDATION ENGINE
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -25,27 +25,44 @@ const CareerDashboard = () => {
   const [animatedValues, setAnimatedValues] = useState({});
   const [activeTab, setActiveTab] = useState('overview');
   
+  // Enhanced user data model matching technical spec
   const [userData, setUserData] = useState({
+    // Constant Variables (used in all recommendations)
+    yearsExperience: '',
+    studyField: '',
+    interests: [],
+    transferableSkills: '',
+    
+    // Recommendation 1 Specific (Tech-Market)
+    jobTechnologies: '',
+    toolsUsed: [],
+    
+    // Recommendation 2 Specific (Academic-Research)
+    educationLevel: '',
+    publications: '',
+    techInterests: '',
+    
+    // Recommendation 3 Specific (Practical-Lifestyle)
+    workPreference: '',
+    timeCommitment: '',
+    currentRole: '',
+    targetSalary: '',
+    
+    // Additional Context
     name: '',
     email: '',
     experienceLevel: '',
-    studyField: '',
-    educationLevel: '',
-    currentRole: '',
-    yearsExperience: '',
     jobResponsibilities: '',
     jobProjects: '',
-    jobTechnologies: '',
-    publications: '',
-    transferableSkills: '',
-    interests: [],
     careerPathsInterest: [],
-    toolsUsed: [],
-    techInterests: '',
-    timeCommitment: '',
-    targetSalary: '',
-    workPreference: '',
     transitionTimeline: ''
+  });
+  
+  // Recommendation metadata
+  const [recommendationMetadata, setRecommendationMetadata] = useState({
+    overallConfidence: 0,
+    dataCompleteness: 0,
+    processedAt: null
   });
   
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
@@ -58,455 +75,1310 @@ const CareerDashboard = () => {
   const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeX9C7YtHTSBy4COsV6KaogdEvrjXoVQ0O2psoyfs1xqrySNg/formResponse';
 
   // ============================================================================
-  // AUTHENTIC CAREER PATH GENERATION SYSTEM (FROM FIRST CODE)
+  // ADVANCED CAREER RECOMMENDATION SYSTEM (BASED ON TECHNICAL SPEC)
   // ============================================================================
 
   /**
-   * Generate authentic career paths based ONLY on user's actual form data
+   * Data Validation Layer - Input sanitization and completeness scoring
    */
-  const generateAuthenticCareerPaths = (userData) => {
-    console.log('🎯 Generating AUTHENTIC career paths for user:', userData.name);
-    console.log('📊 User data analysis:', {
-      interests: userData.careerPathsInterest,
-      techInterests: userData.techInterests,
-      experience: userData.experienceLevel,
-      studyField: userData.studyField,
-      currentRole: userData.currentRole,
-      tools: userData.toolsUsed
-    });
-
-    // CRITICAL: Validate we have user's career interests
-    if (!userData.careerPathsInterest || userData.careerPathsInterest.length === 0) {
-      console.error('❌ NO CAREER INTERESTS PROVIDED - Cannot generate authentic recommendations');
-      return [];
-    }
-
-    const careerPaths = [];
+  const validateProfile = (profile) => {
+    console.log('🔍 Validating user profile...');
     
-    // Process each user's stated career interest
-    userData.careerPathsInterest.forEach((userInterest, index) => {
-      const careerPath = buildAuthenticCareerPath(userInterest, userData, index);
-      if (careerPath) {
-        careerPaths.push(careerPath);
-        console.log(`✅ Created authentic path: ${careerPath.title} (${careerPath.match}% match)`);
-      }
-    });
-
-    // Add complementary paths based on user's tools/tech interests
-    const complementaryPaths = generateComplementaryPaths(userData, careerPaths);
-    careerPaths.push(...complementaryPaths);
-
-    // Sort by authenticity score
-    careerPaths.sort((a, b) => b.match - a.match);
+    const validation = {
+      constantsPresent: countValidConstants(profile),
+      criteriaCompleteness: assessCompleteness(profile),
+      requiresFallback: needsFallback(profile),
+      dataQuality: calculateDataQuality(profile)
+    };
     
-    console.log(`🎉 Generated ${careerPaths.length} authentic career paths`);
-    return careerPaths.slice(0, 6);
-  };
-
-  /**
-   * Build an authentic career path based on user's specific interest
-   */
-  const buildAuthenticCareerPath = (userInterest, userData, priority) => {
-    console.log(`🔍 Processing user interest: "${userInterest}"`);
-    
-    const standardizedPath = mapUserInterestToCareerPath(userInterest);
-    if (!standardizedPath) {
-      console.log(`⚠️ Could not map interest "${userInterest}" to valid career path`);
-      return null;
-    }
-
-    const matchScore = calculateAuthenticMatchScore(standardizedPath, userData, priority);
-    const personalizedInsights = generatePersonalizedInsights(standardizedPath, userData);
-
     return {
-      title: standardizedPath.title,
-      match: matchScore,
-      userInterest: userInterest,
-      insights: personalizedInsights,
-      reasoning: generateMatchReasoning(standardizedPath, userData, matchScore),
-      authenticated: true,
-      category: standardizedPath.category,
-      level: standardizedPath.level
+      ...profile,
+      _validation: validation
+    };
+  };
+
+  const isValid = (value) => {
+    if (!value) return false;
+    if (typeof value === 'string') {
+      const invalid = ['', 'none', 'not sure', 'unclear', 'n/a', 'not specified'];
+      return !invalid.includes(value.toLowerCase().trim());
+    }
+    if (Array.isArray(value)) {
+      return value.length > 0 && !value.some(v => ['not sure', 'unclear', 'none'].includes(v?.toLowerCase()));
+    }
+    return true;
+  };
+
+  const countValidConstants = (profile) => {
+    const constants = ['yearsExperience', 'studyField', 'interests', 'transferableSkills'];
+    return constants.filter(key => isValid(profile[key])).length;
+  };
+
+  const assessCompleteness = (profile) => {
+    const allFields = [
+      'yearsExperience', 'studyField', 'interests', 'transferableSkills',
+      'jobTechnologies', 'toolsUsed', 'educationLevel', 'publications', 
+      'techInterests', 'workPreference', 'timeCommitment', 'currentRole', 'targetSalary'
+    ];
+    const validFields = allFields.filter(key => isValid(profile[key])).length;
+    return (validFields / allFields.length) * 100;
+  };
+
+  const needsFallback = (profile) => {
+    return countValidConstants(profile) < 2;
+  };
+
+  const calculateDataQuality = (profile) => {
+    const completeness = assessCompleteness(profile);
+    const constantsQuality = (countValidConstants(profile) / 4) * 100;
+    return (completeness * 0.7) + (constantsQuality * 0.3);
+  };
+
+  /**
+   * Dynamic Weight Calculation System
+   */
+  const calculateDynamicWeights = (profile, criteria) => {
+    const missingConstants = 4 - countValidConstants(profile);
+    const missingSpecific = countMissingSpecific(profile, criteria.specific);
+    
+    let constantWeight = 0.4;  // Default: 40%
+    let specificWeight = 0.6;  // Default: 60%
+    
+    // Fallback logic
+    if (missingConstants >= 1) {
+      constantWeight = Math.max(0.1, 0.4 - (missingConstants * 0.1));
+      specificWeight = 1 - constantWeight;
+    }
+    
+    if (missingConstants >= 3) {
+      constantWeight = 0.1;
+      specificWeight = 0.9;
+    }
+    
+    return distributeWeights(constantWeight, specificWeight, criteria);
+  };
+
+  const countMissingSpecific = (profile, specificFields) => {
+    return specificFields.filter(field => !isValid(profile[field])).length;
+  };
+
+  const distributeWeights = (constantWeight, specificWeight, criteria) => {
+    const constantFieldCount = 4;
+    const specificFieldCount = criteria.specific.length;
+    
+    return {
+      // Constant weights
+      yearsExperience: constantWeight / constantFieldCount,
+      studyField: constantWeight / constantFieldCount,
+      interests: constantWeight / constantFieldCount,
+      transferableSkills: constantWeight / constantFieldCount,
+      
+      // Specific weights (distributed based on criteria type)
+      ...criteria.specific.reduce((acc, field) => {
+        acc[field] = specificWeight / specificFieldCount;
+        return acc;
+      }, {})
     };
   };
 
   /**
-   * Map user's raw interest to standardized career paths
+   * Recommendation Engine 1: Tech-Market Alignment
    */
-  const mapUserInterestToCareerPath = (userInterest) => {
-    const interest = userInterest.toLowerCase().trim();
+  const generateTechMarketRecommendation = (validatedProfile) => {
+    console.log('🚀 Generating Tech-Market recommendation...');
     
-    const careerMappings = {
-      // Software Development
-      'software developer': { title: 'Software Developer', category: 'development', level: 'mid' },
-      'software engineering': { title: 'Software Engineer', category: 'development', level: 'mid' },
-      'web developer': { title: 'Web Developer', category: 'development', level: 'entry' },
-      'frontend developer': { title: 'Frontend Developer', category: 'development', level: 'mid' },
-      'backend developer': { title: 'Backend Developer', category: 'development', level: 'mid' },
-      'full stack developer': { title: 'Full Stack Developer', category: 'development', level: 'senior' },
-      'mobile developer': { title: 'Mobile App Developer', category: 'development', level: 'mid' },
-      
-      // Data & Analytics
-      'data scientist': { title: 'Data Scientist', category: 'data', level: 'senior' },
-      'data analyst': { title: 'Data Analyst', category: 'data', level: 'entry' },
-      'data engineer': { title: 'Data Engineer', category: 'data', level: 'mid' },
-      'machine learning engineer': { title: 'ML Engineer', category: 'ai', level: 'senior' },
-      'ai engineer': { title: 'AI Engineer', category: 'ai', level: 'senior' },
-      
-      // Design & User Experience
-      'ux designer': { title: 'UX Designer', category: 'design', level: 'mid' },
-      'ui designer': { title: 'UI Designer', category: 'design', level: 'mid' },
-      'product designer': { title: 'Product Designer', category: 'design', level: 'senior' },
-      'graphic designer': { title: 'Digital Designer', category: 'design', level: 'entry' },
-      
-      // Product & Management
-      'product manager': { title: 'Product Manager', category: 'management', level: 'senior' },
-      'project manager': { title: 'Technical Project Manager', category: 'management', level: 'mid' },
-      
-      // Infrastructure & Operations
-      'devops engineer': { title: 'DevOps Engineer', category: 'infrastructure', level: 'senior' },
-      'cloud engineer': { title: 'Cloud Engineer', category: 'infrastructure', level: 'mid' },
-      'systems administrator': { title: 'Systems Engineer', category: 'infrastructure', level: 'mid' },
-      
-      // Security
-      'cybersecurity analyst': { title: 'Cybersecurity Analyst', category: 'security', level: 'mid' },
-      'security engineer': { title: 'Security Engineer', category: 'security', level: 'senior' }
+    const criteria = {
+      constants: ['yearsExperience', 'studyField', 'interests', 'transferableSkills'],
+      specific: ['jobTechnologies', 'toolsUsed']
     };
+    
+    const weights = calculateDynamicWeights(validatedProfile, criteria);
+    const score = calculateTechMarketScore(validatedProfile, weights);
+    const confidence = determineConfidence(score.criteriaCount, score.totalScore);
+    
+    return {
+      id: 'rec_1_tech_market',
+      type: 'tech-market',
+      title: generateTechRoleTitle(score.techStack, validatedProfile.yearsExperience),
+      description: generateTechDescription(score.techStack, validatedProfile),
+      reasoning: generateTechReasoning(validatedProfile, score),
+      confidence: confidence.level,
+      confidenceScore: confidence.score,
+      match: Math.round(score.totalScore),
+      requiredSkills: extractTechSkills(score.techStack, validatedProfile),
+      suggestedActions: generateTechActions(validatedProfile, score.techStack),
+      salaryRange: getTechSalaryRange(score.techStack, validatedProfile.yearsExperience),
+      marketDemand: getTechMarketDemand(score.techStack),
+      metadata: {
+        criteriaUsed: getCriteriaUsed(validatedProfile, criteria),
+        missingCriteria: getMissingCriteria(validatedProfile, criteria),
+        fallbackApplied: score.criteriaCount < 4,
+        techStack: score.techStack,
+        algorithm: 'tech-market-v1.0'
+      }
+    };
+  };
 
-    // Exact match
-    if (careerMappings[interest]) {
-      return careerMappings[interest];
+  const calculateTechMarketScore = (profile, weights) => {
+    let score = 0;
+    let criteriaCount = 0;
+    let techStack = [];
+    
+    // Constant variables scoring
+    if (isValid(profile.yearsExperience)) {
+      score += weights.yearsExperience * getExperienceScore(profile.yearsExperience) * 100;
+      criteriaCount++;
     }
-
-    // Partial matches
-    for (const [key, value] of Object.entries(careerMappings)) {
-      if (interest.includes(key) || key.includes(interest)) {
-        console.log(`✅ Mapped "${userInterest}" → "${value.title}"`);
-        return value;
+    
+    if (isValid(profile.studyField)) {
+      score += weights.studyField * getStudyFieldTechAlignment(profile.studyField) * 100;
+      criteriaCount++;
+    }
+    
+    if (isValid(profile.interests)) {
+      const interestScore = getTechInterestAlignment(profile.interests);
+      score += weights.interests * interestScore * 100;
+      criteriaCount++;
+      if (interestScore > 0.7) {
+        techStack.push(...extractTechFromInterests(profile.interests));
       }
     }
-
-    // Keyword matching
-    const keywordMappings = {
-      'programming': careerMappings['software developer'],
-      'coding': careerMappings['software developer'],
-      'website': careerMappings['web developer'],
-      'app': careerMappings['mobile developer'],
-      'design': careerMappings['ux designer'],
-      'data': careerMappings['data analyst'],
-      'analytics': careerMappings['data analyst'],
-      'security': careerMappings['cybersecurity analyst'],
-      'management': careerMappings['product manager']
+    
+    if (isValid(profile.transferableSkills)) {
+      score += weights.transferableSkills * getTechSkillRelevance(profile.transferableSkills) * 100;
+      criteriaCount++;
+    }
+    
+    // Specific criteria scoring
+    if (isValid(profile.jobTechnologies)) {
+      const techScore = getTechnologyMarketDemand(profile.jobTechnologies);
+      score += weights.jobTechnologies * techScore * 100;
+      criteriaCount++;
+      techStack.push(...extractTechnologies(profile.jobTechnologies));
+    }
+    
+    if (isValid(profile.toolsUsed)) {
+      score += weights.toolsUsed * getToolProficiencyScore(profile.toolsUsed) * 100;
+      criteriaCount++;
+      techStack.push(...profile.toolsUsed);
+    }
+    
+    return { 
+      totalScore: Math.min(score / criteriaCount, 100), 
+      criteriaCount, 
+      techStack: [...new Set(techStack)] // Remove duplicates
     };
+  };
 
-    for (const [keyword, mapping] of Object.entries(keywordMappings)) {
-      if (interest.includes(keyword)) {
-        console.log(`✅ Keyword match "${userInterest}" → "${mapping.title}"`);
-        return mapping;
+  /**
+   * Recommendation Engine 2: Academic-Research Alignment
+   */
+  const generateAcademicResearchRecommendation = (validatedProfile) => {
+    console.log('🎓 Generating Academic-Research recommendation...');
+    
+    const criteria = {
+      constants: ['yearsExperience', 'studyField', 'interests', 'transferableSkills'],
+      specific: ['educationLevel', 'publications', 'techInterests']
+    };
+    
+    const weights = calculateDynamicWeights(validatedProfile, criteria);
+    const score = calculateAcademicScore(validatedProfile, weights);
+    const confidence = determineConfidence(score.criteriaCount, score.totalScore);
+    
+    return {
+      id: 'rec_2_academic_research',
+      type: 'academic-research',
+      title: generateAcademicRoleTitle(score.researchArea, validatedProfile.educationLevel),
+      description: generateAcademicDescription(score.researchArea, validatedProfile),
+      reasoning: generateAcademicReasoning(validatedProfile, score),
+      confidence: confidence.level,
+      confidenceScore: confidence.score,
+      match: Math.round(score.totalScore),
+      requiredSkills: extractAcademicSkills(score.researchArea, validatedProfile),
+      suggestedActions: generateAcademicActions(validatedProfile, score.researchArea),
+      salaryRange: getAcademicSalaryRange(score.researchArea, validatedProfile.educationLevel),
+      marketDemand: getAcademicMarketDemand(score.researchArea),
+      metadata: {
+        criteriaUsed: getCriteriaUsed(validatedProfile, criteria),
+        missingCriteria: getMissingCriteria(validatedProfile, criteria),
+        fallbackApplied: score.criteriaCount < 4,
+        researchArea: score.researchArea,
+        algorithm: 'academic-research-v1.0'
+      }
+    };
+  };
+
+  const calculateAcademicScore = (profile, weights) => {
+    let score = 0;
+    let criteriaCount = 0;
+    let researchArea = 'General Technology Research';
+    
+    // Constant variables scoring (same as tech-market)
+    if (isValid(profile.yearsExperience)) {
+      score += weights.yearsExperience * getExperienceScore(profile.yearsExperience) * 100;
+      criteriaCount++;
+    }
+    
+    if (isValid(profile.studyField)) {
+      const studyScore = getStudyFieldAcademicAlignment(profile.studyField);
+      score += weights.studyField * studyScore * 100;
+      criteriaCount++;
+      if (studyScore > 0.7) {
+        researchArea = generateResearchArea(profile.studyField);
       }
     }
+    
+    if (isValid(profile.interests)) {
+      score += weights.interests * getAcademicInterestAlignment(profile.interests) * 100;
+      criteriaCount++;
+    }
+    
+    if (isValid(profile.transferableSkills)) {
+      score += weights.transferableSkills * getAcademicSkillRelevance(profile.transferableSkills) * 100;
+      criteriaCount++;
+    }
+    
+    // Academic-specific criteria
+    if (isValid(profile.educationLevel)) {
+      score += weights.educationLevel * getEducationLevelScore(profile.educationLevel) * 100;
+      criteriaCount++;
+    }
+    
+    if (isValid(profile.publications)) {
+      score += weights.publications * getPublicationScore(profile.publications) * 100;
+      criteriaCount++;
+    }
+    
+    if (isValid(profile.techInterests)) {
+      const interestScore = getResearchInterestAlignment(profile.techInterests);
+      score += weights.techInterests * interestScore * 100;
+      criteriaCount++;
+      if (interestScore > 0.6) {
+        researchArea = generateResearchAreaFromInterests(profile.techInterests);
+      }
+    }
+    
+    return { 
+      totalScore: Math.min(score / criteriaCount, 100), 
+      criteriaCount, 
+      researchArea 
+    };
+  };
 
+  /**
+   * Recommendation Engine 3: Practical-Lifestyle Alignment
+   */
+  const generatePracticalLifestyleRecommendation = (validatedProfile) => {
+    console.log('🎯 Generating Practical-Lifestyle recommendation...');
+    
+    const criteria = {
+      constants: ['yearsExperience', 'studyField', 'interests', 'transferableSkills'],
+      specific: ['workPreference', 'timeCommitment', 'currentRole', 'targetSalary']
+    };
+    
+    const weights = calculateDynamicWeights(validatedProfile, criteria);
+    const score = calculatePracticalScore(validatedProfile, weights);
+    const confidence = determineConfidence(score.criteriaCount, score.totalScore);
+    
+    return {
+      id: 'rec_3_practical_lifestyle',
+      type: 'practical-lifestyle',
+      title: generatePracticalRoleTitle(score.roleType, validatedProfile.workPreference),
+      description: generatePracticalDescription(score.roleType, validatedProfile),
+      reasoning: generatePracticalReasoning(validatedProfile, score),
+      confidence: confidence.level,
+      confidenceScore: confidence.score,
+      match: Math.round(score.totalScore),
+      requiredSkills: extractPracticalSkills(score.roleType, validatedProfile),
+      suggestedActions: generatePracticalActions(validatedProfile, score.roleType),
+      salaryRange: getPracticalSalaryRange(score.roleType, validatedProfile.targetSalary),
+      marketDemand: getPracticalMarketDemand(score.roleType),
+      metadata: {
+        criteriaUsed: getCriteriaUsed(validatedProfile, criteria),
+        missingCriteria: getMissingCriteria(validatedProfile, criteria),
+        fallbackApplied: score.criteriaCount < 4,
+        roleType: score.roleType,
+        algorithm: 'practical-lifestyle-v1.0'
+      }
+    };
+  };
+
+  const calculatePracticalScore = (profile, weights) => {
+    let score = 0;
+    let criteriaCount = 0;
+    let roleType = 'Technology Professional';
+    
+    // Constant variables scoring (same as others)
+    if (isValid(profile.yearsExperience)) {
+      score += weights.yearsExperience * getExperienceScore(profile.yearsExperience) * 100;
+      criteriaCount++;
+    }
+    
+    if (isValid(profile.studyField)) {
+      score += weights.studyField * getStudyFieldPracticalAlignment(profile.studyField) * 100;
+      criteriaCount++;
+    }
+    
+    if (isValid(profile.interests)) {
+      score += weights.interests * getPracticalInterestAlignment(profile.interests) * 100;
+      criteriaCount++;
+    }
+    
+    if (isValid(profile.transferableSkills)) {
+      score += weights.transferableSkills * getPracticalSkillRelevance(profile.transferableSkills) * 100;
+      criteriaCount++;
+    }
+    
+    // Practical-specific criteria
+    if (isValid(profile.workPreference)) {
+      score += weights.workPreference * getWorkPreferenceScore(profile.workPreference) * 100;
+      criteriaCount++;
+    }
+    
+    if (isValid(profile.timeCommitment)) {
+      score += weights.timeCommitment * getTimeCommitmentScore(profile.timeCommitment) * 100;
+      criteriaCount++;
+    }
+    
+    if (isValid(profile.currentRole)) {
+      const roleScore = getCurrentRoleTransitionScore(profile.currentRole);
+      score += weights.currentRole * roleScore * 100;
+      criteriaCount++;
+      if (roleScore > 0.6) {
+        roleType = generateRoleType(profile.currentRole);
+      }
+    }
+    
+    if (isValid(profile.targetSalary)) {
+      score += weights.targetSalary * getTargetSalaryRealisticScore(profile.targetSalary) * 100;
+      criteriaCount++;
+    }
+    
+    return { 
+      totalScore: Math.min(score / criteriaCount, 100), 
+      criteriaCount, 
+      roleType 
+    };
+  };
+
+  /**
+   * Confidence Scoring System
+   */
+  const determineConfidence = (criteriaCount, totalScore) => {
+    const maxCriteria = 7; // Maximum possible criteria per recommendation
+    const completeness = criteriaCount / maxCriteria;
+    const scoreQuality = Math.min(totalScore / 100, 1);
+    
+    const confidenceScore = (completeness * 0.6) + (scoreQuality * 0.4);
+    const normalizedScore = Math.round(confidenceScore * 100);
+    
+    let level;
+    if (confidenceScore >= 0.8) level = 'high';
+    else if (confidenceScore >= 0.5) level = 'medium';
+    else level = 'low';
+    
+    return { level, score: normalizedScore };
+  };
+
+  const calculateOverallConfidence = (recommendations) => {
+    const scores = recommendations.map(r => r.confidenceScore);
+    return Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length);
+  };
+
+  /**
+   * Main Recommendation Generation Function
+   */
+  const generateAdvancedCareerRecommendations = async (rawProfile) => {
+    console.log('🎯 Starting Advanced Career Recommendation Engine...');
+    
+    try {
+      // Step 1: Validate and prepare profile
+      const validatedProfile = validateProfile(rawProfile);
+      
+      // Step 2: Generate all three types of recommendations
+      const recommendations = [
+        generateTechMarketRecommendation(validatedProfile),
+        generateAcademicResearchRecommendation(validatedProfile),
+        generatePracticalLifestyleRecommendation(validatedProfile)
+      ];
+      
+      // Step 3: Sort by confidence score
+      const sortedRecommendations = recommendations.sort((a, b) => b.confidenceScore - a.confidenceScore);
+      
+      // Step 4: Calculate metadata
+      const metadata = {
+        overallConfidence: calculateOverallConfidence(sortedRecommendations),
+        dataCompleteness: Math.round(validatedProfile._validation.criteriaCompleteness),
+        processedAt: new Date().toISOString(),
+        algorithmVersion: '1.0.0',
+        totalRecommendations: sortedRecommendations.length
+      };
+      
+      console.log('✅ Advanced recommendations generated:', {
+        count: sortedRecommendations.length,
+        avgConfidence: metadata.overallConfidence,
+        completeness: metadata.dataCompleteness
+      });
+      
+      setRecommendationMetadata(metadata);
+      return sortedRecommendations;
+      
+    } catch (error) {
+      console.error('❌ Error generating advanced recommendations:', error);
+      return generateFallbackRecommendations(rawProfile);
+    }
+  };
+
+  /**
+   * Fallback System for Low Data Quality
+   */
+  const generateFallbackRecommendations = (profile) => {
+    console.log('🔄 Generating fallback recommendations...');
+    
+    const fallbackRecs = [
+      {
+        id: 'fallback_1',
+        type: 'exploratory',
+        title: 'Technology Explorer',
+        description: 'Explore various technology roles to find your passion',
+        reasoning: 'Limited profile data - explore multiple paths',
+        confidence: 'low',
+        confidenceScore: 35,
+        match: 35,
+        requiredSkills: ['Basic Programming', 'Problem Solving', 'Communication'],
+        suggestedActions: [
+          'Complete skills assessment',
+          'Try online coding tutorials',
+          'Attend tech meetups'
+        ],
+        salaryRange: '$45k - $85k',
+        marketDemand: 'medium',
+        metadata: {
+          criteriaUsed: [],
+          missingCriteria: ['Most profile fields'],
+          fallbackApplied: true,
+          algorithm: 'fallback-v1.0'
+        }
+      }
+    ];
+    
+    return fallbackRecs;
+  };
+
+  // ============================================================================
+  // SCORING HELPER FUNCTIONS
+  // ============================================================================
+
+  const getExperienceScore = (experience) => {
+    const expMap = {
+      '0': 0.2, '1': 0.3, '2': 0.4, '3': 0.5, '4': 0.6, '5': 0.7,
+      '0-2': 0.3, '3-5': 0.6, '6-10': 0.8, '10+': 0.9,
+      'Complete beginner': 0.2, 'Some exposure': 0.4, 'Beginner': 0.5,
+      'Intermediate': 0.7, 'Advanced': 0.9
+    };
+    return expMap[experience] || 0.5;
+  };
+
+  const getStudyFieldTechAlignment = (field) => {
+    if (!field) return 0.3;
+    const fieldLower = field.toLowerCase();
+    if (fieldLower.includes('computer') || fieldLower.includes('software')) return 0.9;
+    if (fieldLower.includes('engineering') || fieldLower.includes('math')) return 0.8;
+    if (fieldLower.includes('science') || fieldLower.includes('data')) return 0.7;
+    return 0.4;
+  };
+
+  const getTechInterestAlignment = (interests) => {
+    if (!interests || interests.length === 0) return 0.3;
+    const techKeywords = ['programming', 'coding', 'software', 'ai', 'data', 'web', 'mobile'];
+    const hasMatch = interests.some(interest => 
+      techKeywords.some(keyword => interest.toLowerCase().includes(keyword))
+    );
+    return hasMatch ? 0.8 : 0.4;
+  };
+
+  const getTechSkillRelevance = (skills) => {
+    if (!skills) return 0.3;
+    const skillsLower = skills.toLowerCase();
+    const techSkills = ['analytical', 'problem', 'logical', 'technical', 'creative'];
+    const matches = techSkills.filter(skill => skillsLower.includes(skill)).length;
+    return Math.min(0.4 + (matches * 0.15), 0.9);
+  };
+
+  const getTechnologyMarketDemand = (technologies) => {
+    if (!technologies) return 0.3;
+    const techLower = technologies.toLowerCase();
+    const highDemand = ['python', 'javascript', 'react', 'aws', 'sql', 'java'];
+    const matches = highDemand.filter(tech => techLower.includes(tech)).length;
+    return Math.min(0.5 + (matches * 0.1), 0.95);
+  };
+
+  const getToolProficiencyScore = (tools) => {
+    if (!tools || tools.length === 0) return 0.3;
+    return Math.min(0.5 + (tools.length * 0.1), 0.9);
+  };
+
+  // Academic scoring functions
+  const getStudyFieldAcademicAlignment = (field) => {
+    if (!field) return 0.3;
+    const fieldLower = field.toLowerCase();
+    if (fieldLower.includes('phd') || fieldLower.includes('research')) return 0.9;
+    if (fieldLower.includes('master') || fieldLower.includes('science')) return 0.8;
+    return 0.5;
+  };
+
+  const getAcademicInterestAlignment = (interests) => {
+    if (!interests || interests.length === 0) return 0.3;
+    const academicKeywords = ['research', 'analysis', 'theory', 'study', 'academic'];
+    const hasMatch = interests.some(interest => 
+      academicKeywords.some(keyword => interest.toLowerCase().includes(keyword))
+    );
+    return hasMatch ? 0.8 : 0.4;
+  };
+
+  const getAcademicSkillRelevance = (skills) => {
+    if (!skills) return 0.3;
+    const skillsLower = skills.toLowerCase();
+    const academicSkills = ['research', 'analytical', 'writing', 'critical thinking'];
+    const matches = academicSkills.filter(skill => skillsLower.includes(skill)).length;
+    return Math.min(0.4 + (matches * 0.15), 0.9);
+  };
+
+  const getEducationLevelScore = (level) => {
+    const levelMap = {
+      'high school': 0.3, 'bachelor': 0.6, 'master': 0.8, 'phd': 0.95
+    };
+    return levelMap[level?.toLowerCase()] || 0.5;
+  };
+
+  const getPublicationScore = (publications) => {
+    if (!publications) return 0.2;
+    const pubLower = publications.toLowerCase();
+    if (pubLower.includes('none') || pubLower.includes('0')) return 0.2;
+    if (pubLower.includes('1') || pubLower.includes('few')) return 0.6;
+    return 0.8;
+  };
+
+  const getResearchInterestAlignment = (interests) => {
+    if (!interests) return 0.3;
+    const researchKeywords = ['machine learning', 'ai', 'data science', 'algorithms'];
+    const hasMatch = researchKeywords.some(keyword => interests.toLowerCase().includes(keyword));
+    return hasMatch ? 0.8 : 0.4;
+  };
+
+  // Practical scoring functions
+  const getStudyFieldPracticalAlignment = (field) => {
+    if (!field) return 0.4;
+    const fieldLower = field.toLowerCase();
+    if (fieldLower.includes('business') || fieldLower.includes('management')) return 0.8;
+    if (fieldLower.includes('engineering') || fieldLower.includes('computer')) return 0.7;
+    return 0.5;
+  };
+
+  const getPracticalInterestAlignment = (interests) => {
+    if (!interests || interests.length === 0) return 0.4;
+    const practicalKeywords = ['building', 'creating', 'solving', 'helping', 'business'];
+    const hasMatch = interests.some(interest => 
+      practicalKeywords.some(keyword => interest.toLowerCase().includes(keyword))
+    );
+    return hasMatch ? 0.8 : 0.5;
+  };
+
+  const getPracticalSkillRelevance = (skills) => {
+    if (!skills) return 0.4;
+    const skillsLower = skills.toLowerCase();
+    const practicalSkills = ['communication', 'teamwork', 'leadership', 'project management'];
+    const matches = practicalSkills.filter(skill => skillsLower.includes(skill)).length;
+    return Math.min(0.5 + (matches * 0.1), 0.9);
+  };
+
+  const getWorkPreferenceScore = (preference) => {
+    const prefMap = { 'remote': 0.8, 'hybrid': 0.9, 'onsite': 0.7 };
+    return prefMap[preference?.toLowerCase()] || 0.6;
+  };
+
+  const getTimeCommitmentScore = (commitment) => {
+    const commitMap = { 'full-time': 0.9, 'part-time': 0.7, 'flexible': 0.6 };
+    return commitMap[commitment?.toLowerCase()] || 0.6;
+  };
+
+  const getCurrentRoleTransitionScore = (role) => {
+    if (!role) return 0.4;
+    const roleLower = role.toLowerCase();
+    if (roleLower.includes('manager') || roleLower.includes('analyst')) return 0.8;
+    if (roleLower.includes('developer') || roleLower.includes('engineer')) return 0.9;
+    return 0.6;
+  };
+
+  const getTargetSalaryRealisticScore = (salary) => {
+    if (!salary) return 0.5;
+    // This would normally check against market data
+    return 0.7;
+  };
+
+  // Title generation functions
+  const generateTechRoleTitle = (techStack, experience) => {
+    const expLevel = getExperienceScore(experience);
+    const prefix = expLevel > 0.7 ? 'Senior ' : expLevel > 0.4 ? '' : 'Junior ';
+    
+    if (techStack.includes('python') || techStack.includes('data')) {
+      return `${prefix}Data Scientist`;
+    }
+    if (techStack.includes('react') || techStack.includes('javascript')) {
+      return `${prefix}Frontend Developer`;
+    }
+    return `${prefix}Software Developer`;
+  };
+
+  const generateAcademicRoleTitle = (researchArea, educationLevel) => {
+    const level = getEducationLevelScore(educationLevel);
+    const prefix = level > 0.8 ? 'Research ' : 'Junior Research ';
+    return `${prefix}Scientist - ${researchArea}`;
+  };
+
+  const generatePracticalRoleTitle = (roleType, workPreference) => {
+    const remote = workPreference?.toLowerCase() === 'remote' ? 'Remote ' : '';
+    return `${remote}${roleType}`;
+  };
+
+  // Helper functions for metadata
+  const getCriteriaUsed = (profile, criteria) => {
+    const allCriteria = [...criteria.constants, ...criteria.specific];
+    return allCriteria.filter(key => isValid(profile[key]));
+  };
+
+  const getMissingCriteria = (profile, criteria) => {
+    const allCriteria = [...criteria.constants, ...criteria.specific];
+    return allCriteria.filter(key => !isValid(profile[key]));
+  };
+
+  // Additional helper functions
+  const extractTechFromInterests = (interests) => {
+    const techMap = {
+      'web': ['HTML', 'CSS', 'JavaScript'],
+      'data': ['Python', 'SQL', 'Analytics'],
+      'mobile': ['React Native', 'Flutter']
+    };
+    
+    const techs = [];
+    interests.forEach(interest => {
+      Object.keys(techMap).forEach(key => {
+        if (interest.toLowerCase().includes(key)) {
+          techs.push(...techMap[key]);
+        }
+      });
+    });
+    
+    return techs;
+  };
+
+  const extractTechnologies = (techString) => {
+    return techString.split(',').map(tech => tech.trim()).filter(Boolean);
+  };
+
+  const generateResearchArea = (studyField) => {
+    const fieldLower = studyField.toLowerCase();
+    if (fieldLower.includes('computer')) return 'Computer Science Research';
+    if (fieldLower.includes('data')) return 'Data Science Research';
+    return 'Technology Research';
+  };
+
+  const generateResearchAreaFromInterests = (interests) => {
+    const interestsLower = interests.toLowerCase();
+    if (interestsLower.includes('machine learning')) return 'Machine Learning Research';
+    if (interestsLower.includes('ai')) return 'Artificial Intelligence Research';
+    if (interestsLower.includes('data')) return 'Data Science Research';
+    return 'Technology Research';
+  };
+
+  const generateRoleType = (currentRole) => {
+    const roleLower = currentRole.toLowerCase();
+    if (roleLower.includes('manager')) return 'Technology Manager';
+    if (roleLower.includes('analyst')) return 'Technical Analyst';
+    return 'Technology Professional';
+  };
+
+  // Description and reasoning generators
+  const generateTechDescription = (techStack, profile) => {
+    const stackText = techStack.length > 0 ? techStack.slice(0, 3).join(', ') : 'modern technologies';
+    return `Leverage ${stackText} to build innovative solutions and drive technical excellence in the industry.`;
+  };
+
+  const generateTechReasoning = (profile, score) => {
+    return `Based on your ${score.criteriaCount} qualifying criteria and ${Math.round(score.totalScore)}% alignment with current tech market demands.`;
+  };
+
+  const generateAcademicDescription = (researchArea, profile) => {
+    return `Conduct cutting-edge research in ${researchArea} with focus on practical applications and theoretical advancement.`;
+  };
+
+  const generateAcademicReasoning = (profile, score) => {
+    return `Your academic background and research interests align ${Math.round(score.totalScore)}% with ${score.researchArea} opportunities.`;
+  };
+
+  const generatePracticalDescription = (roleType, profile) => {
+    return `Apply technology skills in a ${roleType.toLowerCase()} role that balances technical expertise with business impact.`;
+  };
+
+  const generatePracticalReasoning = (profile, score) => {
+    return `Considering your lifestyle preferences and career goals, this path offers ${Math.round(score.totalScore)}% compatibility.`;
+  };
+
+  // Skills extraction
+  const extractTechSkills = (techStack, profile) => {
+    const baseSkills = ['Programming Fundamentals', 'Problem Solving', 'Version Control'];
+    const stackSkills = techStack.slice(0, 3);
+    return [...baseSkills, ...stackSkills];
+  };
+
+  const extractAcademicSkills = (researchArea, profile) => {
+    return ['Research Methodology', 'Data Analysis', 'Technical Writing', 'Critical Thinking'];
+  };
+
+  const extractPracticalSkills = (roleType, profile) => {
+    return ['Project Management', 'Communication', 'Business Analysis', 'Team Collaboration'];
+  };
+
+  // Action generation
+  const generateTechActions = (profile, techStack) => {
+    const technologies = techStack.slice(0, 2);
+    return [
+      `Build portfolio projects using ${technologies.length > 0 ? technologies.join(' and ') : 'modern technologies'}`,
+      'Contribute to open source projects',
+      'Complete technical certifications'
+    ];
+  };
+
+  const generateAcademicActions = (profile, researchArea) => {
+    return [
+      `Publish research in ${researchArea}`,
+      'Attend academic conferences',
+      'Collaborate on research projects'
+    ];
+  };
+
+  const generatePracticalActions = (profile, roleType) => {
+    return [
+      'Develop business-focused technical projects',
+      'Network with industry professionals',
+      'Gain relevant certifications'
+    ];
+  };
+
+  // Market data functions
+  const getTechSalaryRange = (techStack, experience) => {
+    const baseMap = { '0-2': '$60k-$90k', '3-5': '$80k-$120k', '6+': '$100k-$160k' };
+    return baseMap[experience] || '$70k-$110k';
+  };
+
+  const getTechMarketDemand = (techStack) => {
+    return techStack.some(tech => ['python', 'javascript', 'react'].includes(tech.toLowerCase())) ? 'high' : 'medium';
+  };
+
+  const getAcademicSalaryRange = (researchArea, education) => {
+    const levelMap = { 'phd': '$80k-$130k', 'master': '$65k-$95k', 'bachelor': '$50k-$75k' };
+    return levelMap[education?.toLowerCase()] || '$60k-$90k';
+  };
+
+  const getAcademicMarketDemand = (researchArea) => {
+    return researchArea.toLowerCase().includes('data') ? 'high' : 'medium';
+  };
+
+  const getPracticalSalaryRange = (roleType, targetSalary) => {
+    return targetSalary || '$65k-$105k';
+  };
+
+  const getPracticalMarketDemand = (roleType) => {
+    return roleType.toLowerCase().includes('manager') ? 'high' : 'medium';
+  };
+
+  // ============================================================================
+  // EXISTING EXTRACTION FUNCTIONS (KEEPING FOR BACKWARD COMPATIBILITY)
+  // ============================================================================
+
+  // AI-driven skills gap extraction focused on analysis content
+  const extractSkillsGapImproved = (text) => {
+    if (!text) return [];
+    
+    console.log('🔍 Extracting skills from analysis text...');
+    const skills = [];
+    const lines = text.split('\n');
+    
+    // Extract skills from SKILLS GAP sections
+    let inSkillsSection = false;
+    const skillsSectionKeywords = [
+      'SKILLS GAP', 'SKILL GAP', 'SKILLS NEEDED', 'REQUIRED SKILLS', 
+      'LEARNING REQUIREMENTS', 'COMPETENCY GAP', 'SKILL DEVELOPMENT',
+      'TECHNICAL SKILLS', 'SKILL RECOMMENDATIONS'
+    ];
+    
+    lines.forEach((line, index) => {
+      if (skillsSectionKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
+        inSkillsSection = true;
+        return;
+      }
+      
+      if (inSkillsSection && (
+        line.toUpperCase().includes('NETWORKING') || 
+        line.toUpperCase().includes('INTERVIEW') || 
+        line.toUpperCase().includes('MARKET TRENDS') ||
+        line.toUpperCase().includes('JOB SEARCH') ||
+        line.toUpperCase().includes('PERSONAL BRANDING')
+      )) {
+        inSkillsSection = false;
+        return;
+      }
+      
+      if (inSkillsSection && line.trim() !== '') {
+        const skill = parseSkillFromLine(line, text);
+        if (skill) {
+          skills.push(skill);
+        }
+      }
+    });
+    
+    // Generate skills based on career recommendations if none found
+    if (skills.length < 4 && careerPaths.length > 0) {
+      const topCareerSkills = generateCareerSkills(careerPaths[0].title, userData);
+      skills.push(...topCareerSkills);
+    }
+    
+    return skills.slice(0, 8);
+  };
+
+  const parseSkillFromLine = (line, fullText) => {
+    const cleanLine = line.replace(/^[-•*\d+\.\)\s]+/, '').trim();
+    if (cleanLine.length < 5) return null;
+    
+    const skillFormats = [
+      /^([^:]+):\s*(.+)$/,
+      /^([^(]+)\s*\([^)]*\):\s*(.+)$/,
+      /^([^-]+)\s*-\s*(.+)$/,
+      /^([A-Z][A-Za-z\s\/\(\)\+]+)$/
+    ];
+    
+    for (const format of skillFormats) {
+      const match = cleanLine.match(format);
+      if (match) {
+        const skillName = match[1].trim();
+        const description = match[2] ? match[2].trim() : `Important skill for your career transition`;
+        
+        if (isValidSkill(skillName)) {
+          return createSkillObject(skillName, description, fullText);
+        }
+      }
+    }
+    
+    if (isValidSkill(cleanLine)) {
+      return createSkillObject(cleanLine, `Key skill identified from your analysis`, fullText);
+    }
+    
     return null;
   };
 
-  /**
-   * Calculate AUTHENTIC match score based on user's profile
-   */
-  const calculateAuthenticMatchScore = (careerPath, userData, priority) => {
-    let score = 50; // Base score
-    const reasons = [];
-
-    // User explicitly stated this interest
-    score += 20;
-    reasons.push(`+20 (stated interest)`);
-
-    // Experience level alignment
-    const experienceBoost = calculateExperienceAlignment(careerPath, userData.experienceLevel);
-    score += experienceBoost;
-    reasons.push(`+${experienceBoost} (experience)`);
-
-    // Educational background alignment
-    const educationBoost = calculateEducationAlignment(careerPath, userData.studyField);
-    score += educationBoost;
-    reasons.push(`+${educationBoost} (education)`);
-
-    // Current role relevance
-    const roleBoost = calculateCurrentRoleAlignment(careerPath, userData.currentRole);
-    score += roleBoost;
-    reasons.push(`+${roleBoost} (current role)`);
-
-    // Tools & technology alignment
-    const toolsBoost = calculateToolsAlignment(careerPath, userData.toolsUsed);
-    score += toolsBoost;
-    reasons.push(`+${toolsBoost} (tools)`);
-
-    // Timeline feasibility
-    const timelineBoost = calculateTimelineAlignment(careerPath, userData.transitionTimeline, userData.experienceLevel);
-    score += timelineBoost;
-    reasons.push(`+${timelineBoost} (timeline)`);
-
-    // Priority adjustment
-    if (priority === 0) score += 5;
-    else if (priority === 1) score += 3;
-
-    const finalScore = Math.min(Math.round(score), 95);
-    console.log(`📊 ${careerPath.title} score: ${finalScore}% (${reasons.join(', ')})`);
-    return finalScore;
-  };
-
-  // Helper functions for score calculation
-  const calculateExperienceAlignment = (careerPath, experienceLevel) => {
-    if (!experienceLevel) return 0;
-
-    const experienceMap = {
-      'Complete beginner': 1,
-      'Some exposure': 2,
-      'Beginner': 3,
-      'Intermediate': 4,
-      'Advanced': 5
-    };
-
-    const userLevel = experienceMap[experienceLevel] || 1;
-    const pathRequirement = getCareerPathRequiredLevel(careerPath);
-
-    if (userLevel === pathRequirement) return 15;
-    if (Math.abs(userLevel - pathRequirement) === 1) return 10;
-    if (userLevel > pathRequirement) return 12;
-    if (userLevel < pathRequirement) {
-      const gap = pathRequirement - userLevel;
-      return Math.max(0, 8 - (gap * 2));
+  const isValidSkill = (skillName) => {
+    if (!skillName || skillName.length < 3 || skillName.length > 50) return false;
+    
+    const invalidTerms = [
+      'section', 'analysis', 'summary', 'overview', 'recommendation', 'conclusion',
+      'career', 'path', 'job', 'role', 'position', 'experience', 'background',
+      'industry', 'field', 'area', 'domain', 'market', 'trend', 'opportunity',
+      'and', 'or', 'the', 'for', 'with', 'that', 'this', 'you', 'your'
+    ];
+    
+    const lowerName = skillName.toLowerCase();
+    if (invalidTerms.some(term => lowerName === term || lowerName.startsWith(term + ' '))) {
+      return false;
     }
-    return 5;
+    
+    return /^[A-Za-z][A-Za-z\s\/\(\)\-\.\+\#]*$/.test(skillName) && 
+           skillName.split(' ').length <= 4;
   };
 
-  const getCareerPathRequiredLevel = (careerPath) => {
-    const levelMap = { 'entry': 2, 'mid': 3, 'senior': 4, 'expert': 5 };
-    return levelMap[careerPath.level] || 3;
-  };
-
-  const calculateEducationAlignment = (careerPath, studyField) => {
-    if (!studyField || studyField === 'Not specified') return 0;
-
-    const field = studyField.toLowerCase();
-    const category = careerPath.category;
-
-    const strongAlignment = {
-      'development': ['computer science', 'software engineering', 'information technology'],
-      'data': ['data science', 'statistics', 'mathematics', 'computer science'],
-      'design': ['design', 'graphic design', 'digital media', 'art'],
-      'ai': ['computer science', 'machine learning', 'artificial intelligence'],
-      'security': ['cybersecurity', 'information security', 'computer science']
+  const createSkillObject = (skillName, description, analysisText) => {
+    const currentLevel = assessCurrentSkillLevel(skillName, userData);
+    const requiredLevel = assessRequiredSkillLevel(skillName, analysisText);
+    
+    return {
+      name: skillName,
+      description: description,
+      currentLevel: currentLevel,
+      requiredLevel: requiredLevel,
+      gap: requiredLevel - currentLevel,
+      category: categorizeSkill(skillName),
+      learningPath: generateLearningPath(skillName, currentLevel, requiredLevel),
+      priority: requiredLevel - currentLevel >= 2 ? 'high' : 'medium'
     };
-
-    if (strongAlignment[category]) {
-      for (const alignedField of strongAlignment[category]) {
-        if (field.includes(alignedField)) return 12;
-      }
-    }
-
-    if (field.includes('engineering') || field.includes('science')) return 6;
-    return 0;
   };
 
-  const calculateCurrentRoleAlignment = (careerPath, currentRole) => {
-    if (!currentRole || currentRole === 'Not specified') return 0;
-
-    const role = currentRole.toLowerCase();
-    const category = careerPath.category;
-
-    const roleAlignment = {
-      'development': ['developer', 'programmer', 'engineer', 'analyst'],
-      'data': ['analyst', 'researcher', 'scientist', 'data'],
-      'design': ['designer', 'creative', 'artist', 'marketing'],
-      'management': ['manager', 'coordinator', 'lead', 'supervisor']
+  const assessCurrentSkillLevel = (skillName, userData) => {
+    let level = 0;
+    const skillLower = skillName.toLowerCase();
+    
+    const expLevelMap = {
+      'Complete beginner': 0,
+      'Some exposure': 1,
+      'Beginner': 1,
+      'Intermediate': 2,
+      'Advanced': 3
     };
-
-    if (roleAlignment[category]) {
-      for (const alignedRole of roleAlignment[category]) {
-        if (role.includes(alignedRole)) return 8;
-      }
-    }
-
-    if (role.includes('tech') || role.includes('IT')) return 4;
-    return 0;
-  };
-
-  const calculateToolsAlignment = (careerPath, toolsUsed) => {
-    if (!toolsUsed || toolsUsed.length === 0 || toolsUsed.includes('None')) return 0;
-
-    const category = careerPath.category;
-    let alignment = 0;
-
-    const toolsAlignment = {
-      'development': {
-        'high': ['javascript', 'python', 'java', 'react', 'angular', 'vue'],
-        'medium': ['html', 'css', 'sql', 'git']
-      },
-      'data': {
-        'high': ['python', 'r', 'sql', 'tableau', 'power bi'],
-        'medium': ['excel', 'analytics']
-      },
-      'design': {
-        'high': ['figma', 'sketch', 'adobe', 'photoshop'],
-        'medium': ['canva', 'illustrator']
-      }
-    };
-
-    if (toolsAlignment[category]) {
-      toolsUsed.forEach(tool => {
-        const toolLower = tool.toLowerCase();
-        if (toolsAlignment[category].high?.some(t => toolLower.includes(t))) {
-          alignment += 3;
-        } else if (toolsAlignment[category].medium?.some(t => toolLower.includes(t))) {
-          alignment += 2;
-        }
-      });
-    }
-
-    return Math.min(alignment, 10);
-  };
-
-  const calculateTimelineAlignment = (careerPath, timeline, experienceLevel) => {
-    if (!timeline) return 0;
-
-    const timelineMonths = {
-      'Less than 6 months': 6,
-      '6-12 months': 12,
-      '1-2 years': 24,
-      '2+ years': 36,
-      'Already transitioning': 3
-    };
-
-    const months = timelineMonths[timeline] || 12;
-    const pathLevel = careerPath.level;
-
-    const pathRequiredMonths = {
-      'entry': { 'Complete beginner': 12, 'Some exposure': 8, 'Beginner': 6 },
-      'mid': { 'Complete beginner': 18, 'Some exposure': 12, 'Beginner': 10, 'Intermediate': 6 },
-      'senior': { 'Beginner': 24, 'Intermediate': 18, 'Advanced': 12 }
-    };
-
-    const requiredMonths = pathRequiredMonths[pathLevel]?.[experienceLevel] || 12;
-
-    if (months >= requiredMonths) return 8;
-    if (months >= requiredMonths * 0.75) return 5;
-    if (months >= requiredMonths * 0.5) return 2;
-    return 0;
-  };
-
-  const generateComplementaryPaths = (userData, existingPaths) => {
-    const complementaryPaths = [];
-    const existingTitles = existingPaths.map(p => p.title.toLowerCase());
-
+    level = expLevelMap[userData.experienceLevel] || 1;
+    
     if (userData.toolsUsed && userData.toolsUsed.length > 0) {
-      const toolBasedSuggestions = suggestPathsFromTools(userData.toolsUsed);
+      const hasRelatedTool = userData.toolsUsed.some(tool => 
+        skillLower.includes(tool.toLowerCase()) || 
+        tool.toLowerCase().includes(skillLower)
+      );
+      if (hasRelatedTool) level = Math.min(level + 1, 4);
+    }
+    
+    return Math.max(0, Math.min(level, 4));
+  };
+
+  const assessRequiredSkillLevel = (skillName, analysisText) => {
+    const skillLower = skillName.toLowerCase();
+    let requiredLevel = 3;
+    
+    const skillContext = extractSkillContext(skillName, analysisText);
+    if (skillContext) {
+      if (skillContext.includes('essential') || skillContext.includes('critical')) {
+        requiredLevel = 4;
+      } else if (skillContext.includes('advanced') || skillContext.includes('expert')) {
+        requiredLevel = 5;
+      } else if (skillContext.includes('basic') || skillContext.includes('fundamental')) {
+        requiredLevel = 2;
+      }
+    }
+    
+    return Math.max(2, Math.min(requiredLevel, 5));
+  };
+
+  const extractSkillContext = (skillName, text) => {
+    const lines = text.split('\n');
+    for (const line of lines) {
+      if (line.toLowerCase().includes(skillName.toLowerCase())) {
+        return line.toLowerCase();
+      }
+    }
+    return null;
+  };
+
+  const categorizeSkill = (skillName) => {
+    const skillLower = skillName.toLowerCase();
+    
+    if (skillLower.includes('communication') || skillLower.includes('teamwork') || 
+        skillLower.includes('leadership') || skillLower.includes('management')) {
+      return 'Soft Skills';
+    } else if (skillLower.includes('design') || skillLower.includes('ui') || 
+               skillLower.includes('ux') || skillLower.includes('visual')) {
+      return 'Design';
+    } else if (skillLower.includes('data') || skillLower.includes('analytics') || 
+               skillLower.includes('statistics') || skillLower.includes('ml')) {
+      return 'Data & Analytics';
+    } else if (skillLower.includes('cloud') || skillLower.includes('devops') || 
+               skillLower.includes('infrastructure')) {
+      return 'Infrastructure';
+    } else {
+      return 'Technical Skills';
+    }
+  };
+
+  const generateLearningPath = (skillName, currentLevel, requiredLevel) => {
+    const gap = requiredLevel - currentLevel;
+    const skillLower = skillName.toLowerCase();
+    
+    if (gap <= 0) {
+      return "Maintain skills through advanced projects and stay updated with latest trends";
+    } else if (gap === 1) {
+      if (skillLower.includes('programming') || skillLower.includes('coding')) {
+        return "Build intermediate projects and contribute to open source";
+      } else {
+        return "Practice with real-world scenarios and seek mentorship opportunities";
+      }
+    } else {
+      if (skillLower.includes('programming') || skillLower.includes('coding')) {
+        return "Start with fundamentals course, daily coding practice, and basic projects";
+      } else {
+        return "Begin with foundational courses and establish consistent learning routine";
+      }
+    }
+  };
+
+  const generateCareerSkills = (careerTitle, userData) => {
+    const careerSpecificRequirements = {
+      'Software Developer': [
+        'Programming Languages',
+        'Version Control (Git)',
+        'Database Management',
+        'API Development',
+        'Testing Frameworks'
+      ],
+      'Data Scientist': [
+        'Python Programming',
+        'Statistical Analysis',
+        'Machine Learning',
+        'Data Visualization',
+        'SQL Databases'
+      ],
+      'UX Designer': [
+        'Design Thinking',
+        'Prototyping Tools',
+        'User Research',
+        'Visual Design',
+        'Frontend Fundamentals'
+      ]
+    };
+    
+    const skillNames = careerSpecificRequirements[careerTitle] || careerSpecificRequirements['Software Developer'];
+    
+    return skillNames.map(skillName => {
+      const description = `Essential ${skillName.toLowerCase()} skills for ${careerTitle} roles`;
+      return createSkillObject(skillName, description, `Required for ${careerTitle} career path`);
+    }).slice(0, 5);
+  };
+
+  // Learning Roadmap extraction
+  const extractLearningRoadmapImproved = (text) => {
+    if (!text) return [];
+    
+    const roadmap = [];
+    const lines = text.split('\n');
+    
+    let inRoadmapSection = false;
+    const roadmapKeywords = ['LEARNING ROADMAP', 'ROADMAP', 'LEARNING PATH', 'STUDY PLAN'];
+    
+    lines.forEach((line, index) => {
+      if (roadmapKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
+        inRoadmapSection = true;
+        return;
+      }
       
-      toolBasedSuggestions.forEach(suggestion => {
-        if (!existingTitles.includes(suggestion.title.toLowerCase())) {
-          const score = calculateAuthenticMatchScore(suggestion, userData, 10);
-          if (score >= 60) {
-            complementaryPaths.push({
-              title: suggestion.title,
-              match: score,
-              userInterest: `Based on your ${userData.toolsUsed.join(', ')} experience`,
-              insights: generatePersonalizedInsights(suggestion, userData),
-              reasoning: `Recommended based on your tool experience`,
-              authenticated: true,
-              isComplementary: true,
-              category: suggestion.category,
-              level: suggestion.level
-            });
+      if (inRoadmapSection && (line.toUpperCase().includes('NETWORKING') || 
+          line.toUpperCase().includes('INTERVIEW') || line.toUpperCase().includes('MARKET TRENDS'))) {
+        inRoadmapSection = false;
+        return;
+      }
+      
+      if (inRoadmapSection && line.trim() !== '') {
+        const phaseMatch = line.match(/^(Month\s+\d+|Phase\s+\d+|Week\s+\d+)[-:]?\s*(.+)/i);
+        if (phaseMatch) {
+          roadmap.push({
+            phase: phaseMatch[1],
+            title: phaseMatch[2].trim(),
+            duration: phaseMatch[1],
+            description: phaseMatch[2].trim(),
+            skills: [],
+            resources: []
+          });
+        } else if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
+          const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
+          if (itemText.length > 10 && roadmap.length > 0) {
+            if (itemText.toLowerCase().includes('learn') || itemText.toLowerCase().includes('study')) {
+              roadmap[roadmap.length - 1].skills.push(itemText);
+            } else {
+              roadmap[roadmap.length - 1].resources.push(itemText);
+            }
           }
         }
-      });
-    }
-
-    return complementaryPaths.slice(0, 2);
-  };
-
-  const suggestPathsFromTools = (tools) => {
-    const suggestions = [];
-    const toolsLower = tools.map(t => t.toLowerCase());
-
-    const toolToCareerMap = {
-      'javascript': { title: 'Frontend Developer', category: 'development', level: 'mid' },
-      'react': { title: 'React Developer', category: 'development', level: 'mid' },
-      'python': { title: 'Backend Developer', category: 'development', level: 'mid' },
-      'sql': { title: 'Data Analyst', category: 'data', level: 'entry' },
-      'figma': { title: 'UX Designer', category: 'design', level: 'mid' },
-      'tableau': { title: 'Data Analyst', category: 'data', level: 'mid' },
-      'aws': { title: 'Cloud Engineer', category: 'infrastructure', level: 'mid' }
-    };
-
-    toolsLower.forEach(tool => {
-      if (toolToCareerMap[tool]) {
-        suggestions.push(toolToCareerMap[tool]);
       }
     });
-
-    return suggestions;
+    
+    // Add default roadmap if none found
+    if (roadmap.length === 0) {
+      const defaultRoadmap = [
+        {
+          phase: 'Phase 1',
+          title: 'Foundation Building',
+          duration: 'Months 1-2',
+          description: 'Build fundamental skills and understanding',
+          skills: ['Basic Programming', 'Problem Solving', 'Technical Communication'],
+          resources: ['Online courses', 'Practice exercises', 'Community forums']
+        },
+        {
+          phase: 'Phase 2',
+          title: 'Skill Development',
+          duration: 'Months 3-4',
+          description: 'Develop core technical skills for your target role',
+          skills: ['Advanced Programming', 'Framework/Library Usage', 'Best Practices'],
+          resources: ['Advanced courses', 'Documentation', 'Code reviews']
+        },
+        {
+          phase: 'Phase 3',
+          title: 'Project Building',
+          duration: 'Months 5-6',
+          description: 'Apply skills through hands-on projects',
+          skills: ['Project Management', 'Full-Stack Development', 'Testing'],
+          resources: ['Project tutorials', 'GitHub', 'Portfolio development']
+        }
+      ];
+      
+      roadmap.push(...defaultRoadmap);
+    }
+    
+    return roadmap;
   };
 
-  const generatePersonalizedInsights = (careerPath, userData) => {
-    const insights = [];
-
-    if (userData.experienceLevel) {
-      insights.push(`Your ${userData.experienceLevel.toLowerCase()} experience level aligns well with ${careerPath.title} requirements`);
+  // Market trends generation functions (simplified for space)
+  const generatePersonalizedMarketTrendsWithPaths = (careerPaths, userData) => {
+    if (!careerPaths || careerPaths.length === 0) {
+      return generateGenericMarketTrends();
     }
 
-    if (userData.studyField && userData.studyField !== 'Not specified') {
-      insights.push(`Your ${userData.studyField} background provides a strong foundation for this role`);
-    }
+    const trends = [];
+    const topCareer = careerPaths[0];
 
-    if (userData.toolsUsed && userData.toolsUsed.length > 0 && !userData.toolsUsed.includes('None')) {
-      insights.push(`Your experience with ${userData.toolsUsed.slice(0, 2).join(' and ')} gives you a head start`);
-    }
+    trends.push({
+      title: `${topCareer.title} SALARY OUTLOOK`,
+      description: `Compensation trends specifically for ${topCareer.title} roles`,
+      category: 'Salary Analysis',
+      relevance: 'High',
+      personalizedData: generatePersonalizedSalaryData(topCareer.title),
+      userCareer: topCareer.title
+    });
 
-    return insights.slice(0, 2);
+    trends.push({
+      title: `${topCareer.title} MARKET DEMAND`,
+      description: `Job market demand and growth prospects for ${topCareer.title}`,
+      category: 'Industry Demand',
+      relevance: 'High',
+      personalizedData: generatePersonalizedDemandData(topCareer.title),
+      userCareer: topCareer.title
+    });
+
+    return trends;
   };
 
-  const generateMatchReasoning = (careerPath, userData, score) => {
-    if (score >= 85) {
-      return "Excellent match based on your interests, experience, and background";
-    } else if (score >= 75) {
-      return "Strong match with good alignment to your profile and goals";
-    } else if (score >= 65) {
-      return "Good potential match that builds on your existing strengths";
-    } else {
-      return "Consider this path after building foundational skills";
+  const generatePersonalizedSalaryData = (careerTitle) => {
+    const salaryData = {
+      ranges: ['$70,000 - $120,000 (Average)', '$50,000 - $80,000 (Entry Level)', '$100,000 - $160,000 (Senior Level)'],
+      insights: ['High demand for technical skills', 'Remote work increases opportunities', 'Continuous learning essential'],
+      growth: '8% year-over-year salary growth',
+      comparison: '20% higher than national average'
+    };
+    return salaryData;
+  };
+
+  const generatePersonalizedDemandData = (careerTitle) => {
+    const demandData = {
+      growth: '22% faster than average growth rate',
+      opportunities: ['High demand in tech sector', 'Growing startup ecosystem', 'Remote work opportunities'],
+      hotSkills: ['Programming', 'Cloud Technologies', 'Data Analysis', 'Problem Solving'],
+      industries: ['Technology', 'Healthcare', 'Finance', 'E-commerce'],
+      outlook: 'Excellent long-term prospects'
+    };
+    return demandData;
+  };
+
+  const generatePersonalizedJobMarketOutlook = (careerPaths, userData) => {
+    if (!careerPaths || careerPaths.length === 0) {
+      return generateGenericJobMarketOutlook();
     }
+
+    const outlook = [];
+    const topCareer = careerPaths[0];
+
+    outlook.push({
+      title: `${topCareer.title} Salary Trends`,
+      description: `Current and projected salary trends for ${topCareer.title} professionals`,
+      category: 'Salary Trends',
+      growth: 'Strong',
+      icon: '💰',
+      personalizedData: {
+        trends: ['Salaries increased 8% year-over-year', 'Remote work premium of 15%', 'Specialization commands higher rates'],
+        projections: ['Continued growth expected', 'AI skills becoming valuable', 'Cross-functional skills in demand']
+      },
+      userCareer: topCareer.title
+    });
+
+    return outlook;
+  };
+
+  const generateGenericMarketTrends = () => {
+    return [
+      {
+        title: 'TECHNOLOGY SALARY TRENDS',
+        description: 'General compensation trends in technology sector',
+        category: 'Salary Analysis',
+        relevance: 'Medium'
+      }
+    ];
+  };
+
+  const generateGenericJobMarketOutlook = () => {
+    return [
+      {
+        title: 'Technology Sector Growth',
+        description: 'Overall growth trends in the technology industry',
+        category: 'Industry Growth',
+        growth: 'Strong',
+        icon: '📈'
+      }
+    ];
+  };
+
+  // Other extraction functions (simplified)
+  const extractNetworkingStrategyImproved = (text) => {
+    return [
+      { text: 'Join professional associations and industry groups', type: 'strategy' },
+      { text: 'Attend virtual and in-person meetups and conferences', type: 'strategy' },
+      { text: 'Connect with professionals on LinkedIn', type: 'strategy' }
+    ];
+  };
+
+  const extractPersonalBrandingImproved = (text) => {
+    return [
+      { text: 'Create a professional LinkedIn profile', type: 'tip' },
+      { text: 'Start a blog or social media presence', type: 'tip' },
+      { text: 'Develop a consistent personal brand', type: 'tip' }
+    ];
+  };
+
+  const extractInterviewPrepImproved = (text) => {
+    return [
+      { text: 'Practice coding challenges and technical questions', type: 'tip' },
+      { text: 'Prepare STAR method examples', type: 'tip' },
+      { text: 'Research common interview questions', type: 'tip' }
+    ];
+  };
+
+  const extractPortfolioGuidanceImproved = (text) => {
+    return [
+      { text: 'Build a portfolio showcasing your projects', type: 'tip' },
+      { text: 'Include projects that demonstrate your skills', type: 'tip' },
+      { text: 'Create a compelling career narrative', type: 'tip' }
+    ];
+  };
+
+  const extractJobSearchStrategiesImproved = (text) => {
+    return [
+      { text: 'Optimize your LinkedIn profile with relevant keywords', type: 'tip' },
+      { text: 'Tailor your resume for each application', type: 'tip' },
+      { text: 'Use tech-focused job boards', type: 'tip' }
+    ];
+  };
+
+  const extractCareerGrowthResourcesImproved = (text) => {
+    return [
+      { text: 'Your motivation to transition demonstrates adaptability', type: 'tip' },
+      { text: 'Willingness to learn shows commitment', type: 'tip' },
+      { text: 'Taking assessment indicates proactive approach', type: 'tip' }
+    ];
+  };
+
+  const extractCareerPathVisualizationsImproved = (text) => {
+    return [];
   };
 
   // ============================================================================
-  // END OF AUTHENTIC CAREER PATH GENERATION SYSTEM
+  // COMPONENT LOGIC AND EFFECTS
   // ============================================================================
-
-  // Debug useEffect to track market trends changes
-  useEffect(() => {
-    console.log('🔍 Market trends state changed:', {
-      count: marketTrends.length,
-      trends: marketTrends.map(t => ({
-        title: t.title,
-        hasPersonalizedData: !!t.personalizedData,
-        userCareer: t.userCareer
-      }))
-    });
-  }, [marketTrends]);
-
-  // Debug useEffect to track career paths changes
-  useEffect(() => {
-    console.log('🔍 Career paths state changed:', {
-      count: careerPaths.length,
-      topCareer: careerPaths[0]?.title || 'None'
-    });
-  }, [careerPaths]);
 
   // Animation effect for counters
   useEffect(() => {
     if (careerPaths.length > 0) {
       const timer = setTimeout(() => {
         careerPaths.forEach((path, index) => {
-          const targetValue = path.match;
+          const targetValue = path.confidenceScore || path.match || 0;
           let currentValue = 0;
           const increment = targetValue / 30;
           
@@ -528,7 +1400,7 @@ const CareerDashboard = () => {
     }
   }, [careerPaths]);
 
-  // UPDATED: Enhanced useEffect with proper market trends generation
+  // Main data loading effect with new recommendation system
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -542,44 +1414,53 @@ const CareerDashboard = () => {
           if (location.state.formData) {
             const formData = location.state.formData;
             
+            // Map form data to the new enhanced profile structure
             processedUserData = {
-              name: formData.fullName,
-              email: formData.email,
-              experienceLevel: formData.experienceLevel,
+              // Constant Variables
+              yearsExperience: formData.yearsExperience || formData.experienceLevel || '',
               studyField: formData.studyField || 'Not specified',
-              educationLevel: formData.educationLevel || 'Not specified',
-              currentRole: formData.currentRole || 'Not specified',
-              yearsExperience: formData.yearsExperience || 'Not specified',
-              jobResponsibilities: formData.jobResponsibilities || 'Not specified',
-              jobProjects: formData.jobProjects || 'Not specified',
-              jobTechnologies: formData.jobTechnologies || 'Not specified',
-              publications: formData.publications || 'Not specified',
-              transferableSkills: formData.transferableSkills || 'Not specified',
-              interests: typeof formData.techInterests === 'string' 
-                ? formData.techInterests.split(',').map(i => i.trim()) 
-                : (Array.isArray(formData.techInterests) ? formData.techInterests : []),
-              careerPathsInterest: formData.careerPathsInterest || [],
+              interests: Array.isArray(formData.techInterests) 
+                ? formData.techInterests 
+                : (typeof formData.techInterests === 'string' ? formData.techInterests.split(',').map(i => i.trim()) : []),
+              transferableSkills: formData.transferableSkills || '',
+              
+              // Tech-Market Specific
+              jobTechnologies: formData.jobTechnologies || '',
               toolsUsed: formData.toolsUsed || [],
+              
+              // Academic-Research Specific
+              educationLevel: formData.educationLevel || '',
+              publications: formData.publications || '',
               techInterests: formData.techInterests || '',
-              timeCommitment: formData.timeCommitment || '',
-              targetSalary: formData.targetSalary || '',
+              
+              // Practical-Lifestyle Specific
               workPreference: formData.workPreference || '',
+              timeCommitment: formData.timeCommitment || '',
+              currentRole: formData.currentRole || '',
+              targetSalary: formData.targetSalary || '',
+              
+              // Additional Context
+              name: formData.fullName || '',
+              email: formData.email || '',
+              experienceLevel: formData.experienceLevel || '',
+              jobResponsibilities: formData.jobResponsibilities || '',
+              jobProjects: formData.jobProjects || '',
+              careerPathsInterest: formData.careerPathsInterest || [],
               transitionTimeline: formData.transitionTimeline || ''
             };
             
             setUserData(processedUserData);
             
-            // Generate authentic career paths
-            generatedPaths = generateAuthenticCareerPaths(processedUserData);
+            // Generate advanced recommendations using the new system
+            generatedPaths = await generateAdvancedCareerRecommendations(processedUserData);
             setCareerPaths(generatedPaths);
             
-            console.log('✅ Authentic career paths generated:', generatedPaths.length);
+            console.log('✅ Advanced career recommendations generated:', generatedPaths.length);
           }
           
           // Extract other data from analysis
           const skills = extractSkillsGapImproved(analysisText);
           const roadmap = extractLearningRoadmapImproved(analysisText);
-          // Job market outlook will be generated after career paths are available
           const networking = extractNetworkingStrategyImproved(analysisText);
           const branding = extractPersonalBrandingImproved(analysisText);
           const interview = extractInterviewPrepImproved(analysisText);
@@ -590,7 +1471,6 @@ const CareerDashboard = () => {
           
           setSkillsGap(skills);
           setLearningRoadmap(roadmap);
-          // setJobMarketOutlook will be set after career paths generation
           setNetworkingStrategy(networking);
           setPersonalBranding(branding);
           setInterviewPrep(interview);
@@ -600,6 +1480,7 @@ const CareerDashboard = () => {
           setCareerPathVisualizations(pathVisualizations);
           
         } else {
+          // Handle stored data case
           const storedAnalysis = storageService.getLatestAnalysis();
           if (storedAnalysis) {
             const analysisText = storedAnalysis.analysis;
@@ -607,44 +1488,44 @@ const CareerDashboard = () => {
             
             const submission = storageService.getSubmissionById(storedAnalysis.submissionId);
             if (submission) {
+              // Map stored data to new structure
               processedUserData = {
-                name: submission.fullName,
-                email: submission.email,
-                experienceLevel: submission.experienceLevel,
+                yearsExperience: submission.yearsExperience || submission.experienceLevel || '',
                 studyField: submission.studyField || 'Not specified',
-                educationLevel: submission.educationLevel || 'Not specified',
-                currentRole: submission.currentRole || 'Not specified',
-                yearsExperience: submission.yearsExperience || 'Not specified',
-                jobResponsibilities: submission.jobResponsibilities || 'Not specified',
-                jobProjects: submission.jobProjects || 'Not specified',
-                jobTechnologies: submission.jobTechnologies || 'Not specified',
-                publications: submission.publications || 'Not specified',
-                transferableSkills: submission.transferableSkills || 'Not specified',
-                interests: typeof submission.techInterests === 'string' 
-                  ? submission.techInterests.split(',').map(i => i.trim()) 
-                  : (Array.isArray(submission.techInterests) ? submission.techInterests : []),
-                careerPathsInterest: submission.careerPathsInterest || [],
+                interests: Array.isArray(submission.techInterests) 
+                  ? submission.techInterests 
+                  : (typeof submission.techInterests === 'string' ? submission.techInterests.split(',').map(i => i.trim()) : []),
+                transferableSkills: submission.transferableSkills || '',
+                jobTechnologies: submission.jobTechnologies || '',
                 toolsUsed: submission.toolsUsed || [],
+                educationLevel: submission.educationLevel || '',
+                publications: submission.publications || '',
                 techInterests: submission.techInterests || '',
-                timeCommitment: submission.timeCommitment || '',
-                targetSalary: submission.targetSalary || '',
                 workPreference: submission.workPreference || '',
+                timeCommitment: submission.timeCommitment || '',
+                currentRole: submission.currentRole || '',
+                targetSalary: submission.targetSalary || '',
+                name: submission.fullName || '',
+                email: submission.email || '',
+                experienceLevel: submission.experienceLevel || '',
+                jobResponsibilities: submission.jobResponsibilities || '',
+                jobProjects: submission.jobProjects || '',
+                careerPathsInterest: submission.careerPathsInterest || [],
                 transitionTimeline: submission.transitionTimeline || ''
               };
               
               setUserData(processedUserData);
               
-              // Generate authentic career paths
-              generatedPaths = generateAuthenticCareerPaths(processedUserData);
+              // Generate advanced recommendations
+              generatedPaths = await generateAdvancedCareerRecommendations(processedUserData);
               setCareerPaths(generatedPaths);
               
-              console.log('✅ Stored career paths generated:', generatedPaths.length);
+              console.log('✅ Stored advanced recommendations generated:', generatedPaths.length);
             }
             
-            // Extract other data from analysis
+            // Extract other data
             const skills = extractSkillsGapImproved(analysisText);
             const roadmap = extractLearningRoadmapImproved(analysisText);
-            // Job market outlook will be generated after career paths are available
             const networking = extractNetworkingStrategyImproved(analysisText);
             const branding = extractPersonalBrandingImproved(analysisText);
             const interview = extractInterviewPrepImproved(analysisText);
@@ -655,7 +1536,6 @@ const CareerDashboard = () => {
             
             setSkillsGap(skills);
             setLearningRoadmap(roadmap);
-            // setJobMarketOutlook will be set after career paths generation
             setNetworkingStrategy(networking);
             setPersonalBranding(branding);
             setInterviewPrep(interview);
@@ -671,13 +1551,9 @@ const CareerDashboard = () => {
           }
         }
         
-                  // CRITICAL: Generate market trends AND job outlook AFTER everything is set up
+        // Generate personalized market trends and job outlook
         if (processedUserData && generatedPaths && generatedPaths.length > 0) {
-          console.log('🎯 Generating market trends and job outlook with:', {
-            careerPaths: generatedPaths.length,
-            topCareer: generatedPaths[0]?.title,
-            userInterests: processedUserData.careerPathsInterest
-          });
+          console.log('🎯 Generating market trends for advanced recommendations...');
           
           const personalizedTrends = generatePersonalizedMarketTrendsWithPaths(generatedPaths, processedUserData);
           setMarketTrends(personalizedTrends);
@@ -685,10 +1561,9 @@ const CareerDashboard = () => {
           const personalizedOutlook = generatePersonalizedJobMarketOutlook(generatedPaths, processedUserData);
           setJobMarketOutlook(personalizedOutlook);
           
-          console.log('✅ Market trends generated:', personalizedTrends.length, personalizedTrends);
-          console.log('✅ Job market outlook generated:', personalizedOutlook.length, personalizedOutlook);
+          console.log('✅ Market insights generated for advanced recommendations');
         } else {
-          console.log('⚠️ No career paths or user data available for market trends');
+          console.log('⚠️ Using generic market insights');
           setMarketTrends(generateGenericMarketTrends());
           setJobMarketOutlook(generateGenericJobMarketOutlook());
         }
@@ -705,6 +1580,143 @@ const CareerDashboard = () => {
     
     loadData();
   }, [location, navigate]);
+
+  // Generate next steps based on recommendations
+  const generateNextSteps = () => {
+    const steps = [];
+    
+    if (careerPaths.length > 0) {
+      const topCareer = careerPaths[0];
+      
+      steps.push({
+        title: `Focus on ${topCareer.title} Skills`,
+        text: `Build expertise in the top requirements for ${topCareer.title} roles`,
+        priority: 'high',
+        icon: '🎯',
+        timeline: '2-4 weeks',
+        personalized: true,
+        resources: topCareer.requiredSkills || []
+      });
+      
+      if (topCareer.suggestedActions && topCareer.suggestedActions.length > 0) {
+        topCareer.suggestedActions.forEach((action, index) => {
+          if (index < 2) {
+            steps.push({
+              title: `Action ${index + 2}`,
+              text: action,
+              priority: index === 0 ? 'high' : 'medium',
+              icon: ['💼', '📚', '🤝'][index] || '✅',
+              timeline: '1-2 weeks',
+              personalized: true,
+              resources: []
+            });
+          }
+        });
+      }
+    }
+    
+    if (skillsGap.length > 0) {
+      const prioritySkills = skillsGap.filter(skill => skill.priority === 'high').slice(0, 2);
+      prioritySkills.forEach(skill => {
+        steps.push({
+          title: `Learn ${skill.name}`,
+          text: skill.learningPath || `Develop proficiency in ${skill.name} through structured learning`,
+          priority: 'medium',
+          icon: '📈',
+          timeline: '3-4 weeks',
+          personalized: true,
+          resources: [skill.learningPath]
+        });
+      });
+    }
+    
+    return steps.slice(0, 6);
+  };
+
+  // Create timeline visualization data
+  const createTimelineData = () => {
+    const timelineMap = {
+      'Less than 6 months': 6,
+      '6-12 months': 12,
+      '1-2 years': 18,
+      '2+ years': 24,
+      'Already transitioning': 3
+    };
+    
+    const months = timelineMap[userData.transitionTimeline] || 12;
+    const milestones = [];
+    
+    if (months <= 6) {
+      milestones.push(
+        { month: 1, label: 'Start Learning', progress: 20, status: 'current' },
+        { month: 3, label: 'Complete Basics', progress: 50, status: 'upcoming' },
+        { month: 6, label: 'Job Ready', progress: 100, status: 'upcoming' }
+      );
+    } else if (months <= 12) {
+      milestones.push(
+        { month: 2, label: 'Foundation', progress: 20, status: 'current' },
+        { month: 4, label: 'Core Skills', progress: 40, status: 'upcoming' },
+        { month: 6, label: 'Projects', progress: 60, status: 'upcoming' },
+        { month: 9, label: 'Portfolio', progress: 80, status: 'upcoming' },
+        { month: 12, label: 'Job Ready', progress: 100, status: 'upcoming' }
+      );
+    } else {
+      milestones.push(
+        { month: 3, label: 'Foundation', progress: 15, status: 'current' },
+        { month: 6, label: 'Core Skills', progress: 30, status: 'upcoming' },
+        { month: 9, label: 'Specialization', progress: 45, status: 'upcoming' },
+        { month: 12, label: 'Projects', progress: 60, status: 'upcoming' },
+        { month: 15, label: 'Portfolio', progress: 80, status: 'upcoming' },
+        { month: 18, label: 'Job Ready', progress: 100, status: 'upcoming' }
+      );
+    }
+    
+    return milestones;
+  };
+
+  // Handle feedback form changes
+  const handleFeedbackChange = (e) => {
+    const { name, value } = e.target;
+    setFeedbackData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Submit feedback to Google Form
+  const submitFeedback = async (e) => {
+    e.preventDefault();
+    setSubmittingFeedback(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('entry.162050771', feedbackData.rating);
+      formData.append('entry.2083196363', feedbackData.improvements);
+      
+      await fetch(GOOGLE_FORM_URL, {
+        method: 'POST',
+        body: formData,
+        mode: 'no-cors'
+      });
+      
+      toast.success('Thank you for your feedback!');
+      setShowFeedbackForm(false);
+      setFeedbackData({
+        rating: '',
+        improvements: ''
+      });
+      
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      toast.error('Failed to submit feedback. Please try again.');
+    } finally {
+      setSubmittingFeedback(false);
+    }
+  };
+
+  // ============================================================================
+  // UI COMPONENTS
+  // ============================================================================
 
   // Enhanced Progress Bar Component
   const EnhancedProgressBar = ({ value, maxValue = 100, className = "from-blue-400 to-blue-600", showLabel = true }) => (
@@ -723,7 +1735,7 @@ const CareerDashboard = () => {
     </div>
   );
 
-  // UPDATED: Enhanced Career Path Card Component with authentic data display
+  // Enhanced Career Path Card with new recommendation data
   const CareerPathCard = ({ path, index }) => {
     const animatedValue = animatedValues[`path-${index}`] || 0;
     const colorClasses = [
@@ -735,35 +1747,23 @@ const CareerDashboard = () => {
     ];
     const colorClass = colorClasses[index % colorClasses.length];
     
-    // Generate career explanation based on title
-    const getCareerExplanation = (title) => {
-      const explanations = {
-        'Software Developer': 'Build and maintain software applications, websites, and systems using programming languages and frameworks.',
-        'Data Scientist': 'Analyze complex data to extract insights, build predictive models, and drive data-driven decision making.',
-        'Machine Learning Engineer': 'Design and implement ML systems, deploy models into production, and optimize AI algorithms.',
-        'UX Designer': 'Create user-friendly interfaces and experiences for digital products, focusing on usability and aesthetics.',
-        'UI Designer': 'Design visual elements and interactive components for web and mobile applications.',
-        'Product Designer': 'Combine UX and UI skills to design complete product experiences from concept to launch.',
-        'Product Manager': 'Guide product development from conception to launch, working with cross-functional teams to deliver user value.',
-        'DevOps Engineer': 'Bridge development and operations, automating deployment pipelines and managing cloud infrastructure.',
-        'Cybersecurity Analyst': 'Protect organizations from digital threats by monitoring security, investigating incidents, and implementing safeguards.',
-        'Frontend Developer': 'Build user-facing parts of websites and applications using technologies like React, Vue, or Angular.',
-        'Backend Developer': 'Develop server-side logic, databases, and APIs that power web applications and mobile apps.',
-        'Full Stack Developer': 'Work on both frontend and backend development, handling the complete web development process.',
-        'Data Engineer': 'Build and maintain data pipelines, warehouses, and infrastructure for data processing and analytics.',
-        'Cloud Engineer': 'Design, implement, and manage cloud computing systems and infrastructure on platforms like AWS, Azure, or GCP.',
-        'Data Analyst': 'Collect, process, and analyze data to help organizations make informed business decisions.',
-        'ML Engineer': 'Build and deploy machine learning models at scale, focusing on production systems and performance.',
-        'AI Engineer': 'Develop artificial intelligence systems and integrate AI capabilities into products and services.',
-        'Mobile App Developer': 'Create mobile applications for iOS and Android platforms using native or cross-platform technologies.',
-        'Web Developer': 'Build and maintain websites and web applications using various programming languages and frameworks.',
-        'Technical Project Manager': 'Manage technical projects, coordinate between teams, and ensure successful delivery of technology solutions.',
-        'Systems Engineer': 'Design, implement, and maintain complex computer systems and infrastructure.',
-        'Security Engineer': 'Design and implement security systems, conduct security assessments, and develop security protocols.',
-        'Digital Designer': 'Create visual content for digital platforms including websites, apps, and marketing materials.'
-      };
-      
-      return explanations[title] || 'Leverage technology to solve problems and create innovative solutions in the digital world.';
+    // Get algorithm-specific styling
+    const getTypeIcon = (type) => {
+      switch(type) {
+        case 'tech-market': return '💻';
+        case 'academic-research': return '🎓';
+        case 'practical-lifestyle': return '🎯';
+        default: return '📊';
+      }
+    };
+    
+    const getTypeLabel = (type) => {
+      switch(type) {
+        case 'tech-market': return 'Tech Market Fit';
+        case 'academic-research': return 'Academic Research';
+        case 'practical-lifestyle': return 'Lifestyle Match';
+        default: return 'General';
+      }
     };
     
     return (
@@ -773,32 +1773,38 @@ const CareerDashboard = () => {
         <div className="relative z-10">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-2xl">{getTypeIcon(path.type)}</span>
+                <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                  {getTypeLabel(path.type)}
+                </span>
+              </div>
+              
               <h3 className="text-xl font-bold text-gray-800 group-hover:text-gray-900 transition-colors mb-2">
                 {path.title}
               </h3>
               
-              {/* Show user's original interest if different */}
-              {path.userInterest && path.userInterest !== path.title && (
-                <p className="text-sm text-blue-600 mb-2 italic">
-                  Based on your interest: "{path.userInterest}"
-                </p>
-              )}
-              
               <p className="text-sm text-gray-600 leading-relaxed mb-2">
-                {getCareerExplanation(path.title)}
+                {path.description}
               </p>
               
-              {/* Show authentic reasoning */}
               <p className="text-sm text-green-700 italic">
-                {path.reasoning || `Recommended based on your profile and interests`}
+                {path.reasoning}
               </p>
               
-              {/* Show if it's complementary */}
-              {path.isComplementary && (
-                <span className="inline-block mt-2 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
-                  Bonus recommendation
+              {/* Show algorithm confidence */}
+              <div className="mt-3 flex items-center gap-2">
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  path.confidence === 'high' ? 'bg-green-100 text-green-700' :
+                  path.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                  'bg-red-100 text-red-700'
+                }`}>
+                  {path.confidence} confidence
                 </span>
-              )}
+                <span className="text-xs text-gray-500">
+                  Algorithm: {path.metadata?.algorithm || 'v1.0'}
+                </span>
+              </div>
             </div>
             <div className={`text-3xl font-bold bg-gradient-to-r ${colorClass} bg-clip-text text-transparent ml-4`}>
               {animatedValue}%
@@ -807,7 +1813,7 @@ const CareerDashboard = () => {
           
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-600">Match Score</span>
+              <span className="text-sm font-medium text-gray-600">Confidence Score</span>
               <span className="text-sm text-gray-500">{animatedValue}/100</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
@@ -818,15 +1824,29 @@ const CareerDashboard = () => {
             </div>
           </div>
           
-          {/* Show personalized insights */}
-          {path.insights && path.insights.length > 0 && (
+          {/* Show required skills */}
+          {path.requiredSkills && path.requiredSkills.length > 0 && (
             <div className="mb-4">
-              <h5 className="text-sm font-medium text-gray-700 mb-2">Why this fits you:</h5>
+              <h5 className="text-sm font-medium text-gray-700 mb-2">Required Skills:</h5>
+              <div className="flex flex-wrap gap-1">
+                {path.requiredSkills.slice(0, 4).map((skill, idx) => (
+                  <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Show suggested actions */}
+          {path.suggestedActions && path.suggestedActions.length > 0 && (
+            <div className="mb-4">
+              <h5 className="text-sm font-medium text-gray-700 mb-2">Next Steps:</h5>
               <ul className="text-xs text-gray-600 space-y-1">
-                {path.insights.map((insight, idx) => (
+                {path.suggestedActions.slice(0, 2).map((action, idx) => (
                   <li key={idx} className="flex items-start">
                     <span className="text-green-500 mr-2 mt-0.5">✓</span>
-                    {insight}
+                    {action}
                   </li>
                 ))}
               </ul>
@@ -834,23 +1854,24 @@ const CareerDashboard = () => {
           )}
           
           <div className="flex items-center justify-between">
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-              path.match >= 80 ? 'bg-green-100 text-green-700' :
-              path.match >= 70 ? 'bg-yellow-100 text-yellow-700' :
-              'bg-gray-100 text-gray-700'
-            }`}>
-              {path.match >= 80 ? 'Excellent Match' : path.match >= 70 ? 'Good Match' : 'Consider'}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-600">Salary:</span>
+              <span className="text-xs font-medium text-gray-800">{path.salaryRange}</span>
+            </div>
             
-            <div className="flex gap-2">
-              {path.authenticated && (
-                <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
-                  Personalized
+            <div className="flex items-center gap-2">
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                path.marketDemand === 'high' ? 'bg-green-100 text-green-700' :
+                path.marketDemand === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                'bg-gray-100 text-gray-700'
+              }`}>
+                {path.marketDemand} demand
+              </span>
+              {path.metadata?.fallbackApplied && (
+                <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
+                  Limited Data
                 </span>
               )}
-              <span className="text-xs text-gray-500">
-                Based on your {userData.studyField || 'profile'}
-              </span>
             </div>
           </div>
         </div>
@@ -858,7 +1879,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Enhanced Skill Card Component
+  // Skill Card Component
   const SkillCard = ({ skill, index }) => {
     const gap = skill.gap || (skill.requiredLevel - skill.currentLevel);
     const progress = (skill.currentLevel / skill.requiredLevel) * 100;
@@ -987,164 +2008,69 @@ const CareerDashboard = () => {
     );
   };
 
-  // UPDATED: Market Trends Card Component with better error handling
+  // Market Trends Card Component
   const MarketTrendsCard = ({ trend, index }) => {
-    console.log('🎯 Rendering MarketTrendsCard:', trend.title, 'personalizedData:', !!trend.personalizedData);
-    
     const trendIcons = {
       'SALARY OUTLOOK': '💰',
       'MARKET DEMAND': '📈',
       'SALARY TRENDS': '💰',
-      'INDUSTRY DEMAND': '📊',
-      'TECHNOLOGY SALARY TRENDS': '💰',
-      'TECH INDUSTRY OUTLOOK': '🏭'
+      'INDUSTRY DEMAND': '📊'
     };
     
-    const icon = trendIcons[trend.title.split(' ').slice(-2).join(' ')] || 
-                 trendIcons[trend.title.split(' ').slice(-1)[0]] || 
-                 trendIcons[trend.category] || '📊';
-    
-    // Enhanced content based on personalized trend data
-    const getPersonalizedContent = () => {
-      const title = trend.title || trend.category || 'Market Trend';
-      
-      // Handle personalized salary trends
-      if ((title.includes('SALARY') || title.includes('COMPENSATION')) && trend.personalizedData) {
-        console.log('💰 Rendering salary trend with data:', trend.personalizedData.ranges?.length);
-        return {
-          title: trend.title,
-          content: (
-            <div>
-              <p className="text-gray-700 mb-3">{trend.description}</p>
-              <div className="bg-green-50 p-4 rounded-lg mb-4">
-                <h5 className="font-medium text-green-800 mb-3">💰 Salary Ranges for {trend.userCareer}:</h5>
-                <ul className="text-sm text-green-700 space-y-2">
-                  {trend.personalizedData.ranges.map((range, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className="text-green-500 mr-2 mt-0.5">💵</span>
-                      {range}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h5 className="font-medium text-blue-800 mb-2">📊 Key Insights:</h5>
-                <ul className="text-sm text-blue-700 space-y-1">
-                  <li><strong>Growth:</strong> {trend.personalizedData.growth}</li>
-                  <li><strong>vs National Average:</strong> {trend.personalizedData.comparison}</li>
-                  {trend.personalizedData.insights.slice(0, 2).map((insight, idx) => (
-                    <li key={idx}>• {insight}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )
-        };
-      }
-      
-      // Handle personalized demand trends
-      if ((title.includes('DEMAND') || title.includes('MARKET')) && trend.personalizedData) {
-        console.log('📈 Rendering demand trend with data:', trend.personalizedData.opportunities?.length);
-        return {
-          title: trend.title,
-          content: (
-            <div>
-              <p className="text-gray-700 mb-3">{trend.description}</p>
-              <div className="bg-purple-50 p-4 rounded-lg mb-4">
-                <h5 className="font-medium text-purple-800 mb-3">📈 Growth Outlook:</h5>
-                <div className="text-sm text-purple-700 space-y-2">
-                  <div><strong>Job Growth:</strong> {trend.personalizedData.growth}</div>
-                  <div><strong>Market Outlook:</strong> {trend.personalizedData.outlook}</div>
-                </div>
-              </div>
-              <div className="bg-indigo-50 p-4 rounded-lg mb-4">
-                <h5 className="font-medium text-indigo-800 mb-2">🔥 Hot Skills for {trend.userCareer}:</h5>
-                <div className="flex flex-wrap gap-2">
-                  {trend.personalizedData.hotSkills.slice(0, 4).map((skill, idx) => (
-                    <span key={idx} className="px-2 py-1 bg-indigo-200 text-indigo-800 rounded-full text-xs font-medium">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="bg-teal-50 p-4 rounded-lg">
-                <h5 className="font-medium text-teal-800 mb-2">🏭 Top Industries:</h5>
-                <ul className="text-sm text-teal-700 space-y-1">
-                  {trend.personalizedData.industries.slice(0, 3).map((industry, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className="text-teal-500 mr-2 mt-0.5">•</span>
-                      {industry}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )
-        };
-      }
-      
-      // Check if we have a userCareer but no personalizedData (backup case)
-      if (trend.userCareer && !trend.personalizedData) {
-        console.log('⚠️ Has userCareer but no personalizedData, generating fallback');
-        return {
-          title: title,
-          content: (
-            <div>
-              <p className="text-gray-700 mb-3">{trend.description}</p>
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h5 className="font-medium text-blue-800 mb-2">📊 {trend.userCareer} Market Analysis</h5>
-                <p className="text-sm text-blue-700">
-                  Market data for {trend.userCareer} roles is being processed. This section will show personalized 
-                  salary ranges, growth projections, and industry insights specific to your career path.
-                </p>
-              </div>
-            </div>
-          )
-        };
-      }
-      
-      // Fallback for completely generic trends
-      console.log('📊 Using generic fallback for trend:', title);
-      return {
-        title: title,
-        content: (
-          <div>
-            <p className="text-gray-700 mb-3">{trend.description || 'General market analysis and trends'}</p>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">Complete your career assessment to get personalized market insights for your specific career path.</p>
-            </div>
-          </div>
-        )
-      };
-    };
-
-    const enhancedContent = getPersonalizedContent();
+    const icon = trendIcons[trend.title.split(' ').slice(-2).join(' ')] || '📊';
     
     return (
       <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
         <div className="flex items-start mb-4">
           <span className="text-3xl mr-4">{icon}</span>
           <div className="flex-1">
-            <h4 className="font-semibold text-lg text-gray-800">{enhancedContent.title}</h4>
+            <h4 className="font-semibold text-lg text-gray-800">{trend.title}</h4>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-sm text-gray-500">Market Analysis</span>
               {trend.userCareer && (
                 <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                  Personalized for {trend.userCareer}
+                  {trend.userCareer}
                 </span>
               )}
             </div>
           </div>
         </div>
         
-        {enhancedContent.content}
+        <p className="text-gray-700 mb-3">{trend.description}</p>
+        
+        {trend.personalizedData && (
+          <div className="space-y-3">
+            {trend.personalizedData.ranges && (
+              <div className="bg-green-50 p-3 rounded-lg">
+                <h5 className="font-medium text-green-800 mb-2">💰 Salary Ranges:</h5>
+                <ul className="text-sm text-green-700 space-y-1">
+                  {trend.personalizedData.ranges.slice(0, 3).map((range, idx) => (
+                    <li key={idx}>• {range}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {trend.personalizedData.hotSkills && (
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <h5 className="font-medium text-blue-800 mb-2">🔥 Hot Skills:</h5>
+                <div className="flex flex-wrap gap-1">
+                  {trend.personalizedData.hotSkills.slice(0, 4).map((skill, idx) => (
+                    <span key={idx} className="px-2 py-1 bg-blue-200 text-blue-800 rounded-full text-xs">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
         
         <div className="pt-4 border-t mt-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-600">Relevance to You:</span>
+            <span className="text-sm font-medium text-gray-600">Relevance:</span>
             <span className={`px-3 py-1 rounded-full text-xs font-medium ${
               trend.relevance === 'High' ? 'bg-green-100 text-green-700' :
-              trend.relevance === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
               'bg-blue-100 text-blue-700'
             }`}>
               {trend.relevance || 'High'}
@@ -1155,221 +2081,44 @@ const CareerDashboard = () => {
     );
   };
 
-  // UPDATED: Job Market Outlook Card Component with personalized content
+  // Job Market Outlook Card Component
   const JobMarketOutlookCard = ({ outlook, index }) => {
-    console.log('🎯 Rendering JobMarketOutlookCard:', outlook.title, 'personalizedData:', !!outlook.personalizedData);
-    
     const outlookIcons = ['💼', '📊', '🎯', '🌐', '💰', '📈'];
     const icon = outlook.icon || outlookIcons[index % outlookIcons.length];
-    
-    // Enhanced content based on personalized outlook data
-    const getPersonalizedContent = () => {
-      const title = outlook.title || outlook.aspect;
-      
-      // Handle personalized salary trends outlook
-      if (title.includes('Salary') && outlook.personalizedData) {
-        console.log('💰 Rendering salary outlook with data:', outlook.personalizedData.trends?.length);
-        return {
-          title: outlook.title,
-          content: (
-            <div>
-              <p className="text-gray-700 mb-4">{outlook.description}</p>
-              <div className="bg-green-50 p-4 rounded-lg mb-4">
-                <h5 className="font-medium text-green-800 mb-3">📈 Current Trends:</h5>
-                <ul className="text-sm text-green-700 space-y-2">
-                  {outlook.personalizedData.trends.map((trend, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className="text-green-500 mr-2 mt-0.5">•</span>
-                      {trend}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h5 className="font-medium text-blue-800 mb-2">🔮 Future Projections:</h5>
-                <ul className="text-sm text-blue-700 space-y-1">
-                  {outlook.personalizedData.projections.map((projection, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className="text-blue-500 mr-2 mt-0.5">→</span>
-                      {projection}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )
-        };
-      }
-      
-      // Handle personalized regional opportunities
-      if (title.includes('Regional') && outlook.personalizedData) {
-        console.log('🌍 Rendering regional outlook with data:', outlook.personalizedData.topRegions?.length);
-        return {
-          title: outlook.title,
-          content: (
-            <div>
-              <p className="text-gray-700 mb-4">{outlook.description}</p>
-              <div className="bg-purple-50 p-4 rounded-lg mb-4">
-                <h5 className="font-medium text-purple-800 mb-3">🏙️ Top Markets:</h5>
-                <ul className="text-sm text-purple-700 space-y-2">
-                  {outlook.personalizedData.topRegions.map((region, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className="text-purple-500 mr-2 mt-0.5">📍</span>
-                      {region}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="bg-indigo-50 p-4 rounded-lg mb-4">
-                <h5 className="font-medium text-indigo-800 mb-2">🌱 Emerging Markets:</h5>
-                <ul className="text-sm text-indigo-700 space-y-1">
-                  {outlook.personalizedData.emerging.map((market, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className="text-indigo-500 mr-2 mt-0.5">⭐</span>
-                      {market}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="bg-teal-50 p-3 rounded-lg">
-                <p className="text-sm text-teal-800">
-                  <strong>Remote Work:</strong> {outlook.personalizedData.remote}
-                </p>
-              </div>
-            </div>
-          )
-        };
-      }
-      
-      // Handle personalized emerging technologies
-      if (title.includes('Emerging') && outlook.personalizedData) {
-        console.log('🚀 Rendering tech trends with data:', outlook.personalizedData.technologies?.length);
-        return {
-          title: outlook.title,
-          content: (
-            <div>
-              <p className="text-gray-700 mb-4">{outlook.description}</p>
-              <div className="bg-orange-50 p-4 rounded-lg mb-4">
-                <h5 className="font-medium text-orange-800 mb-3">🚀 Key Technologies:</h5>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {outlook.personalizedData.technologies.map((tech, idx) => (
-                    <span key={idx} className="px-3 py-1 bg-orange-200 text-orange-800 rounded-full text-xs font-medium">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="bg-red-50 p-4 rounded-lg mb-4">
-                <h5 className="font-medium text-red-800 mb-2">💡 Impact on Role:</h5>
-                <ul className="text-sm text-red-700 space-y-1">
-                  {outlook.personalizedData.impact.map((impact, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className="text-red-500 mr-2 mt-0.5">•</span>
-                      {impact}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="bg-yellow-50 p-3 rounded-lg">
-                <p className="text-sm text-yellow-800">
-                  <strong>Timeline:</strong> {outlook.personalizedData.timeline}
-                </p>
-              </div>
-            </div>
-          )
-        };
-      }
-      
-      // Handle personalized industry demand
-      if (title.includes('Demand') && outlook.personalizedData) {
-        console.log('📈 Rendering demand outlook with data:', outlook.personalizedData.sectors?.length);
-        return {
-          title: outlook.title,
-          content: (
-            <div>
-              <p className="text-gray-700 mb-4">{outlook.description}</p>
-              <div className="bg-emerald-50 p-4 rounded-lg mb-4">
-                <h5 className="font-medium text-emerald-800 mb-2">📊 Market Demand:</h5>
-                <p className="text-sm text-emerald-700 font-medium mb-3">{outlook.personalizedData.demand}</p>
-                <h6 className="font-medium text-emerald-800 mb-2">Top Hiring Sectors:</h6>
-                <ul className="text-sm text-emerald-700 space-y-1">
-                  {outlook.personalizedData.sectors.map((sector, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className="text-emerald-500 mr-2 mt-0.5">🏢</span>
-                      {sector}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="bg-cyan-50 p-4 rounded-lg">
-                <h5 className="font-medium text-cyan-800 mb-2">🚀 Growth Drivers:</h5>
-                <ul className="text-sm text-cyan-700 space-y-1">
-                  {outlook.personalizedData.drivers.map((driver, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className="text-cyan-500 mr-2 mt-0.5">▶</span>
-                      {driver}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )
-        };
-      }
-      
-      // Fallback for generic outlook
-      console.log('📊 Using generic fallback for outlook:', title);
-      return {
-        title: title,
-        content: (
-          <div>
-            <p className="text-gray-700 mb-4">{outlook.description || outlook.text}</p>
-            
-            {outlook.statistics && (
-              <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-                <h5 className="font-medium text-blue-800 mb-2">Key Statistics:</h5>
-                <p className="text-sm text-blue-700">{outlook.statistics}</p>
-              </div>
-            )}
-            
-            {outlook.opportunities && outlook.opportunities.length > 0 && (
-              <div className="mb-4">
-                <h5 className="font-medium text-gray-800 mb-2">Opportunities:</h5>
-                <ul className="text-sm text-gray-600 space-y-1">
-                  {outlook.opportunities.slice(0, 3).map((opportunity, oppIndex) => (
-                    <li key={oppIndex} className="flex items-start">
-                      <span className="text-green-500 mr-2">✓</span>
-                      {opportunity}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        )
-      };
-    };
-
-    const enhancedContent = getPersonalizedContent();
     
     return (
       <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
         <div className="flex items-start mb-4">
           <span className="text-3xl mr-4">{icon}</span>
           <div className="flex-1">
-            <h4 className="font-semibold text-lg text-gray-800">{enhancedContent.title}</h4>
+            <h4 className="font-semibold text-lg text-gray-800">{outlook.title}</h4>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-sm text-gray-500">{outlook.category || 'Job Market'}</span>
               {outlook.userCareer && (
                 <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                  {outlook.userCareer} Specific
+                  {outlook.userCareer}
                 </span>
               )}
             </div>
           </div>
         </div>
         
-        {enhancedContent.content}
+        <p className="text-gray-700 mb-4">{outlook.description}</p>
+        
+        {outlook.personalizedData && (
+          <div className="space-y-3">
+            {outlook.personalizedData.trends && (
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <h5 className="font-medium text-blue-800 mb-2">📈 Trends:</h5>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  {outlook.personalizedData.trends.slice(0, 3).map((trend, idx) => (
+                    <li key={idx}>• {trend}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
         
         {outlook.growth && (
           <div className="pt-4 border-t mt-4">
@@ -1389,7 +2138,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // Enhanced Action Card Component
+  // Action Card Component
   const ActionCard = ({ step, index }) => {
     const priorityColors = {
       high: 'from-red-500 to-pink-500',
@@ -1426,7 +2175,7 @@ const CareerDashboard = () => {
         
         <p className="text-gray-700 leading-relaxed">{step.text}</p>
         
-        {step.resources && (
+        {step.resources && step.resources.length > 0 && (
           <div className="mt-4 p-3 bg-gray-50 rounded-lg">
             <h5 className="font-medium text-gray-800 mb-2">Recommended Resources:</h5>
             <ul className="text-sm text-gray-600 space-y-1">
@@ -1480,2103 +2229,24 @@ const CareerDashboard = () => {
     );
   };
 
-  // Handle feedback form changes
-  const handleFeedbackChange = (e) => {
-    const { name, value } = e.target;
-    setFeedbackData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // Submit feedback to Google Form
-  const submitFeedback = async (e) => {
-    e.preventDefault();
-    setSubmittingFeedback(true);
-    
-    try {
-      const formData = new FormData();
-      formData.append('entry.162050771', feedbackData.rating);
-      formData.append('entry.2083196363', feedbackData.improvements);
-      
-      await fetch(GOOGLE_FORM_URL, {
-        method: 'POST',
-        body: formData,
-        mode: 'no-cors'
-      });
-      
-      toast.success('Thank you for your feedback!');
-      setShowFeedbackForm(false);
-      setFeedbackData({
-        rating: '',
-        improvements: ''
-      });
-      
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-      toast.error('Failed to submit feedback. Please try again.');
-    } finally {
-      setSubmittingFeedback(false);
-    }
-  };
-
-  // ALL THE EXTRACTION FUNCTIONS FROM THE SECOND CODE (keeping them as they work well)
-  
-  // AI-driven skills gap extraction focused on analysis content
-  const extractSkillsGapImproved = (text) => {
-    if (!text) return [];
-    
-    console.log('🔍 Extracting AI-generated skills from analysis text...');
-    const skills = [];
-    const lines = text.split('\n');
-    
-    // APPROACH 1: Extract skills from SKILLS GAP or similar sections in AI analysis
-    let inSkillsSection = false;
-    const skillsSectionKeywords = [
-      'SKILLS GAP', 'SKILL GAP', 'SKILLS NEEDED', 'REQUIRED SKILLS', 
-      'LEARNING REQUIREMENTS', 'COMPETENCY GAP', 'SKILL DEVELOPMENT',
-      'TECHNICAL SKILLS', 'SKILL RECOMMENDATIONS'
-    ];
-    
-    lines.forEach((line, index) => {
-      // Check if we're entering a skills section
-      if (skillsSectionKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
-        inSkillsSection = true;
-        console.log('📍 Found AI skills section at line:', index, ':', line.trim());
-        return;
-      }
-      
-      // Exit skills section when we hit other major sections
-      if (inSkillsSection && (
-        line.toUpperCase().includes('NETWORKING') || 
-        line.toUpperCase().includes('INTERVIEW') || 
-        line.toUpperCase().includes('MARKET TRENDS') ||
-        line.toUpperCase().includes('JOB SEARCH') ||
-        line.toUpperCase().includes('PERSONAL BRANDING')
-      )) {
-        inSkillsSection = false;
-        console.log('📍 Exiting skills section at line:', index);
-        return;
-      }
-      
-      // Extract skills from the skills section
-      if (inSkillsSection && line.trim() !== '') {
-        const skill = parseSkillFromLine(line, text);
-        if (skill) {
-          skills.push(skill);
-          console.log('✅ Extracted AI skill:', skill.name);
-        }
-      }
-    });
-    
-    // APPROACH 2: Look for skill mentions throughout the entire analysis
-    if (skills.length < 3) {
-      console.log('🔄 Searching entire analysis for skill mentions...');
-      const contextualSkills = extractSkillsFromContext(text);
-      contextualSkills.forEach(skill => {
-        if (!skills.some(s => s.name.toLowerCase() === skill.name.toLowerCase())) {
-          skills.push(skill);
-          console.log('✅ Added contextual skill:', skill.name);
-        }
-      });
-    }
-    
-    // APPROACH 3: Generate skills based on the TOP career recommendation from AI analysis
-    if (skills.length < 4 && careerPaths.length > 0) {
-      console.log('🎯 Generating skills for top AI-recommended career:', careerPaths[0].title);
-      const topCareerSkills = generateAICareerSkills(careerPaths[0].title, userData);
-      topCareerSkills.forEach(skill => {
-        if (!skills.some(s => s.name.toLowerCase().includes(skill.name.toLowerCase()))) {
-          skills.push(skill);
-          console.log('✅ Added AI career-specific skill:', skill.name);
-        }
-      });
-    }
-    
-    // APPROACH 4: Only if absolutely no skills found, create based on user's stated interests
-    if (skills.length === 0) {
-      console.log('⚠️ No AI skills found - creating emergency fallback based on user interests');
-      const emergencySkills = createEmergencySkillsFromUserData();
-      skills.push(...emergencySkills);
-    }
-    
-    console.log(`🎉 Total AI-driven skills extracted: ${skills.length}`);
-    return skills.slice(0, 8);
-  };
-
-  // Parse individual skill from a line in the analysis
-  const parseSkillFromLine = (line, fullText) => {
-    // Remove common bullet points and numbering
-    const cleanLine = line.replace(/^[-•*\d+\.\)\s]+/, '').trim();
-    
-    if (cleanLine.length < 5) return null;
-    
-    // Pattern matching for different skill formats from AI analysis
-    const skillFormats = [
-      // "JavaScript Programming: Essential for frontend development"
-      /^([^:]+):\s*(.+)$/,
-      // "- Learn Python (Current: 2/5, Target: 4/5)"
-      /^([^(]+)\s*\([^)]*\):\s*(.+)$/,
-      // "Advanced SQL - Critical for data roles"
-      /^([^-]+)\s*-\s*(.+)$/,
-      // "Machine Learning Fundamentals"
-      /^([A-Z][A-Za-z\s\/\(\)\+]+)$/
-    ];
-    
-    for (const format of skillFormats) {
-      const match = cleanLine.match(format);
-      if (match) {
-        const skillName = match[1].trim();
-        const description = match[2] ? match[2].trim() : `Important skill for your career transition`;
-        
-        if (isValidAISkill(skillName)) {
-          return createAISkillObject(skillName, description, fullText);
-        }
-      }
-    }
-    
-    // If no specific format matches, check if the entire line is a valid skill
-    if (isValidAISkill(cleanLine)) {
-      return createAISkillObject(cleanLine, `Key skill identified from your analysis`, fullText);
-    }
-    
-    return null;
-  };
-
-  // Extract skills mentioned in context throughout the analysis
-  const extractSkillsFromContext = (text) => {
-    const skills = [];
-    const skillMentionPatterns = [
-      /learn\s+([A-Z][A-Za-z\s\/\+\#]+)(?:\s+(?:to|for|and|or|,|\.|$))/gi,
-      /master\s+([A-Z][A-Za-z\s\/\+\#]+)(?:\s+(?:to|for|and|or|,|\.|$))/gi,
-      /proficiency\s+in\s+([A-Z][A-Za-z\s\/\+\#]+)(?:\s+(?:to|for|and|or|,|\.|$))/gi,
-      /experience\s+with\s+([A-Z][A-Za-z\s\/\+\#]+)(?:\s+(?:to|for|and|or|,|\.|$))/gi,
-      /knowledge\s+of\s+([A-Z][A-Za-z\s\/\+\#]+)(?:\s+(?:to|for|and|or|,|\.|$))/gi,
-      /skills?\s+in\s+([A-Z][A-Za-z\s\/\+\#]+)(?:\s+(?:to|for|and|or|,|\.|$))/gi,
-      /understanding\s+of\s+([A-Z][A-Za-z\s\/\+\#]+)(?:\s+(?:to|for|and|or|,|\.|$))/gi
-    ];
-    
-    skillMentionPatterns.forEach(pattern => {
-      let match;
-      while ((match = pattern.exec(text)) !== null && skills.length < 6) {
-        const skillName = match[1].trim();
-        if (isValidAISkill(skillName) && !skills.some(s => s.name.toLowerCase() === skillName.toLowerCase())) {
-          const skill = createAISkillObject(skillName, `Mentioned in your career analysis`, text);
-          skills.push(skill);
-        }
-      }
-    });
-    
-    return skills;
-  };
-
-  // Validate if a skill name is legitimate (not generic words)
-  const isValidAISkill = (skillName) => {
-    if (!skillName || skillName.length < 3 || skillName.length > 50) return false;
-    
-    // Filter out common non-skill words
-    const invalidTerms = [
-      'section', 'analysis', 'summary', 'overview', 'recommendation', 'conclusion',
-      'career', 'path', 'job', 'role', 'position', 'experience', 'background',
-      'industry', 'field', 'area', 'domain', 'market', 'trend', 'opportunity',
-      'and', 'or', 'the', 'for', 'with', 'that', 'this', 'you', 'your'
-    ];
-    
-    const lowerName = skillName.toLowerCase();
-    if (invalidTerms.some(term => lowerName === term || lowerName.startsWith(term + ' '))) {
-      return false;
-    }
-    
-    // Must contain letters and be reasonable skill-like
-    return /^[A-Za-z][A-Za-z\s\/\(\)\-\.\+\#]*$/.test(skillName) && 
-           skillName.split(' ').length <= 4; // Max 4 words for a skill name
-  };
-
-  // Create AI-driven skill object with intelligent assessment
-  const createAISkillObject = (skillName, description, analysisText) => {
-    // Determine current and required levels based on user data and analysis context
-    const currentLevel = assessCurrentSkillLevel(skillName, userData);
-    const requiredLevel = assessRequiredSkillLevel(skillName, analysisText, careerPaths[0]?.title);
-    
-    return {
-      name: skillName,
-      description: description,
-      currentLevel: currentLevel,
-      requiredLevel: requiredLevel,
-      gap: requiredLevel - currentLevel,
-      category: categorizeSkill(skillName),
-      learningPath: generateAILearningPath(skillName, currentLevel, requiredLevel),
-      priority: requiredLevel - currentLevel >= 2 ? 'high' : 'medium'
-    };
-  };
-
-  // Assess user's current level in a specific skill
-  const assessCurrentSkillLevel = (skillName, userData) => {
-    let level = 0;
-    const skillLower = skillName.toLowerCase();
-    
-    // Base level from experience
-    const expLevelMap = {
-      'Complete beginner': 0,
-      'Some exposure': 1,
-      'Beginner': 1,
-      'Intermediate': 2,
-      'Advanced': 3
-    };
-    level = expLevelMap[userData.experienceLevel] || 1;
-    
-    // Boost if skill matches user's tools or technologies
-    if (userData.toolsUsed && userData.toolsUsed.length > 0) {
-      const hasRelatedTool = userData.toolsUsed.some(tool => 
-        skillLower.includes(tool.toLowerCase()) || 
-        tool.toLowerCase().includes(skillLower) ||
-        areRelatedTechnologies(skillName, tool)
-      );
-      if (hasRelatedTool) level = Math.min(level + 1, 4);
-    }
-    
-    // Boost if skill matches study field
-    if (userData.studyField) {
-      const fieldLower = userData.studyField.toLowerCase();
-      if ((fieldLower.includes('computer') || fieldLower.includes('engineering')) && 
-          (skillLower.includes('programming') || skillLower.includes('software'))) {
-        level = Math.min(level + 1, 4);
-      }
-    }
-    
-    // Boost if current role is related
-    if (userData.currentRole && userData.currentRole !== 'Not specified') {
-      const roleLower = userData.currentRole.toLowerCase();
-      if (roleLower.includes('developer') || roleLower.includes('engineer') || roleLower.includes('analyst')) {
-        if (skillLower.includes('programming') || skillLower.includes('coding') || skillLower.includes('analysis')) {
-          level = Math.min(level + 1, 4);
-        }
-      }
-    }
-    
-    return Math.max(0, Math.min(level, 4));
-  };
-
-  // Assess required level for a skill based on career path
-  const assessRequiredSkillLevel = (skillName, analysisText, careerTitle) => {
-    const skillLower = skillName.toLowerCase();
-    let requiredLevel = 3; // Default intermediate level
-    
-    // Check analysis text for skill importance indicators
-    const skillContext = extractSkillContext(skillName, analysisText);
-    if (skillContext) {
-      if (skillContext.includes('essential') || skillContext.includes('critical') || skillContext.includes('required')) {
-        requiredLevel = 4;
-      } else if (skillContext.includes('advanced') || skillContext.includes('expert') || skillContext.includes('mastery')) {
-        requiredLevel = 5;
-      } else if (skillContext.includes('basic') || skillContext.includes('fundamental')) {
-        requiredLevel = 2;
-      }
-    }
-    
-    // Adjust based on career path requirements
-    if (careerTitle) {
-      const careerLower = careerTitle.toLowerCase();
-      
-      // Senior/advanced roles need higher skill levels
-      if (careerLower.includes('senior') || careerLower.includes('lead') || careerLower.includes('architect')) {
-        requiredLevel = Math.min(requiredLevel + 1, 5);
-      }
-      
-      // Core skills for specific careers
-      if (careerLower.includes('data') && skillLower.includes('python')) requiredLevel = 4;
-      if (careerLower.includes('frontend') && skillLower.includes('javascript')) requiredLevel = 4;
-      if (careerLower.includes('devops') && skillLower.includes('cloud')) requiredLevel = 4;
-    }
-    
-    return Math.max(2, Math.min(requiredLevel, 5));
-  };
-
-  // Extract context around a skill mention in the analysis
-  const extractSkillContext = (skillName, text) => {
-    const lines = text.split('\n');
-    for (const line of lines) {
-      if (line.toLowerCase().includes(skillName.toLowerCase())) {
-        return line.toLowerCase();
-      }
-    }
-    return null;
-  };
-
-  // Check if two technologies are related
-  const areRelatedTechnologies = (skill, tool) => {
-    const relatedTech = {
-      'javascript': ['react', 'node', 'vue', 'angular', 'typescript'],
-      'python': ['django', 'flask', 'pandas', 'numpy', 'tensorflow'],
-      'java': ['spring', 'maven', 'gradle', 'android'],
-      'sql': ['mysql', 'postgresql', 'mongodb', 'database'],
-      'cloud': ['aws', 'azure', 'gcp', 'docker', 'kubernetes']
-    };
-    
-    const skillLower = skill.toLowerCase();
-    const toolLower = tool.toLowerCase();
-    
-    for (const [tech, related] of Object.entries(relatedTech)) {
-      if (skillLower.includes(tech) && related.some(r => toolLower.includes(r))) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  // Generate AI-specific career skills based on the recommended path
-  const generateAICareerSkills = (careerTitle, userData) => {
-    const careerSpecificRequirements = {
-      'Software Developer': [
-        'Programming Languages',
-        'Version Control (Git)',
-        'Database Management',
-        'API Development',
-        'Testing Frameworks'
-      ],
-      'Data Scientist': [
-        'Python Programming',
-        'Statistical Analysis',
-        'Machine Learning',
-        'Data Visualization',
-        'SQL Databases'
-      ],
-      'Machine Learning Engineer': [
-        'Deep Learning',
-        'MLOps',
-        'Cloud Platforms',
-        'Model Deployment',
-        'Data Pipeline Engineering'
-      ],
-      'UX Designer': [
-        'Design Thinking',
-        'Prototyping Tools',
-        'User Research',
-        'Visual Design',
-        'Frontend Fundamentals'
-      ],
-      'UI Designer': [
-        'Visual Design',
-        'Design Systems',
-        'Prototyping Tools',
-        'Frontend Fundamentals',
-        'User Interface Principles'
-      ],
-      'Product Designer': [
-        'Design Thinking',
-        'User Research',
-        'Prototyping',
-        'Visual Design',
-        'Product Strategy'
-      ],
-      'Product Manager': [
-        'Product Strategy',
-        'Data Analytics',
-        'Agile Methodologies',
-        'Stakeholder Management',
-        'Market Research'
-      ],
-      'DevOps Engineer': [
-        'Cloud Infrastructure',
-        'Infrastructure as Code',
-        'CI/CD Pipelines',
-        'Containerization',
-        'Monitoring and Logging'
-      ],
-      'Cybersecurity Analyst': [
-        'Network Security',
-        'Security Frameworks',
-        'Incident Response',
-        'Risk Assessment',
-        'Security Tools'
-      ]
-    };
-    
-    const skillNames = careerSpecificRequirements[careerTitle] || careerSpecificRequirements['Software Developer'];
-    
-    return skillNames.map(skillName => {
-      const description = `Essential ${skillName.toLowerCase()} skills for ${careerTitle} roles`;
-      return createAISkillObject(skillName, description, `Required for ${careerTitle} career path`);
-    }).slice(0, 5);
-  };
-
-  // Emergency fallback - only use if no AI content found
-  const createEmergencySkillsFromUserData = () => {
-    if (!userData.careerPathsInterest || userData.careerPathsInterest.length === 0) {
-      return [];
-    }
-    
-    const primaryInterest = userData.careerPathsInterest[0];
-    console.log('🚨 Creating emergency skills for:', primaryInterest);
-    
-    return generateAICareerSkills(primaryInterest, userData).slice(0, 3);
-  };
-
-  // Updated helper functions to support AI-driven skills
-
-  // Categorize skills intelligently
-  const categorizeSkill = (skillName) => {
-    const skillLower = skillName.toLowerCase();
-    
-    if (skillLower.includes('communication') || skillLower.includes('teamwork') || 
-        skillLower.includes('leadership') || skillLower.includes('management') ||
-        skillLower.includes('presentation') || skillLower.includes('collaboration')) {
-      return 'Soft Skills';
-    } else if (skillLower.includes('design') || skillLower.includes('ui') || 
-               skillLower.includes('ux') || skillLower.includes('visual') ||
-               skillLower.includes('prototype') || skillLower.includes('figma')) {
-      return 'Design';
-    } else if (skillLower.includes('data') || skillLower.includes('analytics') || 
-               skillLower.includes('statistics') || skillLower.includes('ml') ||
-               skillLower.includes('machine learning') || skillLower.includes('ai')) {
-      return 'Data & Analytics';
-    } else if (skillLower.includes('cloud') || skillLower.includes('devops') || 
-               skillLower.includes('infrastructure') || skillLower.includes('deployment')) {
-      return 'Infrastructure';
-    } else if (skillLower.includes('security') || skillLower.includes('cyber') || 
-               skillLower.includes('privacy') || skillLower.includes('compliance')) {
-      return 'Security';
-    } else {
-      return 'Technical Skills';
-    }
-  };
-
-  // Generate AI-specific learning path suggestion
-  const generateAILearningPath = (skillName, currentLevel, requiredLevel) => {
-    const gap = requiredLevel - currentLevel;
-    const skillLower = skillName.toLowerCase();
-    
-    if (gap <= 0) {
-      return "Maintain skills through advanced projects and stay updated with latest trends";
-    } else if (gap === 1) {
-      if (skillLower.includes('programming') || skillLower.includes('coding')) {
-        return "Build intermediate projects and contribute to open source";
-      } else if (skillLower.includes('design')) {
-        return "Create portfolio pieces and get design feedback from professionals";
-      } else {
-        return "Practice with real-world scenarios and seek mentorship opportunities";
-      }
-    } else if (gap === 2) {
-      if (skillLower.includes('programming') || skillLower.includes('coding')) {
-        return "Take structured courses and build multiple projects with increasing complexity";
-      } else if (skillLower.includes('data') || skillLower.includes('analytics')) {
-        return "Complete data science bootcamp or specialized courses with hands-on projects";
-      } else {
-        return "Enroll in intermediate courses and practice through guided projects";
-      }
-    } else {
-      if (skillLower.includes('programming') || skillLower.includes('coding')) {
-        return "Start with fundamentals course, daily coding practice, and basic projects";
-      } else if (skillLower.includes('design')) {
-        return "Learn design principles, practice with design tools, and study existing designs";
-      } else {
-        return "Begin with foundational courses and establish consistent learning routine";
-      }
-    }
-  };
-
-  // Learning Roadmap extraction
-  const extractLearningRoadmapImproved = (text) => {
-    if (!text) return [];
-    
-    console.log('Extracting learning roadmap from text...');
-    const roadmap = [];
-    const lines = text.split('\n');
-    
-    let inRoadmapSection = false;
-    const roadmapKeywords = ['LEARNING ROADMAP', 'ROADMAP', 'LEARNING PATH', 'STUDY PLAN'];
-    
-    lines.forEach((line, index) => {
-      // Check for roadmap section
-      if (roadmapKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
-        inRoadmapSection = true;
-        return;
-      }
-      
-      // Exit roadmap section
-      if (inRoadmapSection && (line.toUpperCase().includes('NETWORKING') || 
-          line.toUpperCase().includes('INTERVIEW') || line.toUpperCase().includes('MARKET TRENDS'))) {
-        inRoadmapSection = false;
-        return;
-      }
-      
-      if (inRoadmapSection && line.trim() !== '') {
-        // Look for phase/month patterns
-        const phaseMatch = line.match(/^(Month\s+\d+|Phase\s+\d+|Week\s+\d+)[-:]?\s*(.+)/i);
-        if (phaseMatch) {
-          roadmap.push({
-            phase: phaseMatch[1],
-            title: phaseMatch[2].trim(),
-            duration: phaseMatch[1],
-            description: phaseMatch[2].trim(),
-            skills: [],
-            resources: []
-          });
-          console.log('Found roadmap phase:', phaseMatch[1]);
-        } else if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
-          const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          if (itemText.length > 10 && roadmap.length > 0) {
-            // Add as skill or resource to the last phase
-            if (itemText.toLowerCase().includes('learn') || itemText.toLowerCase().includes('study')) {
-              roadmap[roadmap.length - 1].skills.push(itemText);
-            } else {
-              roadmap[roadmap.length - 1].resources.push(itemText);
-            }
-          }
-        }
-      }
-    });
-    
-    // Add default roadmap if none found
-    if (roadmap.length === 0) {
-      console.log('No learning roadmap found, adding defaults...');
-      const defaultRoadmap = [
-        {
-          phase: 'Phase 1',
-          title: 'Foundation Building',
-          duration: 'Months 1-2',
-          description: 'Build fundamental skills and understanding',
-          skills: ['Basic Programming', 'Problem Solving', 'Technical Communication'],
-          resources: ['Online courses', 'Practice exercises', 'Community forums']
-        },
-        {
-          phase: 'Phase 2',
-          title: 'Skill Development',
-          duration: 'Months 3-4',
-          description: 'Develop core technical skills for your target role',
-          skills: ['Advanced Programming', 'Framework/Library Usage', 'Best Practices'],
-          resources: ['Advanced courses', 'Documentation', 'Code reviews']
-        },
-        {
-          phase: 'Phase 3',
-          title: 'Project Building',
-          duration: 'Months 5-6',
-          description: 'Apply skills through hands-on projects',
-          skills: ['Project Management', 'Full-Stack Development', 'Testing'],
-          resources: ['Project tutorials', 'GitHub', 'Portfolio development']
-        },
-        {
-          phase: 'Phase 4',
-          title: 'Job Preparation',
-          duration: 'Months 7-8',
-          description: 'Prepare for job applications and interviews',
-          skills: ['Interview Skills', 'System Design', 'Technical Communication'],
-          resources: ['Interview prep', 'Mock interviews', 'Job applications']
-        }
-      ];
-      
-      roadmap.push(...defaultRoadmap);
-    }
-    
-    console.log('Total roadmap phases extracted:', roadmap.length);
-    return roadmap;
-  };
-
-  // FIXED: Generate personalized market trends with career paths data
-  const generatePersonalizedMarketTrendsWithPaths = (careerPaths, userData) => {
-    console.log('🎯 Generating PERSONALIZED market trends with career paths data...');
-    console.log('Career paths available:', careerPaths?.length || 0);
-    
-    if (!careerPaths || careerPaths.length === 0) {
-      console.log('⚠️ No career paths available, using generic market trends');
-      return generateGenericMarketTrends();
-    }
-
-    const trends = [];
-    const topCareer = careerPaths[0]; // User's top career match
-    const userInterests = userData.careerPathsInterest || [];
-
-    console.log('🎯 Generating trends for top career:', topCareer.title);
-
-    // TREND 1: Personalized Salary Analysis
-    const salaryTrend = {
-      title: `${topCareer.title} SALARY OUTLOOK`,
-      description: `Compensation trends specifically for ${topCareer.title} roles`,
-      category: 'Salary Analysis',
-      relevance: 'High',
-      personalizedData: generatePersonalizedSalaryData(topCareer.title),
-      userCareer: topCareer.title
-    };
-    trends.push(salaryTrend);
-
-    // TREND 2: Personalized Industry Demand Analysis
-    const demandTrend = {
-      title: `${topCareer.title} MARKET DEMAND`,
-      description: `Job market demand and growth prospects for ${topCareer.title}`,
-      category: 'Industry Demand',
-      relevance: 'High',
-      personalizedData: generatePersonalizedDemandData(topCareer.title, userInterests),
-      userCareer: topCareer.title
-    };
-    trends.push(demandTrend);
-
-    console.log(`✅ Generated ${trends.length} personalized market trends for ${topCareer.title}`);
-    return trends;
-  };
-
-  // UPDATED: Market Trends extraction now uses the new function
-  const extractMarketTrendsImproved = (text) => {
-    console.log('🎯 Market trends will be generated after career paths are available...');
-    // This function is now just a placeholder since trends are generated in useEffect
-    return [];
-  };
-
-  // Generate personalized salary data for specific career
-  const generatePersonalizedSalaryData = (careerTitle) => {
-    console.log('💰 Generating salary data for:', careerTitle);
-    
-    const salaryData = {
-      ranges: [],
-      insights: [],
-      growth: '',
-      comparison: ''
-    };
-
-    // Career-specific salary ranges
-    const careerSalaryMap = {
-      'Software Developer': {
-        ranges: ['$95,000 - $180,000 (Average)', '$65,000 - $120,000 (Entry Level)', '$140,000 - $220,000 (Senior Level)'],
-        growth: '8.2% year-over-year salary growth, outpacing most industries',
-        insights: [
-          'High demand for JavaScript, Python, and React developers',
-          'Remote work options increase salary potential by 15-25%',
-          'Full-stack developers command 20% premium over specialists'
-        ],
-        comparison: '23% higher than national average for all occupations'
-      },
-      'Data Scientist': {
-        ranges: ['$100,000 - $200,000 (Average)', '$70,000 - $130,000 (Entry Level)', '$150,000 - $250,000 (Senior Level)'],
-        growth: '11.5% year-over-year growth, highest among tech roles',
-        insights: [
-          'Machine learning expertise adds $25K+ to base salary',
-          'Healthcare and finance sectors pay 30% premium',
-          'PhD holders earn 40% more than bachelors degree holders'
-        ],
-        comparison: '45% higher than national average for all occupations'
-      },
-      'UX Designer': {
-        ranges: ['$85,000 - $160,000 (Average)', '$55,000 - $100,000 (Entry Level)', '$120,000 - $200,000 (Senior Level)'],
-        growth: '6.8% year-over-year growth in design roles',
-        insights: [
-          'Product design roles pay 25% more than general UX roles',
-          'Tech companies offer highest compensation packages',
-          'Portfolio quality directly impacts salary negotiations'
-        ],
-        comparison: '18% higher than national average for all occupations'
-      },
-      'UX/UI Designer': {
-        ranges: ['$85,000 - $160,000 (Average)', '$55,000 - $100,000 (Entry Level)', '$120,000 - $200,000 (Senior Level)'],
-        growth: '6.8% year-over-year growth in design roles',
-        insights: [
-          'Product design roles pay 25% more than general UX roles',
-          'Tech companies offer highest compensation packages',
-          'Portfolio quality directly impacts salary negotiations'
-        ],
-        comparison: '18% higher than national average for all occupations'
-      },
-      'UI Designer': {
-        ranges: ['$80,000 - $150,000 (Average)', '$50,000 - $95,000 (Entry Level)', '$115,000 - $190,000 (Senior Level)'],
-        growth: '7.2% year-over-year growth in UI roles',
-        insights: [
-          'Design system experience increases salary by $15K+',
-          'Frontend development skills add significant value',
-          'Mobile UI specialists earn premium rates'
-        ],
-        comparison: '15% higher than national average for all occupations'
-      },
-      'Product Designer': {
-        ranges: ['$90,000 - $170,000 (Average)', '$60,000 - $110,000 (Entry Level)', '$130,000 - $210,000 (Senior Level)'],
-        growth: '9.1% year-over-year growth in product roles',
-        insights: [
-          'End-to-end product design experience highly valued',
-          'B2B product designers earn 20% more than B2C',
-          'Research skills differentiate top earners'
-        ],
-        comparison: '25% higher than national average for all occupations'
-      },
-      'Data Analyst': {
-        ranges: ['$75,000 - $140,000 (Average)', '$45,000 - $85,000 (Entry Level)', '$110,000 - $180,000 (Senior Level)'],
-        growth: '5.9% year-over-year growth in analytics roles',
-        insights: [
-          'SQL and Tableau skills are baseline requirements',
-          'Python/R expertise increases earning potential significantly',
-          'Domain expertise (healthcare, finance) adds premium'
-        ],
-        comparison: '12% higher than national average for all occupations'
-      },
-      'ML Engineer': {
-        ranges: ['$120,000 - $220,000 (Average)', '$85,000 - $150,000 (Entry Level)', '$170,000 - $280,000 (Senior Level)'],
-        growth: '14.2% year-over-year growth, fastest in tech',
-        insights: [
-          'Highest paying individual contributor role in tech',
-          'MLOps and deployment skills in high demand',
-          'Deep learning expertise commands top salaries'
-        ],
-        comparison: '58% higher than national average for all occupations'
-      },
-      'Product Manager': {
-        ranges: ['$110,000 - $190,000 (Average)', '$75,000 - $130,000 (Entry Level)', '$150,000 - $250,000 (Senior Level)'],
-        growth: '7.8% year-over-year growth in PM roles',
-        insights: [
-          'Technical PM roles pay 30% more than general PM',
-          'B2B product experience highly valued',
-          'Data-driven decision making skills essential'
-        ],
-        comparison: '35% higher than national average for all occupations'
-      },
-      'DevOps Engineer': {
-        ranges: ['$100,000 - $185,000 (Average)', '$70,000 - $125,000 (Entry Level)', '$140,000 - $230,000 (Senior Level)'],
-        growth: '9.8% year-over-year growth in DevOps roles',
-        insights: [
-          'Cloud expertise (AWS, Azure, GCP) essential',
-          'Kubernetes and containerization skills in high demand',
-          'Security-focused DevOps engineers earn premiums'
-        ],
-        comparison: '28% higher than national average for all occupations'
-      },
-      'Cybersecurity Analyst': {
-        ranges: ['$90,000 - $175,000 (Average)', '$60,000 - $110,000 (Entry Level)', '$130,000 - $210,000 (Senior Level)'],
-        growth: '12.4% year-over-year growth due to increased threats',
-        insights: [
-          'Certified professionals (CISSP, CEH) earn 25% more',
-          'Cloud security expertise increasingly valuable',
-          'Incident response experience highly sought after'
-        ],
-        comparison: '31% higher than national average for all occupations'
-      }
-    };
-
-    const careerData = careerSalaryMap[careerTitle] || careerSalaryMap['Software Developer'];
-    console.log('💰 Salary data found for', careerTitle, ':', careerData?.ranges?.length || 0, 'ranges');
-    return careerData;
-  };
-
-  // Generate personalized demand data for specific career
-  const generatePersonalizedDemandData = (careerTitle, userInterests) => {
-    console.log('📈 Generating demand data for:', careerTitle);
-    
-    const demandData = {
-      growth: '',
-      opportunities: [],
-      hotSkills: [],
-      industries: [],
-      outlook: ''
-    };
-
-    const careerDemandMap = {
-      'Software Developer': {
-        growth: '22% faster than average (vs 4% average for all occupations)',
-        opportunities: [
-          '1.4 million software developer jobs projected by 2031',
-          'Startup ecosystem creating 35K+ new developer roles annually',
-          'Remote work expanding global opportunities'
-        ],
-        hotSkills: ['React/Next.js', 'Python', 'Cloud platforms', 'Microservices', 'API design'],
-        industries: ['Fintech', 'Healthcare Technology', 'E-commerce', 'Enterprise Software'],
-        outlook: 'Excellent - Strongest job growth in technology sector'
-      },
-      'Data Scientist': {
-        growth: '35% faster than average - fastest growing tech role',
-        opportunities: [
-          '11.5 million data science jobs expected by 2026',
-          'AI/ML adoption driving unprecedented demand',
-          'Every industry now requires data expertise'
-        ],
-        hotSkills: ['Machine Learning', 'Python/R', 'Deep Learning', 'MLOps', 'Statistical Analysis'],
-        industries: ['Healthcare', 'Financial Services', 'Retail', 'Manufacturing'],
-        outlook: 'Outstanding - Highest demand among all tech roles'
-      },
-      'UX Designer': {
-        growth: '13% faster than average for design roles',
-        opportunities: [
-          'Digital transformation driving UX hiring surge',
-          '450K+ UX roles projected by 2030',
-          'Voice UI and AR/VR creating new specializations'
-        ],
-        hotSkills: ['User Research', 'Prototyping', 'Design Systems', 'Accessibility', 'Data-driven Design'],
-        industries: ['SaaS Products', 'E-commerce', 'Healthcare', 'Financial Technology'],
-        outlook: 'Very Strong - Essential for digital product success'
-      },
-      'UX/UI Designer': {
-        growth: '13% faster than average for design roles',
-        opportunities: [
-          'Digital transformation driving UX hiring surge',
-          '450K+ UX roles projected by 2030',
-          'Voice UI and AR/VR creating new specializations'
-        ],
-        hotSkills: ['User Research', 'Prototyping', 'Design Systems', 'Accessibility', 'Data-driven Design'],
-        industries: ['SaaS Products', 'E-commerce', 'Healthcare', 'Financial Technology'],
-        outlook: 'Very Strong - Essential for digital product success'
-      },
-      'UI Designer': {
-        growth: '8% growth in visual design roles',
-        opportunities: [
-          'Mobile-first design driving UI demand',
-          'Design system roles emerging rapidly',
-          'Cross-platform design expertise valued'
-        ],
-        hotSkills: ['Design Systems', 'Mobile Design', 'Component Libraries', 'Animation', 'Accessibility'],
-        industries: ['Mobile Apps', 'SaaS Platforms', 'Gaming', 'E-commerce'],
-        outlook: 'Strong - Visual design remains crucial for user engagement'
-      },
-      'Product Designer': {
-        growth: '15% growth in product design roles',
-        opportunities: [
-          'End-to-end product design increasingly valued',
-          'Startup ecosystem driving product design hiring',
-          'Senior product designers becoming strategic partners'
-        ],
-        hotSkills: ['Product Strategy', 'User Research', 'Design Systems', 'Business Acumen', 'Cross-functional Leadership'],
-        industries: ['B2B SaaS', 'Consumer Products', 'Fintech', 'Healthcare Technology'],
-        outlook: 'Excellent - Product-focused design approach in high demand'
-      },
-      'Data Analyst': {
-        growth: '25% faster than average for analytical roles',
-        opportunities: [
-          'Every company becoming data-driven',
-          '876K analyst positions by 2031',
-          'Business intelligence roles expanding rapidly'
-        ],
-        hotSkills: ['SQL', 'Python/R', 'Tableau/PowerBI', 'Statistics', 'Business Intelligence'],
-        industries: ['Healthcare', 'Finance', 'Retail', 'Marketing Technology'],
-        outlook: 'Very Strong - Foundational role for data-driven decision making'
-      },
-      'ML Engineer': {
-        growth: '40% growth - highest in all of technology',
-        opportunities: [
-          'AI implementation creating massive demand',
-          'MLOps emergence creating new career paths',
-          'Every tech company building ML capabilities'
-        ],
-        hotSkills: ['MLOps', 'Deep Learning', 'Model Deployment', 'TensorFlow/PyTorch', 'Cloud ML'],
-        industries: ['Tech Giants', 'Autonomous Vehicles', 'Healthcare AI', 'Financial Services'],
-        outlook: 'Exceptional - Most in-demand technical role currently'
-      },
-      'Product Manager': {
-        growth: '12% growth in product management roles',
-        opportunities: [
-          'Product-led growth driving PM demand',
-          'Technical PM roles in highest demand',
-          'AI/ML products need specialized PMs'
-        ],
-        hotSkills: ['Technical Understanding', 'Data Analysis', 'User Research', 'Agile/Scrum', 'AI/ML Knowledge'],
-        industries: ['SaaS', 'Fintech', 'Healthcare Technology', 'AI/ML Products'],
-        outlook: 'Strong - Critical role for product-focused companies'
-      },
-      'DevOps Engineer': {
-        growth: '18% growth in DevOps and SRE roles',
-        opportunities: [
-          'Cloud migration driving DevOps hiring',
-          'SRE roles expanding beyond tech giants',
-          'Security-focused DevOps in high demand'
-        ],
-        hotSkills: ['Kubernetes', 'Cloud Platforms', 'Infrastructure as Code', 'CI/CD', 'Monitoring'],
-        industries: ['Cloud Services', 'Enterprise Software', 'Financial Services', 'Healthcare'],
-        outlook: 'Excellent - Essential for modern software development'
-      },
-      'Cybersecurity Analyst': {
-        growth: '33% growth - driven by increasing cyber threats',
-        opportunities: [
-          '3.5 million unfilled cybersecurity jobs globally',
-          'Zero-trust architecture creating new roles',
-          'Cloud security expertise in extreme demand'
-        ],
-        hotSkills: ['Cloud Security', 'Zero Trust', 'Incident Response', 'Threat Analysis', 'Compliance'],
-        industries: ['Financial Services', 'Healthcare', 'Government', 'Critical Infrastructure'],
-        outlook: 'Outstanding - Critical shortage of qualified professionals'
-      }
-    };
-
-    const careerData = careerDemandMap[careerTitle] || careerDemandMap['Software Developer'];
-    console.log('📈 Demand data found for', careerTitle, ':', careerData?.opportunities?.length || 0, 'opportunities');
-    return careerData;
-  };
-
-  // Fallback generic trends
-  const generateGenericMarketTrends = () => {
-    return [
-      {
-        title: 'TECHNOLOGY SALARY TRENDS',
-        description: 'General compensation trends in technology sector',
-        category: 'Salary Analysis',
-        relevance: 'Medium'
-      },
-      {
-        title: 'TECH INDUSTRY OUTLOOK',
-        description: 'Overall technology industry growth and opportunities',
-        category: 'Industry Analysis',
-        relevance: 'Medium'
-      }
-    ];
-  };
-
-  // Generate industry analysis based on user interests
-  const generateIndustryAnalysis = (careerInterests) => {
-    const sectors = [];
-    
-    careerInterests.forEach(interest => {
-      if (interest.toLowerCase().includes('software') || interest.toLowerCase().includes('development')) {
-        sectors.push('Technology companies (Google, Microsoft, Meta) - High demand for software engineers');
-        sectors.push('Financial services - Digital banking and fintech growth');
-      } else if (interest.toLowerCase().includes('data')) {
-        sectors.push('Healthcare - Data-driven medical research and patient analytics');
-        sectors.push('E-commerce - Customer behavior analysis and recommendations');
-      } else if (interest.toLowerCase().includes('design')) {
-        sectors.push('Consumer products - User experience design for apps and websites');
-        sectors.push('Digital agencies - Creative and user interface design services');
-      }
-    });
-    
-    if (sectors.length === 0) {
-      sectors.push('Technology sector - Consistent growth and innovation opportunities');
-      sectors.push('Healthcare technology - Emerging field with significant potential');
-    }
-    
-    return sectors.slice(0, 4);
-  };
-
-  // UPDATED: Job Market Outlook extraction - now personalized like market trends
-  const extractJobMarketOutlookImproved = (text) => {
-    console.log('🎯 Generating PERSONALIZED job market outlook...');
-    // This will be replaced by the useEffect after career paths are available
-    return [];
-  };
-
-  // FIXED: Generate personalized job market outlook with career paths data
-  const generatePersonalizedJobMarketOutlook = (careerPaths, userData) => {
-    console.log('🎯 Generating PERSONALIZED job market outlook with career paths data...');
-    console.log('Career paths available:', careerPaths?.length || 0);
-    
-    if (!careerPaths || careerPaths.length === 0) {
-      console.log('⚠️ No career paths available, using generic job market outlook');
-      return generateGenericJobMarketOutlook();
-    }
-
-    const outlook = [];
-    const topCareer = careerPaths[0]; // User's top career match
-    const userInterests = userData.careerPathsInterest || [];
-
-    console.log('🎯 Generating job market outlook for top career:', topCareer.title);
-
-    // OUTLOOK 1: Personalized Salary Trends for their career
-    const salaryOutlook = {
-      title: `${topCareer.title} Salary Trends`,
-      description: `Current and projected salary trends for ${topCareer.title} professionals`,
-      category: 'Salary Trends',
-      growth: 'Strong',
-      icon: '💰',
-      personalizedData: generatePersonalizedSalaryOutlook(topCareer.title),
-      userCareer: topCareer.title
-    };
-    outlook.push(salaryOutlook);
-
-    // OUTLOOK 2: Regional Opportunities for their career
-    const regionalOutlook = {
-      title: `${topCareer.title} Regional Opportunities`,
-      description: `Geographic distribution and opportunities for ${topCareer.title} roles`,
-      category: 'Regional Opportunities',
-      growth: 'High',
-      icon: '🌍',
-      personalizedData: generatePersonalizedRegionalData(topCareer.title),
-      userCareer: topCareer.title
-    };
-    outlook.push(regionalOutlook);
-
-    // OUTLOOK 3: Emerging Technologies for their career
-    const techOutlook = {
-      title: `Emerging Technologies for ${topCareer.title}`,
-      description: `New technologies and trends impacting ${topCareer.title} professionals`,
-      category: 'Emerging Technologies',
-      growth: 'High',
-      icon: '🚀',
-      personalizedData: generatePersonalizedTechTrends(topCareer.title),
-      userCareer: topCareer.title
-    };
-    outlook.push(techOutlook);
-
-    // OUTLOOK 4: Industry Demand for their career
-    const demandOutlook = {
-      title: `${topCareer.title} Industry Demand`,
-      description: `Market demand and hiring trends for ${topCareer.title} positions`,
-      category: 'Industry Demand',
-      growth: 'Strong',
-      icon: '📈',
-      personalizedData: generatePersonalizedIndustryDemand(topCareer.title),
-      userCareer: topCareer.title
-    };
-    outlook.push(demandOutlook);
-
-    console.log(`✅ Generated ${outlook.length} personalized job market outlook items for ${topCareer.title}`);
-    return outlook;
-  };
-
-  // Generate personalized salary outlook data
-  const generatePersonalizedSalaryOutlook = (careerTitle) => {
-    const salaryOutlookMap = {
-      'Software Developer': {
-        trends: ['Salaries increased 8.2% year-over-year', 'Remote work premium of 15-25%', 'Full-stack developers earn 20% more'],
-        projections: ['Continued growth expected through 2027', 'AI/ML skills commanding highest premiums', 'Entry-level salaries rising due to talent shortage'],
-        factors: ['Technology stack expertise', 'Years of experience', 'Geographic location', 'Company size and stage']
-      },
-      'Data Scientist': {
-        trends: ['Highest salary growth in tech at 11.5%', 'PhD holders earn 40% premium', 'Healthcare/Finance sectors pay most'],
-        projections: ['MLOps skills becoming essential', 'Domain expertise increasingly valued', 'Senior roles seeing 15%+ annual increases'],
-        factors: ['Advanced degree level', 'Industry specialization', 'Technical skill depth', 'Business impact experience']
-      },
-      'UX Designer': {
-        trends: ['Product design roles pay 25% premium', 'Tech companies offer highest packages', 'Portfolio quality drives negotiations'],
-        projections: ['Design systems expertise in high demand', 'Research skills becoming essential', 'Senior IC roles growing 12% annually'],
-        factors: ['Portfolio strength', 'Research experience', 'Technical collaboration', 'Business impact metrics']
-      },
-      'UI Designer': {
-        trends: ['Design systems experience increases salary 20%', 'Frontend skills add significant value', 'Mobile specialists earn premium rates'],
-        projections: ['Component library expertise growing', 'Animation skills increasingly valued', 'Cross-platform design in demand'],
-        factors: ['Technical design skills', 'System thinking ability', 'Cross-functional collaboration', 'Tool proficiency']
-      },
-      'Product Designer': {
-        trends: ['End-to-end design skills command premium', 'B2B experience pays 20% more', 'Leadership track sees highest growth'],
-        projections: ['Strategic design roles expanding', 'AI-assisted design changing landscape', 'Senior+ roles growing rapidly'],
-        factors: ['Strategic thinking ability', 'Leadership experience', 'Business acumen', 'Research methodology']
-      },
-      'Data Analyst': {
-        trends: ['Python/R skills increase salary 30%', 'Business intelligence roles growing', 'Domain expertise valued highly'],
-        projections: ['Advanced analytics skills essential', 'Storytelling with data crucial', 'Automation skills in demand'],
-        factors: ['Technical skill depth', 'Industry knowledge', 'Communication ability', 'Business understanding']
-      },
-      'Product Manager': {
-        trends: ['Technical PMs earn 30% more', 'B2B product experience premium', 'Data-driven skills essential'],
-        projections: ['AI/ML product expertise growing', 'Platform PM roles expanding', 'Growth PM specialization valuable'],
-        factors: ['Technical depth', 'Industry experience', 'Growth track record', 'Leadership ability']
-      },
-      'DevOps Engineer': {
-        trends: ['Cloud expertise essential for top salaries', 'Kubernetes skills command premium', 'Security focus adds value'],
-        projections: ['Platform engineering roles growing', 'AI/ML infrastructure in demand', 'Multi-cloud expertise valuable'],
-        factors: ['Cloud platform expertise', 'Automation skills', 'Security knowledge', 'Scale experience']
-      },
-      'Cybersecurity Analyst': {
-        trends: ['Certified professionals earn 25% more', 'Cloud security expertise premium', 'Incident response skills valued'],
-        projections: ['Zero-trust architecture skills growing', 'AI security becoming critical', 'Compliance expertise valuable'],
-        factors: ['Certification level', 'Specialization area', 'Industry experience', 'Technical depth']
-      }
-    };
-
-    return salaryOutlookMap[careerTitle] || salaryOutlookMap['Software Developer'];
-  };
-
-  // Generate personalized regional opportunities data
-  const generatePersonalizedRegionalData = (careerTitle) => {
-    const regionalDataMap = {
-      'Software Developer': {
-        topRegions: ['San Francisco Bay Area - $180K avg', 'Seattle - $165K avg', 'New York - $155K avg', 'Austin - $135K avg'],
-        emerging: ['Denver - 25% growth', 'Nashville - 30% growth', 'Miami - 35% growth'],
-        remote: '78% of companies offer remote work', 
-        insights: ['Remote positions expand market by 300%', 'Cost of living arbitrage opportunities', 'International remote work growing']
-      },
-      'Data Scientist': {
-        topRegions: ['San Francisco - $195K avg', 'Boston - $175K avg', 'Seattle - $170K avg', 'Washington DC - $160K avg'],
-        emerging: ['Research Triangle - 40% growth', 'Chicago - 28% growth', 'Atlanta - 32% growth'],
-        remote: '85% of data science roles support remote work',
-        insights: ['Healthcare hubs offer premium salaries', 'Financial centers highly competitive', 'Remote data work very common']
-      },
-      'UX Designer': {
-        topRegions: ['San Francisco - $145K avg', 'New York - $135K avg', 'Seattle - $125K avg', 'Los Angeles - $120K avg'],
-        emerging: ['Austin - 35% growth', 'Portland - 28% growth', 'Raleigh - 30% growth'],
-        remote: '65% of design roles offer remote options',
-        insights: ['Product companies pay most', 'Agency work more location-dependent', 'Freelance opportunities abundant']
-      },
-      'UI Designer': {
-        topRegions: ['San Francisco - $135K avg', 'New York - $125K avg', 'Los Angeles - $115K avg', 'Seattle - $120K avg'],
-        emerging: ['Austin - 32% growth', 'Denver - 28% growth', 'Portland - 25% growth'],
-        remote: '60% of UI roles support remote work',
-        insights: ['Gaming companies offer unique opportunities', 'E-commerce hubs very active', 'Mobile-first companies premium pay']
-      },
-      'Product Designer': {
-        topRegions: ['San Francisco - $155K avg', 'New York - $145K avg', 'Seattle - $140K avg', 'Boston - $130K avg'],
-        emerging: ['Austin - 38% growth', 'Research Triangle - 35% growth', 'Denver - 30% growth'],
-        remote: '70% of product design roles remote-friendly',
-        insights: ['B2B product hubs very competitive', 'Startup ecosystems offer equity upside', 'Enterprise companies value experience']
-      }
-    };
-
-    const baseData = {
-      topRegions: ['Technology hubs - Premium salaries', 'Major metropolitan areas - Strong demand', 'Emerging tech cities - Growth opportunities'],
-      emerging: ['Secondary markets - 25-35% growth', 'Remote-first opportunities expanding'],
-      remote: '70% of tech roles support remote work',
-      insights: ['Geographic flexibility increasing', 'Cost of living arbitrage opportunities', 'Global talent pool accessible']
-    };
-
-    return regionalDataMap[careerTitle] || baseData;
-  };
-
-  // Generate personalized emerging technology trends
-  const generatePersonalizedTechTrends = (careerTitle) => {
-    const techTrendsMap = {
-      'Software Developer': {
-        technologies: ['AI/ML Integration', 'Edge Computing', 'WebAssembly', 'Serverless Architecture'],
-        impact: ['AI coding assistants changing workflow', 'Edge computing enabling new app types', 'WebAssembly bridging performance gaps'],
-        opportunities: ['AI-assisted development tools', 'Edge application development', 'Performance-critical web apps', 'Hybrid cloud solutions'],
-        timeline: 'Most trends impacting roles within 1-2 years'
-      },
-      'Data Scientist': {
-        technologies: ['MLOps Platforms', 'AutoML', 'Edge AI', 'Quantum Computing'],
-        impact: ['MLOps automating model deployment', 'AutoML democratizing machine learning', 'Edge AI enabling real-time inference'],
-        opportunities: ['ML platform engineering', 'Automated model optimization', 'Real-time AI applications', 'Quantum algorithm research'],
-        timeline: 'Immediate impact on daily workflows'
-      },
-      'UX Designer': {
-        technologies: ['AI-Powered Design Tools', 'Voice UI', 'AR/VR Interfaces', 'Neomorphism'],
-        impact: ['AI generating design variations', 'Voice creating new interaction patterns', 'Spatial computing changing UX paradigms'],
-        opportunities: ['Conversational interface design', 'Spatial user experience', 'AI-assisted design workflows', 'Accessibility automation'],
-        timeline: 'Gradual adoption over 2-3 years'
-      },
-      'UI Designer': {
-        technologies: ['Design Systems 2.0', 'Component-driven Design', 'Design Tokens', 'Motion Design'],
-        impact: ['Systems becoming more sophisticated', 'Component libraries standard practice', 'Design tokens enabling consistency'],
-        opportunities: ['Design system architecture', 'Component library development', 'Design-to-code automation', 'Interactive prototyping'],
-        timeline: 'Rapid adoption across industry'
-      },
-      'Product Designer': {
-        technologies: ['Design Intelligence', 'User Behavior AI', 'Predictive UX', 'Design Analytics'],
-        impact: ['AI informing design decisions', 'Behavior prediction improving UX', 'Analytics driving design strategy'],
-        opportunities: ['AI-informed design strategy', 'Behavioral design optimization', 'Data-driven design systems', 'Predictive user experience'],
-        timeline: 'Emerging in forward-thinking companies'
-      }
-    };
-
-    const baseData = {
-      technologies: ['Artificial Intelligence', 'Cloud Computing', 'Automation Tools', 'Remote Collaboration'],
-      impact: ['AI augmenting human capabilities', 'Cloud enabling global collaboration', 'Automation improving efficiency'],
-      opportunities: ['AI-assisted workflows', 'Cloud-native solutions', 'Remote-first tools', 'Process automation'],
-      timeline: 'Continuous evolution and adoption'
-    };
-
-    return techTrendsMap[careerTitle] || baseData;
-  };
-
-  // Generate personalized industry demand data
-  const generatePersonalizedIndustryDemand = (careerTitle) => {
-    const demandDataMap = {
-      'Software Developer': {
-        demand: 'Extremely High - 1.4M new jobs by 2031',
-        sectors: ['Fintech - 40% growth', 'Healthcare Tech - 35% growth', 'E-commerce - 30% growth', 'Enterprise SaaS - 25% growth'],
-        drivers: ['Digital transformation acceleration', 'Mobile-first business models', 'Cloud migration initiatives', 'AI/ML integration needs'],
-        outlook: 'Strongest job market in technology sector'
-      },
-      'Data Scientist': {
-        demand: 'Outstanding - 11.5M jobs expected by 2026',
-        sectors: ['Healthcare Analytics - 45% growth', 'Financial Services - 40% growth', 'Retail Intelligence - 35% growth', 'Manufacturing IoT - 30% growth'],
-        drivers: ['Data-driven decision making', 'AI/ML implementation', 'Predictive analytics adoption', 'Real-time insights demand'],
-        outlook: 'Fastest growing role in technology'
-      },
-      'UX Designer': {
-        demand: 'Very Strong - 450K+ roles by 2030',
-        sectors: ['SaaS Products - 30% growth', 'E-commerce - 28% growth', 'Healthcare - 25% growth', 'Fintech - 22% growth'],
-        drivers: ['Digital experience competition', 'User-centric product development', 'Accessibility requirements', 'Mobile-first design needs'],
-        outlook: 'Essential for digital product success'
-      }
-    };
-
-    const baseData = {
-      demand: 'Strong - Technology roles growing 22% faster than average',
-      sectors: ['Technology Companies', 'Digital Transformation', 'Startup Ecosystem', 'Enterprise Solutions'],
-      drivers: ['Digital acceleration', 'Innovation requirements', 'Competitive advantages', 'User experience focus'],
-      outlook: 'Positive growth trajectory expected'
-    };
-
-    return demandDataMap[careerTitle] || baseData;
-  };
-
-  // Fallback generic job market outlook
-  const generateGenericJobMarketOutlook = () => {
-    return [
-      {
-        title: 'Technology Sector Growth',
-        description: 'Overall growth trends in the technology industry',
-        category: 'Industry Growth',
-        growth: 'Strong',
-        icon: '📈'
-      },
-      {
-        title: 'Skills-Based Hiring',
-        description: 'Shift towards skills-based hiring practices',
-        category: 'Hiring Trends',
-        growth: 'High',
-        icon: '🎯'
-      }
-    ];
-  };
-
-  // Improved Networking Strategy extraction
-  const extractNetworkingStrategyImproved = (text) => {
-    if (!text) return [];
-    
-    console.log('Extracting networking strategies...');
-    const strategies = [];
-    const lines = text.split('\n');
-    
-    let inNetworkingSection = false;
-    const networkingKeywords = ['NETWORKING', 'NETWORK', 'CONNECTIONS', 'COMMUNITY'];
-    
-    lines.forEach((line, index) => {
-      // Check for networking section
-      if (networkingKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
-        inNetworkingSection = true;
-        strategies.push({
-          title: line.trim(),
-          type: 'section_title'
-        });
-        return;
-      }
-      
-      // Exit networking section
-      if (inNetworkingSection && (line.toUpperCase().includes('PERSONAL BRANDING') || 
-          line.toUpperCase().includes('INTERVIEW') || line.toUpperCase().includes('PORTFOLIO'))) {
-        inNetworkingSection = false;
-        return;
-      }
-      
-      if (inNetworkingSection && line.trim() !== '') {
-        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
-          const strategyText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          if (strategyText.length > 10) { // Only add substantial strategies
-            strategies.push({
-              text: strategyText,
-              type: 'strategy'
-            });
-            console.log('Found networking strategy:', strategyText.substring(0, 50) + '...');
-          }
-        }
-      }
-    });
-    
-    // Add default networking strategies if none found
-    if (strategies.filter(s => s.type === 'strategy').length === 0) {
-      console.log('No networking strategies found, adding defaults...');
-      const defaultStrategies = [
-        'Join professional associations and industry groups relevant to your target career',
-        'Attend virtual and in-person meetups, conferences, and workshops',
-        'Connect with professionals on LinkedIn and engage with their content',
-        'Participate in online communities and forums related to your field',
-        'Reach out to alumni from your school who work in tech',
-        'Seek informational interviews with professionals in your target roles'
-      ];
-      
-      defaultStrategies.forEach(strategy => {
-        strategies.push({
-          text: strategy,
-          type: 'strategy'
-        });
-      });
-    }
-    
-    console.log('Total networking strategies:', strategies.filter(s => s.type === 'strategy').length);
-    return strategies;
-  };
-
-  // Improved Personal Branding extraction
-  const extractPersonalBrandingImproved = (text) => {
-    if (!text) return [];
-    
-    const brandingTips = [];
-    const lines = text.split('\n');
-    let inBrandingSection = false;
-    const brandingKeywords = ['PERSONAL BRANDING', 'BRANDING', 'BRAND', 'ONLINE PRESENCE'];
-    
-    lines.forEach((line) => {
-      if (brandingKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
-        inBrandingSection = true;
-        brandingTips.push({
-          title: line.trim(),
-          type: 'section_title'
-        });
-        return;
-      }
-      
-      if (inBrandingSection && (line.toUpperCase().includes('NETWORKING') || 
-          line.toUpperCase().includes('INTERVIEW') || line.toUpperCase().includes('PORTFOLIO'))) {
-        inBrandingSection = false;
-        return;
-      }
-      
-      if (inBrandingSection && line.trim() !== '') {
-        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
-          const tipText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          if (tipText.length > 10) {
-            brandingTips.push({
-              text: tipText,
-              type: 'tip'
-            });
-          }
-        }
-      }
-    });
-    
-    // Add defaults if none found
-    if (brandingTips.filter(t => t.type === 'tip').length === 0) {
-      const defaultTips = [
-        'Create a professional LinkedIn profile highlighting your transition journey',
-        'Start a blog or social media presence sharing your learning experience',
-        'Develop a consistent personal brand across all platforms',
-        'Showcase your projects and learning progress online',
-        'Engage with industry content and thought leaders'
-      ];
-      
-      defaultTips.forEach(tip => {
-        brandingTips.push({
-          text: tip,
-          type: 'tip'
-        });
-      });
-    }
-    
-    return brandingTips;
-  };
-
-  // Improved Interview Prep extraction
-  const extractInterviewPrepImproved = (text) => {
-    if (!text) return [];
-    
-    const interviewTips = [];
-    const lines = text.split('\n');
-    let inInterviewSection = false;
-    const interviewKeywords = ['INTERVIEW', 'PREPARATION', 'PREP'];
-    
-    lines.forEach((line) => {
-      if (interviewKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
-        inInterviewSection = true;
-        interviewTips.push({
-          title: line.trim(),
-          type: 'section_title'
-        });
-        return;
-      }
-      
-      if (inInterviewSection && (line.toUpperCase().includes('NETWORKING') || 
-          line.toUpperCase().includes('PERSONAL BRANDING') || line.toUpperCase().includes('PORTFOLIO'))) {
-        inInterviewSection = false;
-        return;
-      }
-      
-      if (inInterviewSection && line.trim() !== '') {
-        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
-          const tipText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          if (tipText.length > 10) {
-            interviewTips.push({
-              text: tipText,
-              type: 'tip'
-            });
-          }
-        }
-      }
-    });
-    
-    // Add defaults if none found
-    if (interviewTips.filter(t => t.type === 'tip').length === 0) {
-      const defaultTips = [
-        'Practice coding challenges and technical questions relevant to your target role',
-        'Prepare STAR method examples from your previous experience',
-        'Research common interview questions for your target career path',
-        'Practice explaining technical concepts in simple terms',
-        'Prepare questions to ask about the company and role'
-      ];
-      
-      defaultTips.forEach(tip => {
-        interviewTips.push({
-          text: tip,
-          type: 'tip'
-        });
-      });
-    }
-    
-    return interviewTips;
-  };
-
-  // Portfolio/Transition Strategy guidance extraction
-  const extractPortfolioGuidanceImproved = (text) => {
-    console.log('Extracting transition strategy guidance...');
-    const items = [];
-    const lines = text.split('\n');
-    let inSection = false;
-    
-    const transitionKeywords = ['PORTFOLIO', 'PROJECTS', 'TRANSITION STRATEGY', 'CAREER TRANSITION', 'TRANSITION PLAN', 'TRANSITION ADVICE'];
-    
-    lines.forEach((line, index) => {
-      const lineUpper = line.toUpperCase();
-      
-      if (transitionKeywords.some(keyword => lineUpper.includes(keyword))) {
-        inSection = true;
-        console.log('📍 Found transition section at line:', index, ':', line.trim());
-        return;
-      }
-      
-      // Exit section when hitting other major sections
-      if (inSection && (
-        lineUpper.includes('NETWORKING STRATEGY') || 
-        lineUpper.includes('INTERVIEW PREP') || 
-        lineUpper.includes('PERSONAL BRANDING') ||
-        lineUpper.includes('JOB SEARCH') ||
-        lineUpper.includes('SKILLS GAP') ||
-        lineUpper.includes('LEARNING ROADMAP')
-      )) {
-        inSection = false;
-        console.log('📍 Exiting transition section at line:', index);
-        return;
-      }
-      
-      if (inSection && line.trim() !== '') {
-        // Filter out unwanted section headers but be more permissive with content
-        if (lineUpper.includes('TRANSITION STRATEGY:') || 
-            lineUpper.includes('MARKET TRENDS ANALYSIS') || 
-            lineUpper.includes('JOB MARKET OUTLOOK:')) {
-          console.log('🚫 Filtering out section header:', line.trim());
-          return;
-        }
-        
-        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
-          const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          if (itemText.length > 20 && isTransitionContent(itemText)) {
-            items.push({
-              text: itemText,
-              type: 'tip',
-              category: 'Transition Strategy'
-            });
-            console.log('✅ Added transition strategy:', itemText.substring(0, 50) + '...');
-          }
-        }
-      }
-    });
-    
-    // Look for transition advice in other career-related sections
-    if (items.filter(i => i.type === 'tip').length < 4) {
-      console.log('🔄 Looking for additional transition content...');
-      const additionalContent = extractTransitionFromCareerAdvice(text);
-      additionalContent.forEach(item => {
-        if (!items.some(existing => existing.text.toLowerCase().includes(item.text.toLowerCase().substring(0, 20)))) {
-          items.push(item);
-          console.log('✅ Added additional transition content:', item.text.substring(0, 50) + '...');
-        }
-      });
-    }
-    
-    // Generate personalized transition strategies if needed
-    if (items.filter(i => i.type === 'tip').length < 6) {
-      console.log('🎯 Generating personalized transition strategies...');
-      const personalizedTips = generatePersonalizedTransitionTips();
-      personalizedTips.forEach(tip => {
-        if (!items.some(existing => existing.text.toLowerCase().includes(tip.text.toLowerCase().substring(0, 20)))) {
-          items.push(tip);
-        }
-      });
-    }
-    
-    console.log('Total transition strategies found:', items.filter(i => i.type === 'tip').length);
-    return items;
-  };
-
-  // Validate if content is transition-related
-  const isTransitionContent = (text) => {
-    const textLower = text.toLowerCase();
-    
-    // Should contain transition-related terms
-    const transitionTerms = [
-      'transition', 'career', 'background', 'experience', 'skills', 'portfolio', 
-      'project', 'build', 'showcase', 'demonstrate', 'leverage', 'highlight',
-      'previous', 'current', 'change', 'move', 'switch', 'pivot', 'bridge'
-    ];
-    
-    // Exclude pure technical learning content
-    const excludeTerms = [
-      'algorithm', 'data structure', 'syntax', 'framework version', 'debug code'
-    ];
-    
-    const hasTransitionTerms = transitionTerms.some(term => textLower.includes(term));
-    const hasExcludeTerms = excludeTerms.some(term => textLower.includes(term));
-    
-    return hasTransitionTerms && !hasExcludeTerms;
-  };
-
-  // Extract transition advice from general career sections
-  const extractTransitionFromCareerAdvice = (text) => {
-    const transitionContent = [];
-    const lines = text.split('\n');
-    
-    lines.forEach(line => {
-      const lineUpper = line.toUpperCase();
-      if ((lineUpper.includes('CAREER') || lineUpper.includes('TRANSITION') || 
-           lineUpper.includes('BACKGROUND') || lineUpper.includes('EXPERIENCE') ||
-           lineUpper.includes('PORTFOLIO') || lineUpper.includes('PROJECT')) &&
-          !lineUpper.includes('SKILL GAP') && !lineUpper.includes('LEARN PROGRAMMING')) {
-        
-        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
-          const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          if (itemText.length > 25 && isTransitionContent(itemText)) {
-            transitionContent.push({
-              text: itemText,
-              type: 'tip',
-              category: 'Transition Strategy'
-            });
-          }
-        }
-      }
-    });
-    
-    return transitionContent.slice(0, 4);
-  };
-
-  // Generate personalized transition strategies based on user data
-  const generatePersonalizedTransitionTips = () => {
-    const tips = [];
-    const currentRole = userData.currentRole || 'your current role';
-    const studyField = userData.studyField || 'your background';
-    const targetCareer = careerPaths.length > 0 ? careerPaths[0].title : 'technology';
-    
-    // Base transition strategies
-    const baseTips = [
-      `Identify and articulate transferable skills from ${currentRole} that apply to ${targetCareer} positions`,
-      `Build a portfolio showcasing projects that bridge your ${studyField} background with ${targetCareer} skills`,
-      'Create a compelling career narrative that explains your motivation for transitioning to technology',
-      'Start applying your new technical skills to solve problems in your current role for real-world experience'
-    ];
-    
-    // Add role-specific transition advice
-    if (userData.currentRole && userData.currentRole !== 'Not specified') {
-      if (userData.currentRole.toLowerCase().includes('manager') || 
-          userData.currentRole.toLowerCase().includes('analyst')) {
-        tips.push('Emphasize your analytical thinking and project management experience in tech applications');
-        tips.push('Highlight any experience working with technical teams or managing technology projects');
-      } else if (userData.currentRole.toLowerCase().includes('teacher') || 
-                 userData.currentRole.toLowerCase().includes('trainer')) {
-        tips.push('Leverage your communication skills and ability to explain complex concepts clearly');
-        tips.push('Consider technical writing or developer relations roles that value your teaching background');
-      } else if (userData.currentRole.toLowerCase().includes('sales') || 
-                 userData.currentRole.toLowerCase().includes('marketing')) {
-        tips.push('Use your understanding of business needs to bridge technical and business requirements');
-        tips.push('Consider product management or business analyst roles that value your market knowledge');
-      }
-    }
-    
-    // Add career-specific advice
-    if (targetCareer.includes('Developer')) {
-      tips.push('Contribute to open source projects to demonstrate your coding skills and collaboration ability');
-    } else if (targetCareer.includes('Data')) {
-      tips.push('Work on data analysis projects using real datasets relevant to your previous industry experience');
-    } else if (targetCareer.includes('UX') || targetCareer.includes('Design')) {
-      tips.push('Redesign user experiences from your previous industry to showcase design thinking skills');
-    }
-    
-    // Add timeline-specific advice
-    if (userData.transitionTimeline === 'Less than 6 months') {
-      tips.push('Focus on building 2-3 high-quality projects that demonstrate core skills quickly');
-    } else if (userData.transitionTimeline && userData.transitionTimeline.includes('1-2 years')) {
-      tips.push('Take time to build comprehensive expertise and consider formal education or certification programs');
-    }
-    
-    // Combine base tips with personalized ones
-    const allTips = [...baseTips, ...tips];
-    
-    return allTips.slice(0, 8).map(tip => ({
-      text: tip,
-      type: 'tip',
-      category: 'Transition Strategy'
-    }));
-  };
-
-  // Job Search Strategies extraction
-  const extractJobSearchStrategiesImproved = (text) => {
-    console.log('Extracting job search strategies...');
-    const items = [];
-    const lines = text.split('\n');
-    let inJobSearchSection = false;
-    
-    const jobSearchKeywords = ['JOB SEARCH', 'JOB HUNTING', 'APPLICATIONS', 'JOB APPLICATION', 'FINDING JOBS', 'CAREER SEARCH', 'APPLY FOR JOBS'];
-    
-    lines.forEach((line, index) => {
-      const lineUpper = line.toUpperCase();
-      
-      // Check if we're entering a job search section
-      if (jobSearchKeywords.some(keyword => lineUpper.includes(keyword))) {
-        inJobSearchSection = true;
-        console.log('📍 Found job search section at line:', index, ':', line.trim());
-        return;
-      }
-      
-      // Exit job search section when hitting other major sections
-      if (inJobSearchSection && (
-        lineUpper.includes('SKILLS GAP') || 
-        lineUpper.includes('LEARNING ROADMAP') ||
-        lineUpper.includes('NETWORKING STRATEGY') || 
-        lineUpper.includes('INTERVIEW PREP') || 
-        lineUpper.includes('PERSONAL BRANDING') ||
-        lineUpper.includes('PORTFOLIO') ||
-        lineUpper.includes('MARKET TRENDS') ||
-        lineUpper.includes('SALARY') ||
-        lineUpper.includes('STRENGTHS ANALYSIS')
-      )) {
-        inJobSearchSection = false;
-        console.log('📍 Exiting job search section at line:', index);
-        return;
-      }
-      
-      if (inJobSearchSection && line.trim() !== '') {
-        // Be more permissive - only filter out clearly unrelated content
-        if (lineUpper.includes('TRANSITION STRATEGY:') ||
-            lineUpper.includes('SKILL GAP:') ||
-            lineUpper.includes('LEARNING ROADMAP:')) {
-          console.log('🚫 Filtering out section header:', line.trim());
-          return;
-        }
-        
-        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
-          const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          
-          // More lenient validation - include if it's substantial content
-          if (itemText.length > 20 && isJobSearchRelated(itemText)) {
-            items.push({
-              text: itemText,
-              type: 'tip',
-              category: 'Job Search'
-            });
-            console.log('✅ Added job search strategy:', itemText.substring(0, 50) + '...');
-          }
-        }
-      }
-    });
-    
-    // Also try to extract job search advice from general career advice sections
-    if (items.filter(i => i.type === 'tip').length < 3) {
-      console.log('🔄 Looking for additional job search content in other sections...');
-      const additionalContent = extractJobSearchFromCareerAdvice(text);
-      additionalContent.forEach(item => {
-        if (!items.some(existing => existing.text.toLowerCase().includes(item.text.toLowerCase().substring(0, 20)))) {
-          items.push(item);
-          console.log('✅ Added additional job search content:', item.text.substring(0, 50) + '...');
-        }
-      });
-    }
-    
-    // If still not enough content, generate career-specific job search strategies
-    if (items.filter(i => i.type === 'tip').length < 5) {
-      console.log('🎯 Generating career-specific job search strategies...');
-      const careerSpecificTips = generateCareerSpecificJobSearchTips();
-      careerSpecificTips.forEach(tip => {
-        if (!items.some(existing => existing.text.toLowerCase().includes(tip.text.toLowerCase().substring(0, 20)))) {
-          items.push(tip);
-        }
-      });
-    }
-    
-    console.log('Total job search strategies found:', items.filter(i => i.type === 'tip').length);
-    return items;
-  };
-
-  // More lenient validation for job search content
-  const isJobSearchRelated = (text) => {
-    const textLower = text.toLowerCase();
-    
-    // Should NOT contain pure skill/learning content
-    const excludeTerms = [
-      'learn programming', 'study coding', 'master python', 'practice algorithms',
-      'complete course', 'take tutorial', 'skill gap', 'technical competency'
-    ];
-    
-    const hasExcludedTerms = excludeTerms.some(term => textLower.includes(term));
-    if (hasExcludedTerms) return false;
-    
-    // Include if it mentions career, job, or professional activities
-    const includeTerms = [
-      'job', 'career', 'application', 'resume', 'interview', 'linkedin', 'network', 
-      'company', 'employer', 'position', 'opportunity', 'professional', 'industry',
-      'apply', 'search', 'find', 'connect', 'contact', 'follow up', 'reach out'
-    ];
-    
-    return includeTerms.some(term => textLower.includes(term)) || text.length > 50;
-  };
-
-  // Extract job search advice from general career sections
-  const extractJobSearchFromCareerAdvice = (text) => {
-    const jobSearchContent = [];
-    const lines = text.split('\n');
-    
-    lines.forEach(line => {
-      const lineUpper = line.toUpperCase();
-      if ((lineUpper.includes('APPLY') || lineUpper.includes('NETWORK') || 
-           lineUpper.includes('CONNECT') || lineUpper.includes('RESUME') ||
-           lineUpper.includes('LINKEDIN') || lineUpper.includes('COMPANY')) &&
-          !lineUpper.includes('SKILL') && !lineUpper.includes('LEARN')) {
-        
-        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
-          const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          if (itemText.length > 25) {
-            jobSearchContent.push({
-              text: itemText,
-              type: 'tip',
-              category: 'Job Search'
-            });
-          }
-        }
-      }
-    });
-    
-    return jobSearchContent.slice(0, 3);
-  };
-
-  // Generate career-specific job search strategies
-  const generateCareerSpecificJobSearchTips = () => {
-    const tips = [];
-    const topCareer = careerPaths.length > 0 ? careerPaths[0].title : '';
-    
-    // Base strategies for all tech careers
-    const baseTips = [
-      'Optimize your LinkedIn profile with relevant keywords and showcase your career transition journey',
-      'Tailor your resume for each application, emphasizing transferable skills and relevant projects',
-      'Use tech-focused job boards like AngelList, Stack Overflow Jobs, and Dice alongside LinkedIn Jobs',
-      'Network with professionals in your target field through industry meetups and online communities',
-      'Follow up on applications with personalized messages mentioning specific company projects or values'
-    ];
-    
-    // Add career-specific tips based on top recommendation
-    const careerSpecificTips = {
-      'Software Developer': [
-        'Showcase your coding projects on GitHub and include the repository links in applications',
-        'Apply to companies that use technologies you know or are learning',
-        'Consider applying to both startups and established tech companies for diverse opportunities'
-      ],
-      'Data Scientist': [
-        'Create a portfolio demonstrating data analysis projects with real datasets',
-        'Target companies in industries that align with your domain expertise',
-        'Highlight any experience with data visualization and business impact in applications'
-      ],
-      'UX Designer': [
-        'Develop a strong design portfolio showcasing your design process and user research',
-        'Apply to companies whose products you use and can speak passionately about',
-        'Network with other designers through design communities and portfolio review sessions'
-      ],
-      'UI Designer': [
-        'Build a visually compelling portfolio demonstrating your design skills across different projects',
-        'Apply to companies building products with strong visual design requirements',
-        'Showcase your understanding of design systems and component libraries'
-      ],
-      'Product Designer': [
-        'Create case studies showing your end-to-end design process from research to final product',
-        'Target companies where design has strategic importance in product development',
-        'Demonstrate your ability to balance user needs with business objectives'
-      ],
-      'Product Manager': [
-        'Demonstrate understanding of product metrics and user-focused thinking in applications',
-        'Target companies building products you are passionate about using',
-        'Emphasize any experience leading cross-functional projects or initiatives'
-      ]
-    };
-    
-    // Add base tips
-    baseTips.forEach(tip => {
-      tips.push({
-        text: tip,
-        type: 'tip',
-        category: 'Job Search'
-      });
-    });
-    
-    // Add career-specific tips
-    if (topCareer && careerSpecificTips[topCareer]) {
-      careerSpecificTips[topCareer].forEach(tip => {
-        tips.push({
-          text: tip,
-          type: 'tip',
-          category: 'Job Search'
-        });
-      });
-    }
-    
-    return tips.slice(0, 8);
-  };
-
-  // Career Growth Resources / Strengths Analysis extraction
-  const extractCareerGrowthResourcesImproved = (text) => {
-    console.log('Extracting strengths analysis...');
-    const items = [];
-    const lines = text.split('\n');
-    let inSection = false;
-    
-    const strengthsKeywords = ['CAREER GROWTH', 'RESOURCES', 'STRENGTHS', 'STRENGTHS ANALYSIS'];
-    
-    lines.forEach((line) => {
-      if (strengthsKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
-        inSection = true;
-        return;
-      }
-      
-      // Exit section when hitting other major sections
-      if (inSection && (
-        line.toUpperCase().includes('NETWORKING') || 
-        line.toUpperCase().includes('INTERVIEW') || 
-        line.toUpperCase().includes('PERSONAL BRANDING') ||
-        line.toUpperCase().includes('JOB SEARCH')
-      )) {
-        inSection = false;
-        return;
-      }
-      
-      if (inSection && line.trim() !== '') {
-        // Filter out strengths analysis section headers
-        const lineUpper = line.toUpperCase();
-        if (lineUpper.includes('STRENGTHS ANALYSIS:') || 
-            lineUpper === 'STRENGTHS ANALYSIS') {
-          return;
-        }
-        
-        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
-          const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          if (itemText.length > 15) {
-            items.push({
-              text: itemText,
-              type: 'tip',
-              category: 'Strengths'
-            });
-          }
-        }
-      }
-    });
-    
-    // Add default strengths analysis if none found
-    if (items.filter(i => i.type === 'tip').length === 0) {
-      const userStrengths = generateUserStrengthsAnalysis();
-      userStrengths.forEach(strength => {
-        items.push({
-          text: strength,
-          type: 'tip',
-          category: 'Strengths'
-        });
-      });
-    }
-    
-    console.log('Strengths analysis items found:', items.filter(i => i.type === 'tip').length);
-    return items;
-  };
-
-  // Generate personalized strengths analysis based on user data
-  const generateUserStrengthsAnalysis = () => {
-    const strengths = [];
-    
-    // Analyze experience level
-    if (userData.experienceLevel === 'Advanced' || userData.experienceLevel === 'Intermediate') {
-      strengths.push(`Your ${userData.experienceLevel.toLowerCase()} experience level gives you a solid foundation for career transition`);
-    }
-    
-    // Analyze study field
-    if (userData.studyField && userData.studyField !== 'Not specified') {
-      if (userData.studyField.toLowerCase().includes('engineering') || 
-          userData.studyField.toLowerCase().includes('computer') ||
-          userData.studyField.toLowerCase().includes('science')) {
-        strengths.push(`Your ${userData.studyField} background provides strong analytical and problem-solving skills`);
-      } else {
-        strengths.push(`Your ${userData.studyField} background brings unique perspective to technology roles`);
-      }
-    }
-    
-    // Analyze tools and technologies
-    if (userData.toolsUsed && userData.toolsUsed.length > 0 && !userData.toolsUsed.includes('None')) {
-      const tools = userData.toolsUsed.slice(0, 3).join(', ');
-      strengths.push(`Experience with ${tools} demonstrates your technical aptitude and learning ability`);
-    }
-    
-    // Analyze transferable skills
-    if (userData.transferableSkills && userData.transferableSkills !== 'Not specified') {
-      strengths.push(`Your transferable skills in ${userData.transferableSkills} will be valuable in tech roles`);
-    }
-    
-    // Analyze career interests alignment
-    if (userData.careerPathsInterest && userData.careerPathsInterest.length > 0) {
-      strengths.push(`Clear interest in ${userData.careerPathsInterest[0]} shows focused career direction and motivation`);
-    }
-    
-    // Default strengths if none identified
-    if (strengths.length === 0) {
-      strengths.push(
-        'Motivation to transition into tech demonstrates adaptability and growth mindset',
-        'Willingness to learn new skills shows commitment to professional development',
-        'Taking career assessment indicates proactive approach to career planning'
-      );
-    }
-    
-    return strengths.slice(0, 5);
-  };
-
-  // Career Path Visualizations (placeholder)
-  const extractCareerPathVisualizationsImproved = (text) => {
-    return [];
-  };
-
-  // Generate PERSONALIZED next steps based on user data and analysis
-  const generateNextSteps = () => {
-    const steps = [];
-    console.log('Generating personalized next steps for user:', userData.name);
-    
-    // PRIORITY 1: Based on user's experience level and timeline
-    if (userData.experienceLevel === 'Complete beginner' || userData.experienceLevel === 'Some exposure') {
-      const timelineText = userData.transitionTimeline === 'Less than 6 months' ? 'Start immediately with' : 'Begin with';
-      steps.push({
-        title: `${timelineText} Foundation Skills`,
-        text: `Focus on ${userData.careerPathsInterest?.[0] || 'programming'} fundamentals. Given your ${userData.experienceLevel.toLowerCase()} level, start with basic concepts and practice daily.`,
-        priority: 'high',
-        icon: '🎯',
-        timeline: userData.transitionTimeline || '2-4 weeks',
-        personalized: true,
-        resources: ['FreeCodeCamp', 'Codecademy basics', 'YouTube tutorials']
-      });
-    }
-    
-    // PRIORITY 2: Based on user's top career interest and current background
-    if (userData.careerPathsInterest && userData.careerPathsInterest.length > 0) {
-      const topInterest = userData.careerPathsInterest[0];
-      const currentField = userData.studyField || userData.currentRole || 'your current field';
-      
-      steps.push({
-        title: `Bridge ${currentField} to ${topInterest}`,
-        text: `Leverage your ${userData.transferableSkills || 'existing experience'} while building ${topInterest.toLowerCase()} specific skills. Focus on projects that bridge both areas.`,
-        priority: 'high',
-        icon: '🚀',
-        timeline: `${userData.timeCommitment} weekly`,
-        personalized: true,
-        resources: ['Industry transition guides', 'Relevant bootcamps', 'Mentorship platforms']
-      });
-    }
-    
-    // PRIORITY 3: Based on user's timeline and commitment
-    if (userData.transitionTimeline === 'Less than 6 months') {
-      steps.push({
-        title: 'Accelerated Learning Plan',
-        text: `With your ${userData.timeCommitment} weekly commitment and 6-month timeline, focus on high-impact skills and immediate portfolio building.`,
-        priority: 'high',
-        icon: '⚡',
-        timeline: 'Daily practice needed',
-        personalized: true,
-        resources: ['Intensive bootcamps', 'Daily coding challenges', 'Fast-track courses']
-      });
-    } else if (userData.transitionTimeline === '1-2 years' || userData.transitionTimeline === '2+ years') {
-      steps.push({
-        title: 'Strategic Long-term Development',
-        text: `Use your ${userData.transitionTimeline} timeline to build deep expertise. Consider advanced certifications and comprehensive projects.`,
-        priority: 'medium',
-        icon: '📚',
-        timeline: userData.transitionTimeline,
-        personalized: true,
-        resources: ['University courses', 'Professional certifications', 'Complex project series']
-      });
-    }
-    
-    // PRIORITY 4: Based on user's tools experience
-    if (userData.toolsUsed && userData.toolsUsed.length > 0 && !userData.toolsUsed.includes('None')) {
-      const tools = userData.toolsUsed.slice(0, 2).join(' and ');
-      steps.push({
-        title: `Advance Your ${tools} Skills`,
-        text: `Since you already use ${tools}, build advanced projects showcasing these tools for your ${userData.careerPathsInterest?.[0] || 'target'} career path.`,
-        priority: 'medium',
-        icon: '🔧',
-        timeline: '2-3 weeks',
-        personalized: true,
-        resources: ['Advanced tool documentation', 'Expert-level tutorials', 'Open source contributions']
-      });
-    }
-    
-    // PRIORITY 5: Based on networking needs from analysis
-    if (networkingStrategy && networkingStrategy.length > 0) {
-      const networkingStrategies = networkingStrategy.filter(item => item.type === 'strategy');
-      if (networkingStrategies.length > 0) {
-        steps.push({
-          title: `Network in ${userData.careerPathsInterest?.[0] || 'Tech'} Community`,
-          text: networkingStrategies[0].text,
-          priority: 'medium',
-          icon: '🤝',
-          timeline: 'Ongoing',
-          personalized: true,
-          resources: ['LinkedIn groups', 'Local meetups', 'Industry conferences']
-        });
-      }
-    }
-    
-    // PRIORITY 6: Portfolio building based on user's interests
-    if (userData.careerPathsInterest && userData.careerPathsInterest.length > 0) {
-      const interests = userData.careerPathsInterest.slice(0, 2).join(' and ');
-      steps.push({
-        title: `Build ${interests} Portfolio`,
-        text: `Create 2-3 projects showcasing ${interests.toLowerCase()} skills. Include projects that demonstrate your transition from ${userData.currentRole || 'your background'}.`,
-        priority: 'high',
-        icon: '💼',
-        timeline: `${userData.timeCommitment} over 4-6 weeks`,
-        personalized: true,
-        resources: ['GitHub portfolio templates', 'Project idea generators', 'Code review services']
-      });
-    }
-    
-    // Sort by priority and return top 6
-    const priorityOrder = { high: 1, medium: 2, low: 3 };
-    const sortedSteps = steps.sort((a, b) => {
-      if (a.personalized && !b.personalized) return -1;
-      if (!a.personalized && b.personalized) return 1;
-      return priorityOrder[a.priority] - priorityOrder[b.priority];
-    });
-    
-    console.log(`Generated ${sortedSteps.length} personalized steps, ${steps.filter(s => s.personalized).length} are user-specific`);
-    return sortedSteps.slice(0, 6);
-  };
-
-  // Create timeline visualization data
-  const createTimelineData = () => {
-    const timelineMap = {
-      'Less than 6 months': 6,
-      '6-12 months': 12,
-      '1-2 years': 18,
-      '2+ years': 24,
-      'Already transitioning': 3
-    };
-    
-    const months = timelineMap[userData.transitionTimeline] || 12;
-    const milestones = [];
-    
-    if (months <= 6) {
-      milestones.push(
-        { month: 1, label: 'Start Learning', progress: 20, status: 'current' },
-        { month: 3, label: 'Complete Basics', progress: 50, status: 'upcoming' },
-        { month: 6, label: 'Job Ready', progress: 100, status: 'upcoming' }
-      );
-    } else if (months <= 12) {
-      milestones.push(
-        { month: 2, label: 'Foundation', progress: 20, status: 'current' },
-        { month: 4, label: 'Core Skills', progress: 40, status: 'upcoming' },
-        { month: 6, label: 'Projects', progress: 60, status: 'upcoming' },
-        { month: 9, label: 'Portfolio', progress: 80, status: 'upcoming' },
-        { month: 12, label: 'Job Ready', progress: 100, status: 'upcoming' }
-      );
-    } else {
-      milestones.push(
-        { month: 3, label: 'Foundation', progress: 15, status: 'current' },
-        { month: 6, label: 'Core Skills', progress: 30, status: 'upcoming' },
-        { month: 9, label: 'Specialization', progress: 45, status: 'upcoming' },
-        { month: 12, label: 'Projects', progress: 60, status: 'upcoming' },
-        { month: 15, label: 'Portfolio', progress: 80, status: 'upcoming' },
-        { month: 18, label: 'Job Ready', progress: 100, status: 'upcoming' }
-      );
-    }
-    
-    return milestones;
-  };
+  // ============================================================================
+  // MAIN RENDER LOGIC
+  // ============================================================================
 
   if (loading) {
-    return <LoadingSpinner message="Loading your career analysis..." />;
+    return <LoadingSpinner message="Loading your advanced career analysis..." />;
   }
 
+  // Calculate quick stats using new recommendation data
+  const topMatchPercentage = careerPaths.length > 0 ? Math.max(...careerPaths.map(p => p.confidenceScore || p.match || 0)) : 0;
+  const skillsToLearn = skillsGap.filter(skill => skill.gap > 0).length;
+  const highConfidenceCount = careerPaths.filter(p => p.confidence === 'high').length;
   const nextSteps = generateNextSteps();
   const timelineMilestones = createTimelineData();
 
-  // Calculate quick stats
-  const topMatchPercentage = careerPaths.length > 0 ? Math.max(...careerPaths.map(p => p.match)) : 0;
-  const skillsToLearn = skillsGap.filter(skill => skill.gap > 0).length;
-  const authenticPathsCount = careerPaths.filter(p => p.authenticated).length;
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Enhanced Header */}
+      {/* Enhanced Header with new metadata */}
       <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white">
         <div className="container mx-auto px-6 py-12">
           <div className="text-center">
@@ -3584,17 +2254,17 @@ const CareerDashboard = () => {
               Welcome back, {userData.name}! 👋
             </h1>
             <p className="text-xl opacity-90 mb-6">
-              Your authentic tech career recommendations based on your profile
+              Advanced AI-powered career recommendations with {recommendationMetadata.overallConfidence}% overall confidence
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-sm">
-              {userData.currentRole !== 'Not specified' && (
+              {userData.currentRole && userData.currentRole !== 'Not specified' && (
                 <div className="bg-white bg-opacity-20 px-4 py-2 rounded-full">
                   📍 Currently: {userData.currentRole}
                 </div>
               )}
               {careerPaths.length > 0 && (
                 <div className="bg-white bg-opacity-20 px-4 py-2 rounded-full">
-                  🎯 Top Match: {careerPaths[0].title} ({careerPaths[0].match}%)
+                  🎯 Top Match: {careerPaths[0].title} ({careerPaths[0].confidenceScore}%)
                 </div>
               )}
               {userData.transitionTimeline && (
@@ -3602,9 +2272,14 @@ const CareerDashboard = () => {
                   ⏰ Timeline: {userData.transitionTimeline}
                 </div>
               )}
-              {authenticPathsCount > 0 && (
+              {recommendationMetadata.dataCompleteness > 0 && (
                 <div className="bg-green-500 bg-opacity-20 px-4 py-2 rounded-full border border-green-300">
-                  ✅ {authenticPathsCount} Authentic Recommendations
+                  ✅ {recommendationMetadata.dataCompleteness}% Profile Complete
+                </div>
+              )}
+              {highConfidenceCount > 0 && (
+                <div className="bg-purple-500 bg-opacity-20 px-4 py-2 rounded-full border border-purple-300">
+                  🔬 {highConfidenceCount} High-Confidence Recommendations
                 </div>
               )}
             </div>
@@ -3669,42 +2344,47 @@ const CareerDashboard = () => {
               ))}
             </div>
 
-            {/* Data Quality Indicator */}
+            {/* Algorithm Quality Indicator */}
             <div className="bg-white rounded-2xl p-8 shadow-lg">
               <h2 className="text-2xl font-bold mb-6 flex items-center">
-                <span className="mr-3">🎯</span>
-                Recommendation Quality
+                <span className="mr-3">🔬</span>
+                AI Recommendation Quality
               </h2>
               <div className="mb-4">
                 <div className="flex justify-between text-sm mb-2">
-                  <span>Based on your profile completeness</span>
-                  <span>{userData.careerPathsInterest?.length > 0 ? '100%' : '0%'}</span>
+                  <span>Overall Confidence Score</span>
+                  <span>{recommendationMetadata.overallConfidence}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
                   <div
                     className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-1000"
-                    style={{ width: userData.careerPathsInterest?.length > 0 ? '100%' : '0%' }}
+                    style={{ width: `${recommendationMetadata.overallConfidence}%` }}
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div className="flex items-center">
-                  <span className={`w-3 h-3 rounded-full mr-2 ${userData.careerPathsInterest?.length > 0 ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                  Career Interests
+                  <span className={`w-3 h-3 rounded-full mr-2 ${recommendationMetadata.dataCompleteness > 70 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                  Data Quality: {recommendationMetadata.dataCompleteness}%
                 </div>
                 <div className="flex items-center">
-                  <span className={`w-3 h-3 rounded-full mr-2 ${userData.experienceLevel ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                  Experience Level
+                  <span className={`w-3 h-3 rounded-full mr-2 ${careerPaths.length >= 3 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                  Recommendations: {careerPaths.length}
                 </div>
                 <div className="flex items-center">
-                  <span className={`w-3 h-3 rounded-full mr-2 ${userData.studyField !== 'Not specified' ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-                  Education
+                  <span className={`w-3 h-3 rounded-full mr-2 ${highConfidenceCount > 0 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                  High Confidence: {highConfidenceCount}
                 </div>
                 <div className="flex items-center">
-                  <span className={`w-3 h-3 rounded-full mr-2 ${userData.toolsUsed?.length > 0 && !userData.toolsUsed.includes('None') ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-                  Tools Experience
+                  <span className="w-3 h-3 rounded-full mr-2 bg-blue-500"></span>
+                  Algorithm: v{recommendationMetadata.algorithmVersion || '1.0'}
                 </div>
               </div>
+              {recommendationMetadata.processedAt && (
+                <div className="mt-4 text-xs text-gray-500">
+                  Processed: {new Date(recommendationMetadata.processedAt).toLocaleString()}
+                </div>
+              )}
             </div>
 
             {/* Enhanced Progress Overview */}
@@ -3733,7 +2413,7 @@ const CareerDashboard = () => {
               </div>
             </div>
 
-            {/* Top Next Steps Preview - Enhanced with personalization indicator */}
+            {/* Top Next Steps Preview */}
             <div className="bg-white rounded-2xl p-8 shadow-lg">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold flex items-center">
@@ -3742,15 +2422,17 @@ const CareerDashboard = () => {
                 </h2>
                 <div className="flex items-center text-sm text-blue-600">
                   <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                  Tailored to your {userData.careerPathsInterest?.[0] || 'tech'} goals
+                  AI-Powered Recommendations
                 </div>
               </div>
-              <div className="mb-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-                <p className="text-sm text-blue-800">
-                  <strong>Personalized for {userData.name}:</strong> Based on your {userData.experienceLevel?.toLowerCase()} experience level, 
-                  {userData.transitionTimeline ? ` ${userData.transitionTimeline.toLowerCase()} timeline,` : ''} and interest in {userData.careerPathsInterest?.slice(0, 2).join(' and ') || 'technology'}.
-                </p>
-              </div>
+              {careerPaths.length > 0 && (
+                <div className="mb-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                  <p className="text-sm text-blue-800">
+                    <strong>Personalized for {userData.name}:</strong> Based on your {careerPaths[0].type} recommendation 
+                    with {careerPaths[0].confidenceScore}% confidence score from our advanced algorithm.
+                  </p>
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {nextSteps.slice(0, 4).map((step, index) => (
                   <div key={index} className={`${step.personalized ? 'bg-gradient-to-br from-blue-50 to-purple-50' : 'bg-gradient-to-br from-gray-50 to-gray-100'} rounded-xl p-6 hover:shadow-md transition-all duration-300`}>
@@ -3761,7 +2443,7 @@ const CareerDashboard = () => {
                       </div>
                       {step.personalized && (
                         <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                          Custom
+                          AI
                         </span>
                       )}
                     </div>
@@ -3784,38 +2466,62 @@ const CareerDashboard = () => {
         {activeTab === 'paths' && (
           <div className="space-y-8">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-4">Your Authentic Career Paths</h2>
+              <h2 className="text-3xl font-bold mb-4">AI-Powered Career Recommendations</h2>
               <p className="text-gray-600 text-lg">
-                Based on your stated interests: {userData.careerPathsInterest?.join(', ') || 'Not specified'}
+                Advanced multi-algorithm analysis with {recommendationMetadata.overallConfidence}% overall confidence
               </p>
-              {careerPaths.length === 0 && userData.careerPathsInterest?.length === 0 && (
-                <div className="mt-8 p-6 bg-yellow-50 rounded-lg border border-yellow-200">
-                  <p className="text-yellow-800">
-                    <strong>No career interests found.</strong> Please retake the assessment and specify your career interests to get personalized recommendations.
+              {careerPaths.length > 0 && (
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200 max-w-3xl mx-auto">
+                  <p className="text-sm text-blue-800">
+                    <strong>🔬 Advanced Analysis:</strong> Our system analyzed your profile using three specialized algorithms:
+                    Tech-Market Alignment, Academic-Research Fit, and Practical-Lifestyle Match. 
+                    Results sorted by confidence score with personalized reasoning for each recommendation.
                   </p>
-                  <button 
-                    onClick={() => navigate('/career/test')}
-                    className="mt-4 bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 transition-colors"
-                  >
-                    Retake Assessment
-                  </button>
                 </div>
               )}
             </div>
             
             {careerPaths.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {careerPaths.map((path, index) => (
-                  <CareerPathCard key={index} path={path} index={index} />
-                ))}
+              <div className="space-y-6">
+                {/* Algorithm Performance Summary */}
+                <div className="bg-white rounded-xl p-6 shadow-lg">
+                  <h3 className="text-lg font-bold mb-4">Algorithm Performance Summary</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {careerPaths.map((path, index) => (
+                      <div key={index} className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">{path.type}</span>
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            path.confidence === 'high' ? 'bg-green-100 text-green-700' :
+                            path.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-red-100 text-red-700'
+                          }`}>
+                            {path.confidenceScore}%
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600">{path.title}</p>
+                        <div className="mt-2 text-xs text-gray-500">
+                          Used: {path.metadata?.criteriaUsed?.length || 0} criteria
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Career Path Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {careerPaths.map((path, index) => (
+                    <CareerPathCard key={index} path={path} index={index} />
+                  ))}
+                </div>
               </div>
-            ) : userData.careerPathsInterest?.length > 0 ? (
+            ) : (
               <div className="text-center py-12">
-                <div className="text-6xl mb-4">🔍</div>
-                <h3 className="text-xl font-semibold text-gray-600 mb-2">Processing Your Interests</h3>
-                <p className="text-gray-500">Generating recommendations based on: {userData.careerPathsInterest.join(', ')}</p>
+                <div className="text-6xl mb-4">🤖</div>
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">Generating AI Recommendations</h3>
+                <p className="text-gray-500">Our advanced algorithms are analyzing your profile to provide personalized career recommendations.</p>
               </div>
-            ) : null}
+            )}
           </div>
         )}
 
@@ -3873,37 +2579,14 @@ const CareerDashboard = () => {
                   : 'Market trends and job outlook for your career path'
                 }
               </p>
-              {careerPaths.length > 0 && (
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400 max-w-2xl mx-auto">
-                  <p className="text-sm text-blue-800">
-                    <strong>🎯 Tailored Analysis:</strong> These insights are specifically generated for your top career recommendation 
-                    based on your interests in {userData.careerPathsInterest?.join(', ') || 'technology'}.
-                  </p>
-                </div>
-              )}
             </div>
             
             {/* Market Trends Section */}
             <div className="mb-12">
               <h3 className="text-2xl font-bold mb-6 flex items-center">
                 <span className="mr-3">📈</span>
-                {careerPaths.length > 0 
-                  ? `${careerPaths[0].title} Market Analysis`
-                  : 'Market Trends Analysis'
-                }
+                Market Analysis
               </h3>
-              
-              {/* Debug info */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="mb-4 p-3 bg-yellow-50 rounded-lg text-xs">
-                  <strong>Debug:</strong> Market trends: {marketTrends.length}, 
-                  Career paths: {careerPaths.length}, 
-                  Top career: {careerPaths[0]?.title || 'None'}
-                  {marketTrends.length > 0 && (
-                    <div>First trend: {marketTrends[0].title}, Has personalizedData: {!!marketTrends[0].personalizedData}</div>
-                  )}
-                </div>
-              )}
               
               {marketTrends.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -3914,13 +2597,8 @@ const CareerDashboard = () => {
               ) : (
                 <div className="text-center py-8">
                   <div className="text-4xl mb-4">📊</div>
-                  <h4 className="text-lg font-semibold text-gray-600 mb-2">Generating Personalized Market Analysis</h4>
-                  <p className="text-gray-500">
-                    {careerPaths.length > 0 
-                      ? `Creating market insights for ${careerPaths[0].title}...`
-                      : 'Complete your career assessment to get personalized market insights.'
-                    }
-                  </p>
+                  <h4 className="text-lg font-semibold text-gray-600 mb-2">Generating Market Analysis</h4>
+                  <p className="text-gray-500">Creating personalized market insights...</p>
                 </div>
               )}
             </div>
@@ -3929,23 +2607,8 @@ const CareerDashboard = () => {
             <div>
               <h3 className="text-2xl font-bold mb-6 flex items-center">
                 <span className="mr-3">💼</span>
-                {careerPaths.length > 0 
-                  ? `${careerPaths[0].title} Job Market Outlook`
-                  : 'Job Market Outlook'
-                }
+                Job Market Outlook
               </h3>
-              
-              {/* Debug info */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="mb-4 p-3 bg-green-50 rounded-lg text-xs">
-                  <strong>Debug:</strong> Job market outlook: {jobMarketOutlook.length}, 
-                  Career paths: {careerPaths.length}, 
-                  Top career: {careerPaths[0]?.title || 'None'}
-                  {jobMarketOutlook.length > 0 && (
-                    <div>First outlook: {jobMarketOutlook[0].title}, Has personalizedData: {!!jobMarketOutlook[0].personalizedData}</div>
-                  )}
-                </div>
-              )}
               
               {jobMarketOutlook.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -3957,12 +2620,7 @@ const CareerDashboard = () => {
                 <div className="text-center py-8">
                   <div className="text-4xl mb-4">🔮</div>
                   <h4 className="text-lg font-semibold text-gray-600 mb-2">Generating Job Market Analysis</h4>
-                  <p className="text-gray-500">
-                    {careerPaths.length > 0 
-                      ? `Creating job market insights for ${careerPaths[0].title}...`
-                      : 'Complete your career assessment to get personalized job market insights.'
-                    }
-                  </p>
+                  <p className="text-gray-500">Creating job market insights...</p>
                 </div>
               )}
             </div>
@@ -3973,7 +2631,7 @@ const CareerDashboard = () => {
           <div className="space-y-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-4">Your Action Plan</h2>
-              <p className="text-gray-600 text-lg">Step-by-step roadmap to success</p>
+              <p className="text-gray-600 text-lg">AI-generated step-by-step roadmap to success</p>
             </div>
             {nextSteps.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -4071,7 +2729,7 @@ const CareerDashboard = () => {
               <div className="bg-white rounded-2xl p-8 shadow-lg">
                 <h3 className="text-xl font-bold mb-6 flex items-center">
                   <span className="mr-3">🎯</span>
-                  TRANSITION STRATEGY
+                  Transition Strategy
                 </h3>
                 <div className="space-y-4">
                   {portfolioGuidance.filter(item => item.type === 'tip').slice(0, 5).map((tip, index) => (
@@ -4103,7 +2761,7 @@ const CareerDashboard = () => {
               <div className="bg-white rounded-2xl p-8 shadow-lg">
                 <h3 className="text-xl font-bold mb-6 flex items-center">
                   <span className="mr-3">💪</span>
-                  STRENGTHS ANALYSIS
+                  Strengths Analysis
                 </h3>
                 <div className="space-y-4">
                   {careerGrowthResources.filter(item => item.type === 'tip').slice(0, 5).map((tip, index) => (

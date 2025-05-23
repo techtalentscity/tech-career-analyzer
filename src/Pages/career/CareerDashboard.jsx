@@ -832,7 +832,7 @@ const CareerDashboard = () => {
 
   // IMPROVED EXTRACTION FUNCTIONS
 
-  // ENHANCED: More aggressive career paths extraction - tries multiple approaches
+  // ENHANCED: More aggressive career paths extraction - clean titles only
   const extractCareerPathsImproved = (text) => {
     if (!text) return [];
     
@@ -840,7 +840,7 @@ const CareerDashboard = () => {
     const lines = text.split('\n');
     const careerPaths = [];
     
-    // APPROACH 1: Standard patterns with percentages
+    // APPROACH 1: Standard patterns with percentages - extract clean titles
     const patterns = [
       /^[a-z]\)\s+(.*?)\s+\((\d+)%\s*match\)/i,  // a) Career Path (85% match)
       /^(\d+)\.\s+(.*?)\s+\((\d+)%\)/i,           // 1. Career Path (85%)
@@ -854,22 +854,25 @@ const CareerDashboard = () => {
       for (const pattern of patterns) {
         const match = line.match(pattern);
         if (match) {
-          let title, matchScore;
+          let rawTitle, matchScore;
           
           if (pattern === patterns[0] || pattern === patterns[2] || pattern === patterns[3]) {
-            title = match[1].trim();
+            rawTitle = match[1].trim();
             matchScore = parseInt(match[2], 10);
           } else if (pattern === patterns[1]) {
-            title = match[2].trim();
+            rawTitle = match[2].trim();
             matchScore = parseInt(match[3], 10);
           } else {
-            title = match[1].trim();
+            rawTitle = match[1].trim();
             matchScore = parseInt(match[2], 10);
           }
           
-          if (title && !isNaN(matchScore) && matchScore > 0 && matchScore <= 100 && title.length > 3) {
-            careerPaths.push({ title, match: matchScore });
-            console.log('✅ Found career path:', title, matchScore + '%');
+          // Clean and standardize the title
+          const cleanTitle = cleanCareerTitle(rawTitle);
+          
+          if (cleanTitle && !isNaN(matchScore) && matchScore > 0 && matchScore <= 100 && cleanTitle.length > 3) {
+            careerPaths.push({ title: cleanTitle, match: matchScore });
+            console.log('✅ Found career path:', cleanTitle, matchScore + '%');
             break;
           }
         }
@@ -890,10 +893,11 @@ const CareerDashboard = () => {
         recommendationPatterns.forEach(pattern => {
           const match = line.match(pattern);
           if (match) {
-            const title = match[1].trim();
-            if (title.length > 5 && !careerPaths.some(p => p.title.toLowerCase().includes(title.toLowerCase()))) {
-              careerPaths.push({ title, match: Math.floor(Math.random() * 20) + 70 });
-              console.log('✅ Found recommendation:', title);
+            const rawTitle = match[1].trim();
+            const cleanTitle = cleanCareerTitle(rawTitle);
+            if (cleanTitle && cleanTitle.length > 5 && !careerPaths.some(p => p.title.toLowerCase().includes(cleanTitle.toLowerCase()))) {
+              careerPaths.push({ title: cleanTitle, match: Math.floor(Math.random() * 20) + 70 });
+              console.log('✅ Found recommendation:', cleanTitle);
             }
           }
         });
@@ -930,11 +934,14 @@ const CareerDashboard = () => {
           // Add some variation and ensure it doesn't exceed 100
           const finalMatch = Math.min(baseMatch + Math.floor(Math.random() * 10) - index * 3, 95);
           
+          // Clean the user interest title
+          const cleanTitle = cleanCareerTitle(interest);
+          
           careerPaths.push({
-            title: interest,
+            title: cleanTitle,
             match: finalMatch
           });
-          console.log('✅ User interest match:', interest, finalMatch + '%');
+          console.log('✅ User interest match:', cleanTitle, finalMatch + '%');
         });
       }
     }
@@ -972,6 +979,65 @@ const CareerDashboard = () => {
     
     console.log(`🎉 Total career paths extracted: ${finalPaths.length}`);
     return finalPaths;
+  };
+
+  // NEW: Function to clean and standardize career titles
+  const cleanCareerTitle = (rawTitle) => {
+    if (!rawTitle || typeof rawTitle !== 'string') return null;
+    
+    // Remove common prefixes and suffixes that make titles too long
+    let cleanTitle = rawTitle
+      .replace(/^(a\s+|an\s+|the\s+)/i, '')  // Remove articles
+      .replace(/\s+(role|position|job|career|path)s?$/i, '')  // Remove job-related suffixes
+      .replace(/\s+(specialist|professional|expert)s?$/i, '')  // Remove title suffixes
+      .replace(/\([^)]*\)/g, '')  // Remove parenthetical explanations
+      .replace(/[-–—].+$/, '')  // Remove descriptions after dashes
+      .replace(/:.+$/, '')  // Remove descriptions after colons
+      .trim();
+    
+    // Standardize common career titles to short, clean versions
+    const titleMappings = {
+      'software development': 'Software Developer',
+      'software engineering': 'Software Engineer', 
+      'software programmer': 'Software Developer',
+      'web development': 'Web Developer',
+      'frontend development': 'Frontend Developer',
+      'backend development': 'Backend Developer',
+      'full stack development': 'Full Stack Developer',
+      'data science': 'Data Scientist',
+      'data analysis': 'Data Analyst',
+      'data analytics': 'Data Analyst',
+      'machine learning': 'ML Engineer',
+      'machine learning engineering': 'ML Engineer',
+      'artificial intelligence': 'AI Engineer',
+      'user experience design': 'UX Designer',
+      'user interface design': 'UI Designer',
+      'ux/ui design': 'UX/UI Designer',
+      'product management': 'Product Manager',
+      'project management': 'Project Manager',
+      'devops engineering': 'DevOps Engineer',
+      'cybersecurity': 'Cybersecurity Analyst',
+      'information security': 'Security Analyst',
+      'quality assurance': 'QA Engineer',
+      'database administration': 'Database Administrator',
+      'cloud engineering': 'Cloud Engineer',
+      'systems administration': 'Systems Administrator'
+    };
+    
+    // Check if the clean title matches any of our mappings
+    const lowerTitle = cleanTitle.toLowerCase();
+    for (const [key, standardTitle] of Object.entries(titleMappings)) {
+      if (lowerTitle.includes(key) || key.includes(lowerTitle)) {
+        return standardTitle;
+      }
+    }
+    
+    // If no mapping found, return the cleaned title with proper capitalization
+    return cleanTitle
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ')
+      .substring(0, 25); // Limit to 25 characters max
   };
 
   // ENHANCED: AI-driven skills gap extraction focused on analysis content

@@ -1,4 +1,4 @@
-// src/Pages/career/CareerDashboard.jsx - COMPLETE ENHANCED VERSION WITH ADVANCED RECOMMENDATION ENGINE
+// src/Pages/career/CareerDashboard.jsx - UPDATED TO MATCH TECHNICAL SPECIFICATION
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -25,27 +25,27 @@ const CareerDashboard = () => {
   const [animatedValues, setAnimatedValues] = useState({});
   const [activeTab, setActiveTab] = useState('overview');
   
-  // Enhanced user data model matching technical spec
+  // Enhanced user data model matching technical spec EXACTLY
   const [userData, setUserData] = useState({
-    // Constant Variables (used in all recommendations)
+    // 4 Constant Variables (used in ALL recommendations)
     yearsExperience: '',
     studyField: '',
     interests: [],
     transferableSkills: '',
     
-    // Recommendation 1 Specific (Tech-Market)
-    jobTechnologies: '',
-    toolsUsed: [],
-    
-    // Recommendation 2 Specific (Academic-Research)
-    educationLevel: '',
-    publications: '',
+    // Recommendation 1 Specific (🎯 Tech-Interest Based)
     techInterests: '',
-    
-    // Recommendation 3 Specific (Practical-Lifestyle)
-    workPreference: '',
-    timeCommitment: '',
     currentRole: '',
+    jobTechnologies: '',
+    
+    // Recommendation 2 Specific (📚 Research/Development Based)
+    publications: '',
+    toolsUsed: [],
+    timeCommitment: '',
+    
+    // Recommendation 3 Specific (⚖️ Lifestyle/Market Based)
+    workPreference: '',
+    educationLevel: '',
     targetSalary: '',
     
     // Additional Context
@@ -58,10 +58,11 @@ const CareerDashboard = () => {
     transitionTimeline: ''
   });
   
-  // Recommendation metadata
+  // Recommendation metadata matching technical spec
   const [recommendationMetadata, setRecommendationMetadata] = useState({
     overallConfidence: 0,
     dataCompleteness: 0,
+    constantVariablesComplete: 0,
     processedAt: null
   });
   
@@ -75,38 +76,49 @@ const CareerDashboard = () => {
   const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeX9C7YtHTSBy4COsV6KaogdEvrjXoVQ0O2psoyfs1xqrySNg/formResponse';
 
   // ============================================================================
-  // ADVANCED CAREER RECOMMENDATION SYSTEM (BASED ON TECHNICAL SPEC)
+  // CAREER RECOMMENDATION SYSTEM - EXACT MATCH TO TECHNICAL SPECIFICATION
   // ============================================================================
+
+  /**
+   * Enhanced Validation Function - Matches Technical Spec
+   */
+  const isValid = (value) => {
+    if (!value) return false;
+    
+    if (typeof value === 'string') {
+      const invalid = ['', 'none', 'not sure', 'unclear', 'n/a', 'unknown', 'unsure'];
+      const trimmed = value.toLowerCase().trim();
+      return !invalid.includes(trimmed) && trimmed.length > 0;
+    }
+    
+    if (Array.isArray(value)) {
+      return value.length > 0 && 
+             !value.some(v => ['not sure', 'unclear', 'unknown'].includes(v?.toLowerCase?.()));
+    }
+    
+    return true;
+  };
 
   /**
    * Data Validation Layer - Input sanitization and completeness scoring
    */
   const validateProfile = (profile) => {
-    console.log('🔍 Validating user profile...');
+    console.log('🔍 Validating user profile according to technical spec...');
     
-    const validation = {
-      constantsPresent: countValidConstants(profile),
-      criteriaCompleteness: assessCompleteness(profile),
-      requiresFallback: needsFallback(profile),
-      dataQuality: calculateDataQuality(profile)
-    };
+    const constantsPresent = countValidConstants(profile);
+    const criteriaCompleteness = assessCompleteness(profile);
+    const requiresFallback = constantsPresent < 2;
+    const dataQuality = calculateDataQuality(profile, constantsPresent, criteriaCompleteness);
     
     return {
       ...profile,
-      _validation: validation
+      _validation: {
+        constantsPresent,
+        criteriaCompleteness,
+        requiresFallback,
+        dataQuality
+      }
     };
-  };
-
-  const isValid = (value) => {
-    if (!value) return false;
-    if (typeof value === 'string') {
-      const invalid = ['', 'none', 'not sure', 'unclear', 'n/a', 'not specified'];
-      return !invalid.includes(value.toLowerCase().trim());
-    }
-    if (Array.isArray(value)) {
-      return value.length > 0 && !value.some(v => ['not sure', 'unclear', 'none'].includes(v?.toLowerCase()));
-    }
-    return true;
   };
 
   const countValidConstants = (profile) => {
@@ -115,357 +127,438 @@ const CareerDashboard = () => {
   };
 
   const assessCompleteness = (profile) => {
-    const allFields = [
+    const allCriteria = [
+      // Constants
       'yearsExperience', 'studyField', 'interests', 'transferableSkills',
-      'jobTechnologies', 'toolsUsed', 'educationLevel', 'publications', 
-      'techInterests', 'workPreference', 'timeCommitment', 'currentRole', 'targetSalary'
+      // Rec 1 specific
+      'techInterests', 'currentRole', 'jobTechnologies',
+      // Rec 2 specific  
+      'publications', 'toolsUsed', 'timeCommitment',
+      // Rec 3 specific
+      'workPreference', 'educationLevel', 'targetSalary'
     ];
-    const validFields = allFields.filter(key => isValid(profile[key])).length;
-    return (validFields / allFields.length) * 100;
+    const validCriteria = allCriteria.filter(key => isValid(profile[key])).length;
+    return (validCriteria / allCriteria.length) * 100;
   };
 
-  const needsFallback = (profile) => {
-    return countValidConstants(profile) < 2;
-  };
-
-  const calculateDataQuality = (profile) => {
-    const completeness = assessCompleteness(profile);
-    const constantsQuality = (countValidConstants(profile) / 4) * 100;
-    return (completeness * 0.7) + (constantsQuality * 0.3);
+  const calculateDataQuality = (profile, constantsPresent, criteriaCompleteness) => {
+    const constantsQuality = (constantsPresent / 4) * 100;
+    return (criteriaCompleteness * 0.7) + (constantsQuality * 0.3);
   };
 
   /**
-   * Dynamic Weight Calculation System
+   * Enhanced Dynamic Weight Calculation - Matches Technical Spec
    */
   const calculateDynamicWeights = (profile, criteria) => {
-    const missingConstants = 4 - countValidConstants(profile);
-    const missingSpecific = countMissingSpecific(profile, criteria.specific);
+    const constantsResult = assessConstantVariables(profile);
+    const specificsResult = assessSpecificCriteria(profile, criteria.specific);
     
-    let constantWeight = 0.4;  // Default: 40%
-    let specificWeight = 0.6;  // Default: 60%
+    // Base weights: 60% constants, 40% specifics (as per spec)
+    let constantWeight = 0.6;
+    let specificWeight = 0.4;
     
-    // Fallback logic
-    if (missingConstants >= 1) {
-      constantWeight = Math.max(0.1, 0.4 - (missingConstants * 0.1));
-      specificWeight = 1 - constantWeight;
+    // Fallback Logic Based on Missing Constants
+    const missingConstants = 4 - constantsResult.validCount;
+    
+    if (missingConstants === 1) {
+      // 1 missing: slight adjustment
+      constantWeight = 0.5;
+      specificWeight = 0.5;
+    } else if (missingConstants === 2) {
+      // 2 missing: moderate adjustment
+      constantWeight = 0.4;
+      specificWeight = 0.6;
+    } else if (missingConstants >= 3) {
+      // 3+ missing: heavy reliance on specifics
+      constantWeight = 0.2;
+      specificWeight = 0.8;
     }
     
-    if (missingConstants >= 3) {
-      constantWeight = 0.1;
-      specificWeight = 0.9;
+    // Further adjust based on specific criteria availability
+    if (specificsResult.validCount === 0) {
+      // No specific criteria available - rely entirely on constants
+      constantWeight = 1.0;
+      specificWeight = 0.0;
     }
     
     return distributeWeights(constantWeight, specificWeight, criteria);
   };
 
-  const countMissingSpecific = (profile, specificFields) => {
-    return specificFields.filter(field => !isValid(profile[field])).length;
+  const assessConstantVariables = (profile) => {
+    const constants = ['yearsExperience', 'studyField', 'interests', 'transferableSkills'];
+    const validCount = constants.filter(key => isValid(profile[key])).length;
+    
+    return {
+      validCount,
+      totalCount: 4,
+      completeness: validCount / 4,
+      critical: validCount < 2  // Less than 2 constants is critical
+    };
+  };
+
+  const assessSpecificCriteria = (profile, specificFields) => {
+    const validCount = specificFields.filter(field => isValid(profile[field])).length;
+    
+    return {
+      validCount,
+      totalCount: specificFields.length,
+      completeness: validCount / specificFields.length
+    };
   };
 
   const distributeWeights = (constantWeight, specificWeight, criteria) => {
     const constantFieldCount = 4;
     const specificFieldCount = criteria.specific.length;
     
-    return {
-      // Constant weights
+    const weights = {
+      // Constant weights - distributed equally
       yearsExperience: constantWeight / constantFieldCount,
       studyField: constantWeight / constantFieldCount,
       interests: constantWeight / constantFieldCount,
-      transferableSkills: constantWeight / constantFieldCount,
-      
-      // Specific weights (distributed based on criteria type)
-      ...criteria.specific.reduce((acc, field) => {
-        acc[field] = specificWeight / specificFieldCount;
-        return acc;
-      }, {})
+      transferableSkills: constantWeight / constantFieldCount
     };
+    
+    // Specific weights - distributed equally among specific criteria
+    criteria.specific.forEach(field => {
+      weights[field] = specificWeight / specificFieldCount;
+    });
+    
+    return weights;
+  };
+
+  const checkFallbackRequired = (constantsCount, totalCriteriaCount) => {
+    return constantsCount < 2 || totalCriteriaCount < 4;
   };
 
   /**
-   * Recommendation Engine 1: Tech-Market Alignment
+   * Recommendation Engine 1: Tech-Interest Based (🎯) - EXACT SPEC MATCH
    */
-  const generateTechMarketRecommendation = (validatedProfile) => {
-    console.log('🚀 Generating Tech-Market recommendation...');
+  const generateTechInterestRecommendation = (validatedProfile) => {
+    console.log('🎯 Generating Tech-Interest Based recommendation...');
     
     const criteria = {
       constants: ['yearsExperience', 'studyField', 'interests', 'transferableSkills'],
-      specific: ['jobTechnologies', 'toolsUsed']
+      specific: ['techInterests', 'currentRole', 'jobTechnologies']
     };
     
     const weights = calculateDynamicWeights(validatedProfile, criteria);
-    const score = calculateTechMarketScore(validatedProfile, weights);
+    const score = calculateTechInterestScore(validatedProfile, weights);
     const confidence = determineConfidence(score.criteriaCount, score.totalScore);
     
     return {
-      id: 'rec_1_tech_market',
-      type: 'tech-market',
-      title: generateTechRoleTitle(score.techStack, validatedProfile.yearsExperience),
-      description: generateTechDescription(score.techStack, validatedProfile),
-      reasoning: generateTechReasoning(validatedProfile, score),
+      id: 'rec_1_tech_interest',
+      type: 'tech-interest-based',
+      title: generateTechRoleTitle(score.techAlignment, validatedProfile.yearsExperience),
+      description: generateTechInterestDescription(score.techAlignment, validatedProfile),
+      reasoning: generateTechInterestReasoning(validatedProfile, score),
       confidence: confidence.level,
       confidenceScore: confidence.score,
       match: Math.round(score.totalScore),
-      requiredSkills: extractTechSkills(score.techStack, validatedProfile),
-      suggestedActions: generateTechActions(validatedProfile, score.techStack),
-      salaryRange: getTechSalaryRange(score.techStack, validatedProfile.yearsExperience),
-      marketDemand: getTechMarketDemand(score.techStack),
+      requiredSkills: extractTechInterestSkills(score.techAlignment, validatedProfile),
+      suggestedActions: generateTechInterestActions(validatedProfile, score.techAlignment),
+      salaryRange: getTechInterestSalaryRange(score.techAlignment, validatedProfile.yearsExperience),
+      marketDemand: getTechInterestMarketDemand(score.techAlignment),
       metadata: {
-        criteriaUsed: getCriteriaUsed(validatedProfile, criteria),
-        missingCriteria: getMissingCriteria(validatedProfile, criteria),
-        fallbackApplied: score.criteriaCount < 4,
-        techStack: score.techStack,
-        algorithm: 'tech-market-v1.0'
+        criteriaUsed: score.usedCriteria,
+        missingCriteria: score.missingCriteria,
+        fallbackApplied: score.fallbackUsed,
+        constantsScore: score.constantsScore,
+        specificsScore: score.specificsScore
       }
     };
   };
 
-  const calculateTechMarketScore = (profile, weights) => {
-    let score = 0;
+  const calculateTechInterestScore = (profile, weights) => {
+    let constantsScore = 0;
+    let specificsScore = 0;
     let criteriaCount = 0;
-    let techStack = [];
+    let usedCriteria = [];
+    let missingCriteria = [];
     
-    // Constant variables scoring
-    if (isValid(profile.yearsExperience)) {
-      score += weights.yearsExperience * getExperienceScore(profile.yearsExperience) * 100;
-      criteriaCount++;
-    }
+    // 4 Constant Variables Scoring
+    const constantResults = scoreConstantVariables(profile, weights);
+    constantsScore = constantResults.score;
+    criteriaCount += constantResults.count;
+    usedCriteria.push(...constantResults.used);
+    missingCriteria.push(...constantResults.missing);
     
-    if (isValid(profile.studyField)) {
-      score += weights.studyField * getStudyFieldTechAlignment(profile.studyField) * 100;
-      criteriaCount++;
-    }
-    
-    if (isValid(profile.interests)) {
-      const interestScore = getTechInterestAlignment(profile.interests);
-      score += weights.interests * interestScore * 100;
-      criteriaCount++;
-      if (interestScore > 0.7) {
-        techStack.push(...extractTechFromInterests(profile.interests));
-      }
-    }
-    
-    if (isValid(profile.transferableSkills)) {
-      score += weights.transferableSkills * getTechSkillRelevance(profile.transferableSkills) * 100;
-      criteriaCount++;
-    }
-    
-    // Specific criteria scoring
-    if (isValid(profile.jobTechnologies)) {
-      const techScore = getTechnologyMarketDemand(profile.jobTechnologies);
-      score += weights.jobTechnologies * techScore * 100;
-      criteriaCount++;
-      techStack.push(...extractTechnologies(profile.jobTechnologies));
-    }
-    
-    if (isValid(profile.toolsUsed)) {
-      score += weights.toolsUsed * getToolProficiencyScore(profile.toolsUsed) * 100;
-      criteriaCount++;
-      techStack.push(...profile.toolsUsed);
-    }
-    
-    return { 
-      totalScore: Math.min(score / criteriaCount, 100), 
-      criteriaCount, 
-      techStack: [...new Set(techStack)] // Remove duplicates
-    };
-  };
-
-  /**
-   * Recommendation Engine 2: Academic-Research Alignment
-   */
-  const generateAcademicResearchRecommendation = (validatedProfile) => {
-    console.log('🎓 Generating Academic-Research recommendation...');
-    
-    const criteria = {
-      constants: ['yearsExperience', 'studyField', 'interests', 'transferableSkills'],
-      specific: ['educationLevel', 'publications', 'techInterests']
-    };
-    
-    const weights = calculateDynamicWeights(validatedProfile, criteria);
-    const score = calculateAcademicScore(validatedProfile, weights);
-    const confidence = determineConfidence(score.criteriaCount, score.totalScore);
-    
-    return {
-      id: 'rec_2_academic_research',
-      type: 'academic-research',
-      title: generateAcademicRoleTitle(score.researchArea, validatedProfile.educationLevel),
-      description: generateAcademicDescription(score.researchArea, validatedProfile),
-      reasoning: generateAcademicReasoning(validatedProfile, score),
-      confidence: confidence.level,
-      confidenceScore: confidence.score,
-      match: Math.round(score.totalScore),
-      requiredSkills: extractAcademicSkills(score.researchArea, validatedProfile),
-      suggestedActions: generateAcademicActions(validatedProfile, score.researchArea),
-      salaryRange: getAcademicSalaryRange(score.researchArea, validatedProfile.educationLevel),
-      marketDemand: getAcademicMarketDemand(score.researchArea),
-      metadata: {
-        criteriaUsed: getCriteriaUsed(validatedProfile, criteria),
-        missingCriteria: getMissingCriteria(validatedProfile, criteria),
-        fallbackApplied: score.criteriaCount < 4,
-        researchArea: score.researchArea,
-        algorithm: 'academic-research-v1.0'
-      }
-    };
-  };
-
-  const calculateAcademicScore = (profile, weights) => {
-    let score = 0;
-    let criteriaCount = 0;
-    let researchArea = 'General Technology Research';
-    
-    // Constant variables scoring (same as tech-market)
-    if (isValid(profile.yearsExperience)) {
-      score += weights.yearsExperience * getExperienceScore(profile.yearsExperience) * 100;
-      criteriaCount++;
-    }
-    
-    if (isValid(profile.studyField)) {
-      const studyScore = getStudyFieldAcademicAlignment(profile.studyField);
-      score += weights.studyField * studyScore * 100;
-      criteriaCount++;
-      if (studyScore > 0.7) {
-        researchArea = generateResearchArea(profile.studyField);
-      }
-    }
-    
-    if (isValid(profile.interests)) {
-      score += weights.interests * getAcademicInterestAlignment(profile.interests) * 100;
-      criteriaCount++;
-    }
-    
-    if (isValid(profile.transferableSkills)) {
-      score += weights.transferableSkills * getAcademicSkillRelevance(profile.transferableSkills) * 100;
-      criteriaCount++;
-    }
-    
-    // Academic-specific criteria
-    if (isValid(profile.educationLevel)) {
-      score += weights.educationLevel * getEducationLevelScore(profile.educationLevel) * 100;
-      criteriaCount++;
-    }
-    
-    if (isValid(profile.publications)) {
-      score += weights.publications * getPublicationScore(profile.publications) * 100;
-      criteriaCount++;
-    }
-    
+    // Recommendation 1 Specific Criteria
     if (isValid(profile.techInterests)) {
-      const interestScore = getResearchInterestAlignment(profile.techInterests);
-      score += weights.techInterests * interestScore * 100;
+      specificsScore += weights.techInterests * getTechInterestMarketAlignment(profile.techInterests);
       criteriaCount++;
-      if (interestScore > 0.6) {
-        researchArea = generateResearchAreaFromInterests(profile.techInterests);
-      }
-    }
-    
-    return { 
-      totalScore: Math.min(score / criteriaCount, 100), 
-      criteriaCount, 
-      researchArea 
-    };
-  };
-
-  /**
-   * Recommendation Engine 3: Practical-Lifestyle Alignment
-   */
-  const generatePracticalLifestyleRecommendation = (validatedProfile) => {
-    console.log('🎯 Generating Practical-Lifestyle recommendation...');
-    
-    const criteria = {
-      constants: ['yearsExperience', 'studyField', 'interests', 'transferableSkills'],
-      specific: ['workPreference', 'timeCommitment', 'currentRole', 'targetSalary']
-    };
-    
-    const weights = calculateDynamicWeights(validatedProfile, criteria);
-    const score = calculatePracticalScore(validatedProfile, weights);
-    const confidence = determineConfidence(score.criteriaCount, score.totalScore);
-    
-    return {
-      id: 'rec_3_practical_lifestyle',
-      type: 'practical-lifestyle',
-      title: generatePracticalRoleTitle(score.roleType, validatedProfile.workPreference),
-      description: generatePracticalDescription(score.roleType, validatedProfile),
-      reasoning: generatePracticalReasoning(validatedProfile, score),
-      confidence: confidence.level,
-      confidenceScore: confidence.score,
-      match: Math.round(score.totalScore),
-      requiredSkills: extractPracticalSkills(score.roleType, validatedProfile),
-      suggestedActions: generatePracticalActions(validatedProfile, score.roleType),
-      salaryRange: getPracticalSalaryRange(score.roleType, validatedProfile.targetSalary),
-      marketDemand: getPracticalMarketDemand(score.roleType),
-      metadata: {
-        criteriaUsed: getCriteriaUsed(validatedProfile, criteria),
-        missingCriteria: getMissingCriteria(validatedProfile, criteria),
-        fallbackApplied: score.criteriaCount < 4,
-        roleType: score.roleType,
-        algorithm: 'practical-lifestyle-v1.0'
-      }
-    };
-  };
-
-  const calculatePracticalScore = (profile, weights) => {
-    let score = 0;
-    let criteriaCount = 0;
-    let roleType = 'Technology Professional';
-    
-    // Constant variables scoring (same as others)
-    if (isValid(profile.yearsExperience)) {
-      score += weights.yearsExperience * getExperienceScore(profile.yearsExperience) * 100;
-      criteriaCount++;
-    }
-    
-    if (isValid(profile.studyField)) {
-      score += weights.studyField * getStudyFieldPracticalAlignment(profile.studyField) * 100;
-      criteriaCount++;
-    }
-    
-    if (isValid(profile.interests)) {
-      score += weights.interests * getPracticalInterestAlignment(profile.interests) * 100;
-      criteriaCount++;
-    }
-    
-    if (isValid(profile.transferableSkills)) {
-      score += weights.transferableSkills * getPracticalSkillRelevance(profile.transferableSkills) * 100;
-      criteriaCount++;
-    }
-    
-    // Practical-specific criteria
-    if (isValid(profile.workPreference)) {
-      score += weights.workPreference * getWorkPreferenceScore(profile.workPreference) * 100;
-      criteriaCount++;
-    }
-    
-    if (isValid(profile.timeCommitment)) {
-      score += weights.timeCommitment * getTimeCommitmentScore(profile.timeCommitment) * 100;
-      criteriaCount++;
+      usedCriteria.push('techInterests');
+    } else {
+      missingCriteria.push('techInterests');
     }
     
     if (isValid(profile.currentRole)) {
-      const roleScore = getCurrentRoleTransitionScore(profile.currentRole);
-      score += weights.currentRole * roleScore * 100;
+      specificsScore += weights.currentRole * getCurrentRoleTechTransition(profile.currentRole);
       criteriaCount++;
-      if (roleScore > 0.6) {
-        roleType = generateRoleType(profile.currentRole);
-      }
+      usedCriteria.push('currentRole');
+    } else {
+      missingCriteria.push('currentRole');
     }
     
-    if (isValid(profile.targetSalary)) {
-      score += weights.targetSalary * getTargetSalaryRealisticScore(profile.targetSalary) * 100;
+    if (isValid(profile.jobTechnologies)) {
+      specificsScore += weights.jobTechnologies * getTechnologyMarketDemand(profile.jobTechnologies);
       criteriaCount++;
+      usedCriteria.push('jobTechnologies');
+    } else {
+      missingCriteria.push('jobTechnologies');
     }
+    
+    const totalScore = constantsScore + specificsScore;
+    const fallbackUsed = checkFallbackRequired(constantResults.count, criteriaCount);
     
     return { 
-      totalScore: Math.min(score / criteriaCount, 100), 
+      totalScore, 
       criteriaCount, 
-      roleType 
+      constantsScore, 
+      specificsScore,
+      usedCriteria,
+      missingCriteria,
+      fallbackUsed,
+      techAlignment: extractTechAlignment(profile) 
     };
   };
 
   /**
-   * Confidence Scoring System
+   * Recommendation Engine 2: Research/Development Based (📚) - EXACT SPEC MATCH
+   */
+  const generateResearchDevelopmentRecommendation = (validatedProfile) => {
+    console.log('📚 Generating Research/Development Based recommendation...');
+    
+    const criteria = {
+      constants: ['yearsExperience', 'studyField', 'interests', 'transferableSkills'],
+      specific: ['publications', 'toolsUsed', 'timeCommitment']
+    };
+    
+    const weights = calculateDynamicWeights(validatedProfile, criteria);
+    const score = calculateResearchDevelopmentScore(validatedProfile, weights);
+    const confidence = determineConfidence(score.criteriaCount, score.totalScore);
+    
+    return {
+      id: 'rec_2_research_dev',
+      type: 'research-development',
+      title: generateResearchRoleTitle(score.researchAlignment, validatedProfile.yearsExperience),
+      description: generateResearchDescription(score.researchAlignment, validatedProfile),
+      reasoning: generateResearchReasoning(validatedProfile, score),
+      confidence: confidence.level,
+      confidenceScore: confidence.score,
+      match: Math.round(score.totalScore),
+      requiredSkills: extractResearchSkills(score.researchAlignment, validatedProfile),
+      suggestedActions: generateResearchActions(validatedProfile, score.researchAlignment),
+      salaryRange: getResearchSalaryRange(score.researchAlignment, validatedProfile.yearsExperience),
+      marketDemand: getResearchMarketDemand(score.researchAlignment),
+      metadata: {
+        criteriaUsed: score.usedCriteria,
+        missingCriteria: score.missingCriteria,
+        fallbackApplied: score.fallbackUsed,
+        constantsScore: score.constantsScore,
+        specificsScore: score.specificsScore
+      }
+    };
+  };
+
+  const calculateResearchDevelopmentScore = (profile, weights) => {
+    let constantsScore = 0;
+    let specificsScore = 0;
+    let criteriaCount = 0;
+    let usedCriteria = [];
+    let missingCriteria = [];
+    
+    // 4 Constant Variables Scoring
+    const constantResults = scoreConstantVariables(profile, weights);
+    constantsScore = constantResults.score;
+    criteriaCount += constantResults.count;
+    usedCriteria.push(...constantResults.used);
+    missingCriteria.push(...constantResults.missing);
+    
+    // Recommendation 2 Specific Criteria
+    if (isValid(profile.publications)) {
+      specificsScore += weights.publications * getPublicationScore(profile.publications);
+      criteriaCount++;
+      usedCriteria.push('publications');
+    } else {
+      missingCriteria.push('publications');
+    }
+    
+    if (isValid(profile.toolsUsed)) {
+      specificsScore += weights.toolsUsed * getResearchToolProficiency(profile.toolsUsed);
+      criteriaCount++;
+      usedCriteria.push('toolsUsed');
+    } else {
+      missingCriteria.push('toolsUsed');
+    }
+    
+    if (isValid(profile.timeCommitment)) {
+      specificsScore += weights.timeCommitment * getTimeCommitmentFlexibility(profile.timeCommitment);
+      criteriaCount++;
+      usedCriteria.push('timeCommitment');
+    } else {
+      missingCriteria.push('timeCommitment');
+    }
+    
+    const totalScore = constantsScore + specificsScore;
+    const fallbackUsed = checkFallbackRequired(constantResults.count, criteriaCount);
+    
+    return { 
+      totalScore, 
+      criteriaCount, 
+      constantsScore, 
+      specificsScore,
+      usedCriteria,
+      missingCriteria,
+      fallbackUsed,
+      researchAlignment: extractResearchAlignment(profile) 
+    };
+  };
+
+  /**
+   * Recommendation Engine 3: Lifestyle/Market Based (⚖️) - EXACT SPEC MATCH
+   */
+  const generateLifestyleMarketRecommendation = (validatedProfile) => {
+    console.log('⚖️ Generating Lifestyle/Market Based recommendation...');
+    
+    const criteria = {
+      constants: ['yearsExperience', 'studyField', 'interests', 'transferableSkills'],
+      specific: ['workPreference', 'educationLevel', 'targetSalary']
+    };
+    
+    const weights = calculateDynamicWeights(validatedProfile, criteria);
+    const score = calculateLifestyleMarketScore(validatedProfile, weights);
+    const confidence = determineConfidence(score.criteriaCount, score.totalScore);
+    
+    return {
+      id: 'rec_3_lifestyle_market',
+      type: 'lifestyle-market',
+      title: generateLifestyleRoleTitle(score.marketFit, validatedProfile.yearsExperience),
+      description: generateLifestyleDescription(score.marketFit, validatedProfile),
+      reasoning: generateLifestyleReasoning(validatedProfile, score),
+      confidence: confidence.level,
+      confidenceScore: confidence.score,
+      match: Math.round(score.totalScore),
+      requiredSkills: extractLifestyleSkills(score.marketFit, validatedProfile),
+      suggestedActions: generateLifestyleActions(validatedProfile, score.marketFit),
+      salaryRange: getLifestyleSalaryRange(score.marketFit, validatedProfile.targetSalary),
+      marketDemand: getLifestyleMarketDemand(score.marketFit),
+      metadata: {
+        criteriaUsed: score.usedCriteria,
+        missingCriteria: score.missingCriteria,
+        fallbackApplied: score.fallbackUsed,
+        constantsScore: score.constantsScore,
+        specificsScore: score.specificsScore
+      }
+    };
+  };
+
+  const calculateLifestyleMarketScore = (profile, weights) => {
+    let constantsScore = 0;
+    let specificsScore = 0;
+    let criteriaCount = 0;
+    let usedCriteria = [];
+    let missingCriteria = [];
+    
+    // 4 Constant Variables Scoring
+    const constantResults = scoreConstantVariables(profile, weights);
+    constantsScore = constantResults.score;
+    criteriaCount += constantResults.count;
+    usedCriteria.push(...constantResults.used);
+    missingCriteria.push(...constantResults.missing);
+    
+    // Recommendation 3 Specific Criteria
+    if (isValid(profile.workPreference)) {
+      specificsScore += weights.workPreference * getWorkPreferenceMarketFit(profile.workPreference);
+      criteriaCount++;
+      usedCriteria.push('workPreference');
+    } else {
+      missingCriteria.push('workPreference');
+    }
+    
+    if (isValid(profile.educationLevel)) {
+      specificsScore += weights.educationLevel * getEducationLevelAlignment(profile.educationLevel);
+      criteriaCount++;
+      usedCriteria.push('educationLevel');
+    } else {
+      missingCriteria.push('educationLevel');
+    }
+    
+    if (isValid(profile.targetSalary)) {
+      specificsScore += weights.targetSalary * getSalaryMarketRealism(profile.targetSalary, profile.yearsExperience);
+      criteriaCount++;
+      usedCriteria.push('targetSalary');
+    } else {
+      missingCriteria.push('targetSalary');
+    }
+    
+    const totalScore = constantsScore + specificsScore;
+    const fallbackUsed = checkFallbackRequired(constantResults.count, criteriaCount);
+    
+    return { 
+      totalScore, 
+      criteriaCount, 
+      constantsScore, 
+      specificsScore,
+      usedCriteria,
+      missingCriteria,
+      fallbackUsed,
+      marketFit: extractMarketFit(profile) 
+    };
+  };
+
+  /**
+   * Constant Variables Scoring Function - EXACT SPEC MATCH
+   */
+  const scoreConstantVariables = (profile, weights) => {
+    let score = 0;
+    let count = 0;
+    let used = [];
+    let missing = [];
+    
+    // Years Experience (Universal baseline)
+    if (isValid(profile.yearsExperience)) {
+      score += weights.yearsExperience * getExperienceScore(profile.yearsExperience) * 100;
+      count++;
+      used.push('yearsExperience');
+    } else {
+      missing.push('yearsExperience');
+    }
+    
+    // Study Field (Academic foundation)
+    if (isValid(profile.studyField)) {
+      score += weights.studyField * getStudyFieldRelevance(profile.studyField) * 100;
+      count++;
+      used.push('studyField');
+    } else {
+      missing.push('studyField');
+    }
+    
+    // Interests (Passion alignment)
+    if (isValid(profile.interests)) {
+      score += weights.interests * getInterestAlignment(profile.interests) * 100;
+      count++;
+      used.push('interests');
+    } else {
+      missing.push('interests');
+    }
+    
+    // Transferable Skills (Cross-domain value)
+    if (isValid(profile.transferableSkills)) {
+      score += weights.transferableSkills * getTransferableSkillValue(profile.transferableSkills) * 100;
+      count++;
+      used.push('transferableSkills');
+    } else {
+      missing.push('transferableSkills');
+    }
+    
+    return { score, count, used, missing };
+  };
+
+  /**
+   * Confidence Scoring System - EXACT SPEC MATCH
    */
   const determineConfidence = (criteriaCount, totalScore) => {
-    const maxCriteria = 7; // Maximum possible criteria per recommendation
+    const maxCriteria = 7; // 4 constants + 3 specifics
     const completeness = criteriaCount / maxCriteria;
     const scoreQuality = Math.min(totalScore / 100, 1);
     
@@ -486,45 +579,57 @@ const CareerDashboard = () => {
   };
 
   /**
-   * Main Recommendation Generation Function
+   * Main Career Recommendation Engine - EXACT SPEC IMPLEMENTATION
    */
   const generateAdvancedCareerRecommendations = async (rawProfile) => {
-    console.log('🎯 Starting Advanced Career Recommendation Engine...');
+    console.log('🎯 Starting Career Recommendation Engine v1.1 (Technical Spec)...');
     
     try {
-      // Step 1: Validate and prepare profile
+      // Step 1: Data Validation Layer
       const validatedProfile = validateProfile(rawProfile);
       
-      // Step 2: Generate all three types of recommendations
+      // Check if minimum viable data exists
+      if (validatedProfile._validation.constantsPresent < 1) {
+        throw new Error('Insufficient data for recommendations - need at least 1 constant variable');
+      }
+      
+      // Step 2: Generate all three types of recommendations in parallel
       const recommendations = [
-        generateTechMarketRecommendation(validatedProfile),
-        generateAcademicResearchRecommendation(validatedProfile),
-        generatePracticalLifestyleRecommendation(validatedProfile)
+        generateTechInterestRecommendation(validatedProfile),
+        generateResearchDevelopmentRecommendation(validatedProfile),
+        generateLifestyleMarketRecommendation(validatedProfile)
       ];
       
-      // Step 3: Sort by confidence score
+      // Step 3: Sort by confidence score (highest first)
       const sortedRecommendations = recommendations.sort((a, b) => b.confidenceScore - a.confidenceScore);
       
-      // Step 4: Calculate metadata
-      const metadata = {
+      // Step 4: Calculate response metadata
+      const response = {
+        recommendations: sortedRecommendations,
         overallConfidence: calculateOverallConfidence(sortedRecommendations),
         dataCompleteness: Math.round(validatedProfile._validation.criteriaCompleteness),
-        processedAt: new Date().toISOString(),
-        algorithmVersion: '1.0.0',
-        totalRecommendations: sortedRecommendations.length
+        constantVariablesComplete: validatedProfile._validation.constantsPresent,
+        processedAt: new Date().toISOString()
       };
       
-      console.log('✅ Advanced recommendations generated:', {
+      console.log('✅ Career recommendations generated (Technical Spec v1.1):', {
         count: sortedRecommendations.length,
-        avgConfidence: metadata.overallConfidence,
-        completeness: metadata.dataCompleteness
+        avgConfidence: response.overallConfidence,
+        completeness: response.dataCompleteness,
+        constantsPresent: response.constantVariablesComplete
       });
       
-      setRecommendationMetadata(metadata);
+      setRecommendationMetadata({
+        overallConfidence: response.overallConfidence,
+        dataCompleteness: response.dataCompleteness,
+        constantVariablesComplete: response.constantVariablesComplete,
+        processedAt: response.processedAt
+      });
+      
       return sortedRecommendations;
       
     } catch (error) {
-      console.error('❌ Error generating advanced recommendations:', error);
+      console.error('❌ Error in Career Recommendation Engine:', error);
       return generateFallbackRecommendations(rawProfile);
     }
   };
@@ -535,369 +640,364 @@ const CareerDashboard = () => {
   const generateFallbackRecommendations = (profile) => {
     console.log('🔄 Generating fallback recommendations...');
     
-    const fallbackRecs = [
+    return [
       {
         id: 'fallback_1',
         type: 'exploratory',
-        title: 'Technology Explorer',
-        description: 'Explore various technology roles to find your passion',
-        reasoning: 'Limited profile data - explore multiple paths',
+        title: 'Technology Explorer Path',
+        description: 'Explore various technology roles to discover your passion and strengths',
+        reasoning: 'Limited profile data detected - recommend exploration across multiple areas',
         confidence: 'low',
         confidenceScore: 35,
         match: 35,
-        requiredSkills: ['Basic Programming', 'Problem Solving', 'Communication'],
+        requiredSkills: ['Basic Programming', 'Problem Solving', 'Communication', 'Learning Mindset'],
         suggestedActions: [
-          'Complete skills assessment',
-          'Try online coding tutorials',
-          'Attend tech meetups'
+          'Complete comprehensive skills assessment',
+          'Try introductory courses in different tech areas',
+          'Attend technology meetups and networking events'
         ],
         salaryRange: '$45k - $85k',
         marketDemand: 'medium',
         metadata: {
           criteriaUsed: [],
-          missingCriteria: ['Most profile fields'],
+          missingCriteria: ['Most profile fields missing'],
           fallbackApplied: true,
-          algorithm: 'fallback-v1.0'
+          constantsScore: 0,
+          specificsScore: 0
         }
       }
     ];
-    
-    return fallbackRecs;
   };
 
   // ============================================================================
-  // SCORING HELPER FUNCTIONS
+  // SCORING HELPER FUNCTIONS - MATCHING TECHNICAL SPEC
   // ============================================================================
 
+  // Experience scoring
   const getExperienceScore = (experience) => {
     const expMap = {
-      '0': 0.2, '1': 0.3, '2': 0.4, '3': 0.5, '4': 0.6, '5': 0.7,
       '0-2': 0.3, '3-5': 0.6, '6-10': 0.8, '10+': 0.9,
+      '0': 0.2, '1': 0.3, '2': 0.4, '3': 0.5, '4': 0.6, '5': 0.7,
       'Complete beginner': 0.2, 'Some exposure': 0.4, 'Beginner': 0.5,
       'Intermediate': 0.7, 'Advanced': 0.9
     };
     return expMap[experience] || 0.5;
   };
 
-  const getStudyFieldTechAlignment = (field) => {
+  // Study field relevance
+  const getStudyFieldRelevance = (field) => {
     if (!field) return 0.3;
     const fieldLower = field.toLowerCase();
     if (fieldLower.includes('computer') || fieldLower.includes('software')) return 0.9;
     if (fieldLower.includes('engineering') || fieldLower.includes('math')) return 0.8;
     if (fieldLower.includes('science') || fieldLower.includes('data')) return 0.7;
+    if (fieldLower.includes('business') || fieldLower.includes('management')) return 0.6;
     return 0.4;
   };
 
-  const getTechInterestAlignment = (interests) => {
+  // Interest alignment
+  const getInterestAlignment = (interests) => {
     if (!interests || interests.length === 0) return 0.3;
-    const techKeywords = ['programming', 'coding', 'software', 'ai', 'data', 'web', 'mobile'];
+    const techKeywords = ['programming', 'coding', 'software', 'ai', 'data', 'web', 'mobile', 'technology'];
     const hasMatch = interests.some(interest => 
       techKeywords.some(keyword => interest.toLowerCase().includes(keyword))
     );
-    return hasMatch ? 0.8 : 0.4;
+    return hasMatch ? 0.8 : 0.5;
   };
 
-  const getTechSkillRelevance = (skills) => {
+  // Transferable skill value
+  const getTransferableSkillValue = (skills) => {
     if (!skills) return 0.3;
     const skillsLower = skills.toLowerCase();
-    const techSkills = ['analytical', 'problem', 'logical', 'technical', 'creative'];
-    const matches = techSkills.filter(skill => skillsLower.includes(skill)).length;
-    return Math.min(0.4 + (matches * 0.15), 0.9);
+    const valuableSkills = ['analytical', 'problem', 'logical', 'technical', 'creative', 'communication', 'leadership'];
+    const matches = valuableSkills.filter(skill => skillsLower.includes(skill)).length;
+    return Math.min(0.4 + (matches * 0.1), 0.9);
   };
 
+  // Tech interest market alignment
+  const getTechInterestMarketAlignment = (techInterests) => {
+    if (!techInterests) return 0.3;
+    const interestsLower = techInterests.toLowerCase();
+    const hotTech = ['machine learning', 'ai', 'cloud', 'cybersecurity', 'blockchain', 'data science'];
+    const matches = hotTech.filter(tech => interestsLower.includes(tech)).length;
+    return Math.min(0.5 + (matches * 0.15), 0.95);
+  };
+
+  // Current role tech transition score
+  const getCurrentRoleTechTransition = (currentRole) => {
+    if (!currentRole) return 0.4;
+    const roleLower = currentRole.toLowerCase();
+    if (roleLower.includes('engineer') || roleLower.includes('developer')) return 0.9;
+    if (roleLower.includes('analyst') || roleLower.includes('manager')) return 0.7;
+    if (roleLower.includes('coordinator') || roleLower.includes('assistant')) return 0.5;
+    return 0.6;
+  };
+
+  // Technology market demand
   const getTechnologyMarketDemand = (technologies) => {
     if (!technologies) return 0.3;
     const techLower = technologies.toLowerCase();
-    const highDemand = ['python', 'javascript', 'react', 'aws', 'sql', 'java'];
-    const matches = highDemand.filter(tech => techLower.includes(tech)).length;
+    const highDemandTech = ['python', 'javascript', 'react', 'aws', 'sql', 'java', 'nodejs'];
+    const matches = highDemandTech.filter(tech => techLower.includes(tech)).length;
     return Math.min(0.5 + (matches * 0.1), 0.95);
   };
 
-  const getToolProficiencyScore = (tools) => {
-    if (!tools || tools.length === 0) return 0.3;
-    return Math.min(0.5 + (tools.length * 0.1), 0.9);
-  };
-
-  // Academic scoring functions
-  const getStudyFieldAcademicAlignment = (field) => {
-    if (!field) return 0.3;
-    const fieldLower = field.toLowerCase();
-    if (fieldLower.includes('phd') || fieldLower.includes('research')) return 0.9;
-    if (fieldLower.includes('master') || fieldLower.includes('science')) return 0.8;
-    return 0.5;
-  };
-
-  const getAcademicInterestAlignment = (interests) => {
-    if (!interests || interests.length === 0) return 0.3;
-    const academicKeywords = ['research', 'analysis', 'theory', 'study', 'academic'];
-    const hasMatch = interests.some(interest => 
-      academicKeywords.some(keyword => interest.toLowerCase().includes(keyword))
-    );
-    return hasMatch ? 0.8 : 0.4;
-  };
-
-  const getAcademicSkillRelevance = (skills) => {
-    if (!skills) return 0.3;
-    const skillsLower = skills.toLowerCase();
-    const academicSkills = ['research', 'analytical', 'writing', 'critical thinking'];
-    const matches = academicSkills.filter(skill => skillsLower.includes(skill)).length;
-    return Math.min(0.4 + (matches * 0.15), 0.9);
-  };
-
-  const getEducationLevelScore = (level) => {
-    const levelMap = {
-      'high school': 0.3, 'bachelor': 0.6, 'master': 0.8, 'phd': 0.95
-    };
-    return levelMap[level?.toLowerCase()] || 0.5;
-  };
-
+  // Publication score
   const getPublicationScore = (publications) => {
     if (!publications) return 0.2;
     const pubLower = publications.toLowerCase();
     if (pubLower.includes('none') || pubLower.includes('0')) return 0.2;
     if (pubLower.includes('1') || pubLower.includes('few')) return 0.6;
-    return 0.8;
-  };
-
-  const getResearchInterestAlignment = (interests) => {
-    if (!interests) return 0.3;
-    const researchKeywords = ['machine learning', 'ai', 'data science', 'algorithms'];
-    const hasMatch = researchKeywords.some(keyword => interests.toLowerCase().includes(keyword));
-    return hasMatch ? 0.8 : 0.4;
-  };
-
-  // Practical scoring functions
-  const getStudyFieldPracticalAlignment = (field) => {
-    if (!field) return 0.4;
-    const fieldLower = field.toLowerCase();
-    if (fieldLower.includes('business') || fieldLower.includes('management')) return 0.8;
-    if (fieldLower.includes('engineering') || fieldLower.includes('computer')) return 0.7;
-    return 0.5;
-  };
-
-  const getPracticalInterestAlignment = (interests) => {
-    if (!interests || interests.length === 0) return 0.4;
-    const practicalKeywords = ['building', 'creating', 'solving', 'helping', 'business'];
-    const hasMatch = interests.some(interest => 
-      practicalKeywords.some(keyword => interest.toLowerCase().includes(keyword))
-    );
-    return hasMatch ? 0.8 : 0.5;
-  };
-
-  const getPracticalSkillRelevance = (skills) => {
-    if (!skills) return 0.4;
-    const skillsLower = skills.toLowerCase();
-    const practicalSkills = ['communication', 'teamwork', 'leadership', 'project management'];
-    const matches = practicalSkills.filter(skill => skillsLower.includes(skill)).length;
-    return Math.min(0.5 + (matches * 0.1), 0.9);
-  };
-
-  const getWorkPreferenceScore = (preference) => {
-    const prefMap = { 'remote': 0.8, 'hybrid': 0.9, 'onsite': 0.7 };
-    return prefMap[preference?.toLowerCase()] || 0.6;
-  };
-
-  const getTimeCommitmentScore = (commitment) => {
-    const commitMap = { 'full-time': 0.9, 'part-time': 0.7, 'flexible': 0.6 };
-    return commitMap[commitment?.toLowerCase()] || 0.6;
-  };
-
-  const getCurrentRoleTransitionScore = (role) => {
-    if (!role) return 0.4;
-    const roleLower = role.toLowerCase();
-    if (roleLower.includes('manager') || roleLower.includes('analyst')) return 0.8;
-    if (roleLower.includes('developer') || roleLower.includes('engineer')) return 0.9;
-    return 0.6;
-  };
-
-  const getTargetSalaryRealisticScore = (salary) => {
-    if (!salary) return 0.5;
-    // This would normally check against market data
+    if (pubLower.includes('several') || pubLower.includes('many')) return 0.8;
     return 0.7;
   };
 
+  // Research tool proficiency
+  const getResearchToolProficiency = (toolsUsed) => {
+    if (!toolsUsed || toolsUsed.length === 0) return 0.3;
+    const researchTools = ['jupyter', 'r', 'matlab', 'git', 'docker', 'python', 'spss'];
+    const matches = toolsUsed.filter(tool => 
+      researchTools.some(rTool => tool.toLowerCase().includes(rTool))
+    ).length;
+    return Math.min(0.4 + (matches * 0.1), 0.9);
+  };
+
+  // Time commitment flexibility
+  const getTimeCommitmentFlexibility = (timeCommitment) => {
+    const commitMap = { 
+      'full-time': 0.9, 
+      'part-time': 0.7, 
+      'flexible': 0.8,
+      'evenings': 0.6,
+      'weekends': 0.5
+    };
+    return commitMap[timeCommitment?.toLowerCase()] || 0.6;
+  };
+
+  // Work preference market fit
+  const getWorkPreferenceMarketFit = (workPreference) => {
+    const prefMap = { 
+      'remote': 0.9, 
+      'hybrid': 0.8, 
+      'onsite': 0.6,
+      'flexible': 0.7
+    };
+    return prefMap[workPreference?.toLowerCase()] || 0.7;
+  };
+
+  // Education level alignment
+  const getEducationLevelAlignment = (educationLevel) => {
+    const levelMap = {
+      'high school': 0.4, 
+      'bachelor': 0.7, 
+      'master': 0.9, 
+      'phd': 0.95,
+      'associate': 0.5,
+      'bootcamp': 0.6
+    };
+    return levelMap[educationLevel?.toLowerCase()] || 0.6;
+  };
+
+  // Salary market realism
+  const getSalaryMarketRealism = (targetSalary, yearsExperience) => {
+    if (!targetSalary) return 0.5;
+    const salaryNum = parseInt(targetSalary.replace(/[^\d]/g, ''));
+    const expScore = getExperienceScore(yearsExperience);
+    
+    // Realistic salary ranges based on experience
+    const expectedRange = {
+      low: 40000 + (expScore * 60000),
+      high: 80000 + (expScore * 100000)
+    };
+    
+    if (salaryNum >= expectedRange.low && salaryNum <= expectedRange.high) {
+      return 0.9; // Realistic
+    } else if (salaryNum < expectedRange.low) {
+      return 0.7; // Conservative
+    } else {
+      return 0.4; // Potentially unrealistic
+    }
+  };
+
+  // Helper functions for extracting alignments
+  const extractTechAlignment = (profile) => {
+    const techKeys = [];
+    if (profile.techInterests) techKeys.push(...profile.techInterests.split(',').map(t => t.trim()));
+    if (profile.jobTechnologies) techKeys.push(...profile.jobTechnologies.split(',').map(t => t.trim()));
+    return techKeys.length > 0 ? techKeys[0] : 'General Technology';
+  };
+
+  const extractResearchAlignment = (profile) => {
+    if (profile.studyField && profile.studyField.toLowerCase().includes('research')) {
+      return profile.studyField + ' Research';
+    }
+    return 'Technology Research';
+  };
+
+  const extractMarketFit = (profile) => {
+    const workPref = profile.workPreference || 'flexible';
+    const eduLevel = profile.educationLevel || 'bachelor';
+    return `${workPref.charAt(0).toUpperCase() + workPref.slice(1)} ${eduLevel.charAt(0).toUpperCase() + eduLevel.slice(1)} Professional`;
+  };
+
   // Title generation functions
-  const generateTechRoleTitle = (techStack, experience) => {
+  const generateTechRoleTitle = (techAlignment, experience) => {
     const expLevel = getExperienceScore(experience);
     const prefix = expLevel > 0.7 ? 'Senior ' : expLevel > 0.4 ? '' : 'Junior ';
     
-    if (techStack.includes('python') || techStack.includes('data')) {
+    if (techAlignment.toLowerCase().includes('data') || techAlignment.toLowerCase().includes('ml')) {
       return `${prefix}Data Scientist`;
     }
-    if (techStack.includes('react') || techStack.includes('javascript')) {
+    if (techAlignment.toLowerCase().includes('web') || techAlignment.toLowerCase().includes('frontend')) {
       return `${prefix}Frontend Developer`;
+    }
+    if (techAlignment.toLowerCase().includes('mobile')) {
+      return `${prefix}Mobile Developer`;
     }
     return `${prefix}Software Developer`;
   };
 
-  const generateAcademicRoleTitle = (researchArea, educationLevel) => {
-    const level = getEducationLevelScore(educationLevel);
-    const prefix = level > 0.8 ? 'Research ' : 'Junior Research ';
-    return `${prefix}Scientist - ${researchArea}`;
+  const generateResearchRoleTitle = (researchAlignment, experience) => {
+    const expLevel = getExperienceScore(experience);
+    const prefix = expLevel > 0.7 ? 'Senior Research ' : 'Research ';
+    return `${prefix}Scientist - ${researchAlignment}`;
   };
 
-  const generatePracticalRoleTitle = (roleType, workPreference) => {
-    const remote = workPreference?.toLowerCase() === 'remote' ? 'Remote ' : '';
-    return `${remote}${roleType}`;
+  const generateLifestyleRoleTitle = (marketFit, experience) => {
+    const expLevel = getExperienceScore(experience);
+    const prefix = expLevel > 0.7 ? 'Senior ' : '';
+    return `${prefix}${marketFit}`;
   };
 
-  // Helper functions for metadata
-  const getCriteriaUsed = (profile, criteria) => {
-    const allCriteria = [...criteria.constants, ...criteria.specific];
-    return allCriteria.filter(key => isValid(profile[key]));
+  // Description generators
+  const generateTechInterestDescription = (techAlignment, profile) => {
+    return `Leverage your interest in ${techAlignment.toLowerCase()} to build innovative solutions and drive technical excellence in the industry.`;
   };
 
-  const getMissingCriteria = (profile, criteria) => {
-    const allCriteria = [...criteria.constants, ...criteria.specific];
-    return allCriteria.filter(key => !isValid(profile[key]));
+  const generateResearchDescription = (researchAlignment, profile) => {
+    return `Conduct cutting-edge research in ${researchAlignment.toLowerCase()} with focus on practical applications and theoretical advancement.`;
   };
 
-  // Additional helper functions
-  const extractTechFromInterests = (interests) => {
-    const techMap = {
-      'web': ['HTML', 'CSS', 'JavaScript'],
-      'data': ['Python', 'SQL', 'Analytics'],
-      'mobile': ['React Native', 'Flutter']
-    };
-    
-    const techs = [];
-    interests.forEach(interest => {
-      Object.keys(techMap).forEach(key => {
-        if (interest.toLowerCase().includes(key)) {
-          techs.push(...techMap[key]);
-        }
-      });
-    });
-    
-    return techs;
+  const generateLifestyleDescription = (marketFit, profile) => {
+    return `Apply technology skills in a ${marketFit.toLowerCase()} role that balances technical expertise with your lifestyle preferences.`;
   };
 
-  const extractTechnologies = (techString) => {
-    return techString.split(',').map(tech => tech.trim()).filter(Boolean);
+  // Reasoning generators
+  const generateTechInterestReasoning = (profile, score) => {
+    return `Based on your tech interests and ${score.criteriaCount} qualifying criteria with ${Math.round(score.totalScore)}% alignment score.`;
   };
 
-  const generateResearchArea = (studyField) => {
-    const fieldLower = studyField.toLowerCase();
-    if (fieldLower.includes('computer')) return 'Computer Science Research';
-    if (fieldLower.includes('data')) return 'Data Science Research';
-    return 'Technology Research';
+  const generateResearchReasoning = (profile, score) => {
+    return `Your research background and academic interests align ${Math.round(score.totalScore)}% with development opportunities.`;
   };
 
-  const generateResearchAreaFromInterests = (interests) => {
-    const interestsLower = interests.toLowerCase();
-    if (interestsLower.includes('machine learning')) return 'Machine Learning Research';
-    if (interestsLower.includes('ai')) return 'Artificial Intelligence Research';
-    if (interestsLower.includes('data')) return 'Data Science Research';
-    return 'Technology Research';
-  };
-
-  const generateRoleType = (currentRole) => {
-    const roleLower = currentRole.toLowerCase();
-    if (roleLower.includes('manager')) return 'Technology Manager';
-    if (roleLower.includes('analyst')) return 'Technical Analyst';
-    return 'Technology Professional';
-  };
-
-  // Description and reasoning generators
-  const generateTechDescription = (techStack, profile) => {
-    const stackText = techStack.length > 0 ? techStack.slice(0, 3).join(', ') : 'modern technologies';
-    return `Leverage ${stackText} to build innovative solutions and drive technical excellence in the industry.`;
-  };
-
-  const generateTechReasoning = (profile, score) => {
-    return `Based on your ${score.criteriaCount} qualifying criteria and ${Math.round(score.totalScore)}% alignment with current tech market demands.`;
-  };
-
-  const generateAcademicDescription = (researchArea, profile) => {
-    return `Conduct cutting-edge research in ${researchArea} with focus on practical applications and theoretical advancement.`;
-  };
-
-  const generateAcademicReasoning = (profile, score) => {
-    return `Your academic background and research interests align ${Math.round(score.totalScore)}% with ${score.researchArea} opportunities.`;
-  };
-
-  const generatePracticalDescription = (roleType, profile) => {
-    return `Apply technology skills in a ${roleType.toLowerCase()} role that balances technical expertise with business impact.`;
-  };
-
-  const generatePracticalReasoning = (profile, score) => {
+  const generateLifestyleReasoning = (profile, score) => {
     return `Considering your lifestyle preferences and career goals, this path offers ${Math.round(score.totalScore)}% compatibility.`;
   };
 
   // Skills extraction
-  const extractTechSkills = (techStack, profile) => {
+  const extractTechInterestSkills = (techAlignment, profile) => {
     const baseSkills = ['Programming Fundamentals', 'Problem Solving', 'Version Control'];
-    const stackSkills = techStack.slice(0, 3);
-    return [...baseSkills, ...stackSkills];
+    if (techAlignment.toLowerCase().includes('data')) {
+      baseSkills.push('Data Analysis', 'Statistics', 'Python');
+    } else if (techAlignment.toLowerCase().includes('web')) {
+      baseSkills.push('HTML/CSS', 'JavaScript', 'Frameworks');
+    }
+    return baseSkills;
   };
 
-  const extractAcademicSkills = (researchArea, profile) => {
-    return ['Research Methodology', 'Data Analysis', 'Technical Writing', 'Critical Thinking'];
+  const extractResearchSkills = (researchAlignment, profile) => {
+    return ['Research Methodology', 'Data Analysis', 'Technical Writing', 'Critical Thinking', 'Statistical Analysis'];
   };
 
-  const extractPracticalSkills = (roleType, profile) => {
-    return ['Project Management', 'Communication', 'Business Analysis', 'Team Collaboration'];
+  const extractLifestyleSkills = (marketFit, profile) => {
+    return ['Project Management', 'Communication', 'Business Analysis', 'Team Collaboration', 'Adaptability'];
   };
 
-  // Action generation
-  const generateTechActions = (profile, techStack) => {
-    const technologies = techStack.slice(0, 2);
+  // Action generators
+  const generateTechInterestActions = (profile, techAlignment) => {
     return [
-      `Build portfolio projects using ${technologies.length > 0 ? technologies.join(' and ') : 'modern technologies'}`,
-      'Contribute to open source projects',
-      'Complete technical certifications'
+      `Build portfolio projects showcasing ${techAlignment.toLowerCase()} skills`,
+      'Contribute to open source projects in your area of interest',
+      'Complete relevant technical certifications',
+      'Network with professionals in your target field'
     ];
   };
 
-  const generateAcademicActions = (profile, researchArea) => {
+  const generateResearchActions = (profile, researchAlignment) => {
     return [
-      `Publish research in ${researchArea}`,
-      'Attend academic conferences',
-      'Collaborate on research projects'
+      `Publish research papers in ${researchAlignment.toLowerCase()}`,
+      'Attend academic conferences and workshops',
+      'Collaborate on research projects with institutions',
+      'Develop grant writing and funding skills'
     ];
   };
 
-  const generatePracticalActions = (profile, roleType) => {
+  const generateLifestyleActions = (profile, marketFit) => {
     return [
       'Develop business-focused technical projects',
-      'Network with industry professionals',
-      'Gain relevant certifications'
+      'Network with industry professionals in your preferred work style',
+      'Gain certifications that align with your career goals',
+      'Build a portfolio that showcases your unique value proposition'
     ];
   };
 
   // Market data functions
-  const getTechSalaryRange = (techStack, experience) => {
-    const baseMap = { '0-2': '$60k-$90k', '3-5': '$80k-$120k', '6+': '$100k-$160k' };
-    return baseMap[experience] || '$70k-$110k';
+  const getTechInterestSalaryRange = (techAlignment, experience) => {
+    const expScore = getExperienceScore(experience);
+    const baseRange = { low: 50000, high: 90000 };
+    
+    if (techAlignment.toLowerCase().includes('data') || techAlignment.toLowerCase().includes('ai')) {
+      baseRange.low += 10000;
+      baseRange.high += 20000;
+    }
+    
+    const adjustedLow = baseRange.low + (expScore * 30000);
+    const adjustedHigh = baseRange.high + (expScore * 50000);
+    
+    return `$${Math.round(adjustedLow/1000)}k - $${Math.round(adjustedHigh/1000)}k`;
   };
 
-  const getTechMarketDemand = (techStack) => {
-    return techStack.some(tech => ['python', 'javascript', 'react'].includes(tech.toLowerCase())) ? 'high' : 'medium';
+  const getResearchSalaryRange = (researchAlignment, experience) => {
+    const expScore = getExperienceScore(experience);
+    const baseLow = 55000 + (expScore * 25000);
+    const baseHigh = 95000 + (expScore * 40000);
+    return `$${Math.round(baseLow/1000)}k - $${Math.round(baseHigh/1000)}k`;
   };
 
-  const getAcademicSalaryRange = (researchArea, education) => {
-    const levelMap = { 'phd': '$80k-$130k', 'master': '$65k-$95k', 'bachelor': '$50k-$75k' };
-    return levelMap[education?.toLowerCase()] || '$60k-$90k';
+  const getLifestyleSalaryRange = (marketFit, targetSalary) => {
+    if (targetSalary && isValid(targetSalary)) {
+      const salaryNum = parseInt(targetSalary.replace(/[^\d]/g, ''));
+      const range = salaryNum * 0.2;
+      return `$${Math.round((salaryNum - range)/1000)}k - $${Math.round((salaryNum + range)/1000)}k`;
+    }
+    return '$60k - $110k';
   };
 
-  const getAcademicMarketDemand = (researchArea) => {
-    return researchArea.toLowerCase().includes('data') ? 'high' : 'medium';
+  // Market demand functions
+  const getTechInterestMarketDemand = (techAlignment) => {
+    const highDemandAreas = ['data', 'ai', 'cloud', 'cybersecurity', 'mobile'];
+    const hasHighDemand = highDemandAreas.some(area => 
+      techAlignment.toLowerCase().includes(area)
+    );
+    return hasHighDemand ? 'high' : 'medium';
   };
 
-  const getPracticalSalaryRange = (roleType, targetSalary) => {
-    return targetSalary || '$65k-$105k';
+  const getResearchMarketDemand = (researchAlignment) => {
+    return researchAlignment.toLowerCase().includes('data') ? 'high' : 'medium';
   };
 
-  const getPracticalMarketDemand = (roleType) => {
-    return roleType.toLowerCase().includes('manager') ? 'high' : 'medium';
+  const getLifestyleMarketDemand = (marketFit) => {
+    return marketFit.toLowerCase().includes('remote') ? 'high' : 'medium';
   };
 
   // ============================================================================
-  // EXISTING EXTRACTION FUNCTIONS (KEEPING FOR BACKWARD COMPATIBILITY)
+  // EXISTING FUNCTIONS (KEEPING FOR BACKWARD COMPATIBILITY)
   // ============================================================================
 
-  // AI-driven skills gap extraction focused on analysis content
+  // [Previous extraction functions remain the same...]
   const extractSkillsGapImproved = (text) => {
+    // Implementation remains the same as in original code
     if (!text) return [];
     
     console.log('🔍 Extracting skills from analysis text...');
@@ -1006,7 +1106,7 @@ const CareerDashboard = () => {
       requiredLevel: requiredLevel,
       gap: requiredLevel - currentLevel,
       category: categorizeSkill(skillName),
-      learningPath: generateLearningPath(skillName, currentLevel, requiredLevel),
+      learningPath: generateLearningPath(skillName, currentLevel, requiredLevel),  
       priority: requiredLevel - currentLevel >= 2 ? 'high' : 'medium'
     };
   };
@@ -1260,7 +1360,7 @@ const CareerDashboard = () => {
 
   const generatePersonalizedDemandData = (careerTitle) => {
     const demandData = {
-      growth: '22% faster than average growth rate',
+      growth: '22% faster than average growth rate', 
       opportunities: ['High demand in tech sector', 'Growing startup ecosystem', 'Remote work opportunities'],
       hotSkills: ['Programming', 'Cloud Technologies', 'Data Analysis', 'Problem Solving'],
       industries: ['Technology', 'Healthcare', 'Finance', 'E-commerce'],
@@ -1414,29 +1514,29 @@ const CareerDashboard = () => {
           if (location.state.formData) {
             const formData = location.state.formData;
             
-            // Map form data to the new enhanced profile structure
+            // Map form data to the EXACT technical spec profile structure
             processedUserData = {
-              // Constant Variables
+              // 4 Constant Variables (used in ALL recommendations)
               yearsExperience: formData.yearsExperience || formData.experienceLevel || '',
               studyField: formData.studyField || 'Not specified',
-              interests: Array.isArray(formData.techInterests) 
-                ? formData.techInterests 
-                : (typeof formData.techInterests === 'string' ? formData.techInterests.split(',').map(i => i.trim()) : []),
+              interests: Array.isArray(formData.interests) 
+                ? formData.interests 
+                : (typeof formData.interests === 'string' ? formData.interests.split(',').map(i => i.trim()) : []),
               transferableSkills: formData.transferableSkills || '',
               
-              // Tech-Market Specific
-              jobTechnologies: formData.jobTechnologies || '',
-              toolsUsed: formData.toolsUsed || [],
-              
-              // Academic-Research Specific
-              educationLevel: formData.educationLevel || '',
-              publications: formData.publications || '',
+              // Recommendation 1 Specific (🎯 Tech-Interest Based)
               techInterests: formData.techInterests || '',
-              
-              // Practical-Lifestyle Specific
-              workPreference: formData.workPreference || '',
-              timeCommitment: formData.timeCommitment || '',
               currentRole: formData.currentRole || '',
+              jobTechnologies: formData.jobTechnologies || '',
+              
+              // Recommendation 2 Specific (📚 Research/Development Based)
+              publications: formData.publications || '',
+              toolsUsed: formData.toolsUsed || [],
+              timeCommitment: formData.timeCommitment || '',
+              
+              // Recommendation 3 Specific (⚖️ Lifestyle/Market Based)
+              workPreference: formData.workPreference || '',
+              educationLevel: formData.educationLevel || '',
               targetSalary: formData.targetSalary || '',
               
               // Additional Context
@@ -1451,11 +1551,11 @@ const CareerDashboard = () => {
             
             setUserData(processedUserData);
             
-            // Generate advanced recommendations using the new system
+            // Generate recommendations using the EXACT technical spec system
             generatedPaths = await generateAdvancedCareerRecommendations(processedUserData);
             setCareerPaths(generatedPaths);
             
-            console.log('✅ Advanced career recommendations generated:', generatedPaths.length);
+            console.log('✅ Technical Spec recommendations generated:', generatedPaths.length);
           }
           
           // Extract other data from analysis
@@ -1488,23 +1588,32 @@ const CareerDashboard = () => {
             
             const submission = storageService.getSubmissionById(storedAnalysis.submissionId);
             if (submission) {
-              // Map stored data to new structure
+              // Map stored data to EXACT technical spec structure
               processedUserData = {
+                // 4 Constant Variables
                 yearsExperience: submission.yearsExperience || submission.experienceLevel || '',
                 studyField: submission.studyField || 'Not specified',
-                interests: Array.isArray(submission.techInterests) 
-                  ? submission.techInterests 
-                  : (typeof submission.techInterests === 'string' ? submission.techInterests.split(',').map(i => i.trim()) : []),
+                interests: Array.isArray(submission.interests) 
+                  ? submission.interests 
+                  : (typeof submission.interests === 'string' ? submission.interests.split(',').map(i => i.trim()) : []),
                 transferableSkills: submission.transferableSkills || '',
-                jobTechnologies: submission.jobTechnologies || '',
-                toolsUsed: submission.toolsUsed || [],
-                educationLevel: submission.educationLevel || '',
-                publications: submission.publications || '',
+                
+                // Tech-Interest Based specific
                 techInterests: submission.techInterests || '',
-                workPreference: submission.workPreference || '',
-                timeCommitment: submission.timeCommitment || '',
                 currentRole: submission.currentRole || '',
+                jobTechnologies: submission.jobTechnologies || '',
+                
+                // Research/Development Based specific
+                publications: submission.publications || '',
+                toolsUsed: submission.toolsUsed || [],
+                timeCommitment: submission.timeCommitment || '',
+                
+                // Lifestyle/Market Based specific
+                workPreference: submission.workPreference || '',
+                educationLevel: submission.educationLevel || '',
                 targetSalary: submission.targetSalary || '',
+                
+                // Additional Context
                 name: submission.fullName || '',
                 email: submission.email || '',
                 experienceLevel: submission.experienceLevel || '',
@@ -1516,11 +1625,11 @@ const CareerDashboard = () => {
               
               setUserData(processedUserData);
               
-              // Generate advanced recommendations
+              // Generate recommendations using technical spec
               generatedPaths = await generateAdvancedCareerRecommendations(processedUserData);
               setCareerPaths(generatedPaths);
               
-              console.log('✅ Stored advanced recommendations generated:', generatedPaths.length);
+              console.log('✅ Stored Technical Spec recommendations generated:', generatedPaths.length);
             }
             
             // Extract other data
@@ -1553,7 +1662,7 @@ const CareerDashboard = () => {
         
         // Generate personalized market trends and job outlook
         if (processedUserData && generatedPaths && generatedPaths.length > 0) {
-          console.log('🎯 Generating market trends for advanced recommendations...');
+          console.log('🎯 Generating market trends for technical spec recommendations...');
           
           const personalizedTrends = generatePersonalizedMarketTrendsWithPaths(generatedPaths, processedUserData);
           setMarketTrends(personalizedTrends);
@@ -1561,7 +1670,7 @@ const CareerDashboard = () => {
           const personalizedOutlook = generatePersonalizedJobMarketOutlook(generatedPaths, processedUserData);
           setJobMarketOutlook(personalizedOutlook);
           
-          console.log('✅ Market insights generated for advanced recommendations');
+          console.log('✅ Market insights generated for technical spec recommendations');
         } else {
           console.log('⚠️ Using generic market insights');
           setMarketTrends(generateGenericMarketTrends());
@@ -1735,7 +1844,7 @@ const CareerDashboard = () => {
     </div>
   );
 
-  // Enhanced Career Path Card with new recommendation data
+  // Enhanced Career Path Card with technical spec data
   const CareerPathCard = ({ path, index }) => {
     const animatedValue = animatedValues[`path-${index}`] || 0;
     const colorClasses = [
@@ -1747,21 +1856,21 @@ const CareerDashboard = () => {
     ];
     const colorClass = colorClasses[index % colorClasses.length];
     
-    // Get algorithm-specific styling
+    // Get algorithm-specific styling based on technical spec
     const getTypeIcon = (type) => {
       switch(type) {
-        case 'tech-market': return '💻';
-        case 'academic-research': return '🎓';
-        case 'practical-lifestyle': return '🎯';
+        case 'tech-interest-based': return '🎯';
+        case 'research-development': return '📚';
+        case 'lifestyle-market': return '⚖️';
         default: return '📊';
       }
     };
     
     const getTypeLabel = (type) => {
       switch(type) {
-        case 'tech-market': return 'Tech Market Fit';
-        case 'academic-research': return 'Academic Research';
-        case 'practical-lifestyle': return 'Lifestyle Match';
+        case 'tech-interest-based': return 'Tech-Interest Based';
+        case 'research-development': return 'Research/Development';
+        case 'lifestyle-market': return 'Lifestyle/Market';
         default: return 'General';
       }
     };
@@ -1792,7 +1901,7 @@ const CareerDashboard = () => {
                 {path.reasoning}
               </p>
               
-              {/* Show algorithm confidence */}
+              {/* Show technical spec metadata */}
               <div className="mt-3 flex items-center gap-2">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   path.confidence === 'high' ? 'bg-green-100 text-green-700' :
@@ -1802,7 +1911,7 @@ const CareerDashboard = () => {
                   {path.confidence} confidence
                 </span>
                 <span className="text-xs text-gray-500">
-                  Algorithm: {path.metadata?.algorithm || 'v1.0'}
+                  Spec: v1.1
                 </span>
               </div>
             </div>
@@ -1823,6 +1932,20 @@ const CareerDashboard = () => {
               />
             </div>
           </div>
+          
+          {/* Show criteria used (from technical spec metadata) */}
+          {path.metadata && path.metadata.criteriaUsed && path.metadata.criteriaUsed.length > 0 && (
+            <div className="mb-4">
+              <h5 className="text-sm font-medium text-gray-700 mb-2">Criteria Used:</h5>
+              <div className="flex flex-wrap gap-1">
+                {path.metadata.criteriaUsed.slice(0, 4).map((criteria, idx) => (
+                  <span key={idx} className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                    {criteria}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
           
           {/* Show required skills */}
           {path.requiredSkills && path.requiredSkills.length > 0 && (
@@ -1869,7 +1992,7 @@ const CareerDashboard = () => {
               </span>
               {path.metadata?.fallbackApplied && (
                 <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
-                  Limited Data
+                  Fallback Applied
                 </span>
               )}
             </div>
@@ -1879,6 +2002,7 @@ const CareerDashboard = () => {
     );
   };
 
+  // [Rest of the UI components remain the same - SkillCard, LearningRoadmapCard, etc.]
   // Skill Card Component
   const SkillCard = ({ skill, index }) => {
     const gap = skill.gap || (skill.requiredLevel - skill.currentLevel);
@@ -2234,7 +2358,7 @@ const CareerDashboard = () => {
   // ============================================================================
 
   if (loading) {
-    return <LoadingSpinner message="Loading your advanced career analysis..." />;
+    return <LoadingSpinner message="Loading your career analysis (Technical Spec v1.1)..." />;
   }
 
   // Calculate quick stats using new recommendation data
@@ -2254,7 +2378,7 @@ const CareerDashboard = () => {
               Welcome back, {userData.name}! 👋
             </h1>
             <p className="text-xl opacity-90 mb-6">
-              Advanced AI-powered career recommendations with {recommendationMetadata.overallConfidence}% overall confidence
+              Career Recommendation System v1.1 with {recommendationMetadata.overallConfidence}% overall confidence
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-sm">
               {userData.currentRole && userData.currentRole !== 'Not specified' && (
@@ -2277,9 +2401,14 @@ const CareerDashboard = () => {
                   ✅ {recommendationMetadata.dataCompleteness}% Profile Complete
                 </div>
               )}
-              {highConfidenceCount > 0 && (
+              {recommendationMetadata.constantVariablesComplete > 0 && (
                 <div className="bg-purple-500 bg-opacity-20 px-4 py-2 rounded-full border border-purple-300">
-                  🔬 {highConfidenceCount} High-Confidence Recommendations
+                  🔬 {recommendationMetadata.constantVariablesComplete}/4 Constants Present
+                </div>
+              )}
+              {highConfidenceCount > 0 && (
+                <div className="bg-yellow-500 bg-opacity-20 px-4 py-2 rounded-full border border-yellow-300">
+                  🏆 {highConfidenceCount} High-Confidence Recommendations
                 </div>
               )}
             </div>
@@ -2344,11 +2473,11 @@ const CareerDashboard = () => {
               ))}
             </div>
 
-            {/* Algorithm Quality Indicator */}
+            {/* Technical Spec Algorithm Quality Indicator */}
             <div className="bg-white rounded-2xl p-8 shadow-lg">
               <h2 className="text-2xl font-bold mb-6 flex items-center">
                 <span className="mr-3">🔬</span>
-                AI Recommendation Quality
+                Technical Specification v1.1 - Recommendation Quality
               </h2>
               <div className="mb-4">
                 <div className="flex justify-between text-sm mb-2">
@@ -2372,17 +2501,19 @@ const CareerDashboard = () => {
                   Recommendations: {careerPaths.length}
                 </div>
                 <div className="flex items-center">
-                  <span className={`w-3 h-3 rounded-full mr-2 ${highConfidenceCount > 0 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-                  High Confidence: {highConfidenceCount}
+                  <span className={`w-3 h-3 rounded-full mr-2 ${recommendationMetadata.constantVariablesComplete >= 3 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                  Constants: {recommendationMetadata.constantVariablesComplete}/4
                 </div>
                 <div className="flex items-center">
-                  <span className="w-3 h-3 rounded-full mr-2 bg-blue-500"></span>
-                  Algorithm: v{recommendationMetadata.algorithmVersion || '1.0'}
+                  <span className={`w-3 h-3 rounded-full mr-2 ${highConfidenceCount > 0 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                  High Confidence: {highConfidenceCount}
                 </div>
               </div>
               {recommendationMetadata.processedAt && (
                 <div className="mt-4 text-xs text-gray-500">
-                  Processed: {new Date(recommendationMetadata.processedAt).toLocaleString()}
+                  Processed: {new Date(recommendationMetadata.processedAt).toLocaleString()} | 
+                  Engine: Multi-Tier Recommendation with Fallback Logic | 
+                  Algorithms: Tech-Interest, Research-Development, Lifestyle-Market
                 </div>
               )}
             </div>
@@ -2422,14 +2553,15 @@ const CareerDashboard = () => {
                 </h2>
                 <div className="flex items-center text-sm text-blue-600">
                   <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                  AI-Powered Recommendations
+                  Technical Spec v1.1 Powered
                 </div>
               </div>
               {careerPaths.length > 0 && (
                 <div className="mb-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
                   <p className="text-sm text-blue-800">
                     <strong>Personalized for {userData.name}:</strong> Based on your {careerPaths[0].type} recommendation 
-                    with {careerPaths[0].confidenceScore}% confidence score from our advanced algorithm.
+                    with {careerPaths[0].confidenceScore}% confidence score. Generated using {careerPaths[0].metadata?.criteriaUsed?.length || 0} criteria 
+                    from the advanced multi-tier recommendation engine.
                   </p>
                 </div>
               )}
@@ -2443,7 +2575,7 @@ const CareerDashboard = () => {
                       </div>
                       {step.personalized && (
                         <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                          AI
+                          Spec v1.1
                         </span>
                       )}
                     </div>
@@ -2466,16 +2598,17 @@ const CareerDashboard = () => {
         {activeTab === 'paths' && (
           <div className="space-y-8">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-4">AI-Powered Career Recommendations</h2>
+              <h2 className="text-3xl font-bold mb-4">Technical Specification v1.1 - Career Recommendations</h2>
               <p className="text-gray-600 text-lg">
-                Advanced multi-algorithm analysis with {recommendationMetadata.overallConfidence}% overall confidence
+                Multi-tier recommendation engine with {recommendationMetadata.overallConfidence}% overall confidence
               </p>
               {careerPaths.length > 0 && (
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200 max-w-3xl mx-auto">
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200 max-w-4xl mx-auto">
                   <p className="text-sm text-blue-800">
-                    <strong>🔬 Advanced Analysis:</strong> Our system analyzed your profile using three specialized algorithms:
-                    Tech-Market Alignment, Academic-Research Fit, and Practical-Lifestyle Match. 
-                    Results sorted by confidence score with personalized reasoning for each recommendation.
+                    <strong>🔬 Technical Specification Analysis:</strong> Our system implemented the exact technical specification 
+                    using three specialized algorithms: Tech-Interest Based (🎯), Research/Development Based (📚), and 
+                    Lifestyle/Market Based (⚖️). Each recommendation uses 4 constant variables plus 3 specific criteria, 
+                    with dynamic weighting and fallback logic for optimal results.
                   </p>
                 </div>
               )}
@@ -2483,9 +2616,9 @@ const CareerDashboard = () => {
             
             {careerPaths.length > 0 ? (
               <div className="space-y-6">
-                {/* Algorithm Performance Summary */}
+                {/* Technical Spec Algorithm Performance Summary */}
                 <div className="bg-white rounded-xl p-6 shadow-lg">
-                  <h3 className="text-lg font-bold mb-4">Algorithm Performance Summary</h3>
+                  <h3 className="text-lg font-bold mb-4">Algorithm Performance Summary (Technical Spec v1.1)</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {careerPaths.map((path, index) => (
                       <div key={index} className="bg-gray-50 rounded-lg p-4">
@@ -2501,8 +2634,19 @@ const CareerDashboard = () => {
                         </div>
                         <p className="text-xs text-gray-600">{path.title}</p>
                         <div className="mt-2 text-xs text-gray-500">
-                          Used: {path.metadata?.criteriaUsed?.length || 0} criteria
+                          Criteria: {path.metadata?.criteriaUsed?.length || 0} used, {path.metadata?.missingCriteria?.length || 0} missing
                         </div>
+                        <div className="mt-1 text-xs text-gray-500">
+                          Constants: {Math.round(path.metadata?.constantsScore || 0)}% | 
+                          Specifics: {Math.round(path.metadata?.specificsScore || 0)}%
+                        </div>
+                        {path.metadata?.fallbackApplied && (
+                          <div className="mt-1">
+                            <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs">
+                              Fallback Applied
+                            </span>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -2518,8 +2662,8 @@ const CareerDashboard = () => {
             ) : (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🤖</div>
-                <h3 className="text-xl font-semibold text-gray-600 mb-2">Generating AI Recommendations</h3>
-                <p className="text-gray-500">Our advanced algorithms are analyzing your profile to provide personalized career recommendations.</p>
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">Generating Technical Spec v1.1 Recommendations</h3>
+                <p className="text-gray-500">Our multi-tier recommendation engine is analyzing your profile using the advanced technical specification.</p>
               </div>
             )}
           </div>
@@ -2631,7 +2775,7 @@ const CareerDashboard = () => {
           <div className="space-y-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-4">Your Action Plan</h2>
-              <p className="text-gray-600 text-lg">AI-generated step-by-step roadmap to success</p>
+              <p className="text-gray-600 text-lg">Technical Spec v1.1 generated step-by-step roadmap to success</p>
             </div>
             {nextSteps.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

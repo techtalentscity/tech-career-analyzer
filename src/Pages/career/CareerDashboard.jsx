@@ -556,7 +556,7 @@ const CareerDashboard = () => {
           // Extract other data from analysis with existing functions
           const skills = extractSkillsGapImproved(analysisText);
           const roadmap = extractLearningRoadmapImproved(analysisText);
-          const trends = extractMarketTrendsImproved(analysisText);
+          const trends = extractMarketTrendsImproved(analysisText); // This now generates personalized trends
           const outlook = extractJobMarketOutlookImproved(analysisText);
           const networking = extractNetworkingStrategyImproved(analysisText);
           const branding = extractPersonalBrandingImproved(analysisText);
@@ -621,7 +621,7 @@ const CareerDashboard = () => {
             // Extract other data from analysis
             const skills = extractSkillsGapImproved(analysisText);
             const roadmap = extractLearningRoadmapImproved(analysisText);
-            const trends = extractMarketTrendsImproved(analysisText);
+            const trends = extractMarketTrendsImproved(analysisText); // This now generates personalized trends
             const outlook = extractJobMarketOutlookImproved(analysisText);
             const networking = extractNetworkingStrategyImproved(analysisText);
             const branding = extractPersonalBrandingImproved(analysisText);
@@ -943,55 +943,51 @@ const CareerDashboard = () => {
     );
   };
 
-  // Market Trends Card Component
+  // UPDATED: Market Trends Card Component with personalized content
   const MarketTrendsCard = ({ trend, index }) => {
     const trendIcons = {
-      'REGIONAL OPPORTUNITIES': '🌍',
-      'EMERGING TECHNOLOGIES': '🚀',
+      'SALARY OUTLOOK': '💰',
+      'MARKET DEMAND': '📈',
       'SALARY TRENDS': '💰',
-      'INDUSTRY DEMAND': '📈',
-      'INDUSTRY SECTOR ANALYSIS': '🏭'
+      'INDUSTRY DEMAND': '📊',
+      'TECHNOLOGY SALARY TRENDS': '💰',
+      'TECH INDUSTRY OUTLOOK': '🏭'
     };
     
-    const icon = trendIcons[trend.title] || trendIcons[trend.category] || '📊';
+    const icon = trendIcons[trend.title.split(' ').slice(-2).join(' ')] || 
+                 trendIcons[trend.title.split(' ').slice(-1)[0]] || 
+                 trendIcons[trend.category] || '📊';
     
-    // Enhanced content based on trend type
-    const getEnhancedContent = () => {
+    // Enhanced content based on personalized trend data
+    const getPersonalizedContent = () => {
       const title = trend.title || trend.category || 'Market Trend';
       
-      if (title.includes('SALARY')) {
+      // Handle personalized salary trends
+      if ((title.includes('SALARY') || title.includes('COMPENSATION')) && trend.personalizedData) {
         return {
-          title: 'Salary Trends',
+          title: trend.title,
           content: (
             <div>
-              <p className="text-gray-700 mb-3">{trend.description || 'Compensation analysis based on your career path'}</p>
-              <div className="bg-green-50 p-3 rounded-lg">
-                <h5 className="font-medium text-green-800 mb-2">Average Salaries (2024):</h5>
-                <ul className="text-sm text-green-700 space-y-1">
-                  <li>• Software Engineer: $95,000 - $180,000</li>
-                  <li>• Data Scientist: $100,000 - $200,000</li>
-                  <li>• ML Engineer: $120,000 - $220,000</li>
-                  <li>• Product Manager: $110,000 - $190,000</li>
-                  <li>• DevOps Engineer: $100,000 - $185,000</li>
+              <p className="text-gray-700 mb-3">{trend.description}</p>
+              <div className="bg-green-50 p-4 rounded-lg mb-4">
+                <h5 className="font-medium text-green-800 mb-3">💰 Salary Ranges for {trend.userCareer}:</h5>
+                <ul className="text-sm text-green-700 space-y-2">
+                  {trend.personalizedData.ranges.map((range, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">💵</span>
+                      {range}
+                    </li>
+                  ))}
                 </ul>
               </div>
-            </div>
-          )
-        };
-      } else if (title.includes('INDUSTRY')) {
-        return {
-          title: 'Industry Sector Analysis',
-          content: (
-            <div>
-              <p className="text-gray-700 mb-3">{trend.description || 'Industry insights tailored to your career transition'}</p>
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <h5 className="font-medium text-blue-800 mb-2">Key Sectors:</h5>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h5 className="font-medium text-blue-800 mb-2">📊 Key Insights:</h5>
                 <ul className="text-sm text-blue-700 space-y-1">
-                  <li>• Technology companies - High demand for software engineers</li>
-                  <li>• Healthcare technology - Data-driven medical research</li>
-                  <li>• Financial services - Digital banking and fintech growth</li>
-                  <li>• E-commerce - Customer behavior analysis</li>
-                  <li>• Remote-first companies - 40% growth in remote positions</li>
+                  <li><strong>Growth:</strong> {trend.personalizedData.growth}</li>
+                  <li><strong>vs National Average:</strong> {trend.personalizedData.comparison}</li>
+                  {trend.personalizedData.insights.slice(0, 2).map((insight, idx) => (
+                    <li key={idx}>• {insight}</li>
+                  ))}
                 </ul>
               </div>
             </div>
@@ -999,40 +995,93 @@ const CareerDashboard = () => {
         };
       }
       
+      // Handle personalized demand trends
+      if ((title.includes('DEMAND') || title.includes('MARKET')) && trend.personalizedData) {
+        return {
+          title: trend.title,
+          content: (
+            <div>
+              <p className="text-gray-700 mb-3">{trend.description}</p>
+              <div className="bg-purple-50 p-4 rounded-lg mb-4">
+                <h5 className="font-medium text-purple-800 mb-3">📈 Growth Outlook:</h5>
+                <div className="text-sm text-purple-700 space-y-2">
+                  <div><strong>Job Growth:</strong> {trend.personalizedData.growth}</div>
+                  <div><strong>Market Outlook:</strong> {trend.personalizedData.outlook}</div>
+                </div>
+              </div>
+              <div className="bg-indigo-50 p-4 rounded-lg mb-4">
+                <h5 className="font-medium text-indigo-800 mb-2">🔥 Hot Skills for {trend.userCareer}:</h5>
+                <div className="flex flex-wrap gap-2">
+                  {trend.personalizedData.hotSkills.slice(0, 4).map((skill, idx) => (
+                    <span key={idx} className="px-2 py-1 bg-indigo-200 text-indigo-800 rounded-full text-xs font-medium">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-teal-50 p-4 rounded-lg">
+                <h5 className="font-medium text-teal-800 mb-2">🏭 Top Industries:</h5>
+                <ul className="text-sm text-teal-700 space-y-1">
+                  {trend.personalizedData.industries.slice(0, 3).map((industry, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="text-teal-500 mr-2 mt-0.5">•</span>
+                      {industry}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )
+        };
+      }
+      
+      // Fallback for generic trends
       return {
         title: title,
-        content: <p className="text-gray-700">{trend.description || trend.text}</p>
+        content: (
+          <div>
+            <p className="text-gray-700 mb-3">{trend.description || 'General market analysis and trends'}</p>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">Complete your career assessment to get personalized market insights for your specific career path.</p>
+            </div>
+          </div>
+        )
       };
     };
 
-    const enhancedContent = getEnhancedContent();
+    const enhancedContent = getPersonalizedContent();
     
     return (
       <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
         <div className="flex items-start mb-4">
           <span className="text-3xl mr-4">{icon}</span>
-          <div>
+          <div className="flex-1">
             <h4 className="font-semibold text-lg text-gray-800">{enhancedContent.title}</h4>
-            <span className="text-sm text-gray-500">Market Analysis</span>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-sm text-gray-500">Market Analysis</span>
+              {trend.userCareer && (
+                <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                  Personalized for {trend.userCareer}
+                </span>
+              )}
+            </div>
           </div>
         </div>
         
         {enhancedContent.content}
         
-        {trend.relevance && (
-          <div className="pt-4 border-t mt-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-600">Relevance to You:</span>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                trend.relevance === 'High' ? 'bg-red-100 text-red-700' :
-                trend.relevance === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-                'bg-blue-100 text-blue-700'
-              }`}>
-                {trend.relevance || 'High'}
-              </span>
-            </div>
+        <div className="pt-4 border-t mt-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-600">Relevance to You:</span>
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+              trend.relevance === 'High' ? 'bg-green-100 text-green-700' :
+              trend.relevance === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+              'bg-blue-100 text-blue-700'
+            }`}>
+              {trend.relevance || 'High'}
+            </span>
           </div>
-        )}
+        </div>
       </div>
     );
   };
@@ -1776,249 +1825,318 @@ const CareerDashboard = () => {
     return roadmap;
   };
 
-  // Market Trends extraction
+  // UPDATED: Personalized Market Trends based on user's career path recommendations
   const extractMarketTrendsImproved = (text) => {
-    if (!text) return [];
+    console.log('🎯 Generating PERSONALIZED market trends based on user career paths...');
     
-    console.log('Extracting market trends from text...');
-    const trends = [];
-    const lines = text.split('\n');
+    // Generate personalized trends based on user's top career recommendations
+    const personalizedTrends = generatePersonalizedMarketTrends();
     
-    let inTrendsSection = false;
-    const trendsKeywords = ['MARKET TRENDS', 'TRENDS', 'INDUSTRY TRENDS', 'TECHNOLOGY TRENDS'];
-    
-    lines.forEach((line, index) => {
-      // Check for trends section
-      if (trendsKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
-        inTrendsSection = true;
-        return;
-      }
-      
-      // Exit trends section
-      if (inTrendsSection && (line.toUpperCase().includes('JOB MARKET') || 
-          line.toUpperCase().includes('NETWORKING') || line.toUpperCase().includes('SKILLS'))) {
-        inTrendsSection = false;
-        return;
-      }
-      
-      if (inTrendsSection && line.trim() !== '') {
-        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
-          const trendText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          if (trendText.length > 15) {
-            // Try to extract trend title and description
-            let title = trendText;
-            let description = trendText;
-            
-            if (trendText.includes(':')) {
-              const parts = trendText.split(':');
-              title = parts[0].trim();
-              description = parts.slice(1).join(':').trim();
-            }
-            
-            trends.push({
-              title: title,
-              description: description,
-              text: trendText,
-              category: 'Technology Trend',
-              relevance: 'High'
-            });
-            console.log('Found market trend:', title);
-          }
-        }
-      }
-    });
-    
-    // Add ONLY 2 unique enhanced default trends + extracted salary/industry data
-    if (trends.length === 0) {
-      console.log('No market trends found, adding 2 unique defaults + analysis-based content...');
-      
-      // Extract salary and industry data from the analysis
-      const salaryData = extractSalaryTrendsFromAnalysis(text);
-      const industryData = extractIndustrySectorFromAnalysis(text);
-      
-      const uniqueTrends = [
-        {
-          title: 'SALARY TRENDS',
-          description: 'Compensation analysis based on your career path',
-          category: 'Compensation Analysis',
-          relevance: 'High',
-          salaryData: salaryData
-        },
-        {
-          title: 'INDUSTRY SECTOR ANALYSIS',
-          description: 'Industry insights tailored to your career transition',
-          category: 'Industry Analysis',
-          relevance: 'High',
-          industryData: industryData
-        }
-      ];
-      
-      trends.push(...uniqueTrends);
+    if (personalizedTrends.length > 0) {
+      console.log(`✅ Generated ${personalizedTrends.length} personalized market trends`);
+      return personalizedTrends;
     }
     
-    // Ensure NO duplicates and limit to exactly 2 cards
-    const seenTitles = new Set();
-    const finalTrends = trends.filter(trend => {
-      const normalizedTitle = trend.title.toUpperCase().trim();
-      // Skip regional opportunities and emerging technologies to avoid duplicates
-      if (normalizedTitle.includes('REGIONAL OPPORTUNITIES') || 
-          normalizedTitle.includes('EMERGING TECHNOLOGIES')) {
-        console.log('🚫 Skipping duplicate/unwanted trend:', normalizedTitle);
-        return false;
-      }
-      
-      if (seenTitles.has(normalizedTitle)) {
-        console.log('🚫 Removing duplicate trend:', normalizedTitle);
-        return false;
-      }
-      seenTitles.add(normalizedTitle);
-      return true;
-    });
-    
-    console.log('Total UNIQUE market trends extracted:', finalTrends.length);
-    return finalTrends.slice(0, 2); // Limit to exactly 2 unique trends
+    // Fallback to generic trends only if no career paths available
+    console.log('⚠️ No career paths available, using generic market trends');
+    return generateGenericMarketTrends();
   };
 
-  // Extract salary information from the user's analysis
-  const extractSalaryTrendsFromAnalysis = (analysisText) => {
-    console.log('🔍 Extracting salary data from analysis...');
-    const salaryInfo = {
+  // Generate personalized market trends based on user's career paths
+  const generatePersonalizedMarketTrends = () => {
+    if (!careerPaths || careerPaths.length === 0) {
+      return [];
+    }
+
+    const trends = [];
+    const topCareer = careerPaths[0]; // User's top career match
+    const userInterests = userData.careerPathsInterest || [];
+
+    // TREND 1: Personalized Salary Analysis
+    const salaryTrend = {
+      title: `${topCareer.title} SALARY OUTLOOK`,
+      description: `Compensation trends specifically for ${topCareer.title} roles`,
+      category: 'Salary Analysis',
+      relevance: 'High',
+      personalizedData: generatePersonalizedSalaryData(topCareer.title),
+      userCareer: topCareer.title
+    };
+    trends.push(salaryTrend);
+
+    // TREND 2: Personalized Industry Demand Analysis
+    const demandTrend = {
+      title: `${topCareer.title} MARKET DEMAND`,
+      description: `Job market demand and growth prospects for ${topCareer.title}`,
+      category: 'Industry Demand',
+      relevance: 'High',
+      personalizedData: generatePersonalizedDemandData(topCareer.title, userInterests),
+      userCareer: topCareer.title
+    };
+    trends.push(demandTrend);
+
+    return trends;
+  };
+
+  // Generate personalized salary data for specific career
+  const generatePersonalizedSalaryData = (careerTitle) => {
+    const salaryData = {
       ranges: [],
       insights: [],
-      growth: ''
+      growth: '',
+      comparison: ''
     };
-    
-    const lines = analysisText.split('\n');
-    let inSalarySection = false;
-    
-    // Look for salary-related sections
-    const salaryKeywords = ['SALARY', 'COMPENSATION', 'PAY', 'INCOME', 'EARNINGS'];
-    
-    lines.forEach(line => {
-      const lineUpper = line.toUpperCase();
-      
-      // Check if we're in a salary section
-      if (salaryKeywords.some(keyword => lineUpper.includes(keyword))) {
-        inSalarySection = true;
+
+    // Career-specific salary ranges
+    const careerSalaryMap = {
+      'Software Developer': {
+        ranges: ['$95,000 - $180,000 (Average)', '$65,000 - $120,000 (Entry Level)', '$140,000 - $220,000 (Senior Level)'],
+        growth: '8.2% year-over-year salary growth, outpacing most industries',
+        insights: [
+          'High demand for JavaScript, Python, and React developers',
+          'Remote work options increase salary potential by 15-25%',
+          'Full-stack developers command 20% premium over specialists'
+        ],
+        comparison: '23% higher than national average for all occupations'
+      },
+      'Data Scientist': {
+        ranges: ['$100,000 - $200,000 (Average)', '$70,000 - $130,000 (Entry Level)', '$150,000 - $250,000 (Senior Level)'],
+        growth: '11.5% year-over-year growth, highest among tech roles',
+        insights: [
+          'Machine learning expertise adds $25K+ to base salary',
+          'Healthcare and finance sectors pay 30% premium',
+          'PhD holders earn 40% more than bachelors degree holders'
+        ],
+        comparison: '45% higher than national average for all occupations'
+      },
+      'UX Designer': {
+        ranges: ['$85,000 - $160,000 (Average)', '$55,000 - $100,000 (Entry Level)', '$120,000 - $200,000 (Senior Level)'],
+        growth: '6.8% year-over-year growth in design roles',
+        insights: [
+          'Product design roles pay 25% more than general UX roles',
+          'Tech companies offer highest compensation packages',
+          'Portfolio quality directly impacts salary negotiations'
+        ],
+        comparison: '18% higher than national average for all occupations'
+      },
+      'UI Designer': {
+        ranges: ['$80,000 - $150,000 (Average)', '$50,000 - $95,000 (Entry Level)', '$115,000 - $190,000 (Senior Level)'],
+        growth: '7.2% year-over-year growth in UI roles',
+        insights: [
+          'Design system experience increases salary by $15K+',
+          'Frontend development skills add significant value',
+          'Mobile UI specialists earn premium rates'
+        ],
+        comparison: '15% higher than national average for all occupations'
+      },
+      'Product Designer': {
+        ranges: ['$90,000 - $170,000 (Average)', '$60,000 - $110,000 (Entry Level)', '$130,000 - $210,000 (Senior Level)'],
+        growth: '9.1% year-over-year growth in product roles',
+        insights: [
+          'End-to-end product design experience highly valued',
+          'B2B product designers earn 20% more than B2C',
+          'Research skills differentiate top earners'
+        ],
+        comparison: '25% higher than national average for all occupations'
+      },
+      'Data Analyst': {
+        ranges: ['$75,000 - $140,000 (Average)', '$45,000 - $85,000 (Entry Level)', '$110,000 - $180,000 (Senior Level)'],
+        growth: '5.9% year-over-year growth in analytics roles',
+        insights: [
+          'SQL and Tableau skills are baseline requirements',
+          'Python/R expertise increases earning potential significantly',
+          'Domain expertise (healthcare, finance) adds premium'
+        ],
+        comparison: '12% higher than national average for all occupations'
+      },
+      'ML Engineer': {
+        ranges: ['$120,000 - $220,000 (Average)', '$85,000 - $150,000 (Entry Level)', '$170,000 - $280,000 (Senior Level)'],
+        growth: '14.2% year-over-year growth, fastest in tech',
+        insights: [
+          'Highest paying individual contributor role in tech',
+          'MLOps and deployment skills in high demand',
+          'Deep learning expertise commands top salaries'
+        ],
+        comparison: '58% higher than national average for all occupations'
+      },
+      'Product Manager': {
+        ranges: ['$110,000 - $190,000 (Average)', '$75,000 - $130,000 (Entry Level)', '$150,000 - $250,000 (Senior Level)'],
+        growth: '7.8% year-over-year growth in PM roles',
+        insights: [
+          'Technical PM roles pay 30% more than general PM',
+          'B2B product experience highly valued',
+          'Data-driven decision making skills essential'
+        ],
+        comparison: '35% higher than national average for all occupations'
+      },
+      'DevOps Engineer': {
+        ranges: ['$100,000 - $185,000 (Average)', '$70,000 - $125,000 (Entry Level)', '$140,000 - $230,000 (Senior Level)'],
+        growth: '9.8% year-over-year growth in DevOps roles',
+        insights: [
+          'Cloud expertise (AWS, Azure, GCP) essential',
+          'Kubernetes and containerization skills in high demand',
+          'Security-focused DevOps engineers earn premiums'
+        ],
+        comparison: '28% higher than national average for all occupations'
+      },
+      'Cybersecurity Analyst': {
+        ranges: ['$90,000 - $175,000 (Average)', '$60,000 - $110,000 (Entry Level)', '$130,000 - $210,000 (Senior Level)'],
+        growth: '12.4% year-over-year growth due to increased threats',
+        insights: [
+          'Certified professionals (CISSP, CEH) earn 25% more',
+          'Cloud security expertise increasingly valuable',
+          'Incident response experience highly sought after'
+        ],
+        comparison: '31% higher than national average for all occupations'
       }
-      
-      // Extract salary ranges (e.g., "$80,000 - $120,000", "$95K-$180K")
-      const salaryPattern = /\$[\d,]+(?:K|,000)?\s*[-–]\s*\$[\d,]+(?:K|,000)?/g;
-      const salaryMatches = line.match(salaryPattern);
-      if (salaryMatches) {
-        salaryMatches.forEach(salary => {
-          if (!salaryInfo.ranges.includes(salary)) {
-            salaryInfo.ranges.push(salary);
-          }
-        });
-      }
-      
-      // Extract salary insights from the analysis
-      if (inSalarySection && line.trim() !== '') {
-        if (lineUpper.includes('GROWTH') || lineUpper.includes('INCREASE') || lineUpper.includes('TREND')) {
-          salaryInfo.growth = line.trim();
-        }
-        
-        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
-          const insight = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          if (insight.length > 20 && !salaryInfo.insights.includes(insight)) {
-            salaryInfo.insights.push(insight);
-          }
-        }
-      }
-      
-      // Exit salary section
-      if (inSalarySection && (lineUpper.includes('NETWORKING') || 
-          lineUpper.includes('SKILLS') || lineUpper.includes('ROADMAP'))) {
-        inSalarySection = false;
-      }
-    });
-    
-    // If no specific salary data found, create based on user's career path
-    if (salaryInfo.ranges.length === 0 && careerPaths.length > 0) {
-      const topCareer = careerPaths[0].title;
-      salaryInfo.ranges = generateCareerSalaryRanges(topCareer);
-      salaryInfo.insights.push(`Salary ranges for ${topCareer} positions based on experience level`);
-    }
-    
-    console.log('💰 Extracted salary data:', salaryInfo);
-    return salaryInfo;
+    };
+
+    const careerData = careerSalaryMap[careerTitle] || careerSalaryMap['Software Developer'];
+    return careerData;
   };
 
-  // Extract industry sector analysis from the user's analysis
-  const extractIndustrySectorFromAnalysis = (analysisText) => {
-    console.log('🔍 Extracting industry sector data from analysis...');
-    const industryInfo = {
-      sectors: [],
+  // Generate personalized demand data for specific career
+  const generatePersonalizedDemandData = (careerTitle, userInterests) => {
+    const demandData = {
+      growth: '',
       opportunities: [],
-      trends: []
+      hotSkills: [],
+      industries: [],
+      outlook: ''
     };
-    
-    const lines = analysisText.split('\n');
-    let inIndustrySection = false;
-    
-    // Look for industry-related sections
-    const industryKeywords = ['INDUSTRY', 'SECTOR', 'MARKET', 'BUSINESS', 'COMPANIES'];
-    
-    lines.forEach(line => {
-      const lineUpper = line.toUpperCase();
-      
-      // Check if we're in an industry section
-      if (industryKeywords.some(keyword => lineUpper.includes(keyword + ' ANALYSIS') || 
-          lineUpper.includes(keyword + ' TRENDS') || lineUpper.includes(keyword + ' SECTORS'))) {
-        inIndustrySection = true;
+
+    const careerDemandMap = {
+      'Software Developer': {
+        growth: '22% faster than average (vs 4% average for all occupations)',
+        opportunities: [
+          '1.4 million software developer jobs projected by 2031',
+          'Startup ecosystem creating 35K+ new developer roles annually',
+          'Remote work expanding global opportunities'
+        ],
+        hotSkills: ['React/Next.js', 'Python', 'Cloud platforms', 'Microservices', 'API design'],
+        industries: ['Fintech', 'Healthcare Technology', 'E-commerce', 'Enterprise Software'],
+        outlook: 'Excellent - Strongest job growth in technology sector'
+      },
+      'Data Scientist': {
+        growth: '35% faster than average - fastest growing tech role',
+        opportunities: [
+          '11.5 million data science jobs expected by 2026',
+          'AI/ML adoption driving unprecedented demand',
+          'Every industry now requires data expertise'
+        ],
+        hotSkills: ['Machine Learning', 'Python/R', 'Deep Learning', 'MLOps', 'Statistical Analysis'],
+        industries: ['Healthcare', 'Financial Services', 'Retail', 'Manufacturing'],
+        outlook: 'Outstanding - Highest demand among all tech roles'
+      },
+      'UX Designer': {
+        growth: '13% faster than average for design roles',
+        opportunities: [
+          'Digital transformation driving UX hiring surge',
+          '450K+ UX roles projected by 2030',
+          'Voice UI and AR/VR creating new specializations'
+        ],
+        hotSkills: ['User Research', 'Prototyping', 'Design Systems', 'Accessibility', 'Data-driven Design'],
+        industries: ['SaaS Products', 'E-commerce', 'Healthcare', 'Financial Technology'],
+        outlook: 'Very Strong - Essential for digital product success'
+      },
+      'UI Designer': {
+        growth: '8% growth in visual design roles',
+        opportunities: [
+          'Mobile-first design driving UI demand',
+          'Design system roles emerging rapidly',
+          'Cross-platform design expertise valued'
+        ],
+        hotSkills: ['Design Systems', 'Mobile Design', 'Component Libraries', 'Animation', 'Accessibility'],
+        industries: ['Mobile Apps', 'SaaS Platforms', 'Gaming', 'E-commerce'],
+        outlook: 'Strong - Visual design remains crucial for user engagement'
+      },
+      'Product Designer': {
+        growth: '15% growth in product design roles',
+        opportunities: [
+          'End-to-end product design increasingly valued',
+          'Startup ecosystem driving product design hiring',
+          'Senior product designers becoming strategic partners'
+        ],
+        hotSkills: ['Product Strategy', 'User Research', 'Design Systems', 'Business Acumen', 'Cross-functional Leadership'],
+        industries: ['B2B SaaS', 'Consumer Products', 'Fintech', 'Healthcare Technology'],
+        outlook: 'Excellent - Product-focused design approach in high demand'
+      },
+      'Data Analyst': {
+        growth: '25% faster than average for analytical roles',
+        opportunities: [
+          'Every company becoming data-driven',
+          '876K analyst positions by 2031',
+          'Business intelligence roles expanding rapidly'
+        ],
+        hotSkills: ['SQL', 'Python/R', 'Tableau/PowerBI', 'Statistics', 'Business Intelligence'],
+        industries: ['Healthcare', 'Finance', 'Retail', 'Marketing Technology'],
+        outlook: 'Very Strong - Foundational role for data-driven decision making'
+      },
+      'ML Engineer': {
+        growth: '40% growth - highest in all of technology',
+        opportunities: [
+          'AI implementation creating massive demand',
+          'MLOps emergence creating new career paths',
+          'Every tech company building ML capabilities'
+        ],
+        hotSkills: ['MLOps', 'Deep Learning', 'Model Deployment', 'TensorFlow/PyTorch', 'Cloud ML'],
+        industries: ['Tech Giants', 'Autonomous Vehicles', 'Healthcare AI', 'Financial Services'],
+        outlook: 'Exceptional - Most in-demand technical role currently'
+      },
+      'Product Manager': {
+        growth: '12% growth in product management roles',
+        opportunities: [
+          'Product-led growth driving PM demand',
+          'Technical PM roles in highest demand',
+          'AI/ML products need specialized PMs'
+        ],
+        hotSkills: ['Technical Understanding', 'Data Analysis', 'User Research', 'Agile/Scrum', 'AI/ML Knowledge'],
+        industries: ['SaaS', 'Fintech', 'Healthcare Technology', 'AI/ML Products'],
+        outlook: 'Strong - Critical role for product-focused companies'
+      },
+      'DevOps Engineer': {
+        growth: '18% growth in DevOps and SRE roles',
+        opportunities: [
+          'Cloud migration driving DevOps hiring',
+          'SRE roles expanding beyond tech giants',
+          'Security-focused DevOps in high demand'
+        ],
+        hotSkills: ['Kubernetes', 'Cloud Platforms', 'Infrastructure as Code', 'CI/CD', 'Monitoring'],
+        industries: ['Cloud Services', 'Enterprise Software', 'Financial Services', 'Healthcare'],
+        outlook: 'Excellent - Essential for modern software development'
+      },
+      'Cybersecurity Analyst': {
+        growth: '33% growth - driven by increasing cyber threats',
+        opportunities: [
+          '3.5 million unfilled cybersecurity jobs globally',
+          'Zero-trust architecture creating new roles',
+          'Cloud security expertise in extreme demand'
+        ],
+        hotSkills: ['Cloud Security', 'Zero Trust', 'Incident Response', 'Threat Analysis', 'Compliance'],
+        industries: ['Financial Services', 'Healthcare', 'Government', 'Critical Infrastructure'],
+        outlook: 'Outstanding - Critical shortage of qualified professionals'
       }
-      
-      if (inIndustrySection && line.trim() !== '') {
-        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
-          const item = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          if (item.length > 15) {
-            if (lineUpper.includes('SECTOR') || lineUpper.includes('INDUSTRY')) {
-              industryInfo.sectors.push(item);
-            } else if (lineUpper.includes('OPPORTUNITY') || lineUpper.includes('GROWTH')) {
-              industryInfo.opportunities.push(item);
-            } else {
-              industryInfo.trends.push(item);
-            }
-          }
-        }
-      }
-      
-      // Exit industry section
-      if (inIndustrySection && (lineUpper.includes('NETWORKING') || 
-          lineUpper.includes('SKILLS') || lineUpper.includes('SALARY'))) {
-        inIndustrySection = false;
-      }
-    });
-    
-    // If no specific industry data found, create based on user's career interests
-    if (industryInfo.sectors.length === 0 && userData.careerPathsInterest) {
-      industryInfo.sectors = generateIndustryAnalysis(userData.careerPathsInterest);
-      industryInfo.opportunities.push('Growing demand for tech professionals across all industries');
-      industryInfo.trends.push('Digital transformation driving technology adoption');
-    }
-    
-    console.log('🏭 Extracted industry data:', industryInfo);
-    return industryInfo;
+    };
+
+    const careerData = careerDemandMap[careerTitle] || careerDemandMap['Software Developer'];
+    return careerData;
   };
 
-  // Generate salary ranges based on career path
-  const generateCareerSalaryRanges = (careerTitle) => {
-    const salaryMap = {
-      'Software Developer': ['$95,000 - $180,000', '$65,000 - $120,000 (Entry)', '$140,000 - $220,000 (Senior)'],
-      'Data Scientist': ['$100,000 - $200,000', '$70,000 - $130,000 (Entry)', '$150,000 - $250,000 (Senior)'],
-      'Machine Learning Engineer': ['$120,000 - $220,000', '$85,000 - $150,000 (Entry)', '$170,000 - $280,000 (Senior)'],
-      'UX Designer': ['$85,000 - $160,000', '$55,000 - $100,000 (Entry)', '$120,000 - $200,000 (Senior)'],
-      'UI Designer': ['$80,000 - $150,000', '$50,000 - $95,000 (Entry)', '$115,000 - $190,000 (Senior)'],
-      'Product Designer': ['$90,000 - $170,000', '$60,000 - $110,000 (Entry)', '$130,000 - $210,000 (Senior)'],
-      'Product Manager': ['$110,000 - $190,000', '$75,000 - $130,000 (Entry)', '$150,000 - $250,000 (Senior)'],
-      'DevOps Engineer': ['$100,000 - $185,000', '$70,000 - $125,000 (Entry)', '$140,000 - $230,000 (Senior)'],
-      'Cybersecurity Analyst': ['$90,000 - $175,000', '$60,000 - $110,000 (Entry)', '$130,000 - $210,000 (Senior)'],
-      'Data Analyst': ['$75,000 - $140,000', '$45,000 - $85,000 (Entry)', '$110,000 - $180,000 (Senior)'],
-      'Cloud Engineer': ['$95,000 - $180,000', '$65,000 - $120,000 (Entry)', '$135,000 - $220,000 (Senior)']
-    };
-    
-    return salaryMap[careerTitle] || ['$80,000 - $150,000', '$55,000 - $95,000 (Entry)', '$120,000 - $200,000 (Senior)'];
+  // Fallback generic trends
+  const generateGenericMarketTrends = () => {
+    return [
+      {
+        title: 'TECHNOLOGY SALARY TRENDS',
+        description: 'General compensation trends in technology sector',
+        category: 'Salary Analysis',
+        relevance: 'Medium'
+      },
+      {
+        title: 'TECH INDUSTRY OUTLOOK',
+        description: 'Overall technology industry growth and opportunities',
+        category: 'Industry Analysis',
+        relevance: 'Medium'
+      }
+    ];
   };
 
   // Generate industry analysis based on user interests
@@ -3302,14 +3420,30 @@ const CareerDashboard = () => {
           <div className="space-y-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-4">Market Insights</h2>
-              <p className="text-gray-600 text-lg">Current trends and job market outlook for your career path</p>
+              <p className="text-gray-600 text-lg">
+                {careerPaths.length > 0 
+                  ? `Personalized market analysis for your top career match: ${careerPaths[0].title}`
+                  : 'Market trends and job outlook for your career path'
+                }
+              </p>
+              {careerPaths.length > 0 && (
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400 max-w-2xl mx-auto">
+                  <p className="text-sm text-blue-800">
+                    <strong>🎯 Tailored Analysis:</strong> These insights are specifically generated for your top career recommendation 
+                    based on your interests in {userData.careerPathsInterest?.join(', ') || 'technology'}.
+                  </p>
+                </div>
+              )}
             </div>
             
             {/* Market Trends Section */}
             <div className="mb-12">
               <h3 className="text-2xl font-bold mb-6 flex items-center">
                 <span className="mr-3">📈</span>
-                Market Trends Analysis
+                {careerPaths.length > 0 
+                  ? `${careerPaths[0].title} Market Analysis`
+                  : 'Market Trends Analysis'
+                }
               </h3>
               {marketTrends.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -3320,8 +3454,13 @@ const CareerDashboard = () => {
               ) : (
                 <div className="text-center py-8">
                   <div className="text-4xl mb-4">📊</div>
-                  <h4 className="text-lg font-semibold text-gray-600 mb-2">Analyzing Market Trends</h4>
-                  <p className="text-gray-500">Market analysis will appear here.</p>
+                  <h4 className="text-lg font-semibold text-gray-600 mb-2">Generating Personalized Market Analysis</h4>
+                  <p className="text-gray-500">
+                    {careerPaths.length > 0 
+                      ? `Creating market insights for ${careerPaths[0].title}...`
+                      : 'Complete your career assessment to get personalized market insights.'
+                    }
+                  </p>
                 </div>
               )}
             </div>

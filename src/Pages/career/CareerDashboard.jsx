@@ -508,7 +508,7 @@ const CareerDashboard = () => {
     }
   }, [careerPaths]);
 
-  // UPDATED: Enhanced useEffect with CORRECT career path generation
+  // UPDATED: Enhanced useEffect with CORRECT career path generation and market trends
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -550,13 +550,17 @@ const CareerDashboard = () => {
             const paths = generateAuthenticCareerPaths(processedUserData);
             setCareerPaths(paths);
             
+            // FIXED: Generate market trends AFTER career paths are available
+            const personalizedTrends = generatePersonalizedMarketTrendsWithPaths(paths, processedUserData);
+            setMarketTrends(personalizedTrends);
+            
             console.log('✅ Authentic career paths generated:', paths.length);
+            console.log('✅ Personalized market trends generated:', personalizedTrends.length);
           }
           
           // Extract other data from analysis with existing functions
           const skills = extractSkillsGapImproved(analysisText);
           const roadmap = extractLearningRoadmapImproved(analysisText);
-          const trends = extractMarketTrendsImproved(analysisText); // This now generates personalized trends
           const outlook = extractJobMarketOutlookImproved(analysisText);
           const networking = extractNetworkingStrategyImproved(analysisText);
           const branding = extractPersonalBrandingImproved(analysisText);
@@ -568,7 +572,6 @@ const CareerDashboard = () => {
           
           setSkillsGap(skills);
           setLearningRoadmap(roadmap);
-          setMarketTrends(trends);
           setJobMarketOutlook(outlook);
           setNetworkingStrategy(networking);
           setPersonalBranding(branding);
@@ -616,12 +619,18 @@ const CareerDashboard = () => {
               // CORRECT: Generate authentic career paths
               const paths = generateAuthenticCareerPaths(processedUserData);
               setCareerPaths(paths);
+              
+              // FIXED: Generate market trends AFTER career paths are available
+              const personalizedTrends = generatePersonalizedMarketTrendsWithPaths(paths, processedUserData);
+              setMarketTrends(personalizedTrends);
+              
+              console.log('✅ Stored career paths generated:', paths.length);
+              console.log('✅ Stored market trends generated:', personalizedTrends.length);
             }
             
             // Extract other data from analysis
             const skills = extractSkillsGapImproved(analysisText);
             const roadmap = extractLearningRoadmapImproved(analysisText);
-            const trends = extractMarketTrendsImproved(analysisText); // This now generates personalized trends
             const outlook = extractJobMarketOutlookImproved(analysisText);
             const networking = extractNetworkingStrategyImproved(analysisText);
             const branding = extractPersonalBrandingImproved(analysisText);
@@ -633,7 +642,6 @@ const CareerDashboard = () => {
             
             setSkillsGap(skills);
             setLearningRoadmap(roadmap);
-            setMarketTrends(trends);
             setJobMarketOutlook(outlook);
             setNetworkingStrategy(networking);
             setPersonalBranding(branding);
@@ -1825,32 +1833,21 @@ const CareerDashboard = () => {
     return roadmap;
   };
 
-  // UPDATED: Personalized Market Trends based on user's career path recommendations
-  const extractMarketTrendsImproved = (text) => {
-    console.log('🎯 Generating PERSONALIZED market trends based on user career paths...');
+  // FIXED: Generate personalized market trends with career paths data
+  const generatePersonalizedMarketTrendsWithPaths = (careerPaths, userData) => {
+    console.log('🎯 Generating PERSONALIZED market trends with career paths data...');
+    console.log('Career paths available:', careerPaths?.length || 0);
     
-    // Generate personalized trends based on user's top career recommendations
-    const personalizedTrends = generatePersonalizedMarketTrends();
-    
-    if (personalizedTrends.length > 0) {
-      console.log(`✅ Generated ${personalizedTrends.length} personalized market trends`);
-      return personalizedTrends;
-    }
-    
-    // Fallback to generic trends only if no career paths available
-    console.log('⚠️ No career paths available, using generic market trends');
-    return generateGenericMarketTrends();
-  };
-
-  // Generate personalized market trends based on user's career paths
-  const generatePersonalizedMarketTrends = () => {
     if (!careerPaths || careerPaths.length === 0) {
-      return [];
+      console.log('⚠️ No career paths available, using generic market trends');
+      return generateGenericMarketTrends();
     }
 
     const trends = [];
     const topCareer = careerPaths[0]; // User's top career match
     const userInterests = userData.careerPathsInterest || [];
+
+    console.log('🎯 Generating trends for top career:', topCareer.title);
 
     // TREND 1: Personalized Salary Analysis
     const salaryTrend = {
@@ -1874,11 +1871,21 @@ const CareerDashboard = () => {
     };
     trends.push(demandTrend);
 
+    console.log(`✅ Generated ${trends.length} personalized market trends for ${topCareer.title}`);
     return trends;
+  };
+
+  // UPDATED: Market Trends extraction now uses the new function
+  const extractMarketTrendsImproved = (text) => {
+    console.log('🎯 Market trends will be generated after career paths are available...');
+    // This function is now just a placeholder since trends are generated in useEffect
+    return [];
   };
 
   // Generate personalized salary data for specific career
   const generatePersonalizedSalaryData = (careerTitle) => {
+    console.log('💰 Generating salary data for:', careerTitle);
+    
     const salaryData = {
       ranges: [],
       insights: [],
@@ -1909,6 +1916,16 @@ const CareerDashboard = () => {
         comparison: '45% higher than national average for all occupations'
       },
       'UX Designer': {
+        ranges: ['$85,000 - $160,000 (Average)', '$55,000 - $100,000 (Entry Level)', '$120,000 - $200,000 (Senior Level)'],
+        growth: '6.8% year-over-year growth in design roles',
+        insights: [
+          'Product design roles pay 25% more than general UX roles',
+          'Tech companies offer highest compensation packages',
+          'Portfolio quality directly impacts salary negotiations'
+        ],
+        comparison: '18% higher than national average for all occupations'
+      },
+      'UX/UI Designer': {
         ranges: ['$85,000 - $160,000 (Average)', '$55,000 - $100,000 (Entry Level)', '$120,000 - $200,000 (Senior Level)'],
         growth: '6.8% year-over-year growth in design roles',
         insights: [
@@ -1991,11 +2008,14 @@ const CareerDashboard = () => {
     };
 
     const careerData = careerSalaryMap[careerTitle] || careerSalaryMap['Software Developer'];
+    console.log('💰 Salary data found for', careerTitle, ':', careerData?.ranges?.length || 0, 'ranges');
     return careerData;
   };
 
   // Generate personalized demand data for specific career
   const generatePersonalizedDemandData = (careerTitle, userInterests) => {
+    console.log('📈 Generating demand data for:', careerTitle);
+    
     const demandData = {
       growth: '',
       opportunities: [],
@@ -2028,6 +2048,17 @@ const CareerDashboard = () => {
         outlook: 'Outstanding - Highest demand among all tech roles'
       },
       'UX Designer': {
+        growth: '13% faster than average for design roles',
+        opportunities: [
+          'Digital transformation driving UX hiring surge',
+          '450K+ UX roles projected by 2030',
+          'Voice UI and AR/VR creating new specializations'
+        ],
+        hotSkills: ['User Research', 'Prototyping', 'Design Systems', 'Accessibility', 'Data-driven Design'],
+        industries: ['SaaS Products', 'E-commerce', 'Healthcare', 'Financial Technology'],
+        outlook: 'Very Strong - Essential for digital product success'
+      },
+      'UX/UI Designer': {
         growth: '13% faster than average for design roles',
         opportunities: [
           'Digital transformation driving UX hiring surge',
@@ -2118,6 +2149,7 @@ const CareerDashboard = () => {
     };
 
     const careerData = careerDemandMap[careerTitle] || careerDemandMap['Software Developer'];
+    console.log('📈 Demand data found for', careerTitle, ':', careerData?.opportunities?.length || 0, 'opportunities');
     return careerData;
   };
 
@@ -3173,6 +3205,7 @@ const CareerDashboard = () => {
         <div className="container mx-auto px-6">
           <div className="flex overflow-x-auto">
             {[
+              { id: 'home', label: 'Home', icon: '🏠', action: () => navigate('/') },
               { id: 'overview', label: 'Overview', icon: '📊' },
               { id: 'paths', label: 'Career Paths', icon: '🛤️' },
               { id: 'skills', label: 'Skills Gap', icon: '📈' },
@@ -3183,9 +3216,11 @@ const CareerDashboard = () => {
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => tab.action ? tab.action() : setActiveTab(tab.id)}
                 className={`flex items-center px-6 py-4 font-medium transition-all duration-300 border-b-2 whitespace-nowrap ${
-                  activeTab === tab.id
+                  tab.id === 'home' 
+                    ? 'border-transparent text-gray-600 hover:text-green-600 hover:bg-green-50'
+                    : activeTab === tab.id
                     ? 'border-blue-600 text-blue-600 bg-blue-50'
                     : 'border-transparent text-gray-600 hover:text-blue-600 hover:bg-gray-50'
                 }`}

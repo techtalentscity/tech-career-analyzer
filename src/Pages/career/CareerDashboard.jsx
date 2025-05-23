@@ -2137,64 +2137,87 @@ const CareerDashboard = () => {
     console.log('Extracting job search strategies...');
     const items = [];
     const lines = text.split('\n');
-    let inSection = false;
+    let inJobSearchSection = false;
     
-    const jobSearchKeywords = ['JOB SEARCH', 'JOB HUNTING', 'APPLICATIONS', 'JOB APPLICATION'];
+    const jobSearchKeywords = ['JOB SEARCH', 'JOB HUNTING', 'APPLICATIONS', 'JOB APPLICATION', 'FINDING JOBS', 'CAREER SEARCH'];
     
-    lines.forEach((line) => {
-      if (jobSearchKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
-        inSection = true;
+    lines.forEach((line, index) => {
+      const lineUpper = line.toUpperCase();
+      
+      // Check if we're entering a job search section
+      if (jobSearchKeywords.some(keyword => lineUpper.includes(keyword))) {
+        inJobSearchSection = true;
+        console.log('📍 Found job search section at line:', index, ':', line.trim());
         return;
       }
       
-      // Exit section when hitting other major sections  
-      if (inSection && (
-        line.toUpperCase().includes('NETWORKING') || 
-        line.toUpperCase().includes('INTERVIEW') || 
-        line.toUpperCase().includes('PERSONAL BRANDING') ||
-        line.toUpperCase().includes('LEARNING ROADMAP') ||
-        line.toUpperCase().includes('PORTFOLIO')
+      // Exit job search section when hitting other major sections
+      if (inJobSearchSection && (
+        lineUpper.includes('SKILLS') || 
+        lineUpper.includes('NETWORKING') || 
+        lineUpper.includes('INTERVIEW') || 
+        lineUpper.includes('PERSONAL BRANDING') ||
+        lineUpper.includes('LEARNING ROADMAP') ||
+        lineUpper.includes('PORTFOLIO') ||
+        lineUpper.includes('MARKET TRENDS') ||
+        lineUpper.includes('SALARY') ||
+        lineUpper.includes('STRENGTHS') ||
+        lineUpper.includes('COMPETENCIES') ||
+        lineUpper.includes('SKILL GAP') ||
+        lineUpper.includes('TECHNICAL SKILLS')
       )) {
-        inSection = false;
+        inJobSearchSection = false;
+        console.log('📍 Exiting job search section at line:', index);
         return;
       }
       
-      if (inSection && line.trim() !== '') {
-        // Filter out unwanted content sections
-        const lineUpper = line.toUpperCase();
-        if (lineUpper.includes('LEARNING ROADMAP') || 
-            lineUpper.includes('STUDY PLAN') ||
-            lineUpper.includes('LEARNING PATH') ||
-            lineUpper.includes('TRANSITION STRATEGY:') ||
-            lineUpper.includes('TRANSITION STRATEGY')) {
-          console.log('🚫 Filtering out unwanted content:', line.trim());
+      if (inJobSearchSection && line.trim() !== '') {
+        // Filter out any skill-related content that might have slipped in
+        if (lineUpper.includes('SKILL') || 
+            lineUpper.includes('LEARN') || 
+            lineUpper.includes('STUDY') ||
+            lineUpper.includes('MASTER') ||
+            lineUpper.includes('PROGRAMMING') ||
+            lineUpper.includes('CODING') ||
+            lineUpper.includes('TECHNICAL') ||
+            lineUpper.includes('TRANSITION STRATEGY') ||
+            lineUpper.includes('COMPETENCY') ||
+            lineUpper.includes('PROFICIENCY')) {
+          console.log('🚫 Filtering out skill-related content:', line.trim());
           return;
         }
         
         if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
           const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          if (itemText.length > 15) {
+          
+          // Only include if it's clearly job search related
+          if (itemText.length > 15 && isJobSearchContent(itemText)) {
             items.push({
               text: itemText,
               type: 'tip',
               category: 'Job Search'
             });
+            console.log('✅ Added job search strategy:', itemText.substring(0, 50) + '...');
           }
         }
       }
     });
     
-    // Add default job search strategies if none found
+    // If no valid job search strategies found, use clean defaults
     if (items.filter(i => i.type === 'tip').length === 0) {
-      const defaultTips = [
-        'Tailor your resume to highlight relevant skills and projects for each application',
-        'Use job boards like LinkedIn, Indeed, and AngelList to find opportunities',
-        'Apply directly through company websites for better visibility',
-        'Follow up on applications with personalized messages to hiring managers',
-        'Practice coding challenges and technical interview questions regularly'
+      console.log('No job search strategies found in analysis, using defaults...');
+      const defaultJobSearchTips = [
+        'Optimize your LinkedIn profile with relevant keywords and showcase your transition journey',
+        'Tailor your resume for each application, highlighting transferable skills and relevant projects',
+        'Use multiple job boards including LinkedIn Jobs, Indeed, AngelList, and company career pages',
+        'Network with professionals in your target industry through informational interviews',
+        'Follow up on applications with personalized messages to hiring managers within one week',
+        'Practice common interview questions and prepare STAR method examples from your experience',
+        'Apply to 5-10 targeted positions per week rather than mass applying to hundreds',
+        'Research company culture and values before interviews to show genuine interest'
       ];
       
-      defaultTips.forEach(tip => {
+      defaultJobSearchTips.forEach(tip => {
         items.push({
           text: tip,
           type: 'tip',
@@ -2203,8 +2226,32 @@ const CareerDashboard = () => {
       });
     }
     
-    console.log('Job search strategies found:', items.filter(i => i.type === 'tip').length);
+    console.log('Total job search strategies found:', items.filter(i => i.type === 'tip').length);
     return items;
+  };
+
+  // Helper function to validate if content is actually job search related
+  const isJobSearchContent = (text) => {
+    const textLower = text.toLowerCase();
+    
+    // Must contain job search related terms
+    const jobSearchTerms = [
+      'resume', 'cv', 'application', 'apply', 'interview', 'job', 'position', 
+      'linkedin', 'network', 'hiring', 'recruiter', 'cover letter', 'follow up',
+      'job board', 'career', 'company', 'employer', 'candidate'
+    ];
+    
+    // Should NOT contain skill/learning related terms
+    const skillTerms = [
+      'learn', 'study', 'master', 'skill', 'programming', 'coding', 'technical',
+      'course', 'tutorial', 'practice', 'develop', 'build', 'proficiency'
+    ];
+    
+    const hasJobSearchTerms = jobSearchTerms.some(term => textLower.includes(term));
+    const hasSkillTerms = skillTerms.some(term => textLower.includes(term));
+    
+    // Only accept if it has job search terms and doesn't have skill terms
+    return hasJobSearchTerms && !hasSkillTerms;
   };
 
   const extractCareerGrowthResourcesImproved = (text) => {

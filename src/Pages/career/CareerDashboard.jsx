@@ -508,10 +508,13 @@ const CareerDashboard = () => {
     }
   }, [careerPaths]);
 
-  // UPDATED: Enhanced useEffect with CORRECT career path generation and market trends
+  // UPDATED: Enhanced useEffect with proper market trends generation
   useEffect(() => {
     const loadData = async () => {
       try {
+        let processedUserData = null;
+        let generatedPaths = [];
+        
         if (location.state?.analysis) {
           const analysisText = location.state.analysis;
           setAnalysis(analysisText);
@@ -519,7 +522,7 @@ const CareerDashboard = () => {
           if (location.state.formData) {
             const formData = location.state.formData;
             
-            const processedUserData = {
+            processedUserData = {
               name: formData.fullName,
               email: formData.email,
               experienceLevel: formData.experienceLevel,
@@ -546,19 +549,14 @@ const CareerDashboard = () => {
             
             setUserData(processedUserData);
             
-            // CORRECT: Generate authentic career paths using the new system
-            const paths = generateAuthenticCareerPaths(processedUserData);
-            setCareerPaths(paths);
+            // Generate authentic career paths
+            generatedPaths = generateAuthenticCareerPaths(processedUserData);
+            setCareerPaths(generatedPaths);
             
-            // FIXED: Generate market trends AFTER career paths are available
-            const personalizedTrends = generatePersonalizedMarketTrendsWithPaths(paths, processedUserData);
-            setMarketTrends(personalizedTrends);
-            
-            console.log('✅ Authentic career paths generated:', paths.length);
-            console.log('✅ Personalized market trends generated:', personalizedTrends.length);
+            console.log('✅ Authentic career paths generated:', generatedPaths.length);
           }
           
-          // Extract other data from analysis with existing functions
+          // Extract other data from analysis
           const skills = extractSkillsGapImproved(analysisText);
           const roadmap = extractLearningRoadmapImproved(analysisText);
           const outlook = extractJobMarketOutlookImproved(analysisText);
@@ -589,7 +587,7 @@ const CareerDashboard = () => {
             
             const submission = storageService.getSubmissionById(storedAnalysis.submissionId);
             if (submission) {
-              const processedUserData = {
+              processedUserData = {
                 name: submission.fullName,
                 email: submission.email,
                 experienceLevel: submission.experienceLevel,
@@ -616,16 +614,11 @@ const CareerDashboard = () => {
               
               setUserData(processedUserData);
               
-              // CORRECT: Generate authentic career paths
-              const paths = generateAuthenticCareerPaths(processedUserData);
-              setCareerPaths(paths);
+              // Generate authentic career paths
+              generatedPaths = generateAuthenticCareerPaths(processedUserData);
+              setCareerPaths(generatedPaths);
               
-              // FIXED: Generate market trends AFTER career paths are available
-              const personalizedTrends = generatePersonalizedMarketTrendsWithPaths(paths, processedUserData);
-              setMarketTrends(personalizedTrends);
-              
-              console.log('✅ Stored career paths generated:', paths.length);
-              console.log('✅ Stored market trends generated:', personalizedTrends.length);
+              console.log('✅ Stored career paths generated:', generatedPaths.length);
             }
             
             // Extract other data from analysis
@@ -657,6 +650,24 @@ const CareerDashboard = () => {
             return;
           }
         }
+        
+        // CRITICAL: Generate market trends AFTER everything is set up
+        if (processedUserData && generatedPaths && generatedPaths.length > 0) {
+          console.log('🎯 Generating market trends with:', {
+            careerPaths: generatedPaths.length,
+            topCareer: generatedPaths[0]?.title,
+            userInterests: processedUserData.careerPathsInterest
+          });
+          
+          const personalizedTrends = generatePersonalizedMarketTrendsWithPaths(generatedPaths, processedUserData);
+          setMarketTrends(personalizedTrends);
+          
+          console.log('✅ Market trends generated:', personalizedTrends.length, personalizedTrends);
+        } else {
+          console.log('⚠️ No career paths or user data available for market trends');
+          setMarketTrends(generateGenericMarketTrends());
+        }
+        
       } catch (error) {
         console.error('Error loading dashboard data:', error);
         navigate('/career/test', { 
@@ -951,8 +962,10 @@ const CareerDashboard = () => {
     );
   };
 
-  // UPDATED: Market Trends Card Component with personalized content
+  // UPDATED: Market Trends Card Component with better error handling
   const MarketTrendsCard = ({ trend, index }) => {
+    console.log('🎯 Rendering MarketTrendsCard:', trend.title, 'personalizedData:', !!trend.personalizedData);
+    
     const trendIcons = {
       'SALARY OUTLOOK': '💰',
       'MARKET DEMAND': '📈',
@@ -972,6 +985,7 @@ const CareerDashboard = () => {
       
       // Handle personalized salary trends
       if ((title.includes('SALARY') || title.includes('COMPENSATION')) && trend.personalizedData) {
+        console.log('💰 Rendering salary trend with data:', trend.personalizedData.ranges?.length);
         return {
           title: trend.title,
           content: (
@@ -1005,6 +1019,7 @@ const CareerDashboard = () => {
       
       // Handle personalized demand trends
       if ((title.includes('DEMAND') || title.includes('MARKET')) && trend.personalizedData) {
+        console.log('📈 Rendering demand trend with data:', trend.personalizedData.opportunities?.length);
         return {
           title: trend.title,
           content: (
@@ -1043,7 +1058,28 @@ const CareerDashboard = () => {
         };
       }
       
-      // Fallback for generic trends
+      // Check if we have a userCareer but no personalizedData (backup case)
+      if (trend.userCareer && !trend.personalizedData) {
+        console.log('⚠️ Has userCareer but no personalizedData, generating fallback');
+        return {
+          title: title,
+          content: (
+            <div>
+              <p className="text-gray-700 mb-3">{trend.description}</p>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h5 className="font-medium text-blue-800 mb-2">📊 {trend.userCareer} Market Analysis</h5>
+                <p className="text-sm text-blue-700">
+                  Market data for {trend.userCareer} roles is being processed. This section will show personalized 
+                  salary ranges, growth projections, and industry insights specific to your career path.
+                </p>
+              </div>
+            </div>
+          )
+        };
+      }
+      
+      // Fallback for completely generic trends
+      console.log('📊 Using generic fallback for trend:', title);
       return {
         title: title,
         content: (
@@ -3480,6 +3516,19 @@ const CareerDashboard = () => {
                   : 'Market Trends Analysis'
                 }
               </h3>
+              
+              {/* Debug info */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mb-4 p-3 bg-yellow-50 rounded-lg text-xs">
+                  <strong>Debug:</strong> Market trends: {marketTrends.length}, 
+                  Career paths: {careerPaths.length}, 
+                  Top career: {careerPaths[0]?.title || 'None'}
+                  {marketTrends.length > 0 && (
+                    <div>First trend: {marketTrends[0].title}, Has personalizedData: {!!marketTrends[0].personalizedData}</div>
+                  )}
+                </div>
+              )}
+              
               {marketTrends.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {marketTrends.map((trend, index) => (

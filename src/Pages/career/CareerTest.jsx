@@ -391,7 +391,7 @@ const CareerTest = () => {
     }
   };
 
-  // FIXED: Updated handleSubmit function to use the correct API
+  // UPDATED: New structured handleSubmit function
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -404,64 +404,73 @@ const CareerTest = () => {
       setAiAnalyzing(true);
       setError(null);
       
-      console.log('Starting form submission process...');
+      console.log('Starting structured career analysis...');
       
-      // 1. Save form data to local storage for the app's use
+      // 1. Save form data to local storage
       const savedSubmission = storageService.saveCareerTest(formData);
       console.log('Form data saved to local storage');
       
-      // 2. Submit only name and email to Google Form
+      // 2. Submit to Google Form (minimal data)
       const googleFormData = {
         fullName: formData.fullName,
         email: formData.email
       };
       
-      console.log('Submitting minimal data to Google Form...');
       try {
-        // Submit the minimal data to Google Form
         const formSubmissionResult = await googleFormService.submitToGoogleForm(googleFormData);
-        
         if (!formSubmissionResult.success) {
           console.warn('Google Form submission may have failed, but continuing analysis');
-        } else {
-          console.log('Google Form submission successful');
         }
       } catch (googleFormError) {
         console.warn('Google Form submission error, but continuing analysis:', googleFormError);
       }
       
-      // 3. Use the Claude API service to analyze the complete form data
-      console.log('Sending data to Claude API for analysis...');
+      // 3. Use NEW generateCareerRecommendations API for structured data
+      console.log('Generating structured career recommendations...');
       
       try {
-        const analysis = await claudeApiService.analyzeCareerPath(formData);
+        // 🚀 NEW: Use structured API instead of text analysis
+        const structuredResponse = await claudeApiService.generateCareerRecommendations(formData);
         
-        // Verify we got a valid string response
-        if (!analysis || typeof analysis !== 'string') {
+        if (!structuredResponse || !structuredResponse.recommendations) {
           throw new Error('Invalid response from career analysis. Please try again.');
         }
         
-        console.log('Analysis successfully received from Claude API');
-        console.log('Analysis length:', analysis.length);
-        
-        setCareerAnalysis(analysis);
-        
-        // Note: Analysis is now saved inside claudeApiService.analyzeCareerPath
-        // We do NOT need to save it again here - this is the fix!
-        // The previous code was trying to call storageService.saveAnalysis() which doesn't exist
+        console.log('✅ Structured recommendations received:', structuredResponse.recommendations.length);
+        console.log('Overall confidence:', structuredResponse.overallConfidence);
         
         setAiAnalyzing(false);
         
-        // 4. Navigate to dashboard page with analysis and form data
+        // 4. Navigate with structured data instead of text analysis
         navigate('/career/dashboard', { 
           state: { 
-            analysis,
-            formData 
+            // 🎯 NEW: Pass structured data instead of text
+            recommendations: structuredResponse.recommendations,
+            systemResponse: structuredResponse,
+            formData: formData
           } 
         });
+        
       } catch (claudeError) {
-        console.error('Claude API error:', claudeError);
-        throw new Error('Failed to analyze your career data: ' + claudeError.message);
+        console.error('Structured analysis error:', claudeError);
+        
+        // 🔄 FALLBACK: Try legacy text method if structured fails
+        console.log('Falling back to legacy text analysis...');
+        try {
+          const textAnalysis = await claudeApiService.analyzeCareerPath(formData);
+          
+          setAiAnalyzing(false);
+          
+          navigate('/career/dashboard', { 
+            state: { 
+              analysis: textAnalysis,
+              formData: formData,
+              useLegacyMode: true // Flag to indicate legacy parsing needed
+            } 
+          });
+        } catch (legacyError) {
+          throw new Error('Both structured and legacy analysis failed: ' + legacyError.message);
+        }
       }
       
     } catch (error) {

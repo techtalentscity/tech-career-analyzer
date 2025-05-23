@@ -1,6 +1,6 @@
-// src/config/claudeApiConfig.js
+// src/config/claudeApiConfig.js - UPDATED TO MATCH TECHNICAL SPECIFICATION v1.1
 
-// Claude API configuration
+// Claude API configuration for Technical Specification v1.1
 const CLAUDE_API_CONFIG = {
   models: {
     default: 'claude-3-5-sonnet-20240620',
@@ -9,173 +9,377 @@ const CLAUDE_API_CONFIG = {
   maxTokens: {
     formSuggestions: 1024,
     careerAnalysis: 4096
-  }
+  },
+  technicalSpecVersion: '1.1',
+  recommendationEngine: 'Multi-Tier with Fallback Logic'
 };
 
-// Prompts for different Claude API requests
+// Technical Specification v1.1 Prompts for Claude API requests
 const CLAUDE_PROMPTS = {
   formSuggestions: 
-    "I'm filling out a tech career assessment form for someone transitioning into tech. " +
-    "Based on a typical career changer profile, suggest realistic answers for a form with these fields: " +
-    "Education Level, Field of Study, Years of Experience, Current/Previous Role, " +
-    "Job Responsibilities, Notable Projects or Achievements, Software or Technologies Used, Internships or Relevant Experience, " +
-    "Publications or Research, " +
-    "What they like doing best, Biggest motivation for tech career, " +
-    "What they're passionate about, Primary reason for transition, Transferable skills from previous career, " +
-    "Previous tech exposure, Anticipated challenges in transition, Tech areas they're curious about, " +
-    "Comfort with learning new tools, Preferred work method, Current tech experience level, " +
-    "Tools and platforms used, Certifications and courses, Tech career paths interest, " +
-    "Industry preference, Whether to leverage domain expertise, Target salary range, " +
-    "Weekly time commitment, Transition timeline, Whether continuing current role, " +
-    "Guidance needed, and 12-month goal.",
+    "I'm filling out a tech career assessment form for someone transitioning into tech using our Technical Specification v1.1 system. " +
+    "The system uses a Multi-Tier Recommendation Engine with 4 constant variables and 3 specialized algorithms. " +
+    "Based on a typical career changer profile, suggest realistic answers for a form that captures: " +
+    "CONSTANT VARIABLES: Education Level, Field of Study, Years of Experience, Interests, Transferable Skills. " +
+    "TECH-INTEREST ALGORITHM: Tech Interests, Current Role, Job Technologies. " +
+    "RESEARCH-DEVELOPMENT ALGORITHM: Publications, Tools Used, Time Commitment. " +
+    "LIFESTYLE-MARKET ALGORITHM: Work Preference, Target Salary. " +
+    "ADDITIONAL CONTEXT: Job Responsibilities, Notable Projects, Certifications, Career Paths Interest, Timeline.",
   
   careerAnalysis: (formData) => `
-    I'm a career transition expert helping someone move into technology from a different field.
-    Please analyze this comprehensive career assessment for someone looking to transition into tech.
-    Focus especially on their job experience, educational background, transferable skills, interests, tech preferences, and background.
+    I'm a career transition expert using the Technical Specification v1.1 Multi-Tier Recommendation Engine 
+    with fallback logic and dynamic weighting to analyze career transitions into technology.
+
+    TECHNICAL SPECIFICATION v1.1 ANALYSIS FRAMEWORK:
     
-    ASSESSMENT DATA (IMPORTANT FIELDS MARKED):
+    You must analyze this assessment using THREE PARALLEL ALGORITHMS and provide recommendations 
+    based on the Multi-Tier Recommendation Engine approach:
+
+    ====================================================================
+    ALGORITHM 1: 🎯 TECH-INTEREST BASED RECOMMENDATION
+    ====================================================================
+    Uses 4 Constant Variables + 3 Specific Criteria:
     
-    BACKGROUND INFORMATION:
-    - Education Level (IMPORTANT): ${formData.educationLevel || 'Not specified'}
-    - Field of Study (IMPORTANT): ${formData.studyField || 'Not specified'}
-    - Current/Previous Role: ${formData.currentRole || 'Not specified'}
-    - Years of Experience: ${formData.yearsExperience || 'Not specified'}
+    CONSTANT VARIABLES (Universal Baseline):
+    - Years Experience: ${formData.yearsExperience || 'Not specified'}
+    - Study Field: ${formData.studyField || 'Not specified'}  
+    - Interests: ${Array.isArray(formData.interests) ? formData.interests.join(', ') : formData.interests || 'Not specified'}
+    - Transferable Skills: ${formData.transferableSkills || 'Not specified'}
     
-    JOB EXPERIENCE DETAILS (IMPORTANT):
-    - Key Job Responsibilities: ${formData.jobResponsibilities || 'Not specified'}
-    - Notable Projects or Achievements: ${formData.jobProjects || 'Not specified'}
-    - Software or Technologies Used: ${formData.jobTechnologies || 'Not specified'}
-    - Internships or Relevant Experience: ${formData.internships || 'Not specified'}
-    - Publications or Research (IMPORTANT): ${formData.publications || 'Not specified'}
+    TECH-INTEREST SPECIFIC CRITERIA:
+    - Tech Interests: ${formData.techInterests || 'Not specified'}
+    - Current Role: ${formData.currentRole || 'Not specified'}
+    - Job Technologies: ${formData.jobTechnologies || 'Not specified'}
+
+    ====================================================================
+    ALGORITHM 2: 📚 RESEARCH/DEVELOPMENT BASED RECOMMENDATION  
+    ====================================================================
+    Uses 4 Constant Variables + 3 Specific Criteria:
     
-    PERSONAL STRENGTHS & MOTIVATION (IMPORTANT):
-    - Biggest motivation for tech career: ${formData.techMotivation || 'Not specified'}
-    - What they're passionate about: ${formData.techPassion || 'Not specified'}
+    CONSTANT VARIABLES (Same as above):
+    - Years Experience: ${formData.yearsExperience || 'Not specified'}
+    - Study Field: ${formData.studyField || 'Not specified'}
+    - Interests: ${Array.isArray(formData.interests) ? formData.interests.join(', ') : formData.interests || 'Not specified'}
+    - Transferable Skills: ${formData.transferableSkills || 'Not specified'}
     
-    TECH PREFERENCES & INTERESTS (IMPORTANT):
-    - Tech areas they're interested in: ${formData.techInterests || 'Not specified'}
-    - Comfort with learning new tools: ${formData.learningComfort || 'Not specified'}
-    - Work preference: ${formData.workPreference || 'Not specified'}
-    - Current tech experience level: ${formData.experienceLevel || 'Not specified'}
-    - Tools & platforms used: ${formData.toolsUsed ? formData.toolsUsed.join(', ') : 'None'}
-    - Certifications/courses: ${formData.certifications || 'Not specified'}
-    - Certification details: ${formData.certificationsDetail || 'Not specified'}
+    RESEARCH/DEVELOPMENT SPECIFIC CRITERIA:
+    - Publications: ${formData.publications || 'Not specified'}
+    - Tools Used: ${formData.toolsUsed ? formData.toolsUsed.join(', ') : 'Not specified'}
+    - Time Commitment: ${formData.timeCommitment || 'Not specified'}
+
+    ====================================================================
+    ALGORITHM 3: ⚖️ LIFESTYLE/MARKET BASED RECOMMENDATION
+    ====================================================================
+    Uses 4 Constant Variables + 3 Specific Criteria:
     
-    TRANSITION INFORMATION:
-    - Primary reason for transition: ${formData.transitionReason || 'Not specified'}
-    - Transferable skills: ${formData.transferableSkills || 'Not specified'}
-    - Anticipated challenges: ${formData.anticipatedChallenges || 'Not specified'}
+    CONSTANT VARIABLES (Same as above):
+    - Years Experience: ${formData.yearsExperience || 'Not specified'}
+    - Study Field: ${formData.studyField || 'Not specified'}
+    - Interests: ${Array.isArray(formData.interests) ? formData.interests.join(', ') : formData.interests || 'Not specified'}
+    - Transferable Skills: ${formData.transferableSkills || 'Not specified'}
     
-    CAREER ASPIRATIONS:
-    - Tech career paths interest: ${formData.careerPathsInterest ? formData.careerPathsInterest.join(', ') : 'Not specified'}
-    - Industry preferences: ${formData.industryPreference ? formData.industryPreference.join(', ') : 'Not specified'}
-    - Leverage domain expertise: ${formData.leverageDomainExpertise || 'Not specified'}
-    - Target salary range: ${formData.targetSalary || 'Not specified'}
+    LIFESTYLE/MARKET SPECIFIC CRITERIA:
+    - Work Preference: ${formData.workPreference || 'Not specified'}
+    - Education Level: ${formData.educationLevel || 'Not specified'}
+    - Target Salary: ${formData.targetSalary || 'Not specified'}
+
+    ====================================================================
+    ADDITIONAL CONTEXT DATA:
+    ====================================================================
+    - Job Responsibilities: ${formData.jobResponsibilities || 'Not specified'}
+    - Notable Projects: ${formData.jobProjects || 'Not specified'}
+    - Internships: ${formData.internships || 'Not specified'}
+    - Tech Motivation: ${formData.techMotivation || 'Not specified'}
+    - Tech Passion: ${formData.techPassion || 'Not specified'}
+    - Learning Comfort: ${formData.learningComfort || 'Not specified'}
+    - Experience Level: ${formData.experienceLevel || 'Not specified'}
+    - Certifications: ${formData.certifications || 'Not specified'}
+    - Transition Reason: ${formData.transitionReason || 'Not specified'}
+    - Anticipated Challenges: ${formData.anticipatedChallenges || 'Not specified'}
+    - Career Paths Interest: ${formData.careerPathsInterest ? formData.careerPathsInterest.join(', ') : 'Not specified'}
+    - Industry Preference: ${formData.industryPreference ? formData.industryPreference.join(', ') : 'Not specified'}
+    - Leverage Domain Expertise: ${formData.leverageDomainExpertise || 'Not specified'}
+    - Transition Timeline: ${formData.transitionTimeline || 'Not specified'}
+    - Continue Current Role: ${formData.continueCurrent || 'Not specified'}
+    - Guidance Needed: ${formData.guidanceNeeded || 'Not specified'}
+    - 12-Month Goal: ${formData.futureGoal || 'Not specified'}
+
+    ====================================================================
+    TECHNICAL SPECIFICATION v1.1 ANALYSIS REQUIREMENTS:
+    ====================================================================
+
+    IMPORTANT: You MUST analyze this using the Multi-Tier Recommendation Engine approach and provide 
+    your response in the EXACT format below. Apply dynamic weighting (60% constants, 40% specifics) 
+    and note when fallback logic is needed due to missing data.
+
+    FORMAT YOUR RESPONSE EXACTLY AS SHOWN:
+
+    1. TECHNICAL SPECIFICATION v1.1 - CAREER PATH RECOMMENDATIONS:
     
-    COMMITMENT & GOALS:
-    - Weekly time commitment: ${formData.timeCommitment || 'Not specified'}
-    - Transition timeline: ${formData.transitionTimeline || 'Not specified'}
-    - Continue current role: ${formData.continueCurrent || 'Not specified'}
-    - Guidance needed: ${formData.guidanceNeeded || 'Not specified'}
-    - 12-month goal: ${formData.futureGoal || 'Not specified'}
-    
-    Based on this comprehensive assessment, provide a detailed analysis with the following sections.
-    
-    IMPORTANT: Format your response EXACTLY as shown below, maintaining the exact structure and numbering:
-    
-    1. CAREER PATH RECOMMENDATIONS:
-       a) [Role Name] ([X]% match)
-       - Why: [Detailed explanation]
-       - Timeline: [Specific timeline]
+       🎯 TECH-INTEREST BASED RECOMMENDATION:
+       Role: [Specific role title]
+       Match Score: [X]% confidence
+       Reasoning: Based on [list specific criteria used] with [dynamic weighting applied/fallback logic applied]
+       Why: [Detailed explanation focusing on tech interests, current role, and job technologies]
+       Timeline: [Specific timeline]
+       Required Skills: [List 3-5 skills]
+       Suggested Actions: [List 3-4 specific actions]
+       Salary Range: [Specific range]
+       Market Demand: [High/Medium/Low]
        
-       b) [Role Name] ([X]% match)
-       - Why: [Detailed explanation]
-       - Timeline: [Specific timeline]
-    
-    2. STRENGTHS ANALYSIS:
-       - [Strength Category]: [Detailed explanation]
-       - [Strength Category]: [Detailed explanation]
-       (Use bullet points with "-" for this section)
-    
-    3. SKILLS GAP ANALYSIS:
-       FORMAT EACH SKILL AS A NUMBERED ITEM WITH TITLE AND DESCRIPTION ON SEPARATE LINES:
+       📚 RESEARCH/DEVELOPMENT BASED RECOMMENDATION:
+       Role: [Specific role title]
+       Match Score: [X]% confidence  
+       Reasoning: Based on [list specific criteria used] with [dynamic weighting applied/fallback logic applied]
+       Why: [Detailed explanation focusing on publications, tools used, and time commitment]
+       Timeline: [Specific timeline]
+       Required Skills: [List 3-5 skills]
+       Suggested Actions: [List 3-4 specific actions]
+       Salary Range: [Specific range]
+       Market Demand: [High/Medium/Low]
        
-       1. [Skill Name]: [Brief description of the gap and what needs to be learned]
+       ⚖️ LIFESTYLE/MARKET BASED RECOMMENDATION:
+       Role: [Specific role title]
+       Match Score: [X]% confidence
+       Reasoning: Based on [list specific criteria used] with [dynamic weighting applied/fallback logic applied]
+       Why: [Detailed explanation focusing on work preference, education level, and target salary]
+       Timeline: [Specific timeline]
+       Required Skills: [List 3-5 skills]
+       Suggested Actions: [List 3-4 specific actions]
+       Salary Range: [Specific range]
+       Market Demand: [High/Medium/Low]
+
+    2. CONSTANT VARIABLES ANALYSIS:
+       - Years Experience Impact: [Analysis of how their experience level affects all three recommendations]
+       - Study Field Relevance: [Analysis of how their academic background applies across algorithms]
+       - Interest Alignment: [Analysis of how their interests support the recommendations]
+       - Transferable Skills Value: [Analysis of cross-domain skill applicability]
+
+    3. ALGORITHM PERFORMANCE METRICS:
+       🎯 Tech-Interest Algorithm:
+       - Criteria Completeness: [X/7] ([count constant variables + specific criteria present])
+       - Data Quality Score: [X]%
+       - Fallback Applied: [Yes/No - if less than 2 constant variables or missing key criteria]
        
-       2. [Skill Name]: [Brief description of the gap and what needs to be learned]
+       📚 Research/Development Algorithm:
+       - Criteria Completeness: [X/7] ([count constant variables + specific criteria present])
+       - Data Quality Score: [X]%
+       - Fallback Applied: [Yes/No - if less than 2 constant variables or missing key criteria]
        
-       3. [Skill Name]: [Brief description of the gap and what needs to be learned]
+       ⚖️ Lifestyle/Market Algorithm:
+       - Criteria Completeness: [X/7] ([count constant variables + specific criteria present])
+       - Data Quality Score: [X]%
+       - Fallback Applied: [Yes/No - if less than 2 constant variables or missing key criteria]
+
+    4. SKILLS GAP ANALYSIS (ALGORITHM-OPTIMIZED):
+       FORMAT EACH SKILL AS NUMBERED ITEM WITH ALGORITHM CONTEXT:
        
-       (Continue numbering for all skills. Each skill should have the format "N. Skill Name: Description")
-    
-    4. LEARNING ROADMAP:
-       Month 1-2:
-       - [Specific tasks and resources]
-       - [More tasks]
+       1. [Skill Name] (🎯 Tech-Interest Priority): [Description of gap and learning approach]
        
-       Month 3-4:
-       - [Specific tasks and resources]
-       - [More tasks]
+       2. [Skill Name] (📚 Research/Development Priority): [Description of gap and learning approach]
        
-       Month 5-6:
-       - [Specific tasks and resources]
-       - [More tasks]
-    
-    5. TRANSITION STRATEGY:
-       - [Strategy point]
-       - [Strategy point]
-       - [Strategy point]
-    
-    6. MARKET TRENDS ANALYSIS:
-       Include current (as of 2025) job market data for the recommended career paths with the following specific sections:
+       3. [Skill Name] (⚖️ Lifestyle/Market Priority): [Description of gap and learning approach]
        
-       1. JOB MARKET OUTLOOK: 
-          Provide detailed job growth projections, hiring rates, and demand levels for each recommended career path. 
-          Include specific percentages when possible.
+       4. [Skill Name] (Universal Priority): [Description of gap relevant to all algorithms]
+
+    5. MULTI-TIER LEARNING ROADMAP:
+       Phase 1 (Month 1-2) - Foundation Building:
+       - Constant Variables Strengthening: [Tasks to improve core profile elements]
+       - Algorithm-Specific Prep: [Tasks for highest-scoring algorithm]
        
-       2. SALARY TRENDS: 
-          Detail current salary ranges for entry-level, mid-level, and senior positions in each recommended 
-          career path, including how these have changed in the past year. Use specific dollar ranges.
+       Phase 2 (Month 3-4) - Skill Development:
+       - Tech-Interest Track: [If this algorithm scored highest]
+       - Research/Development Track: [If this algorithm scored highest]  
+       - Lifestyle/Market Track: [If this algorithm scored highest]
        
-       3. REGIONAL OPPORTUNITIES: 
-          Analyze which geographic regions show the strongest demand for each career path, including remote 
-          work opportunities and emerging tech hubs.
+       Phase 3 (Month 5-6) - Specialization & Application:
+       - Advanced Skills: [Based on top recommendation algorithm]
+       - Portfolio Development: [Algorithm-specific projects]
+       - Market Positioning: [Algorithm-optimized career positioning]
+
+    6. DYNAMIC WEIGHTING ANALYSIS:
+       - Constants Weight Applied: [X]% (based on data completeness)
+       - Specifics Weight Applied: [X]% (based on data completeness)
+       - Fallback Logic Triggered: [Yes/No and explanation]
+       - Missing Critical Data: [List missing constant variables or specific criteria]
+       - Recommendation Confidence: [Overall confidence level based on data quality]
+
+    7. TECHNICAL SPECIFICATION MARKET TRENDS ANALYSIS:
+       Include algorithm-specific market analysis for 2025:
        
-       4. EMERGING TECHNOLOGIES: 
-          Identify the most important emerging technologies or skills within each career path that are 
-          becoming requirements for new hires in 2025.
+       🎯 TECH-INTEREST MARKET TRENDS:
+       - Job growth for tech-interest aligned roles
+       - Salary trends for roles matching tech interests and current role transitions
+       - Technology demand analysis based on job technologies mentioned
        
-       5. INDUSTRY SECTOR ANALYSIS: 
-          Evaluate which industry sectors are most actively hiring for each career path (e.g., healthcare, 
-          finance, retail) and their growth trajectories.
-          
-    7. NETWORKING STRATEGY:
-       - [Specific networking tips tailored to their background and target roles]
-       - [Industry events or communities to join]
-       - [Online platforms for tech networking]
-       - [How to leverage existing network from previous career]
-       - [Informational interview strategies]
-    
-    8. PERSONAL BRANDING:
-       - [Resume transformation recommendations]
-       - [LinkedIn profile optimization]
-       - [Portfolio development strategy]
-       - [How to highlight transferable skills]
-       - [Online presence recommendations]
-    
-    9. INTERVIEW PREPARATION:
-       - [Technical interview strategies]
-       - [Behavioral question preparation]
-       - [How to discuss career transition effectively]
-       - [Practice project recommendations]
-       - [How to address skills gaps during interviews]
-    
-    Make your analysis practical, personalized, and actionable. Focus on leveraging their specific educational background,
-    field of study, strengths, and interests to create a realistic path into tech. The market trends analysis should be 
-    particularly relevant to their indicated interests (${formData.careerPathsInterest ? formData.careerPathsInterest.join(', ') : 'various tech roles'})
-    and include current, accurate market data for 2025.
+       📚 RESEARCH/DEVELOPMENT MARKET TRENDS:
+       - Academic and industry research role opportunities
+       - Publication-based career path market analysis
+       - Research tool and methodology market demand
+       
+       ⚖️ LIFESTYLE/MARKET TRENDS:
+       - Remote/hybrid work market trends matching work preferences
+       - Salary market analysis for target salary ranges
+       - Education level vs market opportunity analysis
+
+    8. ALGORITHM-OPTIMIZED NETWORKING STRATEGY:
+       - Tech-Interest Networking: [If top algorithm - focus on tech communities matching interests]
+       - Research/Development Networking: [If top algorithm - focus on academic and research networks]
+       - Lifestyle/Market Networking: [If top algorithm - focus on lifestyle-compatible opportunities]
+       - Constant Variables Leverage: [How to use experience, education, interests, skills in networking]
+
+    9. MULTI-TIER PERSONAL BRANDING:
+       - Algorithm-Specific Positioning: [Brand based on highest-scoring recommendation]
+       - Constant Variables Highlighting: [How to showcase universal strengths]
+       - Technical Specification Approach: [How to present comprehensive skill assessment]
+
+    10. TECHNICAL SPECIFICATION INTERVIEW PREPARATION:
+        - Algorithm-Specific Interview Prep: [Prep focused on top recommendation type]
+        - Constant Variables Storytelling: [How to discuss experience, education, interests, skills]
+        - Fallback Strategy Discussion: [How to address gaps in assessment if fallback was applied]
+
+    CRITICAL INSTRUCTIONS:
+    - Apply the Multi-Tier Recommendation Engine with dynamic weighting (default 60% constants, 40% specifics)
+    - Adjust weights based on missing constant variables (if 1 missing: 50/50, if 2 missing: 40/60, if 3+ missing: 20/80)
+    - Note fallback logic application when less than 2 constant variables are present or key criteria missing
+    - Rank recommendations by confidence score based on data completeness and algorithm performance
+    - Ensure all three algorithms are analyzed even if data is incomplete
+    - Focus the analysis on the highest-confidence algorithm while providing comprehensive coverage
+    - Include specific Technical Specification v1.1 terminology and approach throughout
+
+    Make the analysis highly technical and data-driven while remaining practical and actionable.
+    The person should understand they've received a sophisticated algorithmic analysis using the 
+    Multi-Tier Recommendation Engine with fallback logic and dynamic weighting.
   `
 };
 
-export { CLAUDE_API_CONFIG, CLAUDE_PROMPTS };
+// Technical Specification v1.1 validation functions
+const TECHNICAL_SPEC_VALIDATION = {
+  // Validate if minimum viable data exists for Technical Specification analysis
+  validateMinimumData: (formData) => {
+    const constantVariables = [
+      formData.yearsExperience,
+      formData.studyField, 
+      formData.interests,
+      formData.transferableSkills
+    ];
+    
+    const validConstants = constantVariables.filter(variable => 
+      variable && 
+      variable !== 'Not specified' && 
+      variable !== 'none' && 
+      variable !== 'not sure'
+    ).length;
+    
+    return {
+      isValid: validConstants >= 1, // Need at least 1 constant variable
+      constantsPresent: validConstants,
+      requiresFallback: validConstants < 2,
+      dataQuality: validConstants / 4
+    };
+  },
+
+  // Calculate algorithm-specific data completeness
+  calculateAlgorithmCompleteness: (formData) => {
+    const constantVariables = [
+      formData.yearsExperience,
+      formData.studyField,
+      formData.interests, 
+      formData.transferableSkills
+    ];
+
+    const techInterestCriteria = [
+      formData.techInterests,
+      formData.currentRole,
+      formData.jobTechnologies
+    ];
+
+    const researchDevCriteria = [
+      formData.publications,
+      formData.toolsUsed,
+      formData.timeCommitment
+    ];
+
+    const lifestyleMarketCriteria = [
+      formData.workPreference,
+      formData.educationLevel,
+      formData.targetSalary
+    ];
+
+    const isValid = (value) => value && value !== 'Not specified' && value !== 'none' && value !== 'not sure';
+
+    return {
+      constants: constantVariables.filter(isValid).length,
+      techInterest: techInterestCriteria.filter(isValid).length,
+      researchDev: researchDevCriteria.filter(isValid).length,
+      lifestyleMarket: lifestyleMarketCriteria.filter(isValid).length
+    };
+  },
+
+  // Determine dynamic weighting based on data completeness
+  calculateDynamicWeights: (formData) => {
+    const validation = TECHNICAL_SPEC_VALIDATION.validateMinimumData(formData);
+    const missingConstants = 4 - validation.constantsPresent;
+    
+    let constantWeight = 0.6; // Default: 60%
+    let specificWeight = 0.4; // Default: 40%
+    
+    // Fallback Logic Based on Missing Constants
+    if (missingConstants === 1) {
+      constantWeight = 0.5; // 1 missing: slight adjustment
+      specificWeight = 0.5;
+    } else if (missingConstants === 2) {
+      constantWeight = 0.4; // 2 missing: moderate adjustment
+      specificWeight = 0.6;
+    } else if (missingConstants >= 3) {
+      constantWeight = 0.2; // 3+ missing: heavy reliance on specifics
+      specificWeight = 0.8;
+    }
+    
+    return {
+      constantWeight,
+      specificWeight,
+      fallbackApplied: validation.requiresFallback,
+      dataQuality: validation.dataQuality
+    };
+  }
+};
+
+// Enhanced API response structure for Technical Specification v1.1
+const TECHNICAL_SPEC_RESPONSE_STRUCTURE = {
+  recommendations: [
+    {
+      id: 'rec_1_tech_interest',
+      type: 'tech-interest-based',
+      title: 'string',
+      description: 'string', 
+      reasoning: 'string',
+      confidence: 'high|medium|low',
+      confidenceScore: 'number (0-100)',
+      requiredSkills: ['string'],
+      suggestedActions: ['string'],
+      salaryRange: 'string',
+      marketDemand: 'high|medium|low',
+      metadata: {
+        criteriaUsed: ['string'],
+        missingCriteria: ['string'],
+        fallbackApplied: 'boolean',
+        constantsScore: 'number',
+        specificsScore: 'number'
+      }
+    }
+  ],
+  overallConfidence: 'number (0-100)',
+  dataCompleteness: 'number (0-100)', 
+  constantVariablesComplete: 'number (0-4)',
+  processedAt: 'ISO string',
+  technicalSpecVersion: '1.1',
+  algorithmVersion: 'Multi-Tier with Fallback Logic'
+};
+
+export { 
+  CLAUDE_API_CONFIG, 
+  CLAUDE_PROMPTS, 
+  TECHNICAL_SPEC_VALIDATION,
+  TECHNICAL_SPEC_RESPONSE_STRUCTURE 
+};

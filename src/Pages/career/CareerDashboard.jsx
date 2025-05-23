@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const CareerDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -12,7 +12,7 @@ const CareerDashboard = () => {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [feedbackData, setFeedbackData] = useState({ rating: '', improvements: '' });
   
-  // Sample user data - in real app this would come from props or API
+  // Sample user data
   const [userData] = useState({
     name: 'Alex Johnson',
     yearsExperience: '3-5',
@@ -37,11 +37,8 @@ const CareerDashboard = () => {
     algorithmVersion: '1.0.0'
   });
 
-  // ============================================================================
-  // ADVANCED RECOMMENDATION SYSTEM
-  // ============================================================================
-
-  const isValid = useCallback((value) => {
+  // Helper functions
+  const isValid = (value) => {
     if (!value) return false;
     if (typeof value === 'string') {
       const invalid = ['', 'none', 'not sure', 'unclear', 'n/a', 'not specified'];
@@ -51,34 +48,34 @@ const CareerDashboard = () => {
       return value.length > 0 && !value.some(v => ['not sure', 'unclear', 'none'].includes(v?.toLowerCase()));
     }
     return true;
-  }, []);
+  };
 
-  const getExperienceScore = useCallback((experience) => {
+  const getExperienceScore = (experience) => {
     const expMap = {
       '0-2': 0.3, '3-5': 0.6, '6-10': 0.8, '10+': 0.9,
       'Beginner': 0.3, 'Intermediate': 0.6, 'Advanced': 0.9
     };
     return expMap[experience] || 0.5;
-  }, []);
+  };
 
-  const getTechAlignment = useCallback((field) => {
+  const getTechAlignment = (field) => {
     if (!field) return 0.3;
     const fieldLower = field.toLowerCase();
     if (fieldLower.includes('computer') || fieldLower.includes('software')) return 0.9;
     if (fieldLower.includes('engineering') || fieldLower.includes('math')) return 0.8;
     return 0.5;
-  }, []);
+  };
 
-  const getInterestScore = useCallback((interests) => {
+  const getInterestScore = (interests) => {
     if (!interests || interests.length === 0) return 0.3;
     const techKeywords = ['programming', 'coding', 'software', 'ai', 'data', 'web', 'machine learning'];
     const hasMatch = interests.some(interest => 
       techKeywords.some(keyword => interest.toLowerCase().includes(keyword))
     );
     return hasMatch ? 0.8 : 0.4;
-  }, []);
+  };
 
-  const calculateTechMarketScore = useCallback((profile) => {
+  const calculateTechMarketScore = (profile) => {
     let score = 0;
     let criteriaCount = 0;
     let techStack = [];
@@ -123,111 +120,100 @@ const CareerDashboard = () => {
       criteriaCount, 
       techStack: [...new Set(techStack)]
     };
-  }, [isValid, getExperienceScore, getTechAlignment, getInterestScore]);
+  };
 
-  const generateRecommendations = useMemo(() => {
-    return (profile) => {
-      const techScore = calculateTechMarketScore(profile);
-      const academicScore = {
-        totalScore: 78,
-        criteriaCount: 5
-      };
-      const practicalScore = {
-        totalScore: 82,
-        criteriaCount: 4
-      };
+  // FIXED: Moved the recommendation generation into a proper function
+  const generateRecommendations = (profile) => {
+    const techScore = calculateTechMarketScore(profile);
+    const academicScore = { totalScore: 78, criteriaCount: 5 };
+    const practicalScore = { totalScore: 82, criteriaCount: 4 };
 
-      const recommendations = [
-        {
-          id: 'rec_1_tech_market',
-          type: 'tech-market',
-          title: 'Machine Learning Engineer',
-          description: `Leverage ${techScore.techStack.slice(0,2).join(' and ')} expertise to build innovative AI/ML solutions with high market demand`,
-          reasoning: `Based on your ${techScore.criteriaCount} qualifying criteria and ${Math.round(techScore.totalScore)}% alignment with tech market demands.`,
-          confidence: techScore.totalScore > 75 ? 'high' : techScore.totalScore > 50 ? 'medium' : 'low',
-          confidenceScore: Math.round(techScore.totalScore),
-          match: Math.round(techScore.totalScore),
-          requiredSkills: ['Python', 'Machine Learning', 'Deep Learning', 'PyTorch/TensorFlow', 'Cloud Platforms'],
-          suggestedActions: [
-            'Build ML portfolio projects with real datasets',
-            'Complete AWS/Google Cloud ML certifications',
-            'Contribute to open source ML frameworks'
-          ],
-          salaryRange: '$140k - $185k',
-          marketDemand: 'very high',
-          marketData: {
-            growth: '74% annual job posting increase',
-            outlook: 'AI industry growing to $20B by 2025',
-            salaryGrowth: '7% year-over-year increase'
-          }
-        },
-        {
-          id: 'rec_2_academic_research',
-          type: 'academic-research',
-          title: 'AI Research Scientist',
-          description: 'Conduct cutting-edge AI research with focus on practical applications',
-          reasoning: `Your academic background aligns ${Math.round(academicScore.totalScore)}% with research opportunities.`,
-          confidence: 'high',
-          confidenceScore: Math.round(academicScore.totalScore),
-          match: Math.round(academicScore.totalScore),
-          requiredSkills: ['Research Methods', 'Python', 'Statistical Analysis', 'Academic Writing'],
-          suggestedActions: [
-            'Publish papers in AI/ML conferences',
-            'Collaborate on university research projects',
-            'Apply for research internships'
-          ],
-          salaryRange: '$95k - $145k',
-          marketDemand: 'high',
-          marketData: {
-            growth: '30% industry growth expected',
-            outlook: 'Strong research funding availability',
-            salaryGrowth: '5% year-over-year increase'
-          }
-        },
-        {
-          id: 'rec_3_practical_lifestyle',
-          type: 'practical-lifestyle',
-          title: 'Remote Senior Software Engineer',
-          description: 'Apply technical expertise in flexible remote environment',
-          reasoning: `${Math.round(practicalScore.totalScore)}% compatibility with your lifestyle goals.`,
-          confidence: 'high',
-          confidenceScore: Math.round(practicalScore.totalScore),
-          match: Math.round(practicalScore.totalScore),
-          requiredSkills: ['Remote Communication', 'Self-Management', 'Full-Stack Development'],
-          suggestedActions: [
-            'Build strong remote work portfolio',
-            'Network with remote-first companies',
-            'Develop async communication skills'
-          ],
-          salaryRange: '$170k - $195k',
-          marketDemand: 'high',
-          marketData: {
-            growth: 'Remote senior roles: 30% hybrid, 16% fully remote',
-            outlook: 'Remote work stabilized at 15% of high-paying jobs',
-            salaryGrowth: '6% year-over-year increase'
-          }
+    const recommendations = [
+      {
+        id: 'rec_1_tech_market',
+        type: 'tech-market',
+        title: 'Machine Learning Engineer',
+        description: `Leverage ${techScore.techStack.slice(0,2).join(' and ')} expertise to build innovative AI/ML solutions`,
+        reasoning: `Based on your ${techScore.criteriaCount} qualifying criteria and ${Math.round(techScore.totalScore)}% alignment with tech market demands.`,
+        confidence: techScore.totalScore > 75 ? 'high' : techScore.totalScore > 50 ? 'medium' : 'low',
+        confidenceScore: Math.round(techScore.totalScore),
+        match: Math.round(techScore.totalScore),
+        requiredSkills: ['Python', 'Machine Learning', 'Deep Learning', 'PyTorch/TensorFlow', 'Cloud Platforms'],
+        suggestedActions: [
+          'Build ML portfolio projects with real datasets',
+          'Complete AWS/Google Cloud ML certifications',
+          'Contribute to open source ML frameworks'
+        ],
+        salaryRange: '$140k - $185k',
+        marketDemand: 'very high',
+        marketData: {
+          growth: '74% annual job posting increase',
+          outlook: 'AI industry growing to $20B by 2025',
+          salaryGrowth: '7% year-over-year increase'
         }
-      ];
+      },
+      {
+        id: 'rec_2_academic_research',
+        type: 'academic-research',
+        title: 'AI Research Scientist',
+        description: 'Conduct cutting-edge AI research with focus on practical applications',
+        reasoning: `Your academic background aligns ${Math.round(academicScore.totalScore)}% with research opportunities.`,
+        confidence: 'high',
+        confidenceScore: Math.round(academicScore.totalScore),
+        match: Math.round(academicScore.totalScore),
+        requiredSkills: ['Research Methods', 'Python', 'Statistical Analysis', 'Academic Writing'],
+        suggestedActions: [
+          'Publish papers in AI/ML conferences',
+          'Collaborate on university research projects',
+          'Apply for research internships'
+        ],
+        salaryRange: '$95k - $145k',
+        marketDemand: 'high',
+        marketData: {
+          growth: '30% industry growth expected',
+          outlook: 'Strong research funding availability',
+          salaryGrowth: '5% year-over-year increase'
+        }
+      },
+      {
+        id: 'rec_3_practical_lifestyle',
+        type: 'practical-lifestyle',
+        title: 'Remote Senior Software Engineer',
+        description: 'Apply technical expertise in flexible remote environment',
+        reasoning: `${Math.round(practicalScore.totalScore)}% compatibility with your lifestyle goals.`,
+        confidence: 'high',
+        confidenceScore: Math.round(practicalScore.totalScore),
+        match: Math.round(practicalScore.totalScore),
+        requiredSkills: ['Remote Communication', 'Self-Management', 'Full-Stack Development'],
+        suggestedActions: [
+          'Build strong remote work portfolio',
+          'Network with remote-first companies',
+          'Develop async communication skills'
+        ],
+        salaryRange: '$170k - $195k',
+        marketDemand: 'high',
+        marketData: {
+          growth: 'Remote senior roles: 30% hybrid, 16% fully remote',
+          outlook: 'Remote work stabilized at 15% of high-paying jobs',
+          salaryGrowth: '6% year-over-year increase'
+        }
+      }
+    ];
 
-      return recommendations.sort((a, b) => b.confidenceScore - a.confidenceScore);
-    };
-  }, [calculateTechMarketScore]);
+    return recommendations.sort((a, b) => b.confidenceScore - a.confidenceScore);
+  };
 
-  // ============================================================================
-  // COMPONENT EFFECTS
-  // ============================================================================
-
+  // Component effects
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       const generatedRecs = generateRecommendations(userData);
       setRecommendations(generatedRecs);
       setCareerPaths(generatedRecs);
       
-      // Generate mock skills gap
+      // Generate mock data
       setSkillsGap([
         {
           name: 'Machine Learning',
@@ -249,7 +235,6 @@ const CareerDashboard = () => {
         }
       ]);
       
-      // Generate mock roadmap
       setLearningRoadmap([
         {
           phase: 'Phase 1',
@@ -269,10 +254,9 @@ const CareerDashboard = () => {
         }
       ]);
       
-      // Generate mock market trends
       setMarketTrends([
         {
-          title: 'ML ENGINEER SALARY OUTLOOK',
+          title: 'ML Engineer Salary Outlook',
           description: '2024-2025 compensation trends for ML roles',
           category: 'Salary Analysis',
           relevance: 'High',
@@ -289,7 +273,7 @@ const CareerDashboard = () => {
     };
 
     loadData();
-  }, [generateRecommendations, userData]);
+  }, []);
 
   // Animate progress bars
   useEffect(() => {
@@ -318,10 +302,7 @@ const CareerDashboard = () => {
     }
   }, [careerPaths]);
 
-  // ============================================================================
-  // UI COMPONENTS
-  // ============================================================================
-
+  // UI Components
   const LoadingSpinner = ({ message }) => (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
       <div className="text-center">
@@ -424,10 +405,7 @@ const CareerDashboard = () => {
     );
   };
 
-  // ============================================================================
-  // MAIN RENDER
-  // ============================================================================
-
+  // Main render
   if (loading) {
     return <LoadingSpinner message="Loading your advanced career analysis..." />;
   }
@@ -572,45 +550,21 @@ const CareerDashboard = () => {
           <div className="space-y-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-4">Skills Development Plan</h2>
-              <p className="text-gray-600 text-lg">
-                Personalized skill analysis for {recommendations[0]?.title || 'your target role'}
-              </p>
+              <p className="text-gray-600 text-lg">Focus areas for career growth</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {skillsGap.map((skill, index) => (
-                <div key={index} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h4 className="font-semibold text-lg text-gray-800">{skill.name}</h4>
-                      <span className="text-sm text-gray-500">{skill.category}</span>
+                <div key={index} className="bg-white rounded-xl p-6 shadow-lg">
+                  <h4 className="font-semibold text-lg text-gray-800 mb-2">{skill.name}</h4>
+                  <p className="text-sm text-gray-600 mb-4">{skill.description}</p>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Current: {skill.currentLevel}/5</span>
+                      <span>Target: {skill.requiredLevel}/5</span>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      skill.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
-                    }`}>
-                      {skill.priority} priority
-                    </span>
+                    <ProgressBar value={(skill.currentLevel / skill.requiredLevel) * 100} />
                   </div>
-                  
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>Current Level</span>
-                        <span>{skill.currentLevel}/5</span>
-                      </div>
-                      <ProgressBar value={(skill.currentLevel / 5) * 100} />
-                    </div>
-                    
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>Target Level</span>
-                        <span>{skill.requiredLevel}/5</span>
-                      </div>
-                      <ProgressBar value={(skill.requiredLevel / 5) * 100} className="from-purple-400 to-purple-600" />
-                    </div>
-                  </div>
-                  
-                  <p className="text-sm text-gray-600 mt-3">{skill.description}</p>
                 </div>
               ))}
             </div>
@@ -621,47 +575,42 @@ const CareerDashboard = () => {
           <div className="space-y-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-4">Your Learning Roadmap</h2>
-              <p className="text-gray-600 text-lg">Step-by-step learning path tailored to your goals</p>
+              <p className="text-gray-600 text-lg">Step-by-step learning path</p>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-6">
               {learningRoadmap.map((item, index) => (
-                <div key={index} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div key={index} className="bg-white rounded-xl p-6 shadow-lg">
                   <div className="flex items-start mb-4">
-                    <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${
-                      index === 0 ? 'from-green-400 to-green-600' : 'from-blue-400 to-blue-600'
-                    } flex items-center justify-center text-white font-bold mr-4`}>
+                    <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold mr-4">
                       {index + 1}
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <h4 className="font-semibold text-lg text-gray-800">{item.title}</h4>
-                      <span className="text-sm text-gray-500">{item.duration}</span>
+                      <p className="text-gray-600">{item.duration}</p>
+                      <p className="text-gray-700 mt-2">{item.description}</p>
                     </div>
                   </div>
                   
-                  <p className="text-gray-700 mb-4">{item.description}</p>
-                  
-                  <div className="mb-4">
-                    <h5 className="font-medium text-gray-800 mb-2">Key Skills:</h5>
-                    <div className="flex flex-wrap gap-2">
-                      {item.skills.map((skill, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                          {skill}
-                        </span>
-                      ))}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <h5 className="font-medium text-gray-800 mb-2">Skills:</h5>
+                      <div className="flex flex-wrap gap-2">
+                        {item.skills.map((skill, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div>
-                    <h5 className="font-medium text-gray-800 mb-2">Resources:</h5>
-                    <ul className="text-sm text-gray-600 space-y-1">
-                      {item.resources.map((resource, idx) => (
-                        <li key={idx} className="flex items-start">
-                          <span className="text-blue-500 mr-2">•</span>
-                          {resource}
-                        </li>
-                      ))}
-                    </ul>
+                    <div>
+                      <h5 className="font-medium text-gray-800 mb-2">Resources:</h5>
+                      <ul className="text-sm text-gray-600 space-y-1">
+                        {item.resources.map((resource, idx) => (
+                          <li key={idx}>• {resource}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -672,29 +621,15 @@ const CareerDashboard = () => {
         {activeTab === 'market' && (
           <div className="space-y-8">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-4">Market Insights & Salary Analysis</h2>
-              <p className="text-gray-600 text-lg">
-                Real-time market analysis for Machine Learning Engineer roles
-              </p>
+              <h2 className="text-3xl font-bold mb-4">Market Insights</h2>
+              <p className="text-gray-600 text-lg">Current market analysis for your career path</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {marketTrends.map((trend, index) => (
-                <div key={index} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <div className="flex items-start mb-4">
-                    <span className="text-3xl mr-4">📈</span>
-                    <div>
-                      <h4 className="font-semibold text-lg text-gray-800">{trend.title}</h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm text-gray-500">{trend.category}</span>
-                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                          2024-2025 Data
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <p className="text-gray-700 mb-3">{trend.description}</p>
+                <div key={index} className="bg-white rounded-xl p-6 shadow-lg">
+                  <h4 className="font-semibold text-lg text-gray-800 mb-2">{trend.title}</h4>
+                  <p className="text-gray-600 mb-4">{trend.description}</p>
                   
                   <div className="space-y-3">
                     <div className="bg-green-50 p-3 rounded-lg">
@@ -732,9 +667,7 @@ const CareerDashboard = () => {
         onClick={() => setShowFeedbackForm(true)}
         className="fixed bottom-8 right-8 bg-gradient-to-r from-red-500 to-pink-600 text-white p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110"
       >
-        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-        </svg>
+        💬
       </button>
 
       {/* Feedback Form */}

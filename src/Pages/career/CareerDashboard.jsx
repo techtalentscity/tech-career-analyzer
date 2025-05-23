@@ -2128,45 +2128,124 @@ const CareerDashboard = () => {
 
   // Improved extraction functions for Resources tab - filtered content
   const extractPortfolioGuidanceImproved = (text) => {
-    console.log('Extracting portfolio/transition strategy guidance...');
+    console.log('Extracting transition strategy guidance...');
     const items = [];
     const lines = text.split('\n');
     let inSection = false;
     
-    const portfolioKeywords = ['PORTFOLIO', 'PROJECTS', 'TRANSITION STRATEGY', 'CAREER TRANSITION'];
+    const transitionKeywords = ['PORTFOLIO', 'PROJECTS', 'TRANSITION STRATEGY', 'CAREER TRANSITION', 'TRANSITION PLAN', 'TRANSITION ADVICE'];
     
-    lines.forEach((line) => {
-      if (portfolioKeywords.some(keyword => line.toUpperCase().includes(keyword))) {
+    lines.forEach((line, index) => {
+      const lineUpper = line.toUpperCase();
+      
+      if (transitionKeywords.some(keyword => lineUpper.includes(keyword))) {
         inSection = true;
+        console.log('📍 Found transition section at line:', index, ':', line.trim());
         return;
       }
       
       // Exit section when hitting other major sections
       if (inSection && (
-        line.toUpperCase().includes('NETWORKING') || 
-        line.toUpperCase().includes('INTERVIEW') || 
-        line.toUpperCase().includes('PERSONAL BRANDING') ||
-        line.toUpperCase().includes('MARKET TRENDS') ||
-        line.toUpperCase().includes('JOB MARKET OUTLOOK') ||
-        line.toUpperCase().includes('LEARNING ROADMAP')
+        lineUpper.includes('NETWORKING STRATEGY') || 
+        lineUpper.includes('INTERVIEW PREP') || 
+        lineUpper.includes('PERSONAL BRANDING') ||
+        lineUpper.includes('JOB SEARCH') ||
+        lineUpper.includes('SKILLS GAP') ||
+        lineUpper.includes('LEARNING ROADMAP')
       )) {
         inSection = false;
+        console.log('📍 Exiting transition section at line:', index);
         return;
       }
       
       if (inSection && line.trim() !== '') {
-        // Filter out unwanted section headers
-        const lineUpper = line.toUpperCase();
-        if (lineUpper.includes('TRANSITION STRATEGY') || 
+        // Filter out unwanted section headers but be more permissive with content
+        if (lineUpper.includes('TRANSITION STRATEGY:') || 
             lineUpper.includes('MARKET TRENDS ANALYSIS') || 
-            lineUpper.includes('JOB MARKET OUTLOOK')) {
+            lineUpper.includes('JOB MARKET OUTLOOK:')) {
+          console.log('🚫 Filtering out section header:', line.trim());
           return;
         }
         
         if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
           const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-          if (itemText.length > 15) {
+          if (itemText.length > 20 && isTransitionContent(itemText)) {
             items.push({
+              text: itemText,
+              type: 'tip',
+              category: 'Transition Strategy'
+            });
+            console.log('✅ Added transition strategy:', itemText.substring(0, 50) + '...');
+          }
+        }
+      }
+    });
+    
+    // Look for transition advice in other career-related sections
+    if (items.filter(i => i.type === 'tip').length < 4) {
+      console.log('🔄 Looking for additional transition content...');
+      const additionalContent = extractTransitionFromCareerAdvice(text);
+      additionalContent.forEach(item => {
+        if (!items.some(existing => existing.text.toLowerCase().includes(item.text.toLowerCase().substring(0, 20)))) {
+          items.push(item);
+          console.log('✅ Added additional transition content:', item.text.substring(0, 50) + '...');
+        }
+      });
+    }
+    
+    // Generate personalized transition strategies if needed
+    if (items.filter(i => i.type === 'tip').length < 6) {
+      console.log('🎯 Generating personalized transition strategies...');
+      const personalizedTips = generatePersonalizedTransitionTips();
+      personalizedTips.forEach(tip => {
+        if (!items.some(existing => existing.text.toLowerCase().includes(tip.text.toLowerCase().substring(0, 20)))) {
+          items.push(tip);
+        }
+      });
+    }
+    
+    console.log('Total transition strategies found:', items.filter(i => i.type === 'tip').length);
+    return items;
+  };
+
+  // Validate if content is transition-related
+  const isTransitionContent = (text) => {
+    const textLower = text.toLowerCase();
+    
+    // Should contain transition-related terms
+    const transitionTerms = [
+      'transition', 'career', 'background', 'experience', 'skills', 'portfolio', 
+      'project', 'build', 'showcase', 'demonstrate', 'leverage', 'highlight',
+      'previous', 'current', 'change', 'move', 'switch', 'pivot', 'bridge'
+    ];
+    
+    // Exclude pure technical learning content
+    const excludeTerms = [
+      'algorithm', 'data structure', 'syntax', 'framework version', 'debug code'
+    ];
+    
+    const hasTransitionTerms = transitionTerms.some(term => textLower.includes(term));
+    const hasExcludeTerms = excludeTerms.some(term => textLower.includes(term));
+    
+    return hasTransitionTerms && !hasExcludeTerms;
+  };
+
+  // Extract transition advice from general career sections
+  const extractTransitionFromCareerAdvice = (text) => {
+    const transitionContent = [];
+    const lines = text.split('\n');
+    
+    lines.forEach(line => {
+      const lineUpper = line.toUpperCase();
+      if ((lineUpper.includes('CAREER') || lineUpper.includes('TRANSITION') || 
+           lineUpper.includes('BACKGROUND') || lineUpper.includes('EXPERIENCE') ||
+           lineUpper.includes('PORTFOLIO') || lineUpper.includes('PROJECT')) &&
+          !lineUpper.includes('SKILL GAP') && !lineUpper.includes('LEARN PROGRAMMING')) {
+        
+        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
+          const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
+          if (itemText.length > 25 && isTransitionContent(itemText)) {
+            transitionContent.push({
               text: itemText,
               type: 'tip',
               category: 'Transition Strategy'
@@ -2176,27 +2255,66 @@ const CareerDashboard = () => {
       }
     });
     
-    // Add default transition strategy tips if none found
-    if (items.filter(i => i.type === 'tip').length === 0) {
-      const defaultTips = [
-        'Identify transferable skills from your current role to tech positions',
-        'Build a portfolio showcasing projects relevant to your target career path',
-        'Network with professionals in your desired field through LinkedIn and industry events',
-        'Consider taking online courses or bootcamps to gain credibility in your new field',
-        'Start applying your new skills to solve problems in your current role'
-      ];
-      
-      defaultTips.forEach(tip => {
-        items.push({
-          text: tip,
-          type: 'tip',
-          category: 'Transition Strategy'
-        });
-      });
+    return transitionContent.slice(0, 4);
+  };
+
+  // Generate personalized transition strategies based on user data
+  const generatePersonalizedTransitionTips = () => {
+    const tips = [];
+    const currentRole = userData.currentRole || 'your current role';
+    const studyField = userData.studyField || 'your background';
+    const targetCareer = careerPaths.length > 0 ? careerPaths[0].title : 'technology';
+    const userInterests = userData.careerPathsInterest || [];
+    
+    // Base transition strategies
+    const baseTips = [
+      `Identify and articulate transferable skills from ${currentRole} that apply to ${targetCareer} positions`,
+      `Build a portfolio showcasing projects that bridge your ${studyField} background with ${targetCareer} skills`,
+      'Create a compelling career narrative that explains your motivation for transitioning to technology',
+      'Start applying your new technical skills to solve problems in your current role for real-world experience'
+    ];
+    
+    // Add role-specific transition advice
+    if (userData.currentRole && userData.currentRole !== 'Not specified') {
+      if (userData.currentRole.toLowerCase().includes('manager') || 
+          userData.currentRole.toLowerCase().includes('analyst')) {
+        tips.push('Emphasize your analytical thinking and project management experience in tech applications');
+        tips.push('Highlight any experience working with technical teams or managing technology projects');
+      } else if (userData.currentRole.toLowerCase().includes('teacher') || 
+                 userData.currentRole.toLowerCase().includes('trainer')) {
+        tips.push('Leverage your communication skills and ability to explain complex concepts clearly');
+        tips.push('Consider technical writing or developer relations roles that value your teaching background');
+      } else if (userData.currentRole.toLowerCase().includes('sales') || 
+                 userData.currentRole.toLowerCase().includes('marketing')) {
+        tips.push('Use your understanding of business needs to bridge technical and business requirements');
+        tips.push('Consider product management or business analyst roles that value your market knowledge');
+      }
     }
     
-    console.log('Portfolio/transition guidance items found:', items.filter(i => i.type === 'tip').length);
-    return items;
+    // Add career-specific advice
+    if (targetCareer.includes('Developer')) {
+      tips.push('Contribute to open source projects to demonstrate your coding skills and collaboration ability');
+    } else if (targetCareer.includes('Data')) {
+      tips.push('Work on data analysis projects using real datasets relevant to your previous industry experience');
+    } else if (targetCareer.includes('UX') || targetCareer.includes('Design')) {
+      tips.push('Redesign user experiences from your previous industry to showcase design thinking skills');
+    }
+    
+    // Add timeline-specific advice
+    if (userData.transitionTimeline === 'Less than 6 months') {
+      tips.push('Focus on building 2-3 high-quality projects that demonstrate core skills quickly');
+    } else if (userData.transitionTimeline && userData.transitionTimeline.includes('1-2 years')) {
+      tips.push('Take time to build comprehensive expertise and consider formal education or certification programs');
+    }
+    
+    // Combine base tips with personalized ones
+    const allTips = [...baseTips, ...tips];
+    
+    return allTips.slice(0, 8).map(tip => ({
+      text: tip,
+      type: 'tip',
+      category: 'Transition Strategy'
+    }));
   };
 
   const extractJobSearchStrategiesImproved = (text) => {
@@ -2205,7 +2323,7 @@ const CareerDashboard = () => {
     const lines = text.split('\n');
     let inJobSearchSection = false;
     
-    const jobSearchKeywords = ['JOB SEARCH', 'JOB HUNTING', 'APPLICATIONS', 'JOB APPLICATION', 'FINDING JOBS', 'CAREER SEARCH'];
+    const jobSearchKeywords = ['JOB SEARCH', 'JOB HUNTING', 'APPLICATIONS', 'JOB APPLICATION', 'FINDING JOBS', 'CAREER SEARCH', 'APPLY FOR JOBS'];
     
     lines.forEach((line, index) => {
       const lineUpper = line.toUpperCase();
@@ -2219,18 +2337,15 @@ const CareerDashboard = () => {
       
       // Exit job search section when hitting other major sections
       if (inJobSearchSection && (
-        lineUpper.includes('SKILLS') || 
-        lineUpper.includes('NETWORKING') || 
-        lineUpper.includes('INTERVIEW') || 
-        lineUpper.includes('PERSONAL BRANDING') ||
+        lineUpper.includes('SKILLS GAP') || 
         lineUpper.includes('LEARNING ROADMAP') ||
+        lineUpper.includes('NETWORKING STRATEGY') || 
+        lineUpper.includes('INTERVIEW PREP') || 
+        lineUpper.includes('PERSONAL BRANDING') ||
         lineUpper.includes('PORTFOLIO') ||
         lineUpper.includes('MARKET TRENDS') ||
         lineUpper.includes('SALARY') ||
-        lineUpper.includes('STRENGTHS') ||
-        lineUpper.includes('COMPETENCIES') ||
-        lineUpper.includes('SKILL GAP') ||
-        lineUpper.includes('TECHNICAL SKILLS')
+        lineUpper.includes('STRENGTHS ANALYSIS')
       )) {
         inJobSearchSection = false;
         console.log('📍 Exiting job search section at line:', index);
@@ -2238,26 +2353,19 @@ const CareerDashboard = () => {
       }
       
       if (inJobSearchSection && line.trim() !== '') {
-        // Filter out any skill-related content that might have slipped in
-        if (lineUpper.includes('SKILL') || 
-            lineUpper.includes('LEARN') || 
-            lineUpper.includes('STUDY') ||
-            lineUpper.includes('MASTER') ||
-            lineUpper.includes('PROGRAMMING') ||
-            lineUpper.includes('CODING') ||
-            lineUpper.includes('TECHNICAL') ||
-            lineUpper.includes('TRANSITION STRATEGY') ||
-            lineUpper.includes('COMPETENCY') ||
-            lineUpper.includes('PROFICIENCY')) {
-          console.log('🚫 Filtering out skill-related content:', line.trim());
+        // Be more permissive - only filter out clearly unrelated content
+        if (lineUpper.includes('TRANSITION STRATEGY:') ||
+            lineUpper.includes('SKILL GAP:') ||
+            lineUpper.includes('LEARNING ROADMAP:')) {
+          console.log('🚫 Filtering out section header:', line.trim());
           return;
         }
         
         if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
           const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
           
-          // Only include if it's clearly job search related
-          if (itemText.length > 15 && isJobSearchContent(itemText)) {
+          // More lenient validation - include if it's substantial content
+          if (itemText.length > 20 && isJobSearchRelated(itemText)) {
             items.push({
               text: itemText,
               type: 'tip',
@@ -2269,26 +2377,26 @@ const CareerDashboard = () => {
       }
     });
     
-    // If no valid job search strategies found, use clean defaults
-    if (items.filter(i => i.type === 'tip').length === 0) {
-      console.log('No job search strategies found in analysis, using defaults...');
-      const defaultJobSearchTips = [
-        'Optimize your LinkedIn profile with relevant keywords and showcase your transition journey',
-        'Tailor your resume for each application, highlighting transferable skills and relevant projects',
-        'Use multiple job boards including LinkedIn Jobs, Indeed, AngelList, and company career pages',
-        'Network with professionals in your target industry through informational interviews',
-        'Follow up on applications with personalized messages to hiring managers within one week',
-        'Practice common interview questions and prepare STAR method examples from your experience',
-        'Apply to 5-10 targeted positions per week rather than mass applying to hundreds',
-        'Research company culture and values before interviews to show genuine interest'
-      ];
-      
-      defaultJobSearchTips.forEach(tip => {
-        items.push({
-          text: tip,
-          type: 'tip',
-          category: 'Job Search'
-        });
+    // Also try to extract job search advice from general career advice sections
+    if (items.filter(i => i.type === 'tip').length < 3) {
+      console.log('🔄 Looking for additional job search content in other sections...');
+      const additionalContent = extractJobSearchFromCareerAdvice(text);
+      additionalContent.forEach(item => {
+        if (!items.some(existing => existing.text.toLowerCase().includes(item.text.toLowerCase().substring(0, 20)))) {
+          items.push(item);
+          console.log('✅ Added additional job search content:', item.text.substring(0, 50) + '...');
+        }
+      });
+    }
+    
+    // If still not enough content, generate career-specific job search strategies
+    if (items.filter(i => i.type === 'tip').length < 5) {
+      console.log('🎯 Generating career-specific job search strategies...');
+      const careerSpecificTips = generateCareerSpecificJobSearchTips();
+      careerSpecificTips.forEach(tip => {
+        if (!items.some(existing => existing.text.toLowerCase().includes(tip.text.toLowerCase().substring(0, 20)))) {
+          items.push(tip);
+        }
       });
     }
     
@@ -2296,28 +2404,117 @@ const CareerDashboard = () => {
     return items;
   };
 
-  // Helper function to validate if content is actually job search related
-  const isJobSearchContent = (text) => {
+  // More lenient validation for job search content
+  const isJobSearchRelated = (text) => {
     const textLower = text.toLowerCase();
     
-    // Must contain job search related terms
-    const jobSearchTerms = [
-      'resume', 'cv', 'application', 'apply', 'interview', 'job', 'position', 
-      'linkedin', 'network', 'hiring', 'recruiter', 'cover letter', 'follow up',
-      'job board', 'career', 'company', 'employer', 'candidate'
+    // Should NOT contain pure skill/learning content
+    const excludeTerms = [
+      'learn programming', 'study coding', 'master python', 'practice algorithms',
+      'complete course', 'take tutorial', 'skill gap', 'technical competency'
     ];
     
-    // Should NOT contain skill/learning related terms
-    const skillTerms = [
-      'learn', 'study', 'master', 'skill', 'programming', 'coding', 'technical',
-      'course', 'tutorial', 'practice', 'develop', 'build', 'proficiency'
+    const hasExcludedTerms = excludeTerms.some(term => textLower.includes(term));
+    if (hasExcludedTerms) return false;
+    
+    // Include if it mentions career, job, or professional activities
+    const includeTerms = [
+      'job', 'career', 'application', 'resume', 'interview', 'linkedin', 'network', 
+      'company', 'employer', 'position', 'opportunity', 'professional', 'industry',
+      'apply', 'search', 'find', 'connect', 'contact', 'follow up', 'reach out'
     ];
     
-    const hasJobSearchTerms = jobSearchTerms.some(term => textLower.includes(term));
-    const hasSkillTerms = skillTerms.some(term => textLower.includes(term));
+    return includeTerms.some(term => textLower.includes(term)) || text.length > 50;
+  };
+
+  // Extract job search advice from general career sections
+  const extractJobSearchFromCareerAdvice = (text) => {
+    const jobSearchContent = [];
+    const lines = text.split('\n');
     
-    // Only accept if it has job search terms and doesn't have skill terms
-    return hasJobSearchTerms && !hasSkillTerms;
+    lines.forEach(line => {
+      const lineUpper = line.toUpperCase();
+      if ((lineUpper.includes('APPLY') || lineUpper.includes('NETWORK') || 
+           lineUpper.includes('CONNECT') || lineUpper.includes('RESUME') ||
+           lineUpper.includes('LINKEDIN') || lineUpper.includes('COMPANY')) &&
+          !lineUpper.includes('SKILL') && !lineUpper.includes('LEARN')) {
+        
+        if (line.trim().match(/^[-•*]\s+/) || line.trim().match(/^\d+\.\s+/)) {
+          const itemText = line.replace(/^[-•*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
+          if (itemText.length > 25) {
+            jobSearchContent.push({
+              text: itemText,
+              type: 'tip',
+              category: 'Job Search'
+            });
+          }
+        }
+      }
+    });
+    
+    return jobSearchContent.slice(0, 3);
+  };
+
+  // Generate career-specific job search strategies
+  const generateCareerSpecificJobSearchTips = () => {
+    const tips = [];
+    const topCareer = careerPaths.length > 0 ? careerPaths[0].title : '';
+    const userInterests = userData.careerPathsInterest || [];
+    
+    // Base strategies for all tech careers
+    const baseTips = [
+      'Optimize your LinkedIn profile with relevant keywords and showcase your career transition journey',
+      'Tailor your resume for each application, emphasizing transferable skills and relevant projects',
+      'Use tech-focused job boards like AngelList, Stack Overflow Jobs, and Dice alongside LinkedIn Jobs',
+      'Network with professionals in your target field through industry meetups and online communities',
+      'Follow up on applications with personalized messages mentioning specific company projects or values'
+    ];
+    
+    // Add career-specific tips based on top recommendation
+    const careerSpecificTips = {
+      'Software Developer': [
+        'Showcase your coding projects on GitHub and include the repository links in applications',
+        'Apply to companies that use technologies you know or are learning',
+        'Consider applying to both startups and established tech companies for diverse opportunities'
+      ],
+      'Data Scientist': [
+        'Create a portfolio demonstrating data analysis projects with real datasets',
+        'Target companies in industries that align with your domain expertise',
+        'Highlight any experience with data visualization and business impact in applications'
+      ],
+      'UX/UI Designer': [
+        'Develop a strong design portfolio showcasing your design process and user research',
+        'Apply to companies whose products you use and can speak passionately about',
+        'Network with other designers through design communities and portfolio review sessions'
+      ],
+      'Product Manager': [
+        'Demonstrate understanding of product metrics and user-focused thinking in applications',
+        'Target companies building products you are passionate about using',
+        'Emphasize any experience leading cross-functional projects or initiatives'
+      ]
+    };
+    
+    // Add base tips
+    baseTips.forEach(tip => {
+      tips.push({
+        text: tip,
+        type: 'tip',
+        category: 'Job Search'
+      });
+    });
+    
+    // Add career-specific tips
+    if (topCareer && careerSpecificTips[topCareer]) {
+      careerSpecificTips[topCareer].forEach(tip => {
+        tips.push({
+          text: tip,
+          type: 'tip',
+          category: 'Job Search'
+        });
+      });
+    }
+    
+    return tips.slice(0, 8);
   };
 
   const extractCareerGrowthResourcesImproved = (text) => {

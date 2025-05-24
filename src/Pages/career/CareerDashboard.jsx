@@ -989,7 +989,7 @@ const CareerDashboard = () => {
 
   // UPDATED: Market Trends Card Component with better error handling
   const MarketTrendsCard = ({ trend, index }) => {
-    console.log('🎯 Rendering MarketTrendsCard:', trend.title, 'personalizedData:', !!trend.personalizedData);
+    console.log('Rendering MarketTrendsCard:', trend.title, 'personalizedData:', !!trend.personalizedData);
     
     const trendIcons = {
       'SALARY OUTLOOK',

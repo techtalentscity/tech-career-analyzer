@@ -555,8 +555,8 @@ const V2_RESPONSE_STRUCTURE = {
   processedAt: 'ISO string'
 };
 
-// Legacy support for backward compatibility
-const LEGACY_TECHNICAL_SPEC_VALIDATION = {
+// Legacy support for backward compatibility  
+const TECHNICAL_SPEC_VALIDATION = {
   validateMinimumData: (formData) => {
     console.log("⚠️ Using legacy validation - consider upgrading to v2.0");
     
@@ -592,5 +592,5 @@ export {
   V2_RESPONSE_STRUCTURE,
   
   // Legacy exports for backward compatibility
-  LEGACY_TECHNICAL_SPEC_VALIDATION as TECHNICAL_SPEC_VALIDATION
+  TECHNICAL_SPEC_VALIDATION
 };

@@ -18,6 +18,10 @@ import Learning from './Pages/career/Learning';
 import Interviews from './Pages/career/Interviews';
 import CareerGuide from './Pages/career/CareerGuide';
 
+// New Career Resource Components
+import PortfolioPlatforms from './Pages/career/PortfolioPlatforms';
+import MentorshipSection from './Pages/career/MentorshipSection';
+
 // New Public Pages
 import CareerAbout from './Pages/career/CareerAbout';
 import CareerContact from './Pages/career/CareerContact';
@@ -61,7 +65,7 @@ function App() {
             </ProtectedRoute>
           } />
           
-          {/* New career resource routes */}
+          {/* Career resource routes */}
           <Route path="/career/learning" element={
             <ProtectedRoute>
               <Learning />
@@ -75,6 +79,16 @@ function App() {
           <Route path="/career/guide" element={
             <ProtectedRoute>
               <CareerGuide />
+            </ProtectedRoute>
+          } />
+          <Route path="/career/portfolioplatforms" element={
+            <ProtectedRoute>
+              <PortfolioPlatforms />
+            </ProtectedRoute>
+          } />
+          <Route path="/career/mentorshipsection" element={
+            <ProtectedRoute>
+              <MentorshipSection />
             </ProtectedRoute>
           } />
           

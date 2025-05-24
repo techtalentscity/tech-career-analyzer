@@ -22,6 +22,7 @@ const CareerDashboard = () => {
   const [learningPlan, setLearningPlan] = useState(null);
   const [interviewQuestions, setInterviewQuestions] = useState(null);
   const [generatingLearning, setGeneratingLearning] = useState(false);
+  const [generatingInterviews, setGeneratingInterviews] = useState(false);
   const [learningResources, setLearningResources] = useState([]);
   
   // Generation states

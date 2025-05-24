@@ -1,4 +1,4 @@
-// CareerDashboard.jsx - ENHANCED VERSION WITH COMPLETE FEATURE INTEGRATION
+// CareerDashboard.jsx - GREEN THEMED VERSION
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -1005,11 +1005,11 @@ const CareerDashboard = () => {
   };
 
   // ============================================================================
-  // UI COMPONENTS
+  // UI COMPONENTS - UPDATED WITH GREEN THEME
   // ============================================================================
 
   // Enhanced Progress Bar Component
-  const EnhancedProgressBar = ({ value, maxValue = 100, className = "from-blue-400 to-blue-600", showLabel = true }) => (
+  const EnhancedProgressBar = ({ value, maxValue = 100, className = "from-green-400 to-green-600", showLabel = true }) => (
     <div className="relative">
       {showLabel && (
         <div className="flex justify-between items-center mb-2">
@@ -1054,7 +1054,7 @@ const CareerDashboard = () => {
             </div>
             <EnhancedProgressBar 
               value={progress} 
-              className="from-blue-400 to-blue-600"
+              className="from-green-400 to-green-600"
               showLabel={false}
             />
           </div>
@@ -1066,7 +1066,7 @@ const CareerDashboard = () => {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
-                className="h-full bg-gradient-to-r from-purple-400 to-purple-600 rounded-full"
+                className="h-full bg-gradient-to-r from-lime-400 to-green-500 rounded-full"
                 style={{ width: `${(skill.requiredLevel / 5) * 100}%` }}
               />
             </div>
@@ -1078,8 +1078,8 @@ const CareerDashboard = () => {
         )}
         
         {skill.learningPath && (
-          <div className="mt-3 p-2 bg-blue-50 rounded-lg">
-            <p className="text-xs text-blue-700 font-medium">Learning suggestion: {skill.learningPath}</p>
+          <div className="mt-3 p-2 bg-green-50 rounded-lg">
+            <p className="text-xs text-green-700 font-medium">Learning suggestion: {skill.learningPath}</p>
           </div>
         )}
       </div>
@@ -1090,10 +1090,10 @@ const CareerDashboard = () => {
   const LearningRoadmapCard = ({ roadmapItem, index }) => {
     const phaseColors = [
       'from-green-400 to-green-600',
-      'from-blue-400 to-blue-600',
-      'from-purple-400 to-purple-600',
-      'from-orange-400 to-orange-600',
-      'from-pink-400 to-pink-600'
+      'from-lime-400 to-green-500',
+      'from-emerald-400 to-green-600',
+      'from-teal-400 to-green-500',
+      'from-green-500 to-emerald-600'
     ];
     const colorClass = phaseColors[index % phaseColors.length];
     
@@ -1118,7 +1118,7 @@ const CareerDashboard = () => {
             <h5 className="font-medium text-gray-800 mb-2">Key Skills:</h5>
             <div className="flex flex-wrap gap-2">
               {roadmapItem.skills.slice(0, 4).map((skill, skillIndex) => (
-                <span key={skillIndex} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                <span key={skillIndex} className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
                   {skill}
                 </span>
               ))}
@@ -1131,7 +1131,7 @@ const CareerDashboard = () => {
             <span className={`px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${colorClass} text-white`}>
               Phase {index + 1}
             </span>
-            <span className="text-blue-600 font-medium text-sm">
+            <span className="text-green-600 font-medium text-sm">
               {roadmapItem.estimatedTime || `${2 + index} weeks`}
             </span>
           </div>
@@ -1160,7 +1160,7 @@ const CareerDashboard = () => {
             <div className="flex items-center gap-2 mt-1">
               <span className="text-sm text-gray-500">Market Analysis</span>
               {trend.userCareer && (
-                <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                   Personalized for {trend.userCareer}
                 </span>
               )}
@@ -1187,11 +1187,11 @@ const CareerDashboard = () => {
             )}
             
             {trend.personalizedData.hotSkills && (
-              <div className="bg-indigo-50 p-4 rounded-lg mb-4">
-                <h5 className="font-medium text-indigo-800 mb-2">🔥 Hot Skills:</h5>
+              <div className="bg-lime-50 p-4 rounded-lg mb-4">
+                <h5 className="font-medium text-green-800 mb-2">🔥 Hot Skills:</h5>
                 <div className="flex flex-wrap gap-2">
                   {trend.personalizedData.hotSkills.slice(0, 4).map((skill, idx) => (
-                    <span key={idx} className="px-2 py-1 bg-indigo-200 text-indigo-800 rounded-full text-xs font-medium">
+                    <span key={idx} className="px-2 py-1 bg-green-200 text-green-800 rounded-full text-xs font-medium">
                       {skill}
                     </span>
                   ))}
@@ -1207,7 +1207,7 @@ const CareerDashboard = () => {
             <span className={`px-3 py-1 rounded-full text-xs font-medium ${
               trend.relevance === 'High' ? 'bg-green-100 text-green-700' :
               trend.relevance === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-              'bg-blue-100 text-blue-700'
+              'bg-gray-100 text-gray-700'
             }`}>
               {trend.relevance || 'High'}
             </span>
@@ -1281,7 +1281,7 @@ const CareerDashboard = () => {
   const ActionCard = ({ step, index }) => {
     const priorityColors = {
       high: 'from-red-500 to-pink-500',
-      medium: 'from-yellow-500 to-orange-500',
+      medium: 'from-lime-500 to-green-500',
       low: 'from-gray-500 to-gray-600'
     };
 
@@ -1290,7 +1290,7 @@ const CareerDashboard = () => {
 
     return (
       <div className={`bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
-        step.personalized ? 'border-l-4 border-blue-500' : 'border-l-4 border-gray-300'
+        step.personalized ? 'border-l-4 border-green-500' : 'border-l-4 border-gray-300'
       }`}>
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center">
@@ -1300,7 +1300,7 @@ const CareerDashboard = () => {
               <div className="flex items-center gap-2 mt-1">
                 <p className="text-sm text-gray-600">{step.timeline}</p>
                 {step.personalized && (
-                  <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                  <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                     Personalized
                   </span>
                 )}
@@ -1320,7 +1320,7 @@ const CareerDashboard = () => {
             <ul className="text-sm text-gray-600 space-y-1">
               {step.resources.slice(0, 2).map((resource, idx) => (
                 <li key={idx} className="flex items-start">
-                  <span className="text-blue-500 mr-2">•</span>
+                  <span className="text-green-500 mr-2">•</span>
                   {resource}
                 </li>
               ))}
@@ -1460,9 +1460,9 @@ const CareerDashboard = () => {
   const mlDiscoveries = hybridResults?.recommendations?.mlDiscovered?.length || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Enhanced Header */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-lime-50">
+      {/* Enhanced Header - Green Theme */}
+      <div className="bg-gradient-to-r from-green-600 via-lime-500 to-green-600 text-white">
         <div className="container mx-auto px-6 py-12">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
@@ -1488,12 +1488,12 @@ const CareerDashboard = () => {
                 </div>
               )}
               {totalRecommendations > 0 && (
-                <div className="bg-green-500 bg-opacity-20 px-4 py-2 rounded-full border border-green-300">
+                <div className="bg-green-400 bg-opacity-30 px-4 py-2 rounded-full border border-green-300">
                   {totalRecommendations} Hybrid Recommendations
                 </div>
               )}
               {mlDiscoveries > 0 && (
-                <div className="bg-purple-500 bg-opacity-20 px-4 py-2 rounded-full border border-purple-300">
+                <div className="bg-lime-400 bg-opacity-30 px-4 py-2 rounded-full border border-lime-300">
                   🤖 {mlDiscoveries} ML Discoveries
                 </div>
               )}
@@ -1502,7 +1502,7 @@ const CareerDashboard = () => {
         </div>
       </div>
 
-      {/* Enhanced Navigation Tabs */}
+      {/* Enhanced Navigation Tabs - Green Theme */}
       <div className="sticky top-0 bg-white shadow-md z-40">
         <div className="container mx-auto px-6">
           <div className="flex overflow-x-auto">
@@ -1523,8 +1523,8 @@ const CareerDashboard = () => {
                   tab.id === 'home' 
                     ? 'border-transparent text-gray-600 hover:text-green-600 hover:bg-green-50'
                     : activeTab === tab.id
-                    ? 'border-blue-600 text-blue-600 bg-blue-50'
-                    : 'border-transparent text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                    ? 'border-green-600 text-green-600 bg-green-50'
+                    : 'border-transparent text-gray-600 hover:text-green-600 hover:bg-gray-50'
                 }`}
               >
                 {tab.label}
@@ -1538,13 +1538,13 @@ const CareerDashboard = () => {
       <div className="container mx-auto px-6 py-8">
         {activeTab === 'overview' && (
           <div className="space-y-8">
-            {/* Enhanced Quick Stats */}
+            {/* Enhanced Quick Stats - Green Theme */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {[
                 { label: 'Top AI Match', value: `${topMatchPercentage}%`, color: 'from-green-500 to-emerald-500', icon: '🎯' },
-                { label: 'Skills to Learn', value: skillsToLearn.toString(), color: 'from-blue-500 to-cyan-500', icon: '📚' },
-                { label: 'Learning Phases', value: learningRoadmap.length.toString(), color: 'from-purple-500 to-pink-500', icon: '🗺️' },
-                { label: 'Total Recommendations', value: totalRecommendations.toString(), color: 'from-orange-500 to-red-500', icon: '💼' }
+                { label: 'Skills to Learn', value: skillsToLearn.toString(), color: 'from-lime-500 to-green-500', icon: '📚' },
+                { label: 'Learning Phases', value: learningRoadmap.length.toString(), color: 'from-emerald-500 to-green-600', icon: '🗺️' },
+                { label: 'Total Recommendations', value: totalRecommendations.toString(), color: 'from-teal-500 to-green-500', icon: '💼' }
               ].map((stat, index) => (
                 <div key={index} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                   <div className="flex items-center justify-between mb-4">
@@ -1558,37 +1558,37 @@ const CareerDashboard = () => {
               ))}
             </div>
 
-            {/* ML Insights Preview */}
+            {/* ML Insights Preview - Green Theme */}
             {mlInsights && (
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 shadow-lg">
+              <div className="bg-gradient-to-br from-green-50 to-lime-50 rounded-2xl p-6 shadow-lg">
                 <h2 className="text-xl font-bold mb-4 flex items-center">
                   <span className="mr-2">🤖</span>
                   AI Insights Preview
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-600">
+                    <div className="text-2xl font-bold text-green-600">
                       {mlInsights.dominantPattern?.replace('_', ' to ').toUpperCase() || 'Unique'}
                     </div>
-                    <div className="text-sm text-purple-700">Career Pattern</div>
+                    <div className="text-sm text-green-700">Career Pattern</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">
+                    <div className="text-2xl font-bold text-lime-600">
                       {mlInsights.topCluster?.replace('_', ' ').toUpperCase() || 'Multi-Skill'}
                     </div>
-                    <div className="text-sm text-blue-700">Best Fit Cluster</div>
+                    <div className="text-sm text-lime-700">Best Fit Cluster</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-teal-600">
+                    <div className="text-2xl font-bold text-emerald-600">
                       {Math.round((mlInsights.patternConfidence || 0.8) * 100)}%
                     </div>
-                    <div className="text-sm text-teal-700">AI Confidence</div>
+                    <div className="text-sm text-emerald-700">AI Confidence</div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Data Quality Indicator */}
+            {/* Data Quality Indicator - Green Theme */}
             <div className="bg-white rounded-2xl p-8 shadow-lg">
               <h2 className="text-2xl font-bold mb-6 flex items-center">
                 <span className="mr-3">📊</span>
@@ -1626,7 +1626,7 @@ const CareerDashboard = () => {
               </div>
             </div>
 
-            {/* Enhanced Progress Overview */}
+            {/* Enhanced Progress Overview - Green Theme */}
             <div className="bg-white rounded-2xl p-8 shadow-lg">
               <h2 className="text-2xl font-bold mb-6 flex items-center">
                 <span className="mr-3">🚀</span>
@@ -1652,34 +1652,34 @@ const CareerDashboard = () => {
               </div>
             </div>
 
-            {/* Top Next Steps Preview */}
+            {/* Top Next Steps Preview - Green Theme */}
             <div className="bg-white rounded-2xl p-8 shadow-lg">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold flex items-center">
                   <span className="mr-3">⚡</span>
                   Priority Actions
                 </h2>
-                <div className="flex items-center text-sm text-blue-600">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                <div className="flex items-center text-sm text-green-600">
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                   Tailored to your {userData.careerPathsInterest?.[0] || 'tech'} goals
                 </div>
               </div>
-              <div className="mb-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-                <p className="text-sm text-blue-800">
+              <div className="mb-4 p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
+                <p className="text-sm text-green-800">
                   <strong>Personalized for {userData.name}:</strong> Based on your {userData.experienceLevel?.toLowerCase()} experience level, 
                   {userData.transitionTimeline ? ` ${userData.transitionTimeline.toLowerCase()} timeline,` : ''} and AI recommendations.
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {nextSteps.slice(0, 4).map((step, index) => (
-                  <div key={index} className={`${step.personalized ? 'bg-gradient-to-br from-blue-50 to-purple-50' : 'bg-gradient-to-br from-gray-50 to-gray-100'} rounded-xl p-6 hover:shadow-md transition-all duration-300`}>
+                  <div key={index} className={`${step.personalized ? 'bg-gradient-to-br from-green-50 to-lime-50' : 'bg-gradient-to-br from-gray-50 to-gray-100'} rounded-xl p-6 hover:shadow-md transition-all duration-300`}>
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center">
                         <span className="text-2xl mr-3">{step.icon}</span>
                         <h3 className="font-semibold text-gray-800">{step.title}</h3>
                       </div>
                       {step.personalized && (
-                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                           Custom
                         </span>
                       )}
@@ -1688,7 +1688,7 @@ const CareerDashboard = () => {
                     <div className="flex items-center justify-between mt-3">
                       <span className="text-xs text-gray-500">{step.timeline}</span>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        step.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                        step.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
                       }`}>
                         {step.priority?.toUpperCase()}
                       </span>
@@ -1767,8 +1767,8 @@ const CareerDashboard = () => {
                 }
               </p>
               {hybridResults?.allRecommendations.length > 0 && (
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400 max-w-2xl mx-auto">
-                  <p className="text-sm text-blue-800">
+                <div className="mt-4 p-3 bg-green-50 rounded-lg border-l-4 border-green-400 max-w-2xl mx-auto">
+                  <p className="text-sm text-green-800">
                     <strong>🎯 AI-Enhanced Analysis:</strong> These insights are specifically generated for your top AI recommendation 
                     based on machine learning analysis of your profile.
                   </p>
@@ -1867,13 +1867,13 @@ const CareerDashboard = () => {
               <p className="text-gray-600 text-lg">Curated resources to accelerate your journey</p>
             </div>
             
-            {/* Quick Actions Section */}
+            {/* Quick Actions Section - Green Theme */}
             <div className="bg-white rounded-2xl p-6 shadow-lg">
               <h3 className="text-xl font-bold mb-6">Quick Actions</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <button 
                   onClick={() => window.print()}
-                  className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105"
+                  className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105"
                 >
                   <span className="text-2xl mb-2">📄</span>
                   <span className="text-sm font-medium">Export</span>
@@ -1889,7 +1889,7 @@ const CareerDashboard = () => {
                 
                 <button 
                   onClick={() => navigate('/career/learning')}
-                  className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105"
+                  className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-lime-500 to-green-600 text-white rounded-lg hover:from-lime-600 hover:to-green-700 transition-all transform hover:scale-105"
                 >
                   <span className="text-2xl mb-2">📚</span>
                   <span className="text-sm font-medium">Learning</span>
@@ -1897,7 +1897,7 @@ const CareerDashboard = () => {
                 
                 <button 
                   onClick={() => navigate('/career/interviews')}
-                  className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all transform hover:scale-105"
+                  className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg hover:from-emerald-600 hover:to-green-700 transition-all transform hover:scale-105"
                 >
                   <span className="text-2xl mb-2">💬</span>
                   <span className="text-sm font-medium">Interviews</span>
@@ -1905,7 +1905,7 @@ const CareerDashboard = () => {
                 
                 <button 
                   onClick={() => navigate('/career/guide')}
-                  className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg hover:from-teal-600 hover:to-teal-700 transition-all transform hover:scale-105"
+                  className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-teal-500 to-green-600 text-white rounded-lg hover:from-teal-600 hover:to-green-700 transition-all transform hover:scale-105"
                 >
                   <span className="text-2xl mb-2">📖</span>
                   <span className="text-sm font-medium">Guide</span>
@@ -1915,7 +1915,7 @@ const CareerDashboard = () => {
                   href="https://techtalentscity.com" 
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all transform hover:scale-105"
+                  className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-yellow-500 to-green-500 text-white rounded-lg hover:from-yellow-600 hover:to-green-600 transition-all transform hover:scale-105"
                 >
                   <span className="text-2xl mb-2">🚀</span>
                   <span className="text-sm font-medium">Projects</span>
@@ -1923,7 +1923,7 @@ const CareerDashboard = () => {
               </div>
             </div>
 
-            {/* Resource Sections */}
+            {/* Resource Sections - Green Theme */}
             {(portfolioGuidance.length > 0 || jobSearchStrategies.length > 0) && (
               <div className="bg-white rounded-2xl p-8 shadow-lg">
                 <h3 className="text-xl font-bold mb-6 flex items-center">
@@ -1943,7 +1943,7 @@ const CareerDashboard = () => {
                       !item.text.includes('Cloud Computing:')
                     )
                   ].slice(0, 8).map((tip, index) => (
-                    <div key={index} className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
+                    <div key={index} className="bg-gradient-to-r from-green-50 to-lime-50 rounded-lg p-4">
                       <p className="text-gray-700">{tip.text}</p>
                     </div>
                   ))}
@@ -1959,7 +1959,7 @@ const CareerDashboard = () => {
                 </h3>
                 <div className="space-y-4">
                   {careerGrowthResources.filter(item => item.type === 'tip').slice(0, 5).map((tip, index) => (
-                    <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4">
+                    <div key={index} className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4">
                       <p className="text-gray-700">{tip.text}</p>
                     </div>
                   ))}
@@ -1967,7 +1967,7 @@ const CareerDashboard = () => {
               </div>
             )}
 
-            {/* Enhanced Learning Resources */}
+            {/* Enhanced Learning Resources - Green Theme */}
             <div className="bg-white rounded-2xl p-8 shadow-lg">
               <h3 className="text-xl font-bold mb-6 flex items-center">
                 <span className="mr-3">📚</span>
@@ -1990,12 +1990,12 @@ const CareerDashboard = () => {
                 </div>
 
                 {/* Paid Resources */}
-                <div className="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-400">
-                  <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
+                <div className="bg-lime-50 rounded-lg p-6 border-l-4 border-lime-400">
+                  <h4 className="font-semibold text-lime-800 mb-3 flex items-center">
                     <span className="mr-2">💰</span>
                     Premium Resources
                   </h4>
-                  <ul className="space-y-2 text-sm text-blue-700">
+                  <ul className="space-y-2 text-sm text-lime-700">
                     <li>• Udemy - Comprehensive course library</li>
                     <li>• Pluralsight - Technology skill development</li>
                     <li>• LinkedIn Learning - Professional development</li>
@@ -2005,12 +2005,12 @@ const CareerDashboard = () => {
                 </div>
 
                 {/* Tools & Platforms */}
-                <div className="bg-purple-50 rounded-lg p-6 border-l-4 border-purple-400">
-                  <h4 className="font-semibold text-purple-800 mb-3 flex items-center">
+                <div className="bg-emerald-50 rounded-lg p-6 border-l-4 border-emerald-400">
+                  <h4 className="font-semibold text-emerald-800 mb-3 flex items-center">
                     <span className="mr-2">🛠️</span>
                     Essential Tools
                   </h4>
-                  <ul className="space-y-2 text-sm text-purple-700">
+                  <ul className="space-y-2 text-sm text-emerald-700">
                     <li>• VS Code - Code editor</li>
                     <li>• Git/GitHub - Version control</li>
                     <li>• Figma - Design and prototyping</li>
@@ -2021,7 +2021,7 @@ const CareerDashboard = () => {
               </div>
             </div>
 
-            {/* Career-Specific Resources */}
+            {/* Career-Specific Resources - Green Theme */}
             {hybridResults?.allRecommendations.length > 0 && (
               <div className="bg-white rounded-2xl p-8 shadow-lg">
                 <h3 className="text-xl font-bold mb-6 flex items-center">
@@ -2029,22 +2029,22 @@ const CareerDashboard = () => {
                   RESOURCES FOR {hybridResults.allRecommendations[0].title.toUpperCase()}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-lg p-6">
-                    <h4 className="font-semibold text-indigo-800 mb-3">📖 Learning Path</h4>
-                    <p className="text-sm text-indigo-700 mb-3">
+                  <div className="bg-gradient-to-br from-green-50 to-lime-50 rounded-lg p-6">
+                    <h4 className="font-semibold text-green-800 mb-3">📖 Learning Path</h4>
+                    <p className="text-sm text-green-700 mb-3">
                       Customized learning sequence for {hybridResults.allRecommendations[0].title} based on your {userData.experienceLevel?.toLowerCase()} level.
                     </p>
-                    <div className="space-y-2 text-xs text-indigo-600">
+                    <div className="space-y-2 text-xs text-green-600">
                       <div className="flex items-center">
-                        <span className="w-2 h-2 bg-indigo-400 rounded-full mr-2"></span>
+                        <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
                         Foundation skills (Weeks 1-4)
                       </div>
                       <div className="flex items-center">
-                        <span className="w-2 h-2 bg-indigo-400 rounded-full mr-2"></span>
+                        <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
                         Core competencies (Weeks 5-12)
                       </div>
                       <div className="flex items-center">
-                        <span className="w-2 h-2 bg-indigo-400 rounded-full mr-2"></span>
+                        <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
                         Advanced projects (Weeks 13-20)
                       </div>
                     </div>
@@ -2070,10 +2070,10 @@ const CareerDashboard = () => {
         )}
       </div>
 
-      {/* Enhanced Floating Feedback Button */}
+      {/* Enhanced Floating Feedback Button - Green Theme */}
       <button
         onClick={() => setShowFeedbackForm(true)}
-        className="fixed bottom-8 right-8 bg-gradient-to-r from-red-500 to-pink-600 text-white p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 group z-50"
+        className="fixed bottom-8 right-8 bg-gradient-to-r from-green-500 to-lime-600 text-white p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 group z-50"
         aria-label="Give Feedback"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2084,13 +2084,13 @@ const CareerDashboard = () => {
         </span>
       </button>
 
-      {/* Enhanced Feedback Form Modal */}
+      {/* Enhanced Feedback Form Modal - Green Theme */}
       {showFeedbackForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="p-8">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-red-500 to-pink-600 bg-clip-text text-transparent">Your Feedback</h2>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-green-500 to-lime-600 bg-clip-text text-transparent">Your Feedback</h2>
                 <button
                   onClick={() => setShowFeedbackForm(false)}
                   className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-100 rounded-full transition-all"
@@ -2114,8 +2114,8 @@ const CareerDashboard = () => {
                         onClick={() => handleFeedbackChange({ target: { name: 'rating', value: value.toString() } })}
                         className={`w-14 h-14 rounded-full border-2 transition-all transform hover:scale-110 ${
                           feedbackData.rating === value.toString()
-                            ? 'bg-gradient-to-r from-red-500 to-pink-600 text-white border-red-500 shadow-lg'
-                            : 'border-gray-300 hover:border-red-500 hover:shadow-md'
+                            ? 'bg-gradient-to-r from-green-500 to-lime-600 text-white border-green-500 shadow-lg'
+                            : 'border-gray-300 hover:border-green-500 hover:shadow-md'
                         }`}
                       >
                         {value}
@@ -2133,7 +2133,7 @@ const CareerDashboard = () => {
                     value={feedbackData.improvements}
                     onChange={handleFeedbackChange}
                     rows="4"
-                    className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
+                    className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
                     placeholder="Tell us how we can make this better..."
                     required
                   />
@@ -2143,7 +2143,7 @@ const CareerDashboard = () => {
                   <button
                     type="submit"
                     disabled={submittingFeedback || !feedbackData.rating || !feedbackData.improvements}
-                    className="flex-1 bg-gradient-to-r from-red-500 to-pink-600 text-white py-3 px-6 rounded-lg hover:from-red-600 hover:to-pink-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none font-medium"
+                    className="flex-1 bg-gradient-to-r from-green-500 to-lime-600 text-white py-3 px-6 rounded-lg hover:from-green-600 hover:to-lime-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none font-medium"
                   >
                     {submittingFeedback ? 'Submitting...' : 'Submit Feedback'}
                   </button>
@@ -2186,7 +2186,7 @@ const CareerDashboard = () => {
         </div>
       )}
 
-      {/* Success Indicators */}
+      {/* Success Indicators - Green Theme */}
       {hybridResults?.allRecommendations.length > 0 && (
         <div className="fixed bottom-4 left-4 bg-green-500 text-white px-4 py-2 rounded-lg text-sm shadow-lg z-40">
           ✅ {hybridResults.allRecommendations.length} recommendations generated

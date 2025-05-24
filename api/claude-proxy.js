@@ -110,16 +110,14 @@ export default async function handler(req, res) {
       system: req.body.system || (isV2Request ? getV2SystemPrompt() : '')
     };
     
-    // Add v2.0 specific parameters if applicable
-    if (isV2Request) {
-      requestBody.metadata = {
-        systemVersion: '2.0',
-        engineType: 'Sequential Dependency Recommendation Engine',
-        processingType: detectProcessingType(req.body.messages),
-        tierScoringEnabled: true,
-        aiContentGeneration: true
-      };
-    }
+    // Store v2.0 metadata separately (don't send to Claude API)
+    const internalMetadata = isV2Request ? {
+      systemVersion: '2.0',
+      engineType: 'Sequential Dependency Recommendation Engine',
+      processingType: detectProcessingType(req.body.messages),
+      tierScoringEnabled: true,
+      aiContentGeneration: true
+    } : null;
     
     // Performance monitoring start
     const startTime = Date.now();
@@ -170,7 +168,7 @@ export default async function handler(req, res) {
     
     // Enhanced response processing for v2.0 system
     const processedResponse = isV2Request 
-      ? await processV2Response(data, requestMetadata, responseTime)
+      ? await processV2Response(data, requestMetadata, responseTime, internalMetadata)
       : await processLegacyResponse(data, requestMetadata, responseTime);
     
     // v2.0 response validation and enhancement
@@ -352,7 +350,7 @@ function getV2SystemPrompt() {
 /**
  * Process v2.0 response with enhanced features
  */
-async function processV2Response(data, requestMetadata, responseTime) {
+async function processV2Response(data, requestMetadata, responseTime, internalMetadata) {
   // Enhanced response structure for v2.0
   const processedResponse = {
     ...data,
@@ -362,7 +360,8 @@ async function processV2Response(data, requestMetadata, responseTime) {
       responseTime: responseTime,
       processingType: requestMetadata.requestType,
       aiContentGeneration: true,
-      processedAt: new Date().toISOString()
+      processedAt: new Date().toISOString(),
+      ...internalMetadata
     }
   };
   

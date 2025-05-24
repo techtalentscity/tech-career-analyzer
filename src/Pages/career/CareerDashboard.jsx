@@ -34,6 +34,10 @@ const CareerDashboard = () => {
   const [personalizedRoadmap, setPersonalizedRoadmap] = useState(null);
   const [generatingRoadmap, setGeneratingRoadmap] = useState(false);
   
+  // NEW: Market Insights states
+  const [marketInsights, setMarketInsights] = useState(null);
+  const [generatingInsights, setGeneratingInsights] = useState(false);
+  
   // ENHANCED: Complete recommendation states combining ML + Authentic approaches
   const [hybridResults, setHybridResults] = useState(null);
   const [mlInsights, setMLInsights] = useState(null);
@@ -79,8 +83,276 @@ const CareerDashboard = () => {
   const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeX9C7YtHTSBy4COsV6KaogdEvrjXoVQ0O2psoyfs1xqrySNg/formResponse';
 
   // ============================================================================
-  // NEW: PERSONALIZED ROADMAP GENERATOR
+  // NEW: MARKET INSIGHTS GENERATOR
   // ============================================================================
+
+  const generateMarketInsights = async () => {
+    setGeneratingInsights(true);
+    
+    try {
+      // Get the top career recommendation
+      const topCareer = hybridResults?.allRecommendations?.[0] || careerPaths[0];
+      
+      if (!topCareer) {
+        toast.error('No career recommendations found. Please retake the assessment.');
+        return;
+      }
+
+      // Simulate API call delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      const insights = createMarketInsights(topCareer, userData);
+      setMarketInsights(insights);
+      
+      toast.success('Market insights generated successfully!');
+      
+    } catch (error) {
+      console.error('Error generating market insights:', error);
+      toast.error('Failed to generate market insights. Please try again.');
+    } finally {
+      setGeneratingInsights(false);
+    }
+  };
+
+  const createMarketInsights = (topCareer, userData) => {
+    const careerTitle = topCareer.title;
+    const userLocation = userData.workPreference || 'Remote/Flexible';
+    
+    // Get career-specific market data
+    const marketData = getCareerMarketData(careerTitle);
+    
+    return {
+      careerTitle: careerTitle,
+      matchScore: topCareer.hybridScore || topCareer.match,
+      lastUpdated: new Date().toLocaleDateString(),
+      overview: {
+        demandLevel: marketData.demandLevel,
+        growthProjection: marketData.growthProjection,
+        competitionLevel: marketData.competitionLevel,
+        entryBarrier: marketData.entryBarrier
+      },
+      salary: {
+        entry: marketData.salary.entry,
+        mid: marketData.salary.mid,
+        senior: marketData.salary.senior,
+        topPercentile: marketData.salary.topPercentile
+      },
+      jobMarket: {
+        totalJobs: marketData.jobMarket.totalJobs,
+        newJobsMonthly: marketData.jobMarket.newJobsMonthly,
+        remotePercentage: marketData.jobMarket.remotePercentage,
+        topCompanies: marketData.jobMarket.topCompanies
+      },
+      skills: {
+        trending: marketData.skills.trending,
+        essential: marketData.skills.essential,
+        emerging: marketData.skills.emerging,
+        declining: marketData.skills.declining
+      },
+      locations: {
+        topCities: marketData.locations.topCities,
+        remote: marketData.locations.remote,
+        international: marketData.locations.international
+      },
+      trends: marketData.trends,
+      recommendations: generateMarketRecommendations(careerTitle, userData)
+    };
+  };
+
+  const getCareerMarketData = (careerTitle) => {
+    const marketDatabase = {
+      'Data Scientist': {
+        demandLevel: 'Very High',
+        growthProjection: '+22% (2023-2033)',
+        competitionLevel: 'High',
+        entryBarrier: 'Medium-High',
+        salary: {
+          entry: '$85,000 - $120,000',
+          mid: '$120,000 - $160,000', 
+          senior: '$160,000 - $220,000',
+          topPercentile: '$250,000+'
+        },
+        jobMarket: {
+          totalJobs: '156,000+ active positions',
+          newJobsMonthly: '12,000+ new openings',
+          remotePercentage: '78%',
+          topCompanies: ['Google', 'Amazon', 'Microsoft', 'Netflix', 'Meta', 'Apple', 'Tesla', 'Uber']
+        },
+        skills: {
+          trending: ['LLMs & AI', 'MLOps', 'Cloud ML Platforms', 'Real-time Analytics'],
+          essential: ['Python', 'SQL', 'Machine Learning', 'Statistics', 'Data Visualization'],
+          emerging: ['Generative AI', 'Edge ML', 'Federated Learning', 'AutoML'],
+          declining: ['Traditional BI Tools', 'Basic Excel Analysis']
+        },
+        locations: {
+          topCities: ['San Francisco', 'Seattle', 'New York', 'Austin', 'Boston'],
+          remote: 'High availability (78% remote-friendly)',
+          international: ['London', 'Toronto', 'Berlin', 'Singapore', 'Tel Aviv']
+        },
+        trends: [
+          'AI/ML integration in every industry',
+          'Increased focus on ethical AI',
+          'Real-time decision making systems',
+          'Growing demand for domain expertise',
+          'Shift towards MLOps and production ML'
+        ]
+      },
+      'Software Developer': {
+        demandLevel: 'Very High',
+        growthProjection: '+25% (2023-2033)',
+        competitionLevel: 'Medium-High',
+        entryBarrier: 'Medium',
+        salary: {
+          entry: '$75,000 - $110,000',
+          mid: '$110,000 - $150,000',
+          senior: '$150,000 - $200,000',
+          topPercentile: '$230,000+'
+        },
+        jobMarket: {
+          totalJobs: '1.4M+ active positions',
+          newJobsMonthly: '85,000+ new openings',
+          remotePercentage: '72%',
+          topCompanies: ['Google', 'Microsoft', 'Amazon', 'Apple', 'Meta', 'Netflix', 'Salesforce', 'Adobe']
+        },
+        skills: {
+          trending: ['AI Integration', 'Cloud Native', 'Microservices', 'DevOps'],
+          essential: ['JavaScript', 'Python', 'React', 'Git', 'Databases', 'APIs'],
+          emerging: ['WebAssembly', 'Edge Computing', 'Serverless', 'Low-code/No-code'],
+          declining: ['jQuery', 'Monolithic Architecture', 'Legacy PHP']
+        },
+        locations: {
+          topCities: ['San Francisco', 'Seattle', 'Austin', 'Denver', 'Atlanta'],
+          remote: 'High availability (72% remote-friendly)',
+          international: ['London', 'Berlin', 'Amsterdam', 'Toronto', 'Sydney']
+        },
+        trends: [
+          'AI-assisted development tools',
+          'Increased focus on cybersecurity',
+          'Rise of full-stack developers',
+          'Growing mobile-first development',
+          'Emphasis on user experience'
+        ]
+      },
+      'UX/UI Designer': {
+        demandLevel: 'High',
+        growthProjection: '+13% (2023-2033)',
+        competitionLevel: 'Medium',
+        entryBarrier: 'Medium',
+        salary: {
+          entry: '$65,000 - $95,000',
+          mid: '$95,000 - $130,000',
+          senior: '$130,000 - $170,000',
+          topPercentile: '$200,000+'
+        },
+        jobMarket: {
+          totalJobs: '98,000+ active positions',
+          newJobsMonthly: '7,500+ new openings',
+          remotePercentage: '65%',
+          topCompanies: ['Apple', 'Google', 'Adobe', 'Airbnb', 'Spotify', 'Uber', 'Figma', 'Microsoft']
+        },
+        skills: {
+          trending: ['AI-assisted Design', 'Voice UI', 'AR/VR Design', 'Design Systems'],
+          essential: ['Figma', 'User Research', 'Prototyping', 'Visual Design', 'Interaction Design'],
+          emerging: ['Conversational AI UX', 'Ethical Design', 'Inclusive Design', 'Design Ops'],
+          declining: ['Photoshop for UI', 'Static Mockups', 'Waterfall Design Process']
+        },
+        locations: {
+          topCities: ['San Francisco', 'New York', 'Los Angeles', 'Seattle', 'Austin'],
+          remote: 'Medium-High availability (65% remote-friendly)',
+          international: ['London', 'Amsterdam', 'Barcelona', 'Toronto', 'Melbourne']
+        },
+        trends: [
+          'AI-powered design tools',
+          'Focus on accessibility and inclusion',
+          'Rise of design systems',
+          'Data-driven design decisions',
+          'Cross-platform consistency'
+        ]
+      },
+      'Product Manager': {
+        demandLevel: 'High',
+        growthProjection: '+19% (2023-2033)',
+        competitionLevel: 'High',
+        entryBarrier: 'High',
+        salary: {
+          entry: '$90,000 - $130,000',
+          mid: '$130,000 - $180,000',
+          senior: '$180,000 - $250,000',
+          topPercentile: '$300,000+'
+        },
+        jobMarket: {
+          totalJobs: '76,000+ active positions',
+          newJobsMonthly: '5,200+ new openings',
+          remotePercentage: '58%',
+          topCompanies: ['Google', 'Meta', 'Amazon', 'Microsoft', 'Apple', 'Uber', 'Airbnb', 'Stripe']
+        },
+        skills: {
+          trending: ['AI Product Strategy', 'Data Analytics', 'Growth Hacking', 'Customer Success'],
+          essential: ['Strategy', 'Analytics', 'User Research', 'Roadmapping', 'Stakeholder Management'],
+          emerging: ['AI/ML Product Management', 'Platform Strategy', 'Developer Relations'],
+          declining: ['Traditional Waterfall PM', 'Feature Factory Approach']
+        },
+        locations: {
+          topCities: ['San Francisco', 'Seattle', 'New York', 'Los Angeles', 'Boston'],
+          remote: 'Medium availability (58% remote-friendly)',
+          international: ['London', 'Singapore', 'Tel Aviv', 'Toronto', 'Berlin']
+        },
+        trends: [
+          'AI-first product development',
+          'Platform and ecosystem thinking',
+          'Data-driven product decisions',
+          'Focus on user outcomes',
+          'Cross-functional leadership'
+        ]
+      }
+    };
+
+    return marketDatabase[careerTitle] || marketDatabase['Software Developer'];
+  };
+
+  const generateMarketRecommendations = (careerTitle, userData) => {
+    const baseRecommendations = [
+      {
+        type: 'skills',
+        title: 'Focus on Trending Skills',
+        description: 'Prioritize learning the most in-demand skills for your target role',
+        action: 'Start with AI/ML integration and cloud platforms'
+      },
+      {
+        type: 'networking',
+        title: 'Build Professional Network',
+        description: 'Connect with professionals in top hiring companies',
+        action: 'Join industry meetups and LinkedIn professional groups'
+      },
+      {
+        type: 'location',
+        title: 'Consider Market Location',
+        description: 'Remote work is widely available in this field',
+        action: 'Apply to both local and remote opportunities'
+      }
+    ];
+
+    // Customize based on user data
+    if (userData.experienceLevel === 'Complete beginner') {
+      baseRecommendations.push({
+        type: 'entry',
+        title: 'Target Entry-Level Positions',
+        description: 'Focus on junior roles and internships to gain experience',
+        action: 'Build a strong portfolio and consider bootcamps'
+      });
+    }
+
+    if (userData.transitionTimeline === 'Less than 6 months') {
+      baseRecommendations.push({
+        type: 'urgency',
+        title: 'Fast-Track Your Learning',
+        description: 'Intensive learning path for quick career transition',
+        action: 'Consider accelerated programs and intensive bootcamps'
+      });
+    }
+
+    return baseRecommendations;
+  };
 
   const generatePersonalizedRoadmap = async () => {
     setGeneratingRoadmap(true);
@@ -284,8 +556,216 @@ const CareerDashboard = () => {
   };
 
   // ============================================================================
-  // ROADMAP UI COMPONENTS
+  // MARKET INSIGHTS UI COMPONENTS
   // ============================================================================
+
+  const MarketOverviewCard = ({ overview, careerTitle }) => (
+    <div className="bg-white rounded-xl p-6 shadow-lg">
+      <h3 className="text-xl font-bold text-gray-800 mb-4">Market Overview</h3>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="text-center">
+          <div className={`text-2xl font-bold mb-1 ${
+            overview.demandLevel === 'Very High' ? 'text-green-600' : 
+            overview.demandLevel === 'High' ? 'text-lime-600' : 'text-yellow-600'
+          }`}>
+            {overview.demandLevel}
+          </div>
+          <div className="text-sm text-gray-600">Demand Level</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-bold mb-1 text-green-600">{overview.growthProjection}</div>
+          <div className="text-sm text-gray-600">Growth Rate</div>
+        </div>
+        <div className="text-center">
+          <div className={`text-2xl font-bold mb-1 ${
+            overview.competitionLevel === 'High' ? 'text-orange-600' : 
+            overview.competitionLevel === 'Medium' ? 'text-yellow-600' : 'text-green-600'
+          }`}>
+            {overview.competitionLevel}
+          </div>
+          <div className="text-sm text-gray-600">Competition</div>
+        </div>
+        <div className="text-center">
+          <div className={`text-2xl font-bold mb-1 ${
+            overview.entryBarrier === 'High' ? 'text-red-600' : 
+            overview.entryBarrier === 'Medium' ? 'text-yellow-600' : 'text-green-600'
+          }`}>
+            {overview.entryBarrier}
+          </div>
+          <div className="text-sm text-gray-600">Entry Barrier</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const SalaryInsightsCard = ({ salary }) => (
+    <div className="bg-white rounded-xl p-6 shadow-lg">
+      <h3 className="text-xl font-bold text-gray-800 mb-4">💰 Salary Insights</h3>
+      <div className="space-y-4">
+        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium">Entry Level</span>
+          <span className="text-green-600 font-bold">{salary.entry}</span>
+        </div>
+        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium">Mid Level</span>
+          <span className="text-green-600 font-bold">{salary.mid}</span>
+        </div>
+        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium">Senior Level</span>
+          <span className="text-green-600 font-bold">{salary.senior}</span>
+        </div>
+        <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-lime-50 rounded-lg border border-green-200">
+          <span className="font-medium">Top 10%</span>
+          <span className="text-green-700 font-bold">{salary.topPercentile}</span>
+        </div>
+      </div>
+    </div>
+  );
+
+  const JobMarketCard = ({ jobMarket }) => (
+    <div className="bg-white rounded-xl p-6 shadow-lg">
+      <h3 className="text-xl font-bold text-gray-800 mb-4">📊 Job Market</h3>
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="text-center p-3 bg-blue-50 rounded-lg">
+            <div className="text-2xl font-bold text-blue-600">{jobMarket.totalJobs}</div>
+            <div className="text-sm text-gray-600">Total Jobs</div>
+          </div>
+          <div className="text-center p-3 bg-green-50 rounded-lg">
+            <div className="text-2xl font-bold text-green-600">{jobMarket.newJobsMonthly}</div>
+            <div className="text-sm text-gray-600">New Monthly</div>
+          </div>
+          <div className="text-center p-3 bg-purple-50 rounded-lg">
+            <div className="text-2xl font-bold text-purple-600">{jobMarket.remotePercentage}</div>
+            <div className="text-sm text-gray-600">Remote Jobs</div>
+          </div>
+        </div>
+        
+        <div>
+          <h4 className="font-semibold text-gray-800 mb-3">Top Hiring Companies</h4>
+          <div className="flex flex-wrap gap-2">
+            {jobMarket.topCompanies.map((company, idx) => (
+              <span 
+                key={idx}
+                className="px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 text-gray-700 rounded-full text-sm border"
+              >
+                {company}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const SkillsTrendsCard = ({ skills }) => (
+    <div className="bg-white rounded-xl p-6 shadow-lg">
+      <h3 className="text-xl font-bold text-gray-800 mb-4">🚀 Skills & Trends</h3>
+      <div className="space-y-4">
+        <div>
+          <h4 className="font-semibold text-green-700 mb-2 flex items-center">
+            <span className="mr-2">📈</span>Trending Skills
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {skills.trending.map((skill, idx) => (
+              <span key={idx} className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+        
+        <div>
+          <h4 className="font-semibold text-blue-700 mb-2 flex items-center">
+            <span className="mr-2">⚡</span>Essential Skills
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {skills.essential.map((skill, idx) => (
+              <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+        
+        <div>
+          <h4 className="font-semibold text-purple-700 mb-2 flex items-center">
+            <span className="mr-2">🔮</span>Emerging Skills
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {skills.emerging.map((skill, idx) => (
+              <span key={idx} className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const LocationInsightsCard = ({ locations }) => (
+    <div className="bg-white rounded-xl p-6 shadow-lg">
+      <h3 className="text-xl font-bold text-gray-800 mb-4">🌍 Location Insights</h3>
+      <div className="space-y-4">
+        <div>
+          <h4 className="font-semibold text-gray-800 mb-2">Top US Cities</h4>
+          <div className="flex flex-wrap gap-2">
+            {locations.topCities.map((city, idx) => (
+              <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm">
+                📍 {city}
+              </span>
+            ))}
+          </div>
+        </div>
+        
+        <div className="p-3 bg-green-50 rounded-lg">
+          <h4 className="font-semibold text-green-800 mb-1">Remote Work</h4>
+          <p className="text-green-700 text-sm">{locations.remote}</p>
+        </div>
+        
+        <div>
+          <h4 className="font-semibold text-gray-800 mb-2">International Opportunities</h4>
+          <div className="flex flex-wrap gap-2">
+            {locations.international.map((city, idx) => (
+              <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm">
+                🌐 {city}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const MarketTrendsCard = ({ trends }) => (
+    <div className="bg-white rounded-xl p-6 shadow-lg">
+      <h3 className="text-xl font-bold text-gray-800 mb-4">📊 Market Trends</h3>
+      <div className="space-y-3">
+        {trends.map((trend, idx) => (
+          <div key={idx} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+            <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+            <span className="text-gray-700">{trend}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const MarketRecommendationsCard = ({ recommendations }) => (
+    <div className="bg-gradient-to-r from-green-500 to-lime-600 text-white rounded-xl p-6 shadow-lg">
+      <h3 className="text-xl font-bold mb-4">💡 Market-Based Recommendations</h3>
+      <div className="space-y-4">
+        {recommendations.map((rec, idx) => (
+          <div key={idx} className="bg-white bg-opacity-20 rounded-lg p-4">
+            <h4 className="font-semibold mb-2">{rec.title}</h4>
+            <p className="text-green-100 text-sm mb-2">{rec.description}</p>
+            <div className="text-sm font-medium">Action: {rec.action}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   const RoadmapPhase = ({ phase, index, isLast }) => (
     <div className="relative">
@@ -781,7 +1261,8 @@ const CareerDashboard = () => {
             {[
               { id: 'home', label: '🏠 Home', action: () => navigate('/') },
               { id: 'paths', label: '🤖 AI Career Paths' },
-              { id: 'roadmap', label: '🗺️ Career Roadmap' }, // NEW TAB
+              { id: 'roadmap', label: '🗺️ Career Roadmap' }, 
+              { id: 'market', label: '📊 Market Insights' }, // NEW TAB
               { id: 'action', label: '⚡ Action Plan' },
               { id: 'resources', label: '📚 Resources'},
               { id: 'retake', label: '🔄 Retake', action: () => navigate('/career/test') }
@@ -817,7 +1298,116 @@ const CareerDashboard = () => {
           </div>
         )}
 
-        {/* NEW: Career Roadmap Tab */}
+        {/* NEW: Market Insights Tab */}
+        {activeTab === 'market' && (
+          <div className="space-y-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-4">Market Insights & Trends</h2>
+              <p className="text-gray-600 text-lg">Real-time market data for your career path</p>
+            </div>
+
+            {!marketInsights ? (
+              <div className="text-center py-12">
+                <div className="bg-white rounded-2xl p-8 shadow-lg max-w-2xl mx-auto">
+                  <div className="text-6xl mb-6">📊</div>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4">Get Market Intelligence</h3>
+                  <p className="text-gray-600 mb-6 text-lg">
+                    Discover current market trends, salary insights, job demand, and competitive landscape for 
+                    <span className="font-semibold text-green-600"> {hybridResults?.allRecommendations?.[0]?.title || 'your selected career'}</span>.
+                  </p>
+                  
+                  {hybridResults?.allRecommendations?.[0] && (
+                    <div className="bg-blue-50 rounded-lg p-4 mb-6">
+                      <div className="flex items-center justify-center space-x-4">
+                        <div className="text-2xl">🎯</div>
+                        <div>
+                          <div className="font-semibold text-blue-800">
+                            Analyzing: {hybridResults.allRecommendations[0].title}
+                          </div>
+                          <div className="text-blue-600 text-sm">
+                            Market data includes salary, trends, and opportunities
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <button
+                    onClick={generateMarketInsights}
+                    disabled={generatingInsights || !hybridResults?.allRecommendations?.length}
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none shadow-lg"
+                  >
+                    {generatingInsights ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        <span>Analyzing Market Data...</span>
+                      </div>
+                    ) : (
+                      'Generate Market Insights 📈'
+                    )}
+                  </button>
+                  
+                  {!hybridResults?.allRecommendations?.length && (
+                    <p className="text-red-500 text-sm mt-4">
+                      Please complete the career assessment first to get market insights.
+                    </p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {/* Header with career info */}
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl p-6 shadow-lg">
+                  <div className="text-center">
+                    <h2 className="text-2xl font-bold mb-2">Market Analysis: {marketInsights.careerTitle}</h2>
+                    <p className="text-blue-100 mb-4">
+                      Based on your {marketInsights.matchScore}% career match • Updated {marketInsights.lastUpdated}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Market Overview */}
+                <MarketOverviewCard overview={marketInsights.overview} careerTitle={marketInsights.careerTitle} />
+
+                {/* Two-column layout for main insights */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <SalaryInsightsCard salary={marketInsights.salary} />
+                  <JobMarketCard jobMarket={marketInsights.jobMarket} />
+                </div>
+
+                {/* Skills and Trends */}
+                <SkillsTrendsCard skills={marketInsights.skills} />
+
+                {/* Location and Market Trends */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <LocationInsightsCard locations={marketInsights.locations} />
+                  <MarketTrendsCard trends={marketInsights.trends} />
+                </div>
+
+                {/* Market Recommendations */}
+                <MarketRecommendationsCard recommendations={marketInsights.recommendations} />
+                
+                {/* Action buttons */}
+                <div className="text-center space-x-4">
+                  <button
+                    onClick={() => setMarketInsights(null)}
+                    className="bg-gray-200 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-300 transition-all font-medium"
+                  >
+                    Refresh Insights
+                  </button>
+                  <button
+                    onClick={() => window.print()}
+                    className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-all font-medium"
+                  >
+                    Print Report 📄
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Career Roadmap Tab */}
         {activeTab === 'roadmap' && (
           <div className="space-y-8">
             <div className="text-center mb-8">

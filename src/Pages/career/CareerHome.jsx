@@ -9,27 +9,27 @@ const FEATURES = [
   {
     title: "Career Path Recommendations",
     description: "Get matched with ideal tech careers based on your profile, with match percentages and timeline estimates",
-    color: "from-red-500 to-orange-500"
+    color: "from-lime-500 to-green-600"
   },
   {
     title: "Strengths Analysis",
     description: "Detailed breakdown of your transferable skills and how they apply to tech roles",
-    color: "from-green-500 to-teal-500"
+    color: "from-green-500 to-emerald-500"
   },
   {
     title: "Skills Gap Analysis",
     description: "Identify exact technical skills you need to develop for your target career path",
-    color: "from-blue-500 to-cyan-500"
+    color: "from-yellow-400 to-lime-500"
   },
   {
     title: "Learning Roadmap",
     description: "Month-by-month plan with specific courses and projects to build your skills",
-    color: "from-purple-500 to-pink-500"
+    color: "from-lime-400 to-green-500"
   },
   {
     title: "Transition Strategy",
     description: "Practical steps to move from your current role to your target tech position",
-    color: "from-indigo-500 to-purple-500"
+    color: "from-green-600 to-lime-600"
   },
   {
     title: "Export Results",
@@ -43,25 +43,25 @@ const PLATFORM_FEATURES = [
   {
     title: "Personalized Dashboard",
     description: "Track your tech career journey with a comprehensive overview of your profile, skills, and recommended next steps",
-    color: "bg-blue-100 text-blue-600",
+    color: "bg-lime-100 text-lime-700",
     image: "/images/dashboard-preview.png"
   },
   {
     title: "Curated Learning Resources",
     description: "Access top-rated courses and certifications matched to your specific career path and skill gaps",
-    color: "bg-green-100 text-green-600",
+    color: "bg-green-100 text-green-700",
     image: "/images/learning-preview.png"
   },
   {
     title: "Interview Preparation",
     description: "Prepare for technical, behavioral, and coding interviews with our comprehensive resources and practice tools",
-    color: "bg-purple-100 text-purple-600",
+    color: "bg-emerald-100 text-emerald-700",
     image: "/images/interviews-preview.png"
   },
   {
     title: "Career Development Guide",
     description: "Navigate your tech career with expert advice on learning to code, becoming an expert, and strategic career planning",
-    color: "bg-teal-100 text-teal-600",
+    color: "bg-yellow-100 text-yellow-700",
     image: "/images/guide-preview.png"
   }
 ];
@@ -176,7 +176,7 @@ const CareerHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-lime-50 via-green-50 to-emerald-50 overflow-hidden flex flex-col">
       {/* Header */}
       <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-6 py-3">
@@ -194,9 +194,9 @@ const CareerHome = () => {
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/" className="text-indigo-600 font-medium transition-colors border-b-2 border-indigo-600">Home</Link>
-              <Link to="/about" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">About</Link>
-              <Link to="/contact" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Contact</Link>
+              <Link to="/" className="text-lime-600 font-medium transition-colors border-b-2 border-lime-600">Home</Link>
+              <Link to="/about" className="text-gray-700 hover:text-lime-600 font-medium transition-colors">About</Link>
+              <Link to="/contact" className="text-gray-700 hover:text-lime-600 font-medium transition-colors">Contact</Link>
               
               {currentUser ? (
                 <div className="flex items-center space-x-4">
@@ -209,7 +209,7 @@ const CareerHome = () => {
                   {isAuthorized && (
                     <Link 
                       to="/career/dashboard" 
-                      className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg text-sm transition-colors"
+                      className="bg-lime-100 hover:bg-lime-200 text-lime-800 px-4 py-2 rounded-lg text-sm transition-colors"
                     >
                       Dashboard
                     </Link>
@@ -224,7 +224,7 @@ const CareerHome = () => {
               ) : (
                 <button 
                   onClick={() => navigate('/login')} 
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+                  className="bg-lime-600 hover:bg-lime-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
                 >
                   <span className="mr-2">G</span>
                   Login with Google
@@ -236,7 +236,7 @@ const CareerHome = () => {
             <div className="md:hidden">
               <button 
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
-                className="text-gray-700 hover:text-indigo-600 focus:outline-none"
+                className="text-gray-700 hover:text-lime-600 focus:outline-none"
               >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
@@ -249,9 +249,9 @@ const CareerHome = () => {
           {mobileMenuOpen && (
             <div className="md:hidden mt-3 pb-3 border-t border-gray-200">
               <div className="flex flex-col space-y-3 mt-3">
-                <Link to="/" className="text-indigo-600 font-medium transition-colors">Home</Link>
-                <Link to="/about" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">About</Link>
-                <Link to="/contact" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Contact</Link>
+                <Link to="/" className="text-lime-600 font-medium transition-colors">Home</Link>
+                <Link to="/about" className="text-gray-700 hover:text-lime-600 font-medium transition-colors">About</Link>
+                <Link to="/contact" className="text-gray-700 hover:text-lime-600 font-medium transition-colors">Contact</Link>
                 
                 {currentUser ? (
                   <div className="flex flex-col space-y-3 pt-3 border-t border-gray-100">
@@ -264,7 +264,7 @@ const CareerHome = () => {
                     {isAuthorized && (
                       <Link 
                         to="/career/dashboard" 
-                        className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg text-sm transition-colors text-center"
+                        className="bg-lime-100 hover:bg-lime-200 text-lime-800 px-4 py-2 rounded-lg text-sm transition-colors text-center"
                       >
                         Dashboard
                       </Link>
@@ -279,7 +279,7 @@ const CareerHome = () => {
                 ) : (
                   <button 
                     onClick={() => navigate('/login')} 
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+                    className="bg-lime-600 hover:bg-lime-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
                   >
                     <span className="mr-2">G</span>
                     Login with Google
@@ -299,27 +299,27 @@ const CareerHome = () => {
           className={`relative mb-20 transition-all duration-1000 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
           aria-label="Hero section"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-700 rounded-3xl transform rotate-1 opacity-90 animate-pulse-slow"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl transform -rotate-1 opacity-90 animate-pulse-slow"></div>
-          <div className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-8 md:p-16 text-white shadow-2xl backdrop-blur-sm">
+          <div className="absolute inset-0 bg-gradient-to-r from-lime-500 to-green-600 rounded-3xl transform rotate-1 opacity-90 animate-pulse-slow"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-lime-500 rounded-3xl transform -rotate-1 opacity-90 animate-pulse-slow"></div>
+          <div className="relative bg-gradient-to-r from-lime-500 via-green-500 to-emerald-600 rounded-3xl p-8 md:p-16 text-white shadow-2xl backdrop-blur-sm">
             <div className="max-w-4xl">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-2 w-2 bg-white rounded-full animate-pulse"></div>
-                <span className="text-indigo-100 uppercase tracking-wider text-sm font-medium">AI-Powered Career Intelligence</span>
+                <span className="text-lime-100 uppercase tracking-wider text-sm font-medium">AI-Powered Career Intelligence</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
                 Discover Your Tech
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-pink-200">
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-lime-200">
                   Career Path
                 </span>
               </h1>
-              <p className="text-lg md:text-xl mb-10 text-indigo-100 max-w-2xl">
+              <p className="text-lg md:text-xl mb-10 text-lime-100 max-w-2xl">
                 Get comprehensive AI-powered analysis of your career options with personalized recommendations, skills gap analysis, and learning roadmap.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={handleStartTest}
-                  className="bg-white text-indigo-600 px-8 md:px-12 py-4 md:py-5 rounded-full font-bold text-lg hover:bg-gradient-to-r hover:from-white hover:to-indigo-50 transform hover:scale-105 transition-all duration-300 shadow-xl flex items-center justify-center group"
+                  className="bg-white text-lime-600 px-8 md:px-12 py-4 md:py-5 rounded-full font-bold text-lg hover:bg-gradient-to-r hover:from-white hover:to-lime-50 transform hover:scale-105 transition-all duration-300 shadow-xl flex items-center justify-center group"
                   aria-label="Start your career assessment"
                 >
                   {currentUser ? "Continue Your Assessment" : "Start Your Assessment"}
@@ -327,7 +327,7 @@ const CareerHome = () => {
                 </button>
                 <button
                   onClick={handleViewPlatformFeatures}
-                  className="bg-transparent border-2 border-white text-white px-8 md:px-12 py-4 md:py-5 rounded-full font-bold text-lg hover:bg-white hover:text-indigo-600 transform hover:scale-105 transition-all duration-300 shadow-xl"
+                  className="bg-transparent border-2 border-white text-white px-8 md:px-12 py-4 md:py-5 rounded-full font-bold text-lg hover:bg-white hover:text-lime-600 transform hover:scale-105 transition-all duration-300 shadow-xl"
                   aria-label="Explore platform features"
                 >
                   Explore Platform Features
@@ -390,11 +390,11 @@ const CareerHome = () => {
           <div className="bg-white rounded-3xl shadow-xl p-6 md:p-8">
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h3 className="font-bold text-xl mb-4 text-indigo-600">Career Matches</h3>
+                <h3 className="font-bold text-xl mb-4 text-lime-600">Career Matches</h3>
                 <div className="space-y-3">
                   {[
                     { title: "Data Analyst", match: 85, color: "green" },
-                    { title: "AI Research Assistant", match: 70, color: "blue" },
+                    { title: "AI Research Assistant", match: 70, color: "lime" },
                     { title: "Technical Writer", match: 65, color: "yellow" }
                   ].map((career, index) => (
                     <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
@@ -413,7 +413,7 @@ const CareerHome = () => {
                 </div>
               </div>
               <div>
-                <h3 className="font-bold text-xl mb-4 text-indigo-600">Your Strengths</h3>
+                <h3 className="font-bold text-xl mb-4 text-lime-600">Your Strengths</h3>
                 <ul className="space-y-2">
                   {[
                     "Strong analytical skills",
@@ -424,14 +424,14 @@ const CareerHome = () => {
                   ].map((strength, index) => (
                     <li key={index} className="flex items-center group">
                       <span className="text-green-500 mr-2 transform group-hover:scale-110 transition-transform">✓</span>
-                      <span className="group-hover:text-indigo-600 transition-colors">{strength}</span>
+                      <span className="group-hover:text-lime-600 transition-colors">{strength}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             </div>
-            <div className="mt-8 p-4 bg-indigo-50 rounded-lg">
-              <p className="text-sm text-indigo-700 font-medium">
+            <div className="mt-8 p-4 bg-lime-50 rounded-lg">
+              <p className="text-sm text-lime-700 font-medium">
                 <span className="font-bold">Next Step:</span> Complete the full assessment to get your personalized career roadmap
               </p>
             </div>
@@ -441,7 +441,7 @@ const CareerHome = () => {
         {/* Pricing Section */}
         <section className="mb-20 text-center">
           <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl p-8 md:p-12 max-w-3xl mx-auto relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-2 transform rotate-45 translate-x-10 translate-y-3">
+            <div className="absolute top-0 right-0 bg-gradient-to-r from-lime-400 to-green-500 text-white px-8 py-2 transform rotate-45 translate-x-10 translate-y-3">
               Limited Time Offer
             </div>
             
@@ -450,7 +450,7 @@ const CareerHome = () => {
             
             <div className="flex justify-center items-center mb-6">
               <span className="text-gray-400 line-through text-2xl mr-4">$79</span>
-              <span className="text-4xl font-bold text-indigo-600">$60</span>
+              <span className="text-4xl font-bold text-lime-600">$60</span>
             </div>
             
             <ul className="text-left max-w-md mx-auto mb-8 space-y-2">
@@ -504,7 +504,7 @@ const CareerHome = () => {
             
             <button
               onClick={handleStartTest}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-12 py-4 rounded-full font-bold text-lg hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-xl"
+              className="bg-gradient-to-r from-lime-500 to-green-600 text-white px-12 py-4 rounded-full font-bold text-lg hover:from-lime-600 hover:to-green-700 transform hover:scale-105 transition-all duration-300 shadow-xl"
               aria-label="Begin your career assessment"
             >
               {currentUser ? "Continue Your Assessment" : "Start Your Assessment"}
@@ -522,7 +522,7 @@ const CareerHome = () => {
                   key={index} 
                   className={`text-center transition-all duration-700 ${isVisible ? 'animate-fade-up' : 'opacity-0'} ${item.animationDelay}`}
                 >
-                  <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold transform hover:rotate-12 transition-transform">
+                  <div className="bg-gradient-to-br from-lime-500 to-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold transform hover:rotate-12 transition-transform">
                     {item.step}
                   </div>
                   <h3 className="font-bold text-xl mb-2">{item.title}</h3>
@@ -540,37 +540,37 @@ const CareerHome = () => {
           
           <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
             <div className="grid md:grid-cols-3">
-              <div className="p-8 bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
+              <div className="p-8 bg-gradient-to-br from-lime-500 to-green-600 text-white">
                 <h3 className="text-xl font-bold mb-4">Our AI Career Analysis</h3>
                 <div className="text-3xl font-bold mb-4">$60</div>
-                <p className="mb-6 text-indigo-100">One-time payment for 30-day access</p>
+                <p className="mb-6 text-lime-100">One-time payment for 30-day access</p>
                 <ul className="space-y-3">
                   <li className="flex items-start">
-                    <span className="text-green-300 mr-2">✓</span>
+                    <span className="text-green-200 mr-2">✓</span>
                     <span>Personalized to your skills & background</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-300 mr-2">✓</span>
+                    <span className="text-green-200 mr-2">✓</span>
                     <span>Specific learning roadmap with timeline</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-300 mr-2">✓</span>
+                    <span className="text-green-200 mr-2">✓</span>
                     <span>Current market data on salary & demand</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-300 mr-2">✓</span>
+                    <span className="text-green-200 mr-2">✓</span>
                     <span>Complete transition strategy</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-300 mr-2">✓</span>
+                    <span className="text-green-200 mr-2">✓</span>
                     <span>Downloadable PDF report</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-300 mr-2">✓</span>
+                    <span className="text-green-200 mr-2">✓</span>
                     <span>Full platform access with learning resources</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-300 mr-2">✓</span>
+                    <span className="text-green-200 mr-2">✓</span>
                     <span>Interview preparation tools & guides</span>
                   </li>
                 </ul>
@@ -639,7 +639,7 @@ const CareerHome = () => {
 
         {/* Risk Reversal */}
         <section className="mb-20">
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-8 border border-green-100 shadow-sm max-w-4xl mx-auto">
+          <div className="bg-gradient-to-r from-green-50 to-lime-50 rounded-2xl p-8 border border-green-100 shadow-sm max-w-4xl mx-auto">
             <div className="flex flex-col md:flex-row items-center">
               <div className="text-4xl mr-6 text-green-500 mb-4 md:mb-0">🛡️</div>
               <div>
@@ -661,26 +661,26 @@ const CareerHome = () => {
             
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="text-4xl mb-4 text-indigo-600">💾</div>
+                <div className="text-4xl mb-4 text-lime-600">💾</div>
                 <h3 className="font-bold mb-2">Data-Driven</h3>
                 <p className="text-gray-600">Trained on thousands of successful tech career transitions</p>
               </div>
               
               <div className="text-center">
-                <div className="text-4xl mb-4 text-indigo-600">👨‍💼</div>
+                <div className="text-4xl mb-4 text-lime-600">👨‍💼</div>
                 <h3 className="font-bold mb-2">Expert Developed</h3>
                 <p className="text-gray-600">Created by tech industry leaders and career coaches</p>
               </div>
               
               <div className="text-center">
-                <div className="text-4xl mb-4 text-indigo-600">🔄</div>
+                <div className="text-4xl mb-4 text-lime-600">🔄</div>
                 <h3 className="font-bold mb-2">Regularly Updated</h3>
                 <p className="text-gray-600">Constantly refreshed with latest market trends and salary data</p>
               </div>
             </div>
             
-            <div className="mt-8 p-4 bg-indigo-50 rounded-lg">
-              <p className="text-sm text-indigo-700 text-center">
+            <div className="mt-8 p-4 bg-lime-50 rounded-lg">
+              <p className="text-sm text-lime-700 text-center">
                 Our AI analyzes 50+ factors from your background to create a truly personalized transition plan
               </p>
             </div>
@@ -695,7 +695,7 @@ const CareerHome = () => {
           <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto px-6">
             <div className="bg-white rounded-xl p-6 shadow-md">
               <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold">IO</div>
+                <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center text-lime-600 font-bold">IO</div>
                 <div className="ml-4">
                   <div className="font-bold">Isaac O.</div>
                   <div className="text-sm text-gray-500">Design & Tech Ops Coordinator</div>
@@ -705,7 +705,7 @@ const CareerHome = () => {
             </div>
             <div className="bg-white rounded-xl p-6 shadow-md">
               <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">TA</div>
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold">TA</div>
                 <div className="ml-4">
                   <div className="font-bold">Temitope A.</div>
                   <div className="text-sm text-gray-500">Project Manager</div>
@@ -715,7 +715,7 @@ const CareerHome = () => {
             </div>
             <div className="bg-white rounded-xl p-6 shadow-md">
               <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">OO</div>
+                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 font-bold">OO</div>
                 <div className="ml-4">
                   <div className="font-bold">Oyebolade O.</div>
                   <div className="text-sm text-gray-500">Technical Program Manager</div>
@@ -754,20 +754,20 @@ const CareerHome = () => {
 
         {/* CTA Section */}
         <section className="relative" aria-label="Call to action">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl blur-xl opacity-70"></div>
-          <div className="relative bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl p-8 md:p-12 text-center text-white shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-lime-500 rounded-3xl blur-xl opacity-70"></div>
+          <div className="relative bg-gradient-to-r from-green-500 to-lime-500 rounded-3xl p-8 md:p-12 text-center text-white shadow-2xl">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Find Your Tech Career Path?</h2>
-            <p className="mb-10 text-lg md:text-xl text-purple-100 max-w-3xl mx-auto">
+            <p className="mb-10 text-lg md:text-xl text-green-100 max-w-3xl mx-auto">
               Take our comprehensive assessment and get personalized recommendations for your tech career transition.
             </p>
             <button
               onClick={handleStartTest}
-              className="bg-white text-purple-600 px-8 md:px-12 py-4 md:py-5 rounded-full font-bold text-lg hover:bg-gradient-to-r hover:from-white hover:to-purple-50 transform hover:scale-105 transition-all duration-300 shadow-xl"
+              className="bg-white text-green-600 px-8 md:px-12 py-4 md:py-5 rounded-full font-bold text-lg hover:bg-gradient-to-r hover:from-white hover:to-green-50 transform hover:scale-105 transition-all duration-300 shadow-xl"
               aria-label="Begin your career assessment"
             >
               {currentUser ? "Continue Your Assessment" : "Begin Your Assessment"}
             </button>
-            <p className="mt-8 text-sm text-purple-200">
+            <p className="mt-8 text-sm text-green-200">
               Join the professionals who've successfully transitioned to tech careers
             </p>
           </div>

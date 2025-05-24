@@ -487,7 +487,7 @@ const CareerTest = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {options.map(option => (
-          <div key={option.value} className="flex items-center p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+          <div key={option.value} className="flex items-center p-3 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-all duration-200">
             <input
               type="checkbox"
               id={`${fieldName}-${option.value}`}
@@ -495,7 +495,7 @@ const CareerTest = () => {
               value={option.value}
               checked={formData[fieldName].includes(option.value)}
               onChange={() => handleCheckboxChange(fieldName, option.value)}
-              className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="mr-3 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
               required={required && formData[fieldName].length === 0}
             />
             <label 
@@ -556,7 +556,7 @@ const CareerTest = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="bg-white p-8 rounded-2xl shadow-xl">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
           <p className="text-gray-600 text-center font-medium">
             {aiAnalyzing ? "🤖 AI is analyzing your results..." : "Loading..."}
           </p>
@@ -572,7 +572,7 @@ const CareerTest = () => {
         <div className="container mx-auto px-6 py-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-lime-500 to-green-600 bg-clip-text text-transparent">
                 Career Transition to Tech
               </h1>
               <p className="text-gray-600 mt-2 text-lg">
@@ -581,7 +581,7 @@ const CareerTest = () => {
             </div>
             <button 
               onClick={() => navigate('/career')}
-              className="flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+              className="flex items-center text-green-600 hover:text-green-800 font-medium transition-colors duration-200"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -613,7 +613,7 @@ const CareerTest = () => {
         <div className="mb-8">
           <button 
             onClick={toggleAiAssistant}
-            className="flex items-center bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-6 rounded-2xl hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+            className="flex items-center bg-gradient-to-r from-lime-500 to-green-600 text-white py-3 px-6 rounded-2xl hover:from-lime-600 hover:to-green-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
           >
             <span className="text-2xl mr-3">🤖</span>
             <span className="font-semibold">
@@ -625,7 +625,7 @@ const CareerTest = () => {
           </button>
           
           {showAiAssistant && (
-            <div className="mt-4 bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-2xl border border-purple-200 shadow-lg animate-fadeIn">
+            <div className="mt-4 bg-gradient-to-r from-lime-50 to-green-50 p-6 rounded-2xl border border-lime-200 shadow-lg animate-fadeIn">
               <div className="flex items-start">
                 <div className="text-4xl mr-4">🚀</div>
                 <div className="flex-1">
@@ -635,7 +635,7 @@ const CareerTest = () => {
                   </p>
                   <button 
                     onClick={handleAiFillForm}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 font-semibold"
+                    className="bg-gradient-to-r from-lime-500 to-green-600 text-white py-3 px-6 rounded-xl hover:from-lime-600 hover:to-green-700 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 font-semibold"
                   >
                     ✨ Generate AI Suggestions
                   </button>
@@ -649,13 +649,13 @@ const CareerTest = () => {
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center mr-3 shadow-lg">
+              <div className="bg-gradient-to-r from-lime-500 to-green-600 text-white rounded-full w-10 h-10 flex items-center justify-center mr-3 shadow-lg">
                 <span className="font-bold">1</span>
               </div>
               <span className="font-semibold text-gray-800">Career Assessment</span>
             </div>
             <div className="flex-1 mx-4 h-2 bg-gray-200 rounded-full">
-              <div className="h-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full w-1/3"></div>
+              <div className="h-2 bg-gradient-to-r from-lime-500 to-green-600 rounded-full w-1/3"></div>
             </div>
             <div className="flex items-center">
               <div className="bg-gray-300 text-gray-600 rounded-full w-10 h-10 flex items-center justify-center mr-3">
@@ -687,7 +687,7 @@ const CareerTest = () => {
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="Enter your full name"
                   required
                 />
@@ -702,7 +702,7 @@ const CareerTest = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="Enter your email address"
                   required
                 />
@@ -717,7 +717,7 @@ const CareerTest = () => {
                 name="educationLevel"
                 value={formData.educationLevel}
                 onChange={handleChange}
-                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                 required
               >
                 <option value="">Select your education level</option>
@@ -742,7 +742,7 @@ const CareerTest = () => {
                   name="studyField"
                   value={formData.studyField}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="E.g., Computer Science, Biology, Business, etc."
                   required
                 />
@@ -757,7 +757,7 @@ const CareerTest = () => {
                   name="currentRole"
                   value={formData.currentRole}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="E.g., Research Assistant, Project Manager, Teacher, etc."
                   required
                 />
@@ -771,7 +771,7 @@ const CareerTest = () => {
                   name="yearsExperience"
                   value={formData.yearsExperience}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   required
                 >
                   <option value="">Select your experience level</option>
@@ -795,7 +795,7 @@ const CareerTest = () => {
                   name="jobResponsibilities"
                   value={formData.jobResponsibilities}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="Describe your main responsibilities in your current/previous role. Feel free to copy and paste from your resume."
                   rows="4"
                   required
@@ -811,7 +811,7 @@ const CareerTest = () => {
                   name="jobProjects"
                   value={formData.jobProjects}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="Describe 2-3 significant projects, achievements, or initiatives you've worked on"
                   rows="4"
                   required
@@ -827,7 +827,7 @@ const CareerTest = () => {
                   name="jobTechnologies"
                   value={formData.jobTechnologies}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="List all software, tools, systems, or technologies you've used professionally"
                   rows="3"
                   required
@@ -843,7 +843,7 @@ const CareerTest = () => {
                   name="internships"
                   value={formData.internships}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="Describe any internships, volunteer work, or other experiences relevant to technology"
                   rows="3"
                 />
@@ -858,7 +858,7 @@ const CareerTest = () => {
                   name="publications"
                   value={formData.publications}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="List any publications, research papers, articles, or blogs you've authored"
                   rows="3"
                 />
@@ -877,7 +877,7 @@ const CareerTest = () => {
                   name="techMotivation"
                   value={formData.techMotivation}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="What drives you to pursue a career in technology?"
                   rows="3"
                   required
@@ -892,7 +892,7 @@ const CareerTest = () => {
                   name="techPassion"
                   value={formData.techPassion}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="Describe topics, activities or causes you're passionate about"
                   rows="3"
                   required
@@ -911,7 +911,7 @@ const CareerTest = () => {
                   name="transitionReason"
                   value={formData.transitionReason}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   required
                 >
                   <option value="">Select your primary reason</option>
@@ -934,7 +934,7 @@ const CareerTest = () => {
                   name="transferableSkills"
                   value={formData.transferableSkills}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="E.g., analytical thinking, project management, attention to detail, problem-solving, etc."
                   rows="4"
                   required
@@ -949,7 +949,7 @@ const CareerTest = () => {
                   name="anticipatedChallenges"
                   value={formData.anticipatedChallenges}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="E.g., learning programming, technical terminology, finding entry-level positions, etc."
                   rows="4"
                   required
@@ -968,7 +968,7 @@ const CareerTest = () => {
                   name="techInterests"
                   value={formData.techInterests}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="E.g., web development, data science, cybersecurity, etc."
                   rows="3"
                   required
@@ -984,7 +984,7 @@ const CareerTest = () => {
                     name="learningComfort"
                     value={formData.learningComfort}
                     onChange={handleChange}
-                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                     required
                   >
                     <option value="">Select comfort level</option>
@@ -1003,7 +1003,7 @@ const CareerTest = () => {
                     name="workPreference"
                     value={formData.workPreference}
                     onChange={handleChange}
-                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                     required
                   >
                     <option value="">Select work preference</option>
@@ -1023,7 +1023,7 @@ const CareerTest = () => {
                   name="experienceLevel"
                   value={formData.experienceLevel}
                   onChange={handleChange}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   required
                 >
                   <option value="">Select experience level</option>
@@ -1054,7 +1054,7 @@ const CareerTest = () => {
                     name="certifications"
                     value={formData.certifications}
                     onChange={handleChange}
-                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                     required
                   >
                     <option value="">Select an option</option>
@@ -1072,7 +1072,7 @@ const CareerTest = () => {
                     name="certificationsDetail"
                     value={formData.certificationsDetail}
                     onChange={handleChange}
-                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                     placeholder="Enter your certifications (or type 'None')"
                     rows="3"
                     required
@@ -1248,14 +1248,14 @@ const CareerTest = () => {
             <div className="text-center">
               <div className="text-sm text-gray-600 mb-6">
                 By continuing, you agree to our{' '}
-                <a href="/terms" className="text-blue-600 hover:text-blue-800 font-medium">Terms of Service</a>
+                <a href="/terms" className="text-green-600 hover:text-green-800 font-medium">Terms of Service</a>
                 {' '}and acknowledge you've read our{' '}
-                <a href="/privacy" className="text-blue-600 hover:text-blue-800 font-medium">Privacy Policy</a>.
+                <a href="/privacy" className="text-green-600 hover:text-green-800 font-medium">Privacy Policy</a>.
               </div>
               
               <button 
                 type="submit" 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-12 rounded-2xl hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-lg font-semibold"
+                className="bg-gradient-to-r from-lime-500 to-green-600 text-white py-4 px-12 rounded-2xl hover:from-lime-600 hover:to-green-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-lg font-semibold"
               >
                 🚀 Get My Career Analysis
               </button>

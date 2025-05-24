@@ -479,20 +479,19 @@ const CareerDashboard = () => {
       {/* Enhanced Navigation Tabs - Green Theme */}
       <div className="sticky top-0 bg-white shadow-md z-40">
         <div className="container mx-auto px-6">
-          <div className="flex overflow-x-auto">
+          <div className="flex justify-center overflow-x-auto">
             {[
               { id: 'home', label: '🏠 Home', action: () => navigate('/') },
               { id: 'paths', label: '🤖 AI Career Paths' },
               { id: 'action', label: '⚡ Action Plan' },
               { id: 'resources', label: '📚 Resources'},
-              { id: 'export', label: '📄 Export', action: () => window.print() },
               { id: 'retake', label: '🔄 Retake', action: () => navigate('/career/test') }
             ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => tab.action ? tab.action() : setActiveTab(tab.id)}
                 className={`flex items-center px-6 py-4 font-medium transition-all duration-300 border-b-2 whitespace-nowrap ${
-                  tab.id === 'home' || tab.id === 'export' || tab.id === 'retake'
+                  tab.id === 'home' || tab.id === 'retake'
                     ? 'border-transparent text-gray-600 hover:text-green-600 hover:bg-green-50'
                     : activeTab === tab.id
                     ? 'border-green-600 text-green-600 bg-green-50'
@@ -551,7 +550,7 @@ const CareerDashboard = () => {
             {/* Quick Actions Section - Green Theme */}
             <div className="bg-white rounded-2xl p-6 shadow-lg">
               <h3 className="text-xl font-bold mb-6">Quick Actions</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <button 
                   onClick={() => navigate('/career/learning')}
                   className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-lime-500 to-green-600 text-white rounded-lg hover:from-lime-600 hover:to-green-700 transition-all transform hover:scale-105"
@@ -584,16 +583,6 @@ const CareerDashboard = () => {
                 >
                   <span className="text-2xl mb-2">🤝</span>
                   <span className="text-sm font-medium">Mentorship</span>
-                </a>
-                
-                <a 
-                  href="https://techtalentscity.com" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-yellow-500 to-green-500 text-white rounded-lg hover:from-yellow-600 hover:to-green-600 transition-all transform hover:scale-105"
-                >
-                  <span className="text-2xl mb-2">🚀</span>
-                  <span className="text-sm font-medium">Projects</span>
                 </a>
               </div>
             </div>

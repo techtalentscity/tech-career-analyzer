@@ -475,9 +475,9 @@ const CareerTest = () => {
   // Helper function to render a checkbox group
   const renderCheckboxGroup = (fieldName, options, required = false) => {
     return (
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {options.map(option => (
-          <div key={option.value} className="flex items-center">
+          <div key={option.value} className="flex items-center p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
             <input
               type="checkbox"
               id={`${fieldName}-${option.value}`}
@@ -485,12 +485,12 @@ const CareerTest = () => {
               value={option.value}
               checked={formData[fieldName].includes(option.value)}
               onChange={() => handleCheckboxChange(fieldName, option.value)}
-              className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               required={required && formData[fieldName].length === 0}
             />
             <label 
               htmlFor={`${fieldName}-${option.value}`}
-              className="text-sm font-medium text-gray-700"
+              className="text-sm font-medium text-gray-700 cursor-pointer flex-1"
             >
               {option.label}
             </label>
@@ -500,8 +500,18 @@ const CareerTest = () => {
     );
   };
 
+  // Beautiful Enhanced Loading Spinner
   if (loading || aiAnalyzing) {
-    return <LoadingSpinner message={aiAnalyzing ? "AI is analyzing your results..." : "Loading..."} />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl shadow-xl">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-center font-medium">
+            {aiAnalyzing ? "🤖 AI is analyzing your results..." : "Loading..."}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // Define options for checkbox groups
@@ -545,624 +555,714 @@ const CareerTest = () => {
     { value: 'Other', label: 'Other' }
   ];
 
-  return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Career Transition to Tech</h1>
-      <p className="mb-8">Help us understand your background and tech interests to recommend the best career path</p>
+  // Enhanced FormSection Component
+  const EnhancedFormSection = ({ title, children }) => (
+    <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b border-gray-200">
+        {title}
+      </h2>
+      {children}
+    </div>
+  );
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-          <p>{error}</p>
-        </div>
-      )}
-  
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <a href="#" onClick={() => navigate('/career')} className="text-blue-600">
-            Back to Home
-          </a>
-        </div>
-        
-        <button 
-          onClick={toggleAiAssistant}
-          className="flex items-center bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700"
-        >
-          <span className="mr-2">🤖</span>
-          {showAiAssistant ? 'Hide AI Assistant' : 'Use AI Assistant'}
-        </button>
-      </div>
-      
-      {showAiAssistant && (
-        <div className="bg-gray-100 p-4 rounded-lg mb-6">
-          <h3 className="text-xl font-semibold mb-2">AI Assistant</h3>
-          <p className="mb-4">Let our AI help you fill out the form or analyze your results.</p>
-          <div className="flex space-x-4">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b border-gray-100">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Career Transition to Tech
+              </h1>
+              <p className="text-gray-600 mt-2 text-lg">
+                Discover your perfect tech career path with AI-powered insights
+              </p>
+            </div>
             <button 
-              onClick={handleAiFillForm}
-              className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+              onClick={() => navigate('/career')}
+              className="flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
             >
-              Let AI Fill Form
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Home
             </button>
           </div>
         </div>
-      )}
-      
-      <div className="flex justify-between mb-8">
-        <div className="flex items-center">
-          <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-2">1</div>
-          <span className="font-semibold">Career Test</span>
-        </div>
-        <div className="flex items-center">
-          <div className="bg-gray-300 text-gray-700 rounded-full w-8 h-8 flex items-center justify-center mr-2">2</div>
-          <span>Analysis</span>
-        </div>
-        <div className="flex items-center">
-          <div className="bg-gray-300 text-gray-700 rounded-full w-8 h-8 flex items-center justify-center mr-2">3</div>
-          <span>Complete</span>
-        </div>
       </div>
-      
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <FormSection title="Personal Information">
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Full Name
-            </label>
-            <input
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="Enter your full name"
-              required
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Email Address
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="Enter your email address"
-              required
-            />
-          </div>
-          
-          {/* Education Level field */}
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Highest Level of Education
-            </label>
-            <select
-              name="educationLevel"
-              value={formData.educationLevel}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="High School">High School</option>
-              <option value="Associate's Degree">Associate's Degree</option>
-              <option value="Bachelor's Degree">Bachelor's Degree</option>
-              <option value="Master's Degree">Master's Degree</option>
-              <option value="PhD">PhD</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-        </FormSection>
-        
-        <FormSection title="Educational Background">
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Most Recent Course of Study
-            </label>
-            <input
-              type="text"
-              name="studyField"
-              value={formData.studyField}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="E.g., Computer Science, Biology, Business, etc."
-              required
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Current or Most Recent Job Title
-            </label>
-            <input
-              type="text"
-              name="currentRole"
-              value={formData.currentRole}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="E.g., Research Assistant, Project Manager, Teacher, etc."
-              required
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Years of Experience in Current/Previous Field
-            </label>
-            <select
-              name="yearsExperience"
-              value={formData.yearsExperience}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="Less than 1 year">Less than 1 year</option>
-              <option value="1-3 years">1-3 years</option>
-              <option value="3-5 years">3-5 years</option>
-              <option value="5-10 years">5-10 years</option>
-              <option value="10+ years">10+ years</option>
-            </select>
-          </div>
-        </FormSection>
-        
-        {/* Job Experience Section */}
-        <FormSection title="Experience Details">
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Key Job Responsibilities
-            </label>
-            <textarea
-              name="jobResponsibilities"
-              value={formData.jobResponsibilities}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="Describe your main responsibilities in your current/previous role. Feel free to copy and paste from your resume."
-              rows="4"
-              required
-            />
-            <p className="text-sm text-gray-500 mt-1">List your key responsibilities, tasks performed, or duties from your current/previous job</p>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Notable Projects or Achievements
-            </label>
-            <textarea
-              name="jobProjects"
-              value={formData.jobProjects}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="Describe 2-3 significant projects, achievements, or initiatives you've worked on"
-              rows="4"
-              required
-            />
-            <p className="text-sm text-gray-500 mt-1">Include measurable results if possible (e.g., "Increased efficiency by 20%", "Managed a team of 5")</p>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Software or Technologies Used
-            </label>
-            <textarea
-              name="jobTechnologies"
-              value={formData.jobTechnologies}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="List all software, tools, systems, or technologies you've used professionally"
-              rows="3"
-              required
-            />
-            <p className="text-sm text-gray-500 mt-1">Include all technical and non-technical tools (e.g., CRM systems, MS Office, specialized software)</p>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              Internships or Relevant Experience
-            </label>
-            <textarea
-              name="internships"
-              value={formData.internships}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="Describe any internships, volunteer work, or other experiences relevant to technology"
-              rows="3"
-            />
-            <p className="text-sm text-gray-500 mt-1">Include any tech-related side projects, freelance work, or personal initiatives</p>
-          </div>
-          
-          {/* Publications field */}
-          <div className="mb-4">
-            <label className="block mb-2">
-              Publications, Papers, Articles, or Blogs
-            </label>
-            <textarea
-              name="publications"
-              value={formData.publications}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="List any publications, research papers, articles, or blogs you've authored"
-              rows="3"
-            />
-            <p className="text-sm text-gray-500 mt-1">Include titles, publications, dates, and brief descriptions if applicable</p>
-          </div>
-        </FormSection>
-        
-        <FormSection title="Motivation & Personal Strengths">
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> What is your biggest motivation for pursuing a tech career?
-            </label>
-            <textarea
-              name="techMotivation"
-              value={formData.techMotivation}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="What drives you to pursue a career in technology?"
-              rows="3"
-              required
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> What are you passionate about?
-            </label>
-            <textarea
-              name="techPassion"
-              value={formData.techPassion}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="Describe topics, activities or causes you're passionate about"
-              rows="3"
-              required
-            />
-          </div>
-        </FormSection>
-        
-        <FormSection title="Transition Information">
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> What is your primary reason for transitioning to tech?
-            </label>
-            <select
-              name="transitionReason"
-              value={formData.transitionReason}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="Better career prospects">Better career prospects</option>
-              <option value="Higher salary potential">Higher salary potential</option>
-              <option value="Work-life balance">Work-life balance</option>
-              <option value="Remote work opportunities">Remote work opportunities</option>
-              <option value="Interest in technology">Interest in technology</option>
-              <option value="Career advancement">Career advancement</option>
-              <option value="Industry is changing/declining">Industry is changing/declining</option>
-              <option value="Other">Other (please specify in comments)</option>
-            </select>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Which skills from your current/previous career do you believe will transfer well to tech?
-            </label>
-            <textarea
-              name="transferableSkills"
-              value={formData.transferableSkills}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="E.g., analytical thinking, project management, attention to detail, problem-solving, etc."
-              rows="4"
-              required
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> What challenges do you anticipate in transitioning to tech?
-            </label>
-            <textarea
-              name="anticipatedChallenges"
-              value={formData.anticipatedChallenges}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="E.g., learning programming, technical terminology, finding entry-level positions, etc."
-              rows="4"
-              required
-            />
-          </div>
-        </FormSection>
-        
-        <FormSection title="Tech Preferences & Experience">
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Which tech areas are you most curious about or interested in learning?
-            </label>
-            <textarea
-              name="techInterests"
-              value={formData.techInterests}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="E.g., web development, data science, cybersecurity, etc."
-              rows="3"
-              required
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> How comfortable are you with learning new tools or programming languages?
-            </label>
-            <select
-              name="learningComfort"
-              value={formData.learningComfort}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="Very comfortable">Very comfortable</option>
-              <option value="Comfortable">Comfortable</option>
-              <option value="Somewhat comfortable">Somewhat comfortable</option>
-              <option value="Not very comfortable">Not very comfortable</option>
-            </select>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> How do you prefer to work?
-            </label>
-            <select
-              name="workPreference"
-              value={formData.workPreference}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="Remote work">Remote work</option>
-              <option value="Office work">Office work</option>
-              <option value="Hybrid">Hybrid</option>
-              <option value="Flexible">Flexible</option>
-            </select>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Which of these best describes your current experience level in tech?
-            </label>
-            <select
-              name="experienceLevel"
-              value={formData.experienceLevel}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="Complete beginner">Complete beginner</option>
-              <option value="Some exposure">Some exposure</option>
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Advanced">Advanced</option>
-            </select>
-          </div>
-          
-          {/* CONVERTED: Tools Used - From multi-select to checkboxes */}
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Which of the following tools or platforms have you used before?
-            </label>
-            <div className="bg-white border rounded-md p-3">
-              {renderCheckboxGroup('toolsUsed', toolsOptions, true)}
+
+      <div className="container mx-auto px-6 py-8">
+        {/* Error Alert */}
+        {error && (
+          <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-8 rounded-r-lg animate-pulse">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
             </div>
-            <p className="text-sm text-gray-500 mt-1">Select all that apply</p>
           </div>
+        )}
+
+        {/* AI Assistant */}
+        <div className="mb-8">
+          <button 
+            onClick={toggleAiAssistant}
+            className="flex items-center bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-6 rounded-2xl hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+          >
+            <span className="text-2xl mr-3">🤖</span>
+            <span className="font-semibold">
+              {showAiAssistant ? 'Hide AI Assistant' : 'Use AI Assistant'}
+            </span>
+            <svg className={`w-5 h-5 ml-2 transform transition-transform duration-300 ${showAiAssistant ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
           
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Do you already have any certifications or completed courses?
-            </label>
-            <select
-              name="certifications"
-              value={formData.certifications}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
-              <option value="Currently pursuing">Currently pursuing</option>
-            </select>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> List Any Certifications that you have
-            </label>
-            <textarea
-              name="certificationsDetail"
-              value={formData.certificationsDetail}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="Enter your answer (or type 'None' if you don't have any)"
-              rows="3"
-              required
-            />
-          </div>
-        </FormSection>
-        
-        <FormSection title="Tech Career Aspirations">
-          {/* CONVERTED: Career Paths - From multi-select to checkboxes */}
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Which tech career paths are you most interested in exploring?
-            </label>
-            <div className="bg-white border rounded-md p-3 max-h-64 overflow-y-auto">
-              {renderCheckboxGroup('careerPathsInterest', careerPathsOptions, true)}
+          {showAiAssistant && (
+            <div className="mt-4 bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-2xl border border-purple-200 shadow-lg animate-fadeIn">
+              <div className="flex items-start">
+                <div className="text-4xl mr-4">🚀</div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-800 mb-2">AI-Powered Career Assistant</h3>
+                  <p className="text-gray-600 mb-4">
+                    Let our advanced AI analyze your background and automatically fill out the form with personalized suggestions based on your career goals.
+                  </p>
+                  <button 
+                    onClick={handleAiFillForm}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 font-semibold"
+                  >
+                    ✨ Generate AI Suggestions
+                  </button>
+                </div>
+              </div>
             </div>
-            <p className="text-sm text-gray-500 mt-1">Select all that apply</p>
-          </div>
-          
-          {/* CONVERTED: Industry Preference - From multi-select to checkboxes */}
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Do you have a preference for working in specific industries or sectors with your tech skills?
-            </label>
-            <div className="bg-white border rounded-md p-3">
-              {renderCheckboxGroup('industryPreference', industryOptions, true)}
-            </div>
-            <p className="text-sm text-gray-500 mt-1">Select all that apply</p>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Would you prefer to leverage your domain expertise from your current field in your tech role?
-            </label>
-            <select
-              name="leverageDomainExpertise"
-              value={formData.leverageDomainExpertise}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="Yes, definitely">Yes, definitely</option>
-              <option value="Yes, somewhat">Yes, somewhat</option>
-              <option value="Not sure">Not sure</option>
-              <option value="No, I want a complete change">No, I want a complete change</option>
-            </select>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> What salary range are you targeting in your tech role?
-            </label>
-            <select
-              name="targetSalary"
-              value={formData.targetSalary}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="$40,000-$60,000">$40,000-$60,000</option>
-              <option value="$60,000-$80,000">$60,000-$80,000</option>
-              <option value="$80,000-$100,000">$80,000-$100,000</option>
-              <option value="$100,000-$120,000">$100,000-$120,000</option>
-              <option value="$120,000+">$120,000+</option>
-              <option value="Not sure">Not sure</option>
-            </select>
-          </div>
-        </FormSection>
-        
-        <FormSection title="Commitment & Goals">
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> How much time can you realistically commit to learning or working on a project each week?
-            </label>
-            <select
-              name="timeCommitment"
-              value={formData.timeCommitment}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="5 hours or less">5 hours or less</option>
-              <option value="5-10 hours">5-10 hours</option>
-              <option value="10-15 hours">10-15 hours</option>
-              <option value="15-20 hours">15-20 hours</option>
-              <option value="20+ hours">20+ hours</option>
-            </select>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> What timeline do you envision for your transition to tech?
-            </label>
-            <select
-              name="transitionTimeline"
-              value={formData.transitionTimeline}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="Less than 6 months">Less than 6 months</option>
-              <option value="6-12 months">6-12 months</option>
-              <option value="1-2 years">1-2 years</option>
-              <option value="2+ years">2+ years</option>
-              <option value="Already transitioning">Already transitioning</option>
-            </select>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> Are you planning to continue in your current role while learning tech skills?
-            </label>
-            <select
-              name="continueCurrent"
-              value={formData.continueCurrent}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select an option</option>
-              <option value="Yes, continuing full-time">Yes, continuing full-time</option>
-              <option value="Yes, but reducing to part-time">Yes, but reducing to part-time</option>
-              <option value="No, focusing exclusively on the transition">No, focusing exclusively on the transition</option>
-              <option value="Currently unemployed/between roles">Currently unemployed/between roles</option>
-            </select>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> What kind of guidance do you need most right now?
-            </label>
-            <textarea
-              name="guidanceNeeded"
-              value={formData.guidanceNeeded}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="E.g., learning resources, career roadmap, resume help, etc."
-              rows="3"
-              required
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2">
-              <span className="text-red-500">*</span> In the next 12 months, where would you like to be in your tech journey?
-            </label>
-            <textarea
-              name="futureGoal"
-              value={formData.futureGoal}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              placeholder="E.g., completing a bootcamp, landing first tech job, etc."
-              rows="3"
-              required
-            />
-          </div>
-        </FormSection>
-        
-        <div className="text-sm text-gray-600 mb-6">
-          By continuing, you agree to the <a href="/terms" className="text-blue-600">Terms of Service</a> and acknowledge you've read our <a href="/privacy" className="text-blue-600">Privacy Policy</a>.
+          )}
         </div>
         
-        <button 
-          type="submit" 
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
-        >
-          Continue to Results
-        </button>
-      </form>
+        {/* Progress Indicator */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center mr-3 shadow-lg">
+                <span className="font-bold">1</span>
+              </div>
+              <span className="font-semibold text-gray-800">Career Assessment</span>
+            </div>
+            <div className="flex-1 mx-4 h-2 bg-gray-200 rounded-full">
+              <div className="h-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full w-1/3"></div>
+            </div>
+            <div className="flex items-center">
+              <div className="bg-gray-300 text-gray-600 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                <span className="font-bold">2</span>
+              </div>
+              <span className="text-gray-500">AI Analysis</span>
+            </div>
+            <div className="flex-1 mx-4 h-2 bg-gray-200 rounded-full">
+              <div className="h-2 bg-gray-200 rounded-full w-0"></div>
+            </div>
+            <div className="flex items-center">
+              <div className="bg-gray-300 text-gray-600 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                <span className="font-bold">3</span>
+              </div>
+              <span className="text-gray-500">Results</span>
+            </div>
+          </div>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <EnhancedFormSection title="👤 Personal Information">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> Full Name
+                </label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="Enter your full name"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> Email Address
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="Enter your email address"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="mt-6">
+              <label className="block mb-2 text-sm font-semibold text-gray-700">
+                <span className="text-red-500">*</span> Highest Level of Education
+              </label>
+              <select
+                name="educationLevel"
+                value={formData.educationLevel}
+                onChange={handleChange}
+                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                required
+              >
+                <option value="">Select your education level</option>
+                <option value="High School">High School</option>
+                <option value="Associate's Degree">Associate's Degree</option>
+                <option value="Bachelor's Degree">Bachelor's Degree</option>
+                <option value="Master's Degree">Master's Degree</option>
+                <option value="PhD">PhD</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </EnhancedFormSection>
+          
+          <EnhancedFormSection title="🎓 Educational Background">
+            <div className="space-y-6">
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> Most Recent Course of Study
+                </label>
+                <input
+                  type="text"
+                  name="studyField"
+                  value={formData.studyField}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="E.g., Computer Science, Biology, Business, etc."
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> Current or Most Recent Job Title
+                </label>
+                <input
+                  type="text"
+                  name="currentRole"
+                  value={formData.currentRole}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="E.g., Research Assistant, Project Manager, Teacher, etc."
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> Years of Experience in Current/Previous Field
+                </label>
+                <select
+                  name="yearsExperience"
+                  value={formData.yearsExperience}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  required
+                >
+                  <option value="">Select your experience level</option>
+                  <option value="Less than 1 year">Less than 1 year</option>
+                  <option value="1-3 years">1-3 years</option>
+                  <option value="3-5 years">3-5 years</option>
+                  <option value="5-10 years">5-10 years</option>
+                  <option value="10+ years">10+ years</option>
+                </select>
+              </div>
+            </div>
+          </EnhancedFormSection>
+          
+          <EnhancedFormSection title="💼 Experience Details">
+            <div className="space-y-6">
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> Key Job Responsibilities
+                </label>
+                <textarea
+                  name="jobResponsibilities"
+                  value={formData.jobResponsibilities}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="Describe your main responsibilities in your current/previous role. Feel free to copy and paste from your resume."
+                  rows="4"
+                  required
+                />
+                <p className="text-sm text-gray-500 mt-2">List your key responsibilities, tasks performed, or duties from your current/previous job</p>
+              </div>
+              
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> Notable Projects or Achievements
+                </label>
+                <textarea
+                  name="jobProjects"
+                  value={formData.jobProjects}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="Describe 2-3 significant projects, achievements, or initiatives you've worked on"
+                  rows="4"
+                  required
+                />
+                <p className="text-sm text-gray-500 mt-2">Include measurable results if possible (e.g., "Increased efficiency by 20%", "Managed a team of 5")</p>
+              </div>
+              
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> Software or Technologies Used
+                </label>
+                <textarea
+                  name="jobTechnologies"
+                  value={formData.jobTechnologies}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="List all software, tools, systems, or technologies you've used professionally"
+                  rows="3"
+                  required
+                />
+                <p className="text-sm text-gray-500 mt-2">Include all technical and non-technical tools (e.g., CRM systems, MS Office, specialized software)</p>
+              </div>
+              
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  Internships or Relevant Experience
+                </label>
+                <textarea
+                  name="internships"
+                  value={formData.internships}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="Describe any internships, volunteer work, or other experiences relevant to technology"
+                  rows="3"
+                />
+                <p className="text-sm text-gray-500 mt-2">Include any tech-related side projects, freelance work, or personal initiatives</p>
+              </div>
+              
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  Publications, Papers, Articles, or Blogs
+                </label>
+                <textarea
+                  name="publications"
+                  value={formData.publications}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="List any publications, research papers, articles, or blogs you've authored"
+                  rows="3"
+                />
+                <p className="text-sm text-gray-500 mt-2">Include titles, publications, dates, and brief descriptions if applicable</p>
+              </div>
+            </div>
+          </EnhancedFormSection>
+          
+          <EnhancedFormSection title="💡 Motivation & Personal Strengths">
+            <div className="space-y-6">
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> What is your biggest motivation for pursuing a tech career?
+                </label>
+                <textarea
+                  name="techMotivation"
+                  value={formData.techMotivation}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="What drives you to pursue a career in technology?"
+                  rows="3"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> What are you passionate about?
+                </label>
+                <textarea
+                  name="techPassion"
+                  value={formData.techPassion}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="Describe topics, activities or causes you're passionate about"
+                  rows="3"
+                  required
+                />
+              </div>
+            </div>
+          </EnhancedFormSection>
+          
+          <EnhancedFormSection title="🔄 Transition Information">
+            <div className="space-y-6">
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> What is your primary reason for transitioning to tech?
+                </label>
+                <select
+                  name="transitionReason"
+                  value={formData.transitionReason}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  required
+                >
+                  <option value="">Select your primary reason</option>
+                  <option value="Better career prospects">Better career prospects</option>
+                  <option value="Higher salary potential">Higher salary potential</option>
+                  <option value="Work-life balance">Work-life balance</option>
+                  <option value="Remote work opportunities">Remote work opportunities</option>
+                  <option value="Interest in technology">Interest in technology</option>
+                  <option value="Career advancement">Career advancement</option>
+                  <option value="Industry is changing/declining">Industry is changing/declining</option>
+                  <option value="Other">Other (please specify in comments)</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> Which skills from your current/previous career do you believe will transfer well to tech?
+                </label>
+                <textarea
+                  name="transferableSkills"
+                  value={formData.transferableSkills}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="E.g., analytical thinking, project management, attention to detail, problem-solving, etc."
+                  rows="4"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> What challenges do you anticipate in transitioning to tech?
+                </label>
+                <textarea
+                  name="anticipatedChallenges"
+                  value={formData.anticipatedChallenges}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="E.g., learning programming, technical terminology, finding entry-level positions, etc."
+                  rows="4"
+                  required
+                />
+              </div>
+            </div>
+          </EnhancedFormSection>
+          
+          <EnhancedFormSection title="🛠️ Tech Preferences & Experience">
+            <div className="space-y-6">
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> Which tech areas are you most curious about or interested in learning?
+                </label>
+                <textarea
+                  name="techInterests"
+                  value={formData.techInterests}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="E.g., web development, data science, cybersecurity, etc."
+                  rows="3"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block mb-2 text-sm font-semibold text-gray-700">
+                    <span className="text-red-500">*</span> Learning Comfort Level
+                  </label>
+                  <select
+                    name="learningComfort"
+                    value={formData.learningComfort}
+                    onChange={handleChange}
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    required
+                  >
+                    <option value="">Select comfort level</option>
+                    <option value="Very comfortable">Very comfortable</option>
+                    <option value="Comfortable">Comfortable</option>
+                    <option value="Somewhat comfortable">Somewhat comfortable</option>
+                    <option value="Not very comfortable">Not very comfortable</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block mb-2 text-sm font-semibold text-gray-700">
+                    <span className="text-red-500">*</span> Work Preference
+                  </label>
+                  <select
+                    name="workPreference"
+                    value={formData.workPreference}
+                    onChange={handleChange}
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    required
+                  >
+                    <option value="">Select work preference</option>
+                    <option value="Remote work">Remote work</option>
+                    <option value="Office work">Office work</option>
+                    <option value="Hybrid">Hybrid</option>
+                    <option value="Flexible">Flexible</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> Current Tech Experience Level
+                </label>
+                <select
+                  name="experienceLevel"
+                  value={formData.experienceLevel}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  required
+                >
+                  <option value="">Select experience level</option>
+                  <option value="Complete beginner">Complete beginner</option>
+                  <option value="Some exposure">Some exposure</option>
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block mb-4 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> Which tools or platforms have you used before?
+                </label>
+                <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6">
+                  {renderCheckboxGroup('toolsUsed', toolsOptions, true)}
+                </div>
+                <p className="text-sm text-gray-500 mt-2">Select all that apply</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block mb-2 text-sm font-semibold text-gray-700">
+                    <span className="text-red-500">*</span> Existing Certifications
+                  </label>
+                  <select
+                    name="certifications"
+                    value={formData.certifications}
+                    onChange={handleChange}
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    required
+                  >
+                    <option value="">Select an option</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                    <option value="Currently pursuing">Currently pursuing</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block mb-2 text-sm font-semibold text-gray-700">
+                    <span className="text-red-500">*</span> Certification Details
+                  </label>
+                  <textarea
+                    name="certificationsDetail"
+                    value={formData.certificationsDetail}
+                    onChange={handleChange}
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    placeholder="Enter your certifications (or type 'None')"
+                    rows="3"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          </EnhancedFormSection>
+          
+          <EnhancedFormSection title="🚀 Tech Career Aspirations">
+            <div className="space-y-6">
+              <div>
+                <label className="block mb-4 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> Which tech career paths interest you most?
+                </label>
+                <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6 max-h-80 overflow-y-auto">
+                  {renderCheckboxGroup('careerPathsInterest', careerPathsOptions, true)}
+                </div>
+                <p className="text-sm text-gray-500 mt-2">Select all that apply</p>
+              </div>
+              
+              <div>
+                <label className="block mb-4 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> Industry Preferences
+                </label>
+                <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6">
+                  {renderCheckboxGroup('industryPreference', industryOptions, true)}
+                </div>
+                <p className="text-sm text-gray-500 mt-2">Select all that apply</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block mb-2 text-sm font-semibold text-gray-700">
+                    <span className="text-red-500">*</span> Leverage Domain Expertise?
+                  </label>
+                  <select
+                    name="leverageDomainExpertise"
+                    value={formData.leverageDomainExpertise}
+                    onChange={handleChange}
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    required
+                  >
+                    <option value="">Select an option</option>
+                    <option value="Yes, definitely">Yes, definitely</option>
+                    <option value="Yes, somewhat">Yes, somewhat</option>
+                    <option value="Not sure">Not sure</option>
+                    <option value="No, I want a complete change">No, I want a complete change</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block mb-2 text-sm font-semibold text-gray-700">
+                    <span className="text-red-500">*</span> Target Salary Range
+                  </label>
+                  <select
+                    name="targetSalary"
+                    value={formData.targetSalary}
+                    onChange={handleChange}
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    required
+                  >
+                    <option value="">Select salary range</option>
+                    <option value="$40,000-$60,000">$40,000-$60,000</option>
+                    <option value="$60,000-$80,000">$60,000-$80,000</option>
+                    <option value="$80,000-$100,000">$80,000-$100,000</option>
+                    <option value="$100,000-$120,000">$100,000-$120,000</option>
+                    <option value="$120,000+">$120,000+</option>
+                    <option value="Not sure">Not sure</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </EnhancedFormSection>
+          
+          <EnhancedFormSection title="⏰ Commitment & Goals">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block mb-2 text-sm font-semibold text-gray-700">
+                    <span className="text-red-500">*</span> Weekly Time Commitment
+                  </label>
+                  <select
+                    name="timeCommitment"
+                    value={formData.timeCommitment}
+                    onChange={handleChange}
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    required
+                  >
+                    <option value="">Select time commitment</option>
+                    <option value="5 hours or less">5 hours or less</option>
+                    <option value="5-10 hours">5-10 hours</option>
+                    <option value="10-15 hours">10-15 hours</option>
+                    <option value="15-20 hours">15-20 hours</option>
+                    <option value="20+ hours">20+ hours</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block mb-2 text-sm font-semibold text-gray-700">
+                    <span className="text-red-500">*</span> Transition Timeline
+                  </label>
+                  <select
+                    name="transitionTimeline"
+                    value={formData.transitionTimeline}
+                    onChange={handleChange}
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    required
+                  >
+                    <option value="">Select timeline</option>
+                    <option value="Less than 6 months">Less than 6 months</option>
+                    <option value="6-12 months">6-12 months</option>
+                    <option value="1-2 years">1-2 years</option>
+                    <option value="2+ years">2+ years</option>
+                    <option value="Already transitioning">Already transitioning</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> Current Role Status
+                </label>
+                <select
+                  name="continueCurrent"
+                  value={formData.continueCurrent}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  required
+                >
+                  <option value="">Select current status</option>
+                  <option value="Yes, continuing full-time">Yes, continuing full-time</option>
+                  <option value="Yes, but reducing to part-time">Yes, but reducing to part-time</option>
+                  <option value="No, focusing exclusively on the transition">No, focusing exclusively on the transition</option>
+                  <option value="Currently unemployed/between roles">Currently unemployed/between roles</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> What guidance do you need most right now?
+                </label>
+                <textarea
+                  name="guidanceNeeded"
+                  value={formData.guidanceNeeded}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="E.g., learning resources, career roadmap, resume help, etc."
+                  rows="3"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  <span className="text-red-500">*</span> 12-Month Goal
+                </label>
+                <textarea
+                  name="futureGoal"
+                  value={formData.futureGoal}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="E.g., completing a bootcamp, landing first tech job, etc."
+                  rows="3"
+                  required
+                />
+              </div>
+            </div>
+          </EnhancedFormSection>
+          
+          {/* Terms and Submit */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+            <div className="text-center">
+              <div className="text-sm text-gray-600 mb-6">
+                By continuing, you agree to our{' '}
+                <a href="/terms" className="text-blue-600 hover:text-blue-800 font-medium">Terms of Service</a>
+                {' '}and acknowledge you've read our{' '}
+                <a href="/privacy" className="text-blue-600 hover:text-blue-800 font-medium">Privacy Policy</a>.
+              </div>
+              
+              <button 
+                type="submit" 
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-12 rounded-2xl hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-lg font-semibold"
+              >
+                🚀 Get My Career Analysis
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

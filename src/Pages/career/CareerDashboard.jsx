@@ -1,4 +1,4 @@
-// CareerDashboard.jsx - FULLY AI-POWERED VERSION
+// CareerDashboard.jsx - FULLY AI-POWERED VERSION WITH PDF DOWNLOADS
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -68,32 +68,166 @@ const CareerDashboard = () => {
   const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeX9C7YtHTSBy4COsV6KaogdEvrjXoVQ0O2psoyfs1xqrySNg/formResponse';
 
   // ============================================================================
-  // DOWNLOAD FUNCTIONALITY FOR AI CONTENT
+  // PDF DOWNLOAD FUNCTIONALITY FOR AI CONTENT
   // ============================================================================
 
-  const downloadContent = (content, filename, type = 'text') => {
-    let dataStr;
-    let downloadType;
-
-    if (type === 'json') {
-      dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(content, null, 2));
-      downloadType = 'json';
-    } else if (type === 'markdown') {
-      dataStr = "data:text/markdown;charset=utf-8," + encodeURIComponent(content);
-      downloadType = 'md';
-    } else {
-      dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(content);
-      downloadType = 'txt';
-    }
-
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", `${filename}.${downloadType}`);
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
+  const downloadAsPDF = (content, filename) => {
+    // Create a temporary HTML document for PDF generation
+    const printWindow = window.open('', '_blank');
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${filename}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              margin: 40px;
+              color: #333;
+            }
+            h1 {
+              color: #2563eb;
+              border-bottom: 3px solid #2563eb;
+              padding-bottom: 10px;
+              font-size: 24px;
+            }
+            h2 {
+              color: #059669;
+              margin-top: 30px;
+              margin-bottom: 15px;
+              font-size: 18px;
+            }
+            h3 {
+              color: #7c3aed;
+              margin-top: 20px;
+              margin-bottom: 10px;
+              font-size: 16px;
+            }
+            h4 {
+              color: #dc2626;
+              margin-top: 15px;
+              margin-bottom: 8px;
+              font-size: 14px;
+            }
+            p, li {
+              margin-bottom: 8px;
+              font-size: 12px;
+            }
+            ul, ol {
+              margin-left: 20px;
+            }
+            .metadata {
+              background-color: #f3f4f6;
+              padding: 15px;
+              border-radius: 8px;
+              margin-bottom: 20px;
+              font-size: 11px;
+            }
+            .section {
+              margin-bottom: 25px;
+              page-break-inside: avoid;
+            }
+            .divider {
+              border-top: 1px solid #e5e7eb;
+              margin: 20px 0;
+            }
+            strong {
+              color: #1f2937;
+            }
+            @media print {
+              body { margin: 20px; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          ${formatContentForPDF(content)}
+          <div class="no-print" style="margin-top: 30px; text-align: center;">
+            <button onclick="window.print()" style="background: #059669; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer;">
+              Download as PDF
+            </button>
+            <button onclick="window.close()" style="background: #6b7280; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; margin-left: 10px;">
+              Close
+            </button>
+          </div>
+        </body>
+      </html>
+    `;
     
-    toast.success(`${filename} downloaded successfully!`);
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    
+    // Auto-trigger print dialog after content loads
+    printWindow.onload = function() {
+      setTimeout(() => {
+        printWindow.print();
+      }, 250);
+    };
+    
+    toast.success(`${filename} opened for PDF download!`);
+  };
+
+  const formatContentForPDF = (content) => {
+    // Convert markdown-like content to HTML
+    const lines = content.split('\n');
+    let html = '';
+    let inList = false;
+    
+    lines.forEach((line) => {
+      const trimmedLine = line.trim();
+      
+      if (trimmedLine === '') {
+        if (inList) {
+          html += '</ul>';
+          inList = false;
+        }
+        html += '<br>';
+      } else if (trimmedLine.startsWith('# ')) {
+        if (inList) { html += '</ul>'; inList = false; }
+        html += `<h1>${trimmedLine.substring(2)}</h1>`;
+      } else if (trimmedLine.startsWith('## ')) {
+        if (inList) { html += '</ul>'; inList = false; }
+        html += `<h2>${trimmedLine.substring(3)}</h2>`;
+      } else if (trimmedLine.startsWith('### ')) {
+        if (inList) { html += '</ul>'; inList = false; }
+        html += `<h3>${trimmedLine.substring(4)}</h3>`;
+      } else if (trimmedLine.startsWith('#### ')) {
+        if (inList) { html += '</ul>'; inList = false; }
+        html += `<h4>${trimmedLine.substring(5)}</h4>`;
+      } else if (trimmedLine === '---') {
+        if (inList) { html += '</ul>'; inList = false; }
+        html += '<div class="divider"></div>';
+      } else if (trimmedLine.startsWith('- ')) {
+        if (!inList) {
+          html += '<ul>';
+          inList = true;
+        }
+        html += `<li>${formatText(trimmedLine.substring(2))}</li>`;
+      } else {
+        if (inList) {
+          html += '</ul>';
+          inList = false;
+        }
+        if (trimmedLine.includes('Generated on:') || trimmedLine.includes('User:') || 
+            trimmedLine.includes('Timeline:') || trimmedLine.includes('Career Match:')) {
+          html += `<div class="metadata">${formatText(trimmedLine)}</div>`;
+        } else {
+          html += `<p>${formatText(trimmedLine)}</p>`;
+        }
+      }
+    });
+    
+    if (inList) {
+      html += '</ul>';
+    }
+    
+    return html;
+  };
+
+  const formatText = (text) => {
+    // Convert **bold** to <strong>
+    return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   };
 
   const downloadCareerRecommendations = () => {
@@ -121,7 +255,7 @@ ${career.keySkills.map(skill => `- ${skill}`).join('\n')}
 ---
 `).join('\n')}`;
 
-    downloadContent(content, `AI_Career_Recommendations_${userData.name}`, 'markdown');
+    downloadAsPDF(content, `AI_Career_Recommendations_${userData.name}`);
   };
 
   const downloadRoadmap = () => {
@@ -151,7 +285,7 @@ ${phase.skills ? phase.skills.map(skill => `- ${skill}`).join('\n') : 'No specif
 ---
 `).join('\n')}`;
 
-    downloadContent(content, `AI_Career_Roadmap_${personalizedRoadmap.careerTitle}_${userData.name}`, 'markdown');
+    downloadAsPDF(content, `AI_Career_Roadmap_${personalizedRoadmap.careerTitle}_${userData.name}`);
   };
 
   const downloadMarketInsights = () => {
@@ -201,7 +335,7 @@ ${marketInsights.recommendations.map(rec => `
 **Action:** ${rec.action}
 `).join('\n')}`;
 
-    downloadContent(content, `AI_Market_Insights_${marketInsights.careerTitle}_${userData.name}`, 'markdown');
+    downloadAsPDF(content, `AI_Market_Insights_${marketInsights.careerTitle}_${userData.name}`);
   };
 
   const downloadActionPlan = () => {
@@ -229,7 +363,7 @@ ${step.resources.map(resource => `- ${resource}`).join('\n')}` : ''}
 ---
 `).join('\n')}`;
 
-    downloadContent(content, `AI_Action_Plan_${userData.name}`, 'markdown');
+    downloadAsPDF(content, `AI_Action_Plan_${userData.name}`);
   };
 
   const downloadLearningPlan = () => {
@@ -291,7 +425,7 @@ ${learningPlan.communityResources.map(community => `
 ${community.url ? `**URL:** ${community.url}` : ''}
 `).join('\n')}` : ''}`;
 
-    downloadContent(content, `AI_Learning_Plan_${learningPlan.careerTitle}_${userData.name}`, 'markdown');
+    downloadAsPDF(content, `AI_Learning_Plan_${learningPlan.careerTitle}_${userData.name}`);
   };
 
   const downloadInterviewQuestions = () => {
@@ -332,7 +466,7 @@ ${interviewQuestions.commonMistakes.map(mistake => `
 **Better Approach:** ${mistake.correction}
 `).join('\n')}` : ''}`;
 
-    downloadContent(content, `AI_Interview_Questions_${interviewQuestions.careerTitle}_${userData.name}`, 'markdown');
+    downloadAsPDF(content, `AI_Interview_Questions_${interviewQuestions.careerTitle}_${userData.name}`);
   };
 
   const callClaudeAPI = async (prompt, maxTokens = 1000) => {
@@ -1373,7 +1507,7 @@ Focus on questions that are realistic for someone transitioning from ${userData.
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <span>Download Career Recommendations</span>
+                    <span>Download Career Recommendations (PDF)</span>
                   </button>
                 </div>
               </div>
@@ -1614,7 +1748,7 @@ Focus on questions that are realistic for someone transitioning from ${userData.
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <span>Download Action Plan</span>
+                    <span>Download Action Plan (PDF)</span>
                   </button>
                 </div>
               </div>
@@ -1811,7 +1945,7 @@ Focus on questions that are realistic for someone transitioning from ${userData.
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <span>Download Learning Plan</span>
+                    <span>Download Learning Plan (PDF)</span>
                   </button>
                 </div>
 
@@ -1964,7 +2098,7 @@ Focus on questions that are realistic for someone transitioning from ${userData.
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <span>Download Complete Interview Guide</span>
+                    <span>Download Complete Interview Guide (PDF)</span>
                   </button>
                 </div>
               </div>

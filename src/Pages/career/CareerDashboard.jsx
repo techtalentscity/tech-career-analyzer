@@ -990,14 +990,14 @@ const CareerDashboard = () => {
   // UPDATED: Market Trends Card Component with better error handling
   const MarketTrendsCard = ({ trend, index }) => {
     console.log('Rendering MarketTrendsCard:', trend.title, 'personalizedData:', !!trend.personalizedData);
-    
+
     const trendIcons = {
-      'SALARY OUTLOOK',
-      'MARKET DEMAND',
-      'SALARY TRENDS',
-      'INDUSTRY DEMAND',
-      'TECHNOLOGY SALARY TRENDS',
-      'TECH INDUSTRY OUTLOOK'
+      'SALARY OUTLOOK': '💰',
+      'MARKET DEMAND': '📈',
+      'SALARY TRENDS': '💰',
+      'INDUSTRY DEMAND': '📊',
+      'TECHNOLOGY SALARY TRENDS': '💰',
+      'TECH INDUSTRY OUTLOOK': '🏭'
     };
     
     const icon = trendIcons[trend.title.split(' ').slice(-2).join(' ')] || 

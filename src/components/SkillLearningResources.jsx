@@ -1,303 +1,368 @@
-// src/components/SkillLearningResources.jsx - UPDATED TO MATCH TECHNICAL SPECIFICATION v1.1
+// src/components/SkillLearningResources.jsx - UPDATED FOR CAREER PATH RECOMMENDATION SYSTEM v2.0
 import React, { useState } from 'react';
 import { getResourcesForSkill } from '../data/learningResourcesData';
 
-const SkillLearningResources = ({ skillName, userData, skillDetails, topRecommendation = null }) => {
+const SkillLearningResources = ({ skillName, userData, skillDetails, careerPathRecommendation = null }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const levels = ['Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert'];
   
-  // Enhanced resource selection based on Technical Specification v1.1
-  const getEnhancedResourcesForSkill = (skillName, userData, skillDetails, topRecommendation) => {
+  // v2.0 Sequential Dependency Recommendation Engine
+  const getV2EnhancedResourcesForSkill = (skillName, userData, skillDetails, careerPathRecommendation) => {
     const baseResources = getResourcesForSkill(skillName, userData, skillDetails);
     
-    // Apply Technical Specification v1.1 enhancements
+    // Apply v2.0 AI-Generated Content Enhancement
     const enhancedResources = baseResources.map(resource => ({
       ...resource,
-      algorithmOptimized: false,
-      technicalSpecRecommendation: false,
-      constantVariableAlignment: 0,
-      specificCriteriaAlignment: 0
+      aiGenerated: false,
+      careerPathAligned: false,
+      skillGapTargeted: false,
+      learningRoadmapIntegrated: false,
+      tierAlignment: {
+        coreDriving: 0,
+        strongMotivators: 0,
+        supportingEvidence: 0,
+        backgroundContext: 0
+      },
+      v2Confidence: 0,
+      v2RecommendationType: 'base'
     }));
     
-    // Algorithm-specific resource optimization
-    if (topRecommendation) {
-      const algorithmResources = getAlgorithmSpecificResources(skillName, topRecommendation, userData);
-      enhancedResources.push(...algorithmResources);
+    // Sequential Dependency Enhancement: Career Path → Skill Gap → Learning Roadmap
+    if (careerPathRecommendation) {
+      const aiGeneratedResources = generateAIOptimizedResources(skillName, careerPathRecommendation, userData);
+      enhancedResources.push(...aiGeneratedResources);
       
-      // Mark resources as algorithm-optimized
+      // Apply v2.0 4-Tier Scoring Enhancement
       enhancedResources.forEach(resource => {
-        resource.algorithmOptimized = isResourceOptimizedForAlgorithm(resource, topRecommendation);
-        resource.technicalSpecRecommendation = true;
-        resource.constantVariableAlignment = calculateConstantVariableAlignment(resource, userData);
-        resource.specificCriteriaAlignment = calculateSpecificCriteriaAlignment(resource, topRecommendation, userData);
+        resource.careerPathAligned = isResourceAlignedWithCareerPath(resource, careerPathRecommendation);
+        resource.skillGapTargeted = isResourceTargetingSkillGap(resource, skillName, userData);
+        resource.learningRoadmapIntegrated = isResourceIntegratedWithLearningRoadmap(resource, userData);
+        resource.tierAlignment = calculateV2TierAlignment(resource, userData, careerPathRecommendation);
+        resource.v2Confidence = calculateV2ResourceConfidence(resource, userData, careerPathRecommendation);
+        resource.aiGenerated = resource.v2RecommendationType !== 'base';
       });
     }
     
-    // Sort by Technical Specification relevance
+    // Sort by v2.0 Sequential Dependency Score
     return enhancedResources.sort((a, b) => {
-      const aScore = (a.algorithmOptimized ? 10 : 0) + 
-                    (a.personalMatch ? 5 : 0) + 
-                    a.constantVariableAlignment + 
-                    a.specificCriteriaAlignment;
-      const bScore = (b.algorithmOptimized ? 10 : 0) + 
-                    (b.personalMatch ? 5 : 0) + 
-                    b.constantVariableAlignment + 
-                    b.specificCriteriaAlignment;
+      const aScore = calculateV2OverallScore(a);
+      const bScore = calculateV2OverallScore(b);
       return bScore - aScore;
     });
   };
 
-  // Get algorithm-specific learning resources based on Technical Specification
-  const getAlgorithmSpecificResources = (skillName, topRecommendation, userData) => {
-    const algorithmResources = [];
+  // AI-Generated Content based on v2.0 Career Path Recommendation
+  const generateAIOptimizedResources = (skillName, careerPathRecommendation, userData) => {
+    const aiResources = [];
     
-    switch(topRecommendation.type) {
-      case 'tech-interest-based':
-        // Tech-Interest Based specific resources
-        if (userData.techInterests) {
-          algorithmResources.push({
-            title: `${skillName} for Your Tech Interests`,
-            description: `Specialized ${skillName} learning path aligned with your interests: ${userData.techInterests}`,
-            url: `https://www.google.com/search?q=${encodeURIComponent(skillName + ' ' + userData.techInterests + ' tutorial')}`,
-            type: 'course',
+    // AI-Generated resources based on Career Path recommendation type
+    if (careerPathRecommendation.type === 'career-path') {
+      // Generate resources based on recommendedPaths
+      if (careerPathRecommendation.recommendedPaths) {
+        careerPathRecommendation.recommendedPaths.forEach(path => {
+          aiResources.push({
+            title: `${skillName} for ${path} Career Track`,
+            description: `AI-curated ${skillName} learning path specifically designed for transitioning to ${path} role`,
+            url: generateAIOptimizedURL(skillName, path, userData),
+            type: 'ai-course',
+            difficulty: determineAIDifficulty(userData, careerPathRecommendation),
+            aiGenerated: true,
+            careerPathAligned: true,
+            bestFor: ['Career Path Alignment', 'Role-Specific Skills', 'Market Demand'],
+            v2RecommendationType: 'career-path-ai',
+            aiConfidence: careerPathRecommendation.confidenceScore || 75,
+            marketDemand: careerPathRecommendation.marketDemand || 'medium'
+          });
+        });
+      }
+      
+      // Generate industry-focused resources
+      if (careerPathRecommendation.industryFocus) {
+        careerPathRecommendation.industryFocus.forEach(industry => {
+          aiResources.push({
+            title: `${skillName} in ${industry} Industry`,
+            description: `Industry-specific ${skillName} applications and best practices for ${industry} sector`,
+            url: generateIndustrySpecificURL(skillName, industry, userData),
+            type: 'ai-tutorial',
             difficulty: 'intermediate',
-            algorithmOptimized: true,
-            bestFor: ['Tech Interest Alignment', 'Current Role Transition'],
-            personalMatch: true,
-            algorithmType: 'tech-interest-based'
+            aiGenerated: true,
+            careerPathAligned: true,
+            bestFor: ['Industry Expertise', 'Market Relevance', 'Professional Context'],
+            v2RecommendationType: 'industry-ai',
+            aiConfidence: careerPathRecommendation.confidenceScore || 75,
+            industryRelevance: industry
           });
-        }
-        
-        if (userData.currentRole) {
-          algorithmResources.push({
-            title: `${skillName} for ${userData.currentRole} Transition`,
-            description: `Learn ${skillName} specifically for transitioning from ${userData.currentRole}`,
-            url: `https://www.google.com/search?q=${encodeURIComponent(userData.currentRole + ' to ' + skillName + ' career transition')}`,
-            type: 'tutorial',
-            difficulty: 'intermediate',
-            algorithmOptimized: true,
-            bestFor: ['Role Transition', 'Career Development'],
-            personalMatch: userData.currentRole !== 'Not specified',
-            algorithmType: 'tech-interest-based'
-          });
-        }
-        
-        if (userData.jobTechnologies) {
-          algorithmResources.push({
-            title: `${skillName} with Your Current Tech Stack`,
-            description: `Integrate ${skillName} with technologies you already know: ${userData.jobTechnologies}`,
-            url: `https://www.google.com/search?q=${encodeURIComponent(skillName + ' with ' + userData.jobTechnologies)}`,
-            type: 'practice',
-            difficulty: 'advanced',
-            algorithmOptimized: true,
-            bestFor: ['Technology Integration', 'Practical Application'],
-            personalMatch: true,
-            algorithmType: 'tech-interest-based'
-          });
-        }
-        break;
-        
-      case 'research-development':
-        // Research/Development Based specific resources
-        if (userData.publications) {
-          algorithmResources.push({
-            title: `Academic ${skillName} Research Methods`,
-            description: `Advanced ${skillName} for researchers with publication experience`,
-            url: `https://scholar.google.com/scholar?q=${encodeURIComponent(skillName + ' research methods academic')}`,
-            type: 'book',
-            difficulty: 'advanced',
-            algorithmOptimized: true,
-            bestFor: ['Academic Research', 'Publication Quality'],
-            personalMatch: !userData.publications.toLowerCase().includes('none'),
-            algorithmType: 'research-development'
-          });
-        }
-        
-        if (userData.toolsUsed && userData.toolsUsed.length > 0) {
-          algorithmResources.push({
-            title: `${skillName} with Research Tools`,
-            description: `Learn ${skillName} using research tools you're familiar with: ${userData.toolsUsed.join(', ')}`,
-            url: `https://www.google.com/search?q=${encodeURIComponent(skillName + ' ' + userData.toolsUsed.join(' ') + ' research')}`,
-            type: 'tutorial',
-            difficulty: 'intermediate',
-            algorithmOptimized: true,
-            bestFor: ['Research Tools', 'Methodology'],
-            personalMatch: true,
-            algorithmType: 'research-development'
-          });
-        }
-        
-        if (userData.timeCommitment) {
-          const timeBasedTitle = userData.timeCommitment === 'full-time' ? 
-            `Intensive ${skillName} Research Program` : 
-            `Flexible ${skillName} for Researchers`;
-          
-          algorithmResources.push({
-            title: timeBasedTitle,
-            description: `${skillName} learning designed for ${userData.timeCommitment} commitment`,
-            url: `https://www.google.com/search?q=${encodeURIComponent(skillName + ' ' + userData.timeCommitment + ' research program')}`,
-            type: 'course',
-            difficulty: 'varied',
-            algorithmOptimized: true,
-            bestFor: ['Time Management', 'Research Focus'],
-            personalMatch: true,
-            algorithmType: 'research-development'
-          });
-        }
-        break;
-        
-      case 'lifestyle-market':
-        // Lifestyle/Market Based specific resources
-        if (userData.workPreference) {
-          algorithmResources.push({
-            title: `${skillName} for ${userData.workPreference} Work`,
-            description: `Master ${skillName} in ${userData.workPreference} work environments`,
-            url: `https://www.google.com/search?q=${encodeURIComponent(skillName + ' ' + userData.workPreference + ' work best practices')}`,
-            type: 'course',
-            difficulty: 'intermediate',
-            algorithmOptimized: true,
-            bestFor: ['Work-Life Balance', 'Lifestyle Fit'],
-            personalMatch: true,
-            algorithmType: 'lifestyle-market'
-          });
-        }
-        
-        if (userData.educationLevel) {
-          algorithmResources.push({
-            title: `${skillName} for ${userData.educationLevel} Professionals`,
-            description: `${skillName} resources tailored for ${userData.educationLevel} level professionals`,
-            url: `https://www.google.com/search?q=${encodeURIComponent(skillName + ' for ' + userData.educationLevel + ' professionals')}`,
-            type: 'platform',
-            difficulty: 'varied',
-            algorithmOptimized: true,
-            bestFor: ['Education Level Match', 'Professional Development'],
-            personalMatch: true,
-            algorithmType: 'lifestyle-market'
-          });
-        }
-        
-        if (userData.targetSalary) {
-          algorithmResources.push({
-            title: `High-Value ${skillName} Skills`,
-            description: `Premium ${skillName} skills that command salaries like your target: ${userData.targetSalary}`,
-            url: `https://www.google.com/search?q=${encodeURIComponent('high paying ' + skillName + ' skills certification')}`,
-            type: 'course',
-            difficulty: 'advanced',
-            algorithmOptimized: true,
-            bestFor: ['Salary Optimization', 'Market Value'],
-            personalMatch: true,
-            algorithmType: 'lifestyle-market'
-          });
-        }
-        break;
+        });
+      }
+      
+      // Generate resources based on v2.0 4-Tier Criteria
+      const tierBasedResources = generateTierBasedResources(skillName, userData, careerPathRecommendation);
+      aiResources.push(...tierBasedResources);
     }
     
-    return algorithmResources;
+    return aiResources;
   };
 
-  // Calculate alignment with constant variables from Technical Specification
-  const calculateConstantVariableAlignment = (resource, userData) => {
-    let alignment = 0;
+  // Generate resources based on v2.0 4-Tier Scoring System
+  const generateTierBasedResources = (skillName, userData, careerPathRecommendation) => {
+    const tierResources = [];
     
-    // Years Experience alignment
-    if (userData.yearsExperience) {
-      const expScore = getExperienceScore(userData.yearsExperience);
-      if (resource.difficulty === 'beginner' && expScore < 0.4) alignment += 2;
-      else if (resource.difficulty === 'intermediate' && expScore >= 0.4 && expScore < 0.7) alignment += 2;
-      else if (resource.difficulty === 'advanced' && expScore >= 0.7) alignment += 2;
+    // Tier 1: Core Drivers (45%) - futureGoal, techInterests, leverageDomainExpertise, careerPathsInterest
+    if (userData.futureGoal && userData.techInterests) {
+      tierResources.push({
+        title: `${skillName} Aligned with Your Future Goals`,
+        description: `Personalized ${skillName} learning path designed to achieve: ${userData.futureGoal}`,
+        url: generateGoalAlignedURL(skillName, userData.futureGoal, userData.techInterests),
+        type: 'ai-specialization',
+        difficulty: 'advanced',
+        aiGenerated: true,
+        careerPathAligned: true,
+        bestFor: ['Goal Achievement', 'Tech Interest Alignment', 'Strategic Development'],
+        v2RecommendationType: 'tier1-core-drivers',
+        tierFocus: 'Core Drivers (45%)',
+        aiConfidence: 90
+      });
     }
     
-    // Study Field alignment
-    if (userData.studyField && resource.title.toLowerCase().includes(userData.studyField.toLowerCase())) {
-      alignment += 1;
+    // Tier 2: Strong Motivators (25%) - industryPreference, techMotivation, techPassion
+    if (userData.industryPreference && userData.techMotivation) {
+      tierResources.push({
+        title: `${skillName} for Your Industry Passion`,
+        description: `${skillName} courses focused on ${userData.industryPreference.join(' & ')} with emphasis on ${userData.techMotivation}`,
+        url: generateMotivationBasedURL(skillName, userData.industryPreference, userData.techMotivation),
+        type: 'ai-bootcamp',
+        difficulty: 'intermediate',
+        aiGenerated: true,
+        careerPathAligned: true,
+        bestFor: ['Passion Alignment', 'Industry Focus', 'Motivation Sustainability'],
+        v2RecommendationType: 'tier2-strong-motivators',
+        tierFocus: 'Strong Motivators (25%)',
+        aiConfidence: 85
+      });
     }
     
-    // Interest alignment
-    if (userData.interests && Array.isArray(userData.interests)) {
-      const hasInterestMatch = userData.interests.some(interest => 
-        resource.title.toLowerCase().includes(interest.toLowerCase()) ||
-        (resource.bestFor && resource.bestFor.some(tag => tag.toLowerCase().includes(interest.toLowerCase())))
-      );
-      if (hasInterestMatch) alignment += 1;
+    // Tier 3: Supporting Evidence (20%) - transferableSkills, jobTechnologies, jobResponsibilities, jobProjects
+    if (userData.transferableSkills && userData.jobTechnologies) {
+      tierResources.push({
+        title: `${skillName} Building on Your Tech Foundation`,
+        description: `Advanced ${skillName} leveraging your existing skills: ${userData.transferableSkills} and tech stack: ${userData.jobTechnologies}`,
+        url: generateSkillBuildingURL(skillName, userData.transferableSkills, userData.jobTechnologies),
+        type: 'ai-practice',
+        difficulty: 'intermediate',
+        aiGenerated: true,
+        skillGapTargeted: true,
+        bestFor: ['Skill Transfer', 'Technology Integration', 'Practical Application'],
+        v2RecommendationType: 'tier3-supporting-evidence',
+        tierFocus: 'Supporting Evidence (20%)',
+        aiConfidence: 80
+      });
     }
     
-    // Transferable Skills alignment
-    if (userData.transferableSkills && resource.bestFor) {
-      const skillsLower = userData.transferableSkills.toLowerCase();
-      const hasSkillMatch = resource.bestFor.some(tag => 
-        skillsLower.includes(tag.toLowerCase()) || tag.toLowerCase().includes('communication') || tag.toLowerCase().includes('analysis')
-      );
-      if (hasSkillMatch) alignment += 1;
+    // Tier 4: Background Context (10%) - continueCurrent, studyField, certifications, internships, publications
+    if (userData.studyField && userData.currentRole) {
+      tierResources.push({
+        title: `${skillName} for ${userData.studyField} Professionals`,
+        description: `${skillName} curriculum designed for ${userData.studyField} background transitioning from ${userData.currentRole}`,
+        url: generateBackgroundContextURL(skillName, userData.studyField, userData.currentRole),
+        type: 'ai-academic',
+        difficulty: 'varied',
+        aiGenerated: true,
+        learningRoadmapIntegrated: true,
+        bestFor: ['Academic Foundation', 'Professional Transition', 'Background Optimization'],
+        v2RecommendationType: 'tier4-background-context',
+        tierFocus: 'Background Context (10%)',
+        aiConfidence: 75
+      });
     }
     
-    return alignment;
+    return tierResources;
   };
 
-  // Calculate alignment with specific criteria from Technical Specification
-  const calculateSpecificCriteriaAlignment = (resource, topRecommendation, userData) => {
-    if (!topRecommendation) return 0;
-    
-    let alignment = 0;
-    
-    switch(topRecommendation.type) {
-      case 'tech-interest-based':
-        if (userData.techInterests && resource.title.toLowerCase().includes(userData.techInterests.toLowerCase())) {
-          alignment += 2;
-        }
-        if (userData.currentRole && resource.description && resource.description.toLowerCase().includes('transition')) {
-          alignment += 1;
-        }
-        if (userData.jobTechnologies && resource.bestFor && resource.bestFor.includes('Technology Integration')) {
-          alignment += 1;
-        }
-        break;
-        
-      case 'research-development':
-        if (userData.publications && resource.bestFor && resource.bestFor.includes('Academic Research')) {
-          alignment += 2;
-        }
-        if (userData.toolsUsed && resource.bestFor && resource.bestFor.includes('Research Tools')) {
-          alignment += 1;
-        }
-        if (userData.timeCommitment && resource.bestFor && resource.bestFor.includes('Time Management')) {
-          alignment += 1;
-        }
-        break;
-        
-      case 'lifestyle-market':
-        if (userData.workPreference && resource.bestFor && resource.bestFor.includes('Work-Life Balance')) {
-          alignment += 2;
-        }
-        if (userData.educationLevel && resource.bestFor && resource.bestFor.includes('Education Level Match')) {
-          alignment += 1;
-        }
-        if (userData.targetSalary && resource.bestFor && resource.bestFor.includes('Salary Optimization')) {
-          alignment += 1;
-        }
-        break;
-    }
-    
-    return alignment;
-  };
-
-  // Check if resource is optimized for specific algorithm
-  const isResourceOptimizedForAlgorithm = (resource, topRecommendation) => {
-    return resource.algorithmType === topRecommendation.type || resource.algorithmOptimized === true;
-  };
-
-  // Experience scoring function from Technical Specification
-  const getExperienceScore = (experience) => {
-    const expMap = {
-      '0-2': 0.3, '3-5': 0.6, '6-10': 0.8, '10+': 0.9,
-      '0': 0.2, '1': 0.3, '2': 0.4, '3': 0.5, '4': 0.6, '5': 0.7,
-      'Complete beginner': 0.2, 'Some exposure': 0.4, 'Beginner': 0.5,
-      'Intermediate': 0.7, 'Advanced': 0.9
+  // v2.0 4-Tier Alignment Calculation
+  const calculateV2TierAlignment = (resource, userData, careerPathRecommendation) => {
+    let tierAlignment = {
+      coreDriving: 0,
+      strongMotivators: 0,
+      supportingEvidence: 0,
+      backgroundContext: 0
     };
-    return expMap[experience] || 0.5;
+    
+    // Tier 1: Core Drivers (45%)
+    if (userData.futureGoal && resource.title.toLowerCase().includes('goal')) tierAlignment.coreDriving += 0.15;
+    if (userData.techInterests && resource.description && 
+        userData.techInterests.split(',').some(interest => 
+          resource.description.toLowerCase().includes(interest.trim().toLowerCase()))) {
+      tierAlignment.coreDriving += 0.12;
+    }
+    if (userData.leverageDomainExpertise === 'yes' && 
+        resource.bestFor && resource.bestFor.includes('Domain Leverage')) {
+      tierAlignment.coreDriving += 0.10;
+    }
+    if (userData.careerPathsInterest && Array.isArray(userData.careerPathsInterest) &&
+        userData.careerPathsInterest.some(path => 
+          resource.title.toLowerCase().includes(path.toLowerCase()))) {
+      tierAlignment.coreDriving += 0.08;
+    }
+    
+    // Tier 2: Strong Motivators (25%)
+    if (userData.industryPreference && Array.isArray(userData.industryPreference) &&
+        userData.industryPreference.some(industry => 
+          resource.description && resource.description.toLowerCase().includes(industry.toLowerCase()))) {
+      tierAlignment.strongMotivators += 0.10;
+    }
+    if (userData.techMotivation && resource.description && 
+        resource.description.toLowerCase().includes(userData.techMotivation.toLowerCase())) {
+      tierAlignment.strongMotivators += 0.08;
+    }
+    if (userData.techPassion && resource.bestFor && 
+        resource.bestFor.some(tag => tag.toLowerCase().includes('passion'))) {
+      tierAlignment.strongMotivators += 0.07;
+    }
+    
+    // Tier 3: Supporting Evidence (20%)
+    if (userData.transferableSkills && resource.bestFor && 
+        resource.bestFor.includes('Skill Transfer')) {
+      tierAlignment.supportingEvidence += 0.08;
+    }
+    if (userData.jobTechnologies && resource.description &&
+        userData.jobTechnologies.split(',').some(tech => 
+          resource.description.toLowerCase().includes(tech.trim().toLowerCase()))) {
+      tierAlignment.supportingEvidence += 0.04;
+    }
+    if (userData.jobResponsibilities && resource.bestFor && 
+        resource.bestFor.includes('Professional Transition')) {
+      tierAlignment.supportingEvidence += 0.04;
+    }
+    if (userData.jobProjects && resource.bestFor && 
+        resource.bestFor.includes('Practical Application')) {
+      tierAlignment.supportingEvidence += 0.04;
+    }
+    
+    // Tier 4: Background Context (10%)
+    if (userData.currentRole && resource.description &&
+        resource.description.toLowerCase().includes(userData.currentRole.toLowerCase())) {
+      tierAlignment.backgroundContext += 0.03;
+    }
+    if (userData.studyField && resource.title.toLowerCase().includes(userData.studyField.toLowerCase())) {
+      tierAlignment.backgroundContext += 0.03;
+    }
+    if (userData.certifications && resource.bestFor && 
+        resource.bestFor.includes('Certification')) {
+      tierAlignment.backgroundContext += 0.02;
+    }
+    
+    return tierAlignment;
   };
 
-  // Get enhanced resources using Technical Specification
-  const resources = getEnhancedResourcesForSkill(skillName, userData, skillDetails, topRecommendation);
+  // v2.0 Resource Confidence Calculation
+  const calculateV2ResourceConfidence = (resource, userData, careerPathRecommendation) => {
+    let confidence = 0;
+    
+    // Base confidence from AI generation
+    if (resource.aiGenerated) confidence += 20;
+    if (resource.careerPathAligned) confidence += 25;
+    if (resource.skillGapTargeted) confidence += 20;
+    if (resource.learningRoadmapIntegrated) confidence += 15;
+    
+    // Tier alignment bonus
+    const tierTotal = Object.values(resource.tierAlignment || {}).reduce((sum, val) => sum + val, 0);
+    confidence += tierTotal * 50; // Scale tier scores to confidence points
+    
+    // Career path confidence inheritance
+    if (careerPathRecommendation && careerPathRecommendation.confidenceScore) {
+      confidence += careerPathRecommendation.confidenceScore * 0.2; // 20% of career path confidence
+    }
+    
+    return Math.min(100, Math.max(0, confidence));
+  };
+
+  // v2.0 Overall Score Calculation
+  const calculateV2OverallScore = (resource) => {
+    let score = 0;
+    
+    // v2.0 Sequential Dependency Bonuses
+    if (resource.careerPathAligned) score += 30;
+    if (resource.skillGapTargeted) score += 25;
+    if (resource.learningRoadmapIntegrated) score += 20;
+    if (resource.aiGenerated) score += 15;
+    
+    // v2.0 4-Tier Alignment Score
+    const tierScore = Object.values(resource.tierAlignment || {}).reduce((sum, val) => sum + val, 0) * 100;
+    score += tierScore;
+    
+    // v2.0 Confidence Score
+    score += (resource.v2Confidence || 0) * 0.5;
+    
+    // Market demand bonus
+    if (resource.marketDemand === 'high') score += 10;
+    else if (resource.marketDemand === 'medium') score += 5;
+    
+    return score;
+  };
+
+  // URL Generation Functions for AI-Optimized Resources
+  const generateAIOptimizedURL = (skillName, careerPath, userData) => {
+    const searchTerms = [skillName, careerPath, userData.experienceLevel || 'intermediate'].join(' ');
+    return `https://www.google.com/search?q=${encodeURIComponent(searchTerms + ' course certification')}`;
+  };
+
+  const generateIndustrySpecificURL = (skillName, industry, userData) => {
+    const searchTerms = [skillName, industry, 'professional development'].join(' ');
+    return `https://www.google.com/search?q=${encodeURIComponent(searchTerms)}`;
+  };
+
+  const generateGoalAlignedURL = (skillName, futureGoal, techInterests) => {
+    const searchTerms = [skillName, futureGoal, techInterests].join(' ');
+    return `https://www.google.com/search?q=${encodeURIComponent(searchTerms + ' learning path')}`;
+  };
+
+  const generateMotivationBasedURL = (skillName, industries, motivation) => {
+    const searchTerms = [skillName, industries.join(' '), motivation].join(' ');
+    return `https://www.google.com/search?q=${encodeURIComponent(searchTerms + ' training')}`;
+  };
+
+  const generateSkillBuildingURL = (skillName, transferableSkills, jobTech) => {
+    const searchTerms = [skillName, transferableSkills, jobTech].join(' ');
+    return `https://www.google.com/search?q=${encodeURIComponent(searchTerms + ' advanced tutorial')}`;
+  };
+
+  const generateBackgroundContextURL = (skillName, studyField, currentRole) => {
+    const searchTerms = [skillName, studyField, currentRole, 'transition'].join(' ');
+    return `https://www.google.com/search?q=${encodeURIComponent(searchTerms)}`;
+  };
+
+  // Helper Functions
+  const isResourceAlignedWithCareerPath = (resource, careerPath) => {
+    if (!careerPath || !careerPath.recommendedPaths) return false;
+    return careerPath.recommendedPaths.some(path => 
+      resource.title.toLowerCase().includes(path.toLowerCase()) ||
+      (resource.description && resource.description.toLowerCase().includes(path.toLowerCase()))
+    );
+  };
+
+  const isResourceTargetingSkillGap = (resource, skillName, userData) => {
+    return resource.title.toLowerCase().includes(skillName.toLowerCase()) &&
+           resource.bestFor && resource.bestFor.includes('Skill Development');
+  };
+
+  const isResourceIntegratedWithLearningRoadmap = (resource, userData) => {
+    return userData.timeCommitment && 
+           (resource.type.includes('roadmap') || 
+            resource.bestFor && resource.bestFor.includes('Learning Path'));
+  };
+
+  const determineAIDifficulty = (userData, careerPathRecommendation) => {
+    if (userData.yearsExperience) {
+      const expNum = parseInt(userData.yearsExperience) || 0;
+      if (expNum <= 2) return 'beginner';
+      if (expNum <= 5) return 'intermediate';
+      return 'advanced';
+    }
+    return careerPathRecommendation.confidenceScore > 80 ? 'intermediate' : 'beginner';
+  };
+
+  // Get enhanced resources using v2.0 system
+  const resources = getV2EnhancedResourcesForSkill(skillName, userData, skillDetails, careerPathRecommendation);
   
   // Group resources by type for better organization
   const groupedResources = resources.reduce((acc, resource) => {
@@ -310,10 +375,16 @@ const SkillLearningResources = ({ skillName, userData, skillDetails, topRecommen
   
   const resourceTypeLabels = {
     'book': 'Books & Research',
-    'course': 'Courses & Programs',
+    'course': 'Traditional Courses',
     'tutorial': 'Tutorials & Documentation',
     'practice': 'Practice Platforms',
-    'platform': 'Learning Platforms'
+    'platform': 'Learning Platforms',
+    'ai-course': '🤖 AI-Generated Courses',
+    'ai-tutorial': '🤖 AI-Curated Tutorials',
+    'ai-specialization': '🤖 AI-Specialized Tracks',
+    'ai-bootcamp': '🤖 AI-Designed Bootcamps',
+    'ai-practice': '🤖 AI-Enhanced Practice',
+    'ai-academic': '🤖 AI-Academic Paths'
   };
 
   const resourceTypeIcons = {
@@ -339,9 +410,15 @@ const SkillLearningResources = ({ skillName, userData, skillDetails, topRecommen
     ),
     'platform': (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s1.343-9-3-9m-9 9a9 9 0 019-9" />
       </svg>
-    )
+    ),
+    'ai-course': '🤖',
+    'ai-tutorial': '🤖',
+    'ai-specialization': '🤖',
+    'ai-bootcamp': '🤖',
+    'ai-practice': '🤖',
+    'ai-academic': '🤖'
   };
   
   const difficultyColors = {
@@ -351,15 +428,24 @@ const SkillLearningResources = ({ skillName, userData, skillDetails, topRecommen
     'varied': 'bg-purple-100 text-purple-800'
   };
 
-  // Get algorithm display name
-  const getAlgorithmDisplayName = (algorithmType) => {
-    switch(algorithmType) {
-      case 'tech-interest-based': return '🎯 Tech-Interest';
-      case 'research-development': return '📚 Research/Dev';
-      case 'lifestyle-market': return '⚖️ Lifestyle/Market';
-      default: return '📊 General';
-    }
+  // Get v2.0 system display information
+  const getV2SystemInfo = () => {
+    if (!careerPathRecommendation) return null;
+    
+    const confidence = careerPathRecommendation.confidenceScore || 0;
+    const tierScores = careerPathRecommendation.metadata?.tierScores || {};
+    const criteriaUsed = careerPathRecommendation.metadata?.criteriaUsed?.length || 0;
+    
+    return {
+      confidence,
+      tierScores,
+      criteriaUsed,
+      totalCriteria: 16,
+      systemVersion: 'v2.0'
+    };
   };
+
+  const systemInfo = getV2SystemInfo();
 
   return (
     <div className="mt-3">
@@ -370,45 +456,45 @@ const SkillLearningResources = ({ skillName, userData, skillDetails, topRecommen
         <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-1 transition-transform transform ${isExpanded ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
         </svg>
-        {isExpanded ? 'Hide Technical Spec v1.1 Learning Resources' : 'Show Technical Spec v1.1 Learning Resources'}
+        {isExpanded ? 'Hide v2.0 AI-Enhanced Learning Resources' : 'Show v2.0 AI-Enhanced Learning Resources'}
       </button>
       
       {isExpanded && (
         <div className="mt-3 space-y-4 animate-fadeIn">
-          {/* Technical Specification v1.1 Personalization Message */}
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-md">
+          {/* v2.0 System Overview */}
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-blue-500 p-3 rounded-md">
             <p className="text-sm text-blue-700">
-              <span className="font-medium">🔬 Technical Specification v1.1:</span> These resources are optimized using our Multi-Tier Recommendation Engine to help you progress from {levels[Math.max(0, skillDetails.currentLevel - 1)]} to {levels[Math.max(0, skillDetails.requiredLevel - 1)]} level in {skillName}.
-              {topRecommendation && (
+              <span className="font-medium">🤖 Career Path Recommendation System v2.0:</span> AI-driven Sequential Dependency Engine optimizing your learning path from {levels[Math.max(0, skillDetails.currentLevel - 1)]} to {levels[Math.max(0, skillDetails.requiredLevel - 1)]} level in {skillName}.
+              {systemInfo && (
                 <span className="block mt-1">
-                  Algorithm: {getAlgorithmDisplayName(topRecommendation.type)} with {topRecommendation.confidenceScore}% confidence
+                  Career Path → Skill Gap → Learning Roadmap | Confidence: {systemInfo.confidence}% | Criteria: {systemInfo.criteriaUsed}/16
                 </span>
               )}
             </p>
           </div>
 
-          {/* Technical Specification Metadata */}
-          {topRecommendation && topRecommendation.metadata && (
+          {/* v2.0 4-Tier Scoring Breakdown */}
+          {systemInfo && systemInfo.tierScores && (
             <div className="bg-gray-50 border border-gray-200 p-3 rounded-md">
               <h5 className="text-sm font-medium text-gray-800 mb-2">
-                🔬 Algorithm Performance Metrics:
+                🎯 4-Tier Scoring System Performance:
               </h5>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                 <div>
-                  <span className="font-medium text-gray-700">Criteria Used:</span>
-                  <div className="text-gray-600">{topRecommendation.metadata.criteriaUsed?.length || 0}</div>
+                  <span className="font-medium text-blue-700">Core Drivers (45%):</span>
+                  <div className="text-blue-600">{Math.round((systemInfo.tierScores.coreDriving || 0) * 100)}%</div>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Constants Score:</span>
-                  <div className="text-gray-600">{Math.round(topRecommendation.metadata.constantsScore || 0)}%</div>
+                  <span className="font-medium text-green-700">Strong Motivators (25%):</span>
+                  <div className="text-green-600">{Math.round((systemInfo.tierScores.strongMotivators || 0) * 100)}%</div>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Specifics Score:</span>
-                  <div className="text-gray-600">{Math.round(topRecommendation.metadata.specificsScore || 0)}%</div>
+                  <span className="font-medium text-yellow-700">Supporting Evidence (20%):</span>
+                  <div className="text-yellow-600">{Math.round((systemInfo.tierScores.supportingEvidence || 0) * 100)}%</div>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Fallback Applied:</span>
-                  <div className="text-gray-600">{topRecommendation.metadata.fallbackApplied ? 'Yes' : 'No'}</div>
+                  <span className="font-medium text-purple-700">Background Context (10%):</span>
+                  <div className="text-purple-600">{Math.round((systemInfo.tierScores.backgroundContext || 0) * 100)}%</div>
                 </div>
               </div>
             </div>
@@ -418,12 +504,22 @@ const SkillLearningResources = ({ skillName, userData, skillDetails, topRecommen
             Object.keys(groupedResources).map(type => (
               <div key={type} className="space-y-2">
                 <h4 className="text-sm font-medium text-gray-700 flex items-center">
-                  {resourceTypeIcons[type]}
+                  {typeof resourceTypeIcons[type] === 'string' ? (
+                    <span className="mr-1">{resourceTypeIcons[type]}</span>
+                  ) : (
+                    resourceTypeIcons[type]
+                  )}
                   <span className="ml-1">{resourceTypeLabels[type] || type}</span>
-                  {/* Algorithm-optimized resources count */}
-                  {groupedResources[type].filter(r => r.algorithmOptimized).length > 0 && (
-                    <span className="ml-2 px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">
-                      {groupedResources[type].filter(r => r.algorithmOptimized).length} algorithm-optimized
+                  {/* AI-generated resources count */}
+                  {groupedResources[type].filter(r => r.aiGenerated).length > 0 && (
+                    <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+                      {groupedResources[type].filter(r => r.aiGenerated).length} AI-Generated
+                    </span>
+                  )}
+                  {/* Career path aligned count */}
+                  {groupedResources[type].filter(r => r.careerPathAligned).length > 0 && (
+                    <span className="ml-2 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                      {groupedResources[type].filter(r => r.careerPathAligned).length} Career-Aligned
                     </span>
                   )}
                 </h4>
@@ -435,10 +531,10 @@ const SkillLearningResources = ({ skillName, userData, skillDetails, topRecommen
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`block p-3 rounded-lg border transition-colors ${
-                        resource.algorithmOptimized 
-                          ? 'bg-purple-50 border-purple-200 hover:bg-purple-100' 
-                          : resource.personalMatch 
-                          ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' 
+                        resource.aiGenerated 
+                          ? 'bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 hover:from-blue-100 hover:to-purple-100' 
+                          : resource.careerPathAligned 
+                          ? 'bg-green-50 border-green-200 hover:bg-green-100' 
                           : 'bg-white border-gray-200 hover:bg-blue-50 hover:border-blue-200'
                       }`}
                     >
@@ -447,25 +543,30 @@ const SkillLearningResources = ({ skillName, userData, skillDetails, topRecommen
                           <div className="flex items-center flex-wrap gap-2">
                             <div className="font-medium text-gray-900">{resource.title}</div>
                             
-                            {/* Technical Specification badges */}
-                            {resource.algorithmOptimized && (
-                              <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">
-                                Algorithm Optimized
-                              </span>
-                            )}
-                            {resource.personalMatch && !resource.algorithmOptimized && (
+                            {/* v2.0 System badges */}
+                            {resource.aiGenerated && (
                               <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-                                Personal Match
+                                🤖 AI-Generated
                               </span>
                             )}
-                            {resource.technicalSpecRecommendation && (
+                            {resource.careerPathAligned && (
                               <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-                                Tech Spec v1.1
+                                🎯 Career-Aligned
                               </span>
                             )}
-                            {resource.algorithmType && (
+                            {resource.skillGapTargeted && (
+                              <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                                📚 Skill-Targeted
+                              </span>
+                            )}
+                            {resource.learningRoadmapIntegrated && (
+                              <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">
+                                ⚖️ Roadmap-Integrated
+                              </span>
+                            )}
+                            {resource.v2RecommendationType && resource.v2RecommendationType !== 'base' && (
                               <span className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full">
-                                {getAlgorithmDisplayName(resource.algorithmType)}
+                                {resource.v2RecommendationType}
                               </span>
                             )}
                           </div>
@@ -474,11 +575,19 @@ const SkillLearningResources = ({ skillName, userData, skillDetails, topRecommen
                             <p className="text-sm text-gray-600 mt-1">{resource.description}</p>
                           )}
                           
-                          {/* Technical Specification alignment scores */}
-                          {(resource.constantVariableAlignment > 0 || resource.specificCriteriaAlignment > 0) && (
-                            <div className="mt-2 text-xs text-gray-500">
-                              Constants Alignment: {resource.constantVariableAlignment}/5 | 
-                              Criteria Alignment: {resource.specificCriteriaAlignment}/4
+                          {/* v2.0 Tier focus and confidence */}
+                          {resource.tierFocus && (
+                            <div className="mt-2 text-xs text-blue-600 font-medium">
+                              {resource.tierFocus} | AI Confidence: {Math.round(resource.v2Confidence || 0)}%
+                            </div>
+                          )}
+                          
+                          {/* v2.0 Market demand indicator */}
+                          {resource.marketDemand && (
+                            <div className="mt-1 text-xs text-gray-500">
+                              Market Demand: <span className={resource.marketDemand === 'high' ? 'text-green-600' : resource.marketDemand === 'medium' ? 'text-yellow-600' : 'text-gray-600'}>
+                                {resource.marketDemand}
+                              </span>
                             </div>
                           )}
                           
@@ -506,51 +615,61 @@ const SkillLearningResources = ({ skillName, userData, skillDetails, topRecommen
           ) : (
             <div className="text-center py-4">
               <p className="text-sm text-gray-500 italic mb-3">
-                No specific resources available for this skill yet. Our Technical Specification v1.1 system is continuously learning.
+                No resources generated yet. The v2.0 AI system requires career path data for optimal personalization.
               </p>
               <p className="text-xs text-gray-400">
-                Try searching online platforms like Coursera, Udemy, or edX for "{skillName}" courses.
+                Complete your career assessment for AI-generated, personalized learning recommendations.
               </p>
             </div>
           )}
 
-          {/* Enhanced Search Integration */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {/* Enhanced v2.0 Search Integration */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             <button 
               className="text-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               onClick={() => {
-                const searchQuery = topRecommendation 
-                  ? `${skillName} ${topRecommendation.type.replace('-', ' ')} courses tutorials`
-                  : `learn ${skillName} courses tutorials`;
+                const searchQuery = careerPathRecommendation 
+                  ? `${skillName} ${careerPathRecommendation.recommendedPaths?.join(' ')} career development`
+                  : `learn ${skillName} professional development`;
                 window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, '_blank');
               }}
             >
-              Find More Resources
+              🎯 Career-Aligned Search
             </button>
             
-            {topRecommendation && (
+            {careerPathRecommendation && careerPathRecommendation.industryFocus && (
               <button 
                 className="text-center py-2 px-4 border border-blue-600 text-sm font-medium rounded-md text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                 onClick={() => {
-                  const algorithmQuery = `${skillName} ${topRecommendation.type} ${userData.yearsExperience || 'beginner'} level`;
-                  window.open(`https://www.google.com/search?q=${encodeURIComponent(algorithmQuery)}`, '_blank');
+                  const industryQuery = `${skillName} ${careerPathRecommendation.industryFocus.join(' ')} industry training`;
+                  window.open(`https://www.google.com/search?q=${encodeURIComponent(industryQuery)}`, '_blank');
                 }}
               >
-                Algorithm-Specific Search
+                🏭 Industry-Specific
               </button>
             )}
+            
+            <button 
+              className="text-center py-2 px-4 border border-purple-600 text-sm font-medium rounded-md text-purple-600 hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+              onClick={() => {
+                const aiQuery = `${skillName} AI curated learning path ${userData.experienceLevel || 'intermediate'} level`;
+                window.open(`https://www.google.com/search?q=${encodeURIComponent(aiQuery)}`, '_blank');
+              }}
+            >
+              🤖 AI-Enhanced Search
+            </button>
           </div>
 
-          {/* Technical Specification Summary */}
-          <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+          {/* v2.0 System Summary */}
+          <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 via-purple-50 to-green-50 rounded-lg border border-blue-200">
             <h5 className="text-sm font-bold text-blue-800 mb-1">
-              🔬 Technical Specification v1.1 Summary:
+              🤖 Career Path Recommendation System v2.0 Summary:
             </h5>
             <p className="text-xs text-blue-700">
-              Resources optimized using Multi-Tier Recommendation Engine with dynamic weighting and fallback logic. 
-              {topRecommendation ? `Your ${topRecommendation.type} algorithm achieved ${topRecommendation.confidenceScore}% confidence. ` : ''}
-              Learning paths are personalized based on your constant variables (experience, study field, interests, transferable skills) 
-              and specific criteria for maximum skill development efficiency.
+              Sequential Dependency Engine: Career Path → Skill Gap → Learning Roadmap. 
+              {systemInfo ? `AI analyzed ${systemInfo.criteriaUsed} of 16 criteria with ${systemInfo.confidence}% confidence. ` : ''}
+              Resources are dynamically generated using 4-tier weighted scoring (Core Drivers 45%, Strong Motivators 25%, Supporting Evidence 20%, Background Context 10%) 
+              for maximum career transition efficiency and market relevance.
             </p>
           </div>
         </div>

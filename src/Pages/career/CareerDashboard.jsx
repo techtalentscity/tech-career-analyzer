@@ -1353,7 +1353,6 @@ const CareerDashboard = () => {
         title: `Focus on ${careerPathRecommendation.title} Path`,
         text: `Develop expertise aligned with your top career recommendation`,
         priority: 'high',
-        icon:,
         timeline: '2-4 weeks',
         personalized: true,
         resources: careerPathRecommendation.recommendedPaths || []
@@ -1367,7 +1366,6 @@ const CareerDashboard = () => {
           title: `Learn ${skillGap.skill}`,
           text: `Develop ${skillGap.skill} skills to bridge identified gap`,
           priority: 'medium',
-          icon:,
           timeline: skillGap.estimatedLearningTime || '4-6 weeks',
           personalized: true,
           resources: [skillGap.skill]
@@ -1382,7 +1380,6 @@ const CareerDashboard = () => {
           title: `Start ${firstPhase.title}`,
           text: `Begin your learning journey with phase 1 activities`,
           priority: 'high',
-          icon:,
           timeline: firstPhase.duration || '2-3 months',
           personalized: true,
           resources: firstPhase.resources || []

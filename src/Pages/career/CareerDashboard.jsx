@@ -1002,7 +1002,7 @@ const CareerDashboard = () => {
     
     const icon = trendIcons[trend.title.split(' ').slice(-2).join(' ')] || 
                  trendIcons[trend.title.split(' ').slice(-1)[0]] || 
-                 trendIcons[trend.category] || ;
+                 trendIcons[trend.category] ||'📊' ;
     
     // Enhanced content based on personalized trend data
     const getPersonalizedContent = () => {

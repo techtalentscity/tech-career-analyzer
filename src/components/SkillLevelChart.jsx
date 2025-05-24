@@ -1,148 +1,406 @@
-// src/components/SkillLevelChart.jsx - UPDATED TO MATCH TECHNICAL SPECIFICATION v1.1
+// src/components/SkillLevelChart.jsx - UPDATED TO MATCH TECHNICAL SPECIFICATION v2.0
 import React from 'react';
 import SkillLearningResources from './SkillLearningResources';
 
-const SkillLevelChart = ({ skill, userData, topRecommendation = null }) => {
+const SkillLevelChart = ({ 
+  skill, 
+  userData, 
+  careerPathRecommendation = null,
+  skillGapAnalysis = null,
+  learningRoadmap = null,
+  systemResponse = null 
+}) => {
   const levels = ['Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert'];
   const levelColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
   
-  // Enhanced skill gap analysis based on Technical Specification v1.1
-  const analyzeSkillGapTechnicalSpec = (skill, userData, topRecommendation) => {
+  // Enhanced skill gap analysis based on Technical Specification v2.0
+  const analyzeSkillGapSequentialSystem = (skill, userData, careerPathRec, skillGapAnalysis, learningRoadmap) => {
     const gapAreas = [];
-    const algorithmInsights = [];
+    const sequentialInsights = [];
     
-    // Analyze based on 4 Constant Variables from Technical Specification
+    // Analyze based on 16-Criteria System with 4-Tier Weighting from Technical Specification v2.0
     
-    // 1. Years Experience Analysis
-    if (userData.yearsExperience) {
-      const expScore = getExperienceScore(userData.yearsExperience);
-      if (expScore < 0.5 && skill.requiredLevel >= 4) {
-        gapAreas.push('experience-gap');
-        algorithmInsights.push('Limited experience for advanced skill level');
+    // Tier 1: Core Drivers (45%) Analysis
+    if (userData.futureGoal) {
+      const goalAlignment = getFutureGoalSkillAlignment(userData.futureGoal, skill.name);
+      if (goalAlignment < 0.6 && skill.requiredLevel >= 4) {
+        gapAreas.push('future-goal-alignment');
+        sequentialInsights.push('Skill critical for achieving stated future goals');
       }
     }
     
-    // 2. Study Field Relevance Analysis
-    if (userData.studyField) {
-      const fieldRelevance = getStudyFieldRelevance(userData.studyField, skill.name);
-      if (fieldRelevance < 0.6) {
-        gapAreas.push('academic-foundation');
-        algorithmInsights.push('Study field provides limited foundation for this skill');
+    if (userData.techInterests) {
+      const techAlignment = getTechInterestSkillAlignment(userData.techInterests, skill.name);
+      if (techAlignment < 0.5) {
+        gapAreas.push('tech-interest-gap');
+        sequentialInsights.push('Skill not strongly aligned with tech interests');
       }
     }
     
-    // 3. Interest Alignment Analysis
-    if (userData.interests && Array.isArray(userData.interests)) {
-      const interestAlignment = getInterestAlignment(userData.interests, skill.name);
-      if (interestAlignment < 0.5) {
-        gapAreas.push('interest-alignment');
-        algorithmInsights.push('Skill may not align with stated interests');
+    if (userData.leverageDomainExpertise) {
+      const domainLeverage = getDomainExpertiseSkillRelevance(userData.leverageDomainExpertise, skill.name, userData.currentRole);
+      if (domainLeverage < 0.4) {
+        gapAreas.push('domain-leverage');
+        sequentialInsights.push('Skill important for leveraging domain expertise');
       }
     }
     
-    // 4. Transferable Skills Analysis
+    if (userData.careerPathsInterest && Array.isArray(userData.careerPathsInterest)) {
+      const pathAlignment = getCareerPathSkillRelevance(userData.careerPathsInterest, skill.name);
+      if (pathAlignment < 0.5) {
+        gapAreas.push('career-path-alignment');
+        sequentialInsights.push('Skill essential for target career paths');
+      }
+    }
+    
+    // Tier 2: Strong Motivators (25%) Analysis
+    if (userData.industryPreference && Array.isArray(userData.industryPreference)) {
+      const industryRelevance = getIndustrySkillDemand(userData.industryPreference, skill.name);
+      if (industryRelevance > 0.7) {
+        gapAreas.push('industry-demand');
+        sequentialInsights.push('High demand skill in target industries');
+      }
+    }
+    
+    if (userData.techMotivation) {
+      const motivationAlignment = getTechMotivationSkillAlignment(userData.techMotivation, skill.name);
+      if (motivationAlignment > 0.6 && skill.gap >= 2) {
+        gapAreas.push('motivation-skill-gap');
+        sequentialInsights.push('Skill aligns with tech motivation but needs development');
+      }
+    }
+    
+    // Tier 3: Supporting Evidence (20%) Analysis
     if (userData.transferableSkills) {
       const transferableValue = getTransferableSkillValue(userData.transferableSkills, skill.name);
       if (transferableValue < 0.4) {
         gapAreas.push('transferable-skills');
-        algorithmInsights.push('Limited transferable skills for this area');
+        sequentialInsights.push('Limited transferable skills for this area');
       }
     }
     
-    // Algorithm-Specific Analysis based on Technical Specification
-    if (topRecommendation) {
-      switch(topRecommendation.type) {
-        case 'tech-interest-based':
-          // Tech-Interest Based specific analysis
-          if (userData.techInterests && !isSkillInTechInterests(skill.name, userData.techInterests)) {
-            gapAreas.push('tech-interest-mismatch');
-            algorithmInsights.push('Skill not aligned with stated tech interests');
-          }
-          
-          if (userData.jobTechnologies && !isSkillInJobTechnologies(skill.name, userData.jobTechnologies)) {
-            gapAreas.push('job-tech-gap');
-            algorithmInsights.push('Skill not present in current job technologies');
-          }
-          
-          if (userData.currentRole && !isSkillRelevantToRole(skill.name, userData.currentRole)) {
-            gapAreas.push('role-transition');
-            algorithmInsights.push('Skill important for role transition');
-          }
-          break;
-          
-        case 'research-development':
-          // Research/Development Based specific analysis
-          if (userData.publications && skill.name.toLowerCase().includes('research')) {
-            const pubScore = getPublicationScore(userData.publications);
-            if (pubScore < 0.5) {
-              gapAreas.push('research-experience');
-              algorithmInsights.push('Limited research publication experience');
-            }
-          }
-          
-          if (userData.toolsUsed && !isSkillInResearchTools(skill.name, userData.toolsUsed)) {
-            gapAreas.push('research-tools');
-            algorithmInsights.push('Skill requires research tool proficiency');
-          }
-          
-          if (userData.timeCommitment !== 'full-time' && skill.requiredLevel >= 4) {
-            gapAreas.push('time-commitment');
-            algorithmInsights.push('Advanced skills may require full-time commitment');
-          }
-          break;
-          
-        case 'lifestyle-market':
-          // Lifestyle/Market Based specific analysis
-          if (userData.workPreference === 'remote' && isSkillCollaborationHeavy(skill.name)) {
-            gapAreas.push('remote-challenges');
-            algorithmInsights.push('Skill may be challenging in remote work settings');
-          }
-          
-          if (userData.educationLevel && !isEducationSufficientForSkill(userData.educationLevel, skill.name)) {
-            gapAreas.push('education-gap');
-            algorithmInsights.push('Education level may need enhancement for this skill');
-          }
-          
-          if (userData.targetSalary && !isSalaryRealisticForSkill(userData.targetSalary, skill.name)) {
-            gapAreas.push('salary-expectations');
-            algorithmInsights.push('Skill level impacts salary expectations');
-          }
-          break;
+    if (userData.jobTechnologies) {
+      const techFoundation = getTechnologyFoundationForSkill(userData.jobTechnologies, skill.name);
+      if (techFoundation < 0.5 && skill.requiredLevel >= 3) {
+        gapAreas.push('technology-foundation');
+        sequentialInsights.push('Current job technologies provide limited foundation');
       }
     }
     
-    // Technical Specification Gap Analysis
-    if (skill.gap >= 2 && userData.experienceLevel === 'Complete beginner') {
-      gapAreas.push('foundations');
-      algorithmInsights.push('Need strong foundational learning approach');
+    // Tier 4: Background Context (10%) Analysis
+    if (userData.studyField) {
+      const fieldRelevance = getStudyFieldRelevance(userData.studyField, skill.name);
+      if (fieldRelevance < 0.6) {
+        gapAreas.push('academic-foundation');
+        sequentialInsights.push('Study field provides limited foundation for this skill');
+      }
     }
     
-    // Check for practical experience gap
-    if (skill.requiredLevel >= 4 && skill.currentLevel <= 2) {
-      gapAreas.push('advanced-concepts');
-      algorithmInsights.push('Significant skill level advancement needed');
+    if (userData.certifications && userData.certificationsDetail) {
+      const certRelevance = getCertificationSkillRelevance(userData.certificationsDetail, skill.name);
+      if (certRelevance < 0.3 && skill.requiredLevel >= 4) {
+        gapAreas.push('certification-gap');
+        sequentialInsights.push('Advanced certifications may be needed for this skill level');
+      }
     }
     
-    // Project-based learning analysis
-    if (userData.educationLevel && userData.educationLevel.includes('Degree') && !userData.jobProjects) {
-      gapAreas.push('practical-application');
-      algorithmInsights.push('Need hands-on project experience');
+    // Sequential System Specific Analysis - Technical Specification v2.0
+    
+    // Career Path Foundation Analysis
+    if (careerPathRec) {
+      if (careerPathRec.requiredSkills && !careerPathRec.requiredSkills.includes(skill.name)) {
+        gapAreas.push('career-path-optional');
+        sequentialInsights.push('Skill is supplementary to core career path requirements');
+      }
+      
+      if (careerPathRec.confidenceScore < 70 && skill.priority === 'high') {
+        gapAreas.push('path-confidence-skill');
+        sequentialInsights.push('High-priority skill despite moderate career path confidence');
+      }
+      
+      // Industry Focus Analysis
+      if (careerPathRec.industryFocus && careerPathRec.industryFocus.length > 0) {
+        const industrySkillDemand = getIndustrySkillDemand(careerPathRec.industryFocus, skill.name);
+        if (industrySkillDemand > 0.8) {
+          gapAreas.push('industry-critical');
+          sequentialInsights.push('Critical skill for target industry focus');
+        }
+      }
     }
     
-    return { gapAreas, algorithmInsights };
+    // Skill Gap Analysis Context
+    if (skillGapAnalysis) {
+      if (skillGapAnalysis.currentSkillLevel === 'entry-level-beginner' && skill.requiredLevel >= 4) {
+        gapAreas.push('significant-advancement');
+        sequentialInsights.push('Requires substantial skill level advancement');
+      }
+      
+      if (skillGapAnalysis.strengthsToLeverage && 
+          skillGapAnalysis.strengthsToLeverage.some(strength => 
+            strength.toLowerCase().includes(skill.name.toLowerCase().split(' ')[0])
+          )) {
+        gapAreas.push('leverage-strength');
+        sequentialInsights.push('Can leverage existing strengths for this skill');
+      }
+      
+      if (skillGapAnalysis.recommendedCertifications && 
+          skillGapAnalysis.recommendedCertifications.some(cert => 
+            cert.toLowerCase().includes(skill.name.toLowerCase().split(' ')[0])
+          )) {
+        gapAreas.push('certification-pathway');
+        sequentialInsights.push('Certification pathway available for this skill');
+      }
+    }
+    
+    // Learning Roadmap Context Analysis
+    if (learningRoadmap) {
+      const skillInRoadmap = learningRoadmap.phases && learningRoadmap.phases.some(phase => 
+        phase.skills && phase.skills.some(s => s.toLowerCase().includes(skill.name.toLowerCase().split(' ')[0]))
+      );
+      
+      if (!skillInRoadmap && skill.priority === 'high') {
+        gapAreas.push('roadmap-missing');
+        sequentialInsights.push('High-priority skill not explicitly in learning roadmap');
+      }
+      
+      if (learningRoadmap.totalTimelineEstimate && skill.estimatedLearningTime) {
+        const roadmapMonths = parseInt(learningRoadmap.totalTimelineEstimate.split('-')[0]) || 12;
+        const skillWeeks = parseInt(skill.estimatedLearningTime.split('-')[0]) || 4;
+        const skillMonths = Math.ceil(skillWeeks / 4);
+        
+        if (skillMonths > roadmapMonths * 0.3) {
+          gapAreas.push('time-intensive');
+          sequentialInsights.push('Time-intensive skill relative to overall roadmap');
+        }
+      }
+      
+      if (learningRoadmap.budgetEstimate && skill.priority === 'high') {
+        gapAreas.push('budget-consideration');
+        sequentialInsights.push('Consider budget allocation for high-priority skill development');
+      }
+    }
+    
+    // System-Level Analysis
+    if (systemResponse) {
+      if (systemResponse.overallConfidence < 70 && skill.gap >= 2) {
+        gapAreas.push('system-confidence');
+        sequentialInsights.push('Significant skill gap with moderate system confidence');
+      }
+      
+      if (systemResponse.dataCompleteness < 80) {
+        gapAreas.push('data-completeness');
+        sequentialInsights.push('Skill analysis based on incomplete profile data');
+      }
+      
+      if (systemResponse.careerPathCriteriaComplete < 12) {
+        gapAreas.push('criteria-incomplete');
+        sequentialInsights.push('Skill recommendations based on limited criteria');
+      }
+    }
+    
+    // Advanced Learning Context Analysis
+    if (skill.gap >= 2 && userData.learningComfort === 'Not very comfortable') {
+      gapAreas.push('learning-comfort');
+      sequentialInsights.push('Consider additional support given learning comfort level');
+    }
+    
+    if (userData.timeCommitment && skill.estimatedLearningTime) {
+      const timeAvailable = getTimeCommitmentHours(userData.timeCommitment);
+      const skillIntensity = getSkillLearningIntensity(skill.estimatedLearningTime);
+      
+      if (skillIntensity > timeAvailable * 0.5) {
+        gapAreas.push('time-commitment-gap');
+        sequentialInsights.push('Skill learning time may exceed available commitment');
+      }
+    }
+    
+    return { gapAreas, sequentialInsights };
   };
 
-  // Technical Specification Scoring Functions
-  const getExperienceScore = (experience) => {
-    const expMap = {
-      '0-2': 0.3, '3-5': 0.6, '6-10': 0.8, '10+': 0.9,
-      '0': 0.2, '1': 0.3, '2': 0.4, '3': 0.5, '4': 0.6, '5': 0.7,
-      'Complete beginner': 0.2, 'Some exposure': 0.4, 'Beginner': 0.5,
-      'Intermediate': 0.7, 'Advanced': 0.9
+  // Technical Specification v2.0 Scoring Functions
+  
+  // Tier 1: Core Drivers Scoring
+  const getFutureGoalSkillAlignment = (futureGoal, skillName) => {
+    if (!futureGoal) return 0.3;
+    const goalLower = futureGoal.toLowerCase();
+    const skillLower = skillName.toLowerCase();
+    
+    // Extract key terms from future goal
+    const goalTerms = goalLower.split(' ');
+    const skillTerms = skillLower.split(' ');
+    
+    // Check for direct alignment
+    const directMatch = goalTerms.some(term => skillTerms.includes(term));
+    if (directMatch) return 0.9;
+    
+    // Check for conceptual alignment
+    if (goalLower.includes('senior') && skillLower.includes('advanced')) return 0.8;
+    if (goalLower.includes('engineer') && skillLower.includes('programming')) return 0.8;
+    if (goalLower.includes('data') && skillLower.includes('analysis')) return 0.8;
+    if (goalLower.includes('ai') && skillLower.includes('machine learning')) return 0.9;
+    
+    return 0.5;
+  };
+
+  const getTechInterestSkillAlignment = (techInterests, skillName) => {
+    if (!techInterests) return 0.3;
+    const interestsLower = techInterests.toLowerCase();
+    const skillLower = skillName.toLowerCase();
+    
+    // Direct keyword matching
+    if (interestsLower.includes(skillLower) || skillLower.includes(interestsLower.split(',')[0])) {
+      return 0.9;
+    }
+    
+    // Conceptual matching
+    const interestKeywords = interestsLower.split(',').map(i => i.trim());
+    for (const interest of interestKeywords) {
+      if (skillLower.includes(interest) || interest.includes(skillLower.split(' ')[0])) {
+        return 0.8;
+      }
+    }
+    
+    return 0.4;
+  };
+
+  const getDomainExpertiseSkillRelevance = (leverageDomainExpertise, skillName, currentRole) => {
+    if (!leverageDomainExpertise) return 0.5;
+    
+    const leverage = leverageDomainExpertise.toLowerCase();
+    const skillLower = skillName.toLowerCase();
+    const roleLower = (currentRole || '').toLowerCase();
+    
+    if (leverage.includes('yes')) {
+      // If user wants to leverage domain expertise, check if skill helps bridge domains
+      if (skillLower.includes('communication') || skillLower.includes('management')) return 0.8;
+      if (roleLower.includes('analyst') && skillLower.includes('data')) return 0.9;
+      if (roleLower.includes('manager') && skillLower.includes('leadership')) return 0.9;
+      return 0.6;
+    }
+    
+    if (leverage.includes('no')) {
+      // If user wants complete change, all new skills are relevant
+      return 0.7;
+    }
+    
+    return 0.5;
+  };
+
+  const getCareerPathSkillRelevance = (careerPathsInterest, skillName) => {
+    if (!careerPathsInterest || careerPathsInterest.length === 0) return 0.3;
+    
+    const skillLower = skillName.toLowerCase();
+    
+    for (const path of careerPathsInterest) {
+      const pathLower = path.toLowerCase();
+      
+      if (pathLower.includes('software') && skillLower.includes('programming')) return 0.9;
+      if (pathLower.includes('data') && skillLower.includes('analysis')) return 0.9;
+      if (pathLower.includes('ai') && skillLower.includes('machine learning')) return 0.9;
+      if (pathLower.includes('ux') && skillLower.includes('design')) return 0.9;
+      if (pathLower.includes('product') && skillLower.includes('management')) return 0.8;
+      if (pathLower.includes('cyber') && skillLower.includes('security')) return 0.9;
+    }
+    
+    return 0.4;
+  };
+
+  // Tier 2: Strong Motivators Scoring
+  const getIndustrySkillDemand = (industryPreference, skillName) => {
+    if (!industryPreference || industryPreference.length === 0) return 0.5;
+    
+    const skillLower = skillName.toLowerCase();
+    
+    for (const industry of industryPreference) {
+      const industryLower = industry.toLowerCase();
+      
+      if (industryLower.includes('technology')) {
+        if (skillLower.includes('programming') || skillLower.includes('development')) return 0.9;
+        if (skillLower.includes('cloud') || skillLower.includes('devops')) return 0.8;
+      }
+      
+      if (industryLower.includes('healthcare')) {
+        if (skillLower.includes('data') || skillLower.includes('compliance')) return 0.8;
+        if (skillLower.includes('security') || skillLower.includes('privacy')) return 0.9;
+      }
+      
+      if (industryLower.includes('finance')) {
+        if (skillLower.includes('analysis') || skillLower.includes('modeling')) return 0.8;
+        if (skillLower.includes('security') || skillLower.includes('risk')) return 0.9;
+      }
+    }
+    
+    return 0.6;
+  };
+
+  const getTechMotivationSkillAlignment = (techMotivation, skillName) => {
+    if (!techMotivation) return 0.5;
+    
+    const motivationLower = techMotivation.toLowerCase();
+    const skillLower = skillName.toLowerCase();
+    
+    if (motivationLower.includes('passion') && skillLower.includes('creative')) return 0.8;
+    if (motivationLower.includes('problem') && skillLower.includes('solving')) return 0.9;
+    if (motivationLower.includes('innovation') && skillLower.includes('advanced')) return 0.8;
+    if (motivationLower.includes('growth') && skillLower.includes('learning')) return 0.7;
+    
+    return 0.6;
+  };
+
+  // Tier 3: Supporting Evidence Scoring
+  const getTransferableSkillValue = (skills, skillName) => {
+    if (!skills) return 0.3;
+    const skillsLower = skills.toLowerCase();
+    const skillNameLower = skillName.toLowerCase();
+    
+    const relevantSkills = {
+      'programming': ['analytical', 'problem', 'logical', 'technical'],
+      'communication': ['communication', 'writing', 'presentation', 'teamwork'],
+      'leadership': ['leadership', 'management', 'coordination', 'planning'],
+      'research': ['analytical', 'critical thinking', 'investigation', 'methodology'],
+      'design': ['creative', 'visual', 'aesthetic', 'user-focused'],
+      'data': ['analytical', 'mathematical', 'statistical', 'detail-oriented']
     };
-    return expMap[experience] || 0.5;
+    
+    let applicableSkills = [];
+    Object.keys(relevantSkills).forEach(category => {
+      if (skillNameLower.includes(category)) {
+        applicableSkills = relevantSkills[category];
+      }
+    });
+    
+    const matches = applicableSkills.filter(skill => skillsLower.includes(skill)).length;
+    return Math.min(0.4 + (matches * 0.15), 0.9);
   };
 
+  const getTechnologyFoundationForSkill = (jobTechnologies, skillName) => {
+    if (!jobTechnologies) return 0.3;
+    
+    const techLower = jobTechnologies.toLowerCase();
+    const skillLower = skillName.toLowerCase();
+    
+    // Direct technology match
+    if (techLower.includes(skillLower) || skillLower.includes(techLower.split(',')[0])) {
+      return 0.9;
+    }
+    
+    // Related technology foundation
+    const techStack = techLower.split(',').map(t => t.trim());
+    for (const tech of techStack) {
+      if (skillLower.includes(tech) || tech.includes(skillLower.split(' ')[0])) {
+        return 0.7;
+      }
+    }
+    
+    // General tech foundation
+    const generalTech = ['programming', 'software', 'database', 'web', 'api'];
+    const hasGeneralTech = generalTech.some(tech => techLower.includes(tech));
+    if (hasGeneralTech && skillLower.includes('programming')) return 0.6;
+    
+    return 0.4;
+  };
+
+  // Tier 4: Background Context Scoring
   const getStudyFieldRelevance = (field, skillName) => {
     if (!field) return 0.3;
     const fieldLower = field.toLowerCase();
@@ -166,174 +424,84 @@ const SkillLevelChart = ({ skill, userData, topRecommendation = null }) => {
       return 0.4;
     }
     
-    return 0.6; // Default relevance
+    return 0.6;
   };
 
-  const getInterestAlignment = (interests, skillName) => {
-    if (!interests || interests.length === 0) return 0.3;
+  const getCertificationSkillRelevance = (certificationsDetail, skillName) => {
+    if (!certificationsDetail) return 0.2;
+    
+    const certLower = certificationsDetail.toLowerCase();
     const skillLower = skillName.toLowerCase();
     
-    const techKeywords = ['programming', 'coding', 'software', 'ai', 'data', 'web', 'mobile', 'technology'];
-    const researchKeywords = ['research', 'analysis', 'study', 'investigation', 'academic'];
-    const designKeywords = ['design', 'visual', 'ui', 'ux', 'creative'];
+    if (certLower.includes('none')) return 0.2;
     
-    let relevantKeywords = [];
-    if (techKeywords.some(keyword => skillLower.includes(keyword))) {
-      relevantKeywords = techKeywords;
-    } else if (researchKeywords.some(keyword => skillLower.includes(keyword))) {
-      relevantKeywords = researchKeywords;
-    } else if (designKeywords.some(keyword => skillLower.includes(keyword))) {
-      relevantKeywords = designKeywords;
+    // Direct skill match in certifications
+    if (certLower.includes(skillLower) || skillLower.includes(certLower.split(' ')[0])) {
+      return 0.9;
     }
     
-    const hasMatch = interests.some(interest => 
-      relevantKeywords.some(keyword => interest.toLowerCase().includes(keyword))
-    );
+    // Related certification areas
+    if (skillLower.includes('cloud') && certLower.includes('aws')) return 0.8;
+    if (skillLower.includes('data') && certLower.includes('analytics')) return 0.8;
+    if (skillLower.includes('programming') && certLower.includes('developer')) return 0.7;
     
-    return hasMatch ? 0.8 : 0.4;
+    return 0.4;
   };
 
-  const getTransferableSkillValue = (skills, skillName) => {
-    if (!skills) return 0.3;
-    const skillsLower = skills.toLowerCase();
-    const skillNameLower = skillName.toLowerCase();
+  // Helper functions for analysis
+  const getTimeCommitmentHours = (timeCommitment) => {
+    if (!timeCommitment) return 10;
     
-    const relevantSkills = {
-      'programming': ['analytical', 'problem', 'logical', 'technical'],
-      'communication': ['communication', 'writing', 'presentation', 'teamwork'],
-      'leadership': ['leadership', 'management', 'coordination', 'planning'],
-      'research': ['analytical', 'critical thinking', 'investigation', 'methodology']
+    const timeMap = {
+      '5 hours or less': 5,
+      '5-10 hours': 7.5,
+      '10-15 hours': 12.5,
+      '15-20 hours': 17.5,
+      '20+ hours': 25
     };
     
-    let applicableSkills = [];
-    Object.keys(relevantSkills).forEach(category => {
-      if (skillNameLower.includes(category)) {
-        applicableSkills = relevantSkills[category];
-      }
-    });
+    return timeMap[timeCommitment] || 10;
+  };
+
+  const getSkillLearningIntensity = (estimatedLearningTime) => {
+    if (!estimatedLearningTime) return 5;
     
-    const matches = applicableSkills.filter(skill => skillsLower.includes(skill)).length;
-    return Math.min(0.4 + (matches * 0.15), 0.9);
+    const weeks = parseInt(estimatedLearningTime.split('-')[0]) || 4;
+    return weeks * 1.5; // Approximate hours per week needed
   };
 
-  // Algorithm-specific helper functions
-  const isSkillInTechInterests = (skillName, techInterests) => {
-    if (!techInterests) return false;
-    const interestsLower = techInterests.toLowerCase();
-    const skillLower = skillName.toLowerCase();
-    return interestsLower.includes(skillLower) || 
-           skillLower.split(' ').some(word => interestsLower.includes(word));
-  };
-
-  const isSkillInJobTechnologies = (skillName, jobTechnologies) => {
-    if (!jobTechnologies) return false;
-    const techLower = jobTechnologies.toLowerCase();
-    const skillLower = skillName.toLowerCase();
-    return techLower.includes(skillLower) || 
-           skillLower.split(' ').some(word => techLower.includes(word));
-  };
-
-  const isSkillRelevantToRole = (skillName, currentRole) => {
-    if (!currentRole) return false;
-    const roleLower = currentRole.toLowerCase();
+  // Get sequential system specific skill category
+  const getSequentialSystemCategory = (skillName, careerPathRec, skillGapAnalysis) => {
     const skillLower = skillName.toLowerCase();
     
-    // Basic relevance mapping
-    if (roleLower.includes('developer') && skillLower.includes('programming')) return true;
-    if (roleLower.includes('analyst') && skillLower.includes('data')) return true;
-    if (roleLower.includes('manager') && skillLower.includes('leadership')) return true;
-    
-    return false;
-  };
-
-  const isSkillInResearchTools = (skillName, toolsUsed) => {
-    if (!toolsUsed || !Array.isArray(toolsUsed)) return false;
-    const skillLower = skillName.toLowerCase();
-    return toolsUsed.some(tool => 
-      tool.toLowerCase().includes(skillLower) || 
-      skillLower.includes(tool.toLowerCase())
-    );
-  };
-
-  const getPublicationScore = (publications) => {
-    if (!publications) return 0.2;
-    const pubLower = publications.toLowerCase();
-    if (pubLower.includes('none') || pubLower.includes('0')) return 0.2;
-    if (pubLower.includes('1') || pubLower.includes('few')) return 0.6;
-    return 0.8;
-  };
-
-  const isSkillCollaborationHeavy = (skillName) => {
-    const collaborativeSkills = ['teamwork', 'communication', 'leadership', 'management', 'coordination'];
-    return collaborativeSkills.some(collab => skillName.toLowerCase().includes(collab));
-  };
-
-  const isEducationSufficientForSkill = (educationLevel, skillName) => {
-    const skillLower = skillName.toLowerCase();
-    const eduLower = educationLevel.toLowerCase();
-    
-    if (skillLower.includes('advanced') || skillLower.includes('expert')) {
-      return eduLower.includes('master') || eduLower.includes('phd');
+    // Check if skill is from career path requirements
+    if (careerPathRec?.requiredSkills?.includes(skillName)) {
+      return '🎯 Career Path Foundation';
     }
     
-    if (skillLower.includes('research') || skillLower.includes('analysis')) {
-      return eduLower.includes('bachelor') || eduLower.includes('master') || eduLower.includes('phd');
+    // Check if skill is from skill gap analysis
+    if (skillGapAnalysis?.skillGaps?.some(gap => gap.skill === skillName)) {
+      return '📚 Skill Gap Priority';
     }
     
-    return true; // Most skills can be learned regardless of education level
+    // Categorize by skill type
+    if (skillLower.includes('programming') || skillLower.includes('coding')) return 'Core Technical Skills';
+    if (skillLower.includes('data') || skillLower.includes('analytics')) return 'Data & Analysis Skills';
+    if (skillLower.includes('leadership') || skillLower.includes('management')) return 'Leadership Skills';
+    if (skillLower.includes('communication') || skillLower.includes('presentation')) return 'Soft Skills';
+    if (skillLower.includes('design') || skillLower.includes('ui')) return 'Design Skills';
+    
+    return 'Professional Skills';
   };
 
-  const isSalaryRealisticForSkill = (targetSalary, skillName) => {
-    if (!targetSalary) return true;
-    const salaryNum = parseInt(targetSalary.replace(/[^\d]/g, ''));
-    const skillLower = skillName.toLowerCase();
-    
-    // Advanced skills typically command higher salaries
-    if (skillLower.includes('advanced') || skillLower.includes('expert')) {
-      return salaryNum >= 80000; // Advanced skills typically $80k+
-    }
-    
-    return true; // Default to realistic
-  };
-
-  // Get algorithm-specific skill category
-  const getAlgorithmSpecificCategory = (skillName, topRecommendation) => {
-    if (!topRecommendation) return 'General';
-    
-    const skillLower = skillName.toLowerCase();
-    
-    switch(topRecommendation.type) {
-      case 'tech-interest-based':
-        if (skillLower.includes('programming') || skillLower.includes('coding')) return 'Core Tech Skills';
-        if (skillLower.includes('data') || skillLower.includes('ml')) return 'Data & AI Skills';
-        if (skillLower.includes('web') || skillLower.includes('mobile')) return 'Platform Skills';
-        return 'Tech Skills';
-        
-      case 'research-development':
-        if (skillLower.includes('research') || skillLower.includes('methodology')) return 'Research Skills';
-        if (skillLower.includes('analysis') || skillLower.includes('statistics')) return 'Analytical Skills';
-        if (skillLower.includes('writing') || skillLower.includes('publication')) return 'Academic Skills';
-        return 'Research Skills';
-        
-      case 'lifestyle-market':
-        if (skillLower.includes('leadership') || skillLower.includes('management')) return 'Leadership Skills';
-        if (skillLower.includes('communication') || skillLower.includes('presentation')) return 'Soft Skills';
-        if (skillLower.includes('business') || skillLower.includes('strategy')) return 'Business Skills';
-        return 'Professional Skills';
-        
-      default:
-        return 'General Skills';
-    }
-  };
-
-  // Enhance the skill details with Technical Specification analysis
-  const gapAnalysis = analyzeSkillGapTechnicalSpec(skill, userData, topRecommendation);
+  // Enhance the skill details with Technical Specification v2.0 analysis
+  const gapAnalysis = analyzeSkillGapSequentialSystem(skill, userData, careerPathRecommendation, skillGapAnalysis, learningRoadmap);
   const enhancedSkillDetails = {
     ...skill,
     gapAreas: gapAnalysis.gapAreas,
-    algorithmInsights: gapAnalysis.algorithmInsights,
-    algorithmCategory: getAlgorithmSpecificCategory(skill.name, topRecommendation),
-    technicalSpecVersion: '1.1'
+    sequentialInsights: gapAnalysis.sequentialInsights,
+    sequentialCategory: getSequentialSystemCategory(skill.name, careerPathRecommendation, skillGapAnalysis),
+    technicalSpecVersion: '2.0'
   };
   
   return (
@@ -342,23 +510,22 @@ const SkillLevelChart = ({ skill, userData, topRecommendation = null }) => {
         <div className="flex-1">
           <h4 className="font-semibold text-lg">{skill.name}</h4>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <span className="text-sm text-gray-500">{enhancedSkillDetails.algorithmCategory}</span>
+            <span className="text-sm text-gray-500">{enhancedSkillDetails.sequentialCategory}</span>
             
-            {/* Technical Specification Badge */}
+            {/* Technical Specification v2.0 Badge */}
             <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-              Tech Spec v1.1
+              Tech Spec v2.0
             </span>
             
-            {/* Algorithm Type Badge */}
-            {topRecommendation && (
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                topRecommendation.type === 'tech-interest-based' ? 'bg-purple-100 text-purple-700' :
-                topRecommendation.type === 'research-development' ? 'bg-green-100 text-green-700' :
-                'bg-orange-100 text-orange-700'
-              }`}>
-                {topRecommendation.type === 'tech-interest-based' ? '🎯 Tech-Interest' :
-                 topRecommendation.type === 'research-development' ? '📚 Research/Dev' :
-                 '⚖️ Lifestyle/Market'} Optimized
+            {/* Sequential System Badge */}
+            <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+              Sequential Dependency
+            </span>
+            
+            {/* System Phase Badge */}
+            {careerPathRecommendation && (
+              <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                🎯→📚→⚖️ Optimized
               </span>
             )}
           </div>
@@ -374,7 +541,7 @@ const SkillLevelChart = ({ skill, userData, topRecommendation = null }) => {
               Gap: {skill.gap} {skill.gap === 1 ? 'level' : 'levels'}
             </span>
             
-            {/* Priority Badge based on Technical Specification */}
+            {/* Priority Badge based on Technical Specification v2.0 */}
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
               skill.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
             }`}>
@@ -410,28 +577,61 @@ const SkillLevelChart = ({ skill, userData, topRecommendation = null }) => {
         <span className="text-blue-600 font-medium">Target: {levels[Math.max(0, skill.requiredLevel - 1)]}</span>
       </div>
       
-      {/* Technical Specification Analysis Results */}
-      {topRecommendation && topRecommendation.metadata && (
+      {/* Technical Specification v2.0 Sequential System Analysis */}
+      {systemResponse && (
         <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
           <h5 className="text-sm font-medium text-blue-800 mb-2">
-            Technical Specification Analysis:
+            Technical Specification v2.0 - Sequential System Analysis:
           </h5>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
             <div>
-              <span className="font-medium text-blue-700">Algorithm:</span>
-              <div className="text-blue-600">{topRecommendation.type}</div>
+              <span className="font-medium text-blue-700">System Confidence:</span>
+              <div className="text-blue-600">{systemResponse.overallConfidence}%</div>
             </div>
             <div>
-              <span className="font-medium text-blue-700">Confidence:</span>
-              <div className="text-blue-600">{topRecommendation.confidenceScore}%</div>
+              <span className="font-medium text-blue-700">Criteria Complete:</span>
+              <div className="text-blue-600">{systemResponse.careerPathCriteriaComplete}/16</div>
             </div>
             <div>
-              <span className="font-medium text-blue-700">Criteria Used:</span>
-              <div className="text-blue-600">{topRecommendation.metadata.criteriaUsed?.length || 0}</div>
+              <span className="font-medium text-blue-700">Data Quality:</span>
+              <div className="text-blue-600">{systemResponse.dataCompleteness}%</div>
             </div>
             <div>
-              <span className="font-medium text-blue-700">Fallback:</span>
-              <div className="text-blue-600">{topRecommendation.metadata.fallbackApplied ? 'Yes' : 'No'}</div>
+              <span className="font-medium text-blue-700">Sequential Phases:</span>
+              <div className="text-blue-600">
+                {careerPathRecommendation ? '🎯' : '⭕'}
+                {skillGapAnalysis ? '📚' : '⭕'}
+                {learningRoadmap ? '⚖️' : '⭕'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Career Path Context Display */}
+      {careerPathRecommendation && (
+        <div className="mb-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
+          <h5 className="text-sm font-medium text-purple-800 mb-2">
+            🎯 Career Path Context:
+          </h5>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+            <div>
+              <span className="font-medium text-purple-700">Path Confidence:</span>
+              <div className="text-purple-600">{careerPathRecommendation.confidenceScore}%</div>
+            </div>
+            <div>
+              <span className="font-medium text-purple-700">16-Criteria Used:</span>
+              <div className="text-purple-600">{careerPathRecommendation.metadata?.criteriaUsed?.length || 0}</div>
+            </div>
+            <div>
+              <span className="font-medium text-purple-700">Core Drivers:</span>
+              <div className="text-purple-600">{Math.round((careerPathRecommendation.metadata?.tierScores?.coreDriving || 0) * 100)}%</div>
+            </div>
+            <div>
+              <span className="font-medium text-purple-700">Required Skill:</span>
+              <div className="text-purple-600">
+                {careerPathRecommendation.requiredSkills?.includes(skill.name) ? 'Yes' : 'No'}
+              </div>
             </div>
           </div>
         </div>
@@ -441,14 +641,14 @@ const SkillLevelChart = ({ skill, userData, topRecommendation = null }) => {
         <p className="text-sm text-gray-700 mb-3">{skill.description}</p>
       )}
       
-      {/* Algorithm Insights from Technical Specification */}
-      {enhancedSkillDetails.algorithmInsights && enhancedSkillDetails.algorithmInsights.length > 0 && (
+      {/* Sequential System Insights from Technical Specification v2.0 */}
+      {enhancedSkillDetails.sequentialInsights && enhancedSkillDetails.sequentialInsights.length > 0 && (
         <div className="mb-3 p-3 bg-gray-100 rounded-lg">
           <h5 className="text-sm font-medium text-gray-800 mb-2">
-            🔬 Algorithm Insights:
+            🔗 Sequential System Insights:
           </h5>
           <ul className="text-xs text-gray-700 space-y-1">
-            {enhancedSkillDetails.algorithmInsights.slice(0, 3).map((insight, idx) => (
+            {enhancedSkillDetails.sequentialInsights.slice(0, 3).map((insight, idx) => (
               <li key={idx} className="flex items-start">
                 <span className="text-blue-500 mr-2 mt-0.5">•</span>
                 {insight}
@@ -458,53 +658,88 @@ const SkillLevelChart = ({ skill, userData, topRecommendation = null }) => {
         </div>
       )}
       
-      {/* Enhanced Gap Areas with Technical Specification context */}
+      {/* Enhanced Gap Areas with Technical Specification v2.0 context */}
       {enhancedSkillDetails.gapAreas && enhancedSkillDetails.gapAreas.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-1">
           {enhancedSkillDetails.gapAreas.map((area, idx) => (
             <span key={idx} className={`inline-block px-2 py-0.5 text-xs rounded ${
-              area.includes('gap') || area.includes('mismatch') ? 'bg-red-100 text-red-800' :
-              area.includes('foundation') || area.includes('experience') ? 'bg-yellow-100 text-yellow-800' :
+              area.includes('gap') || area.includes('missing') ? 'bg-red-100 text-red-800' :
+              area.includes('foundation') || area.includes('alignment') ? 'bg-yellow-100 text-yellow-800' :
+              area.includes('leverage') || area.includes('strength') ? 'bg-green-100 text-green-800' :
+              area.includes('critical') || area.includes('demand') ? 'bg-purple-100 text-purple-800' :
               'bg-blue-100 text-blue-800'
             }`}>
-              {area === 'experience-gap' ? 'Experience Gap' :
+              {area === 'future-goal-alignment' ? 'Future Goal Critical' :
+               area === 'tech-interest-gap' ? 'Tech Interest Gap' :
+               area === 'domain-leverage' ? 'Domain Leverage Skill' :
+               area === 'career-path-alignment' ? 'Career Path Essential' :
+               area === 'industry-demand' ? 'High Industry Demand' :
+               area === 'motivation-skill-gap' ? 'Motivation-Aligned Gap' :
+               area === 'transferable-skills' ? 'Limited Transferable Skills' :
+               area === 'technology-foundation' ? 'Tech Foundation Gap' :
                area === 'academic-foundation' ? 'Academic Foundation' :
-               area === 'interest-alignment' ? 'Interest Alignment' :
-               area === 'transferable-skills' ? 'Transferable Skills' :
-               area === 'tech-interest-mismatch' ? 'Tech Interest Mismatch' :
-               area === 'job-tech-gap' ? 'Job Technology Gap' :
-               area === 'role-transition' ? 'Role Transition Skill' :
-               area === 'research-experience' ? 'Research Experience' :
-               area === 'research-tools' ? 'Research Tools' :
-               area === 'time-commitment' ? 'Time Commitment' :
-               area === 'remote-challenges' ? 'Remote Work Challenges' :
-               area === 'education-gap' ? 'Education Gap' :
-               area === 'salary-expectations' ? 'Salary Impact' :
-               area === 'foundations' ? 'Need Fundamentals' :
-               area === 'advanced-concepts' ? 'Advanced Concepts Needed' :
-               area === 'practical-application' ? 'Practical Application' :
+               area === 'certification-gap' ? 'Certification Needed' :
+               area === 'career-path-optional' ? 'Supplementary Skill' :
+               area === 'path-confidence-skill' ? 'High Priority Despite Confidence' :
+               area === 'industry-critical' ? 'Industry Critical' :
+               area === 'significant-advancement' ? 'Major Advancement Needed' :
+               area === 'leverage-strength' ? 'Leverage Existing Strength' :
+               area === 'certification-pathway' ? 'Certification Available' :
+               area === 'roadmap-missing' ? 'Not in Roadmap' :
+               area === 'time-intensive' ? 'Time Intensive' :
+               area === 'budget-consideration' ? 'Budget Impact' :
+               area === 'system-confidence' ? 'System Confidence Factor' :
+               area === 'data-completeness' ? 'Limited Data Analysis' :
+               area === 'criteria-incomplete' ? 'Incomplete Criteria' :
+               area === 'learning-comfort' ? 'Learning Support Needed' :
+               area === 'time-commitment-gap' ? 'Time Commitment Challenge' :
                area}
             </span>
           ))}
         </div>
       )}
       
-      {/* Learning Path Recommendation based on Technical Specification */}
+      {/* Learning Path Recommendation based on Technical Specification v2.0 */}
       {skill.learningPath && (
         <div className="mb-3 p-3 bg-green-50 rounded-lg border border-green-200">
           <h5 className="text-sm font-medium text-green-800 mb-1">
-            💡 Learning Path (Tech Spec v1.1):
+            💡 Learning Path (Sequential System v2.0):
           </h5>
           <p className="text-sm text-green-700">{skill.learningPath}</p>
         </div>
       )}
+
+      {/* Sequential System Progress Indicator */}
+      {(careerPathRecommendation || skillGapAnalysis || learningRoadmap) && (
+        <div className="mb-3 p-3 bg-gradient-to-r from-purple-50 to-green-50 rounded-lg border border-purple-200">
+          <h5 className="text-sm font-medium text-purple-700 mb-2">
+            🔗 Sequential System Progress for {skill.name}:
+          </h5>
+          <div className="flex items-center space-x-2 text-xs">
+            <div className={`px-2 py-1 rounded ${careerPathRecommendation ? 'bg-purple-200 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>
+              🎯 Career Foundation: {careerPathRecommendation ? 'Established' : 'Pending'}
+            </div>
+            <span className="text-gray-400">→</span>
+            <div className={`px-2 py-1 rounded ${skillGapAnalysis ? 'bg-blue-200 text-blue-800' : 'bg-gray-200 text-gray-600'}`}>
+              📚 Gap Analysis: {skillGapAnalysis ? 'Complete' : 'Pending'}
+            </div>
+            <span className="text-gray-400">→</span>
+            <div className={`px-2 py-1 rounded ${learningRoadmap ? 'bg-green-200 text-green-800' : 'bg-gray-200 text-gray-600'}`}>
+              ⚖️ Learning Plan: {learningRoadmap ? 'Ready' : 'Pending'}
+            </div>
+          </div>
+        </div>
+      )}
       
-      {/* Use enhanced skill details and pass technical specification data */}
+      {/* Use enhanced skill details and pass technical specification v2.0 data */}
       <SkillLearningResources 
         skillName={skill.name} 
         userData={userData} 
         skillDetails={enhancedSkillDetails}
-        topRecommendation={topRecommendation}
+        careerPathRecommendation={careerPathRecommendation}
+        skillGapAnalysis={skillGapAnalysis}
+        learningRoadmap={learningRoadmap}
+        systemResponse={systemResponse}
       />
     </div>
   );

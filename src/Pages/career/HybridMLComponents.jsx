@@ -1,5 +1,5 @@
 // ============================================================================
-// HybridMLComponents.jsx - ENHANCED VERSION
+// HybridMLComponents.jsx - ENHANCED VERSION (FIXED HOOKS)
 // Complete UI Components for Hybrid ML + Rule-Based Recommendations
 // ============================================================================
 
@@ -22,26 +22,20 @@ export const MLEnhancedCareerCard = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [animatedScore, setAnimatedScore] = useState(0);
   
-  // Error handling for missing path data
-  if (!path || !path.title) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-600 text-sm">⚠️ Error loading career recommendation</p>
-      </div>
-    );
-  }
-
-  const finalScore = path.hybridScore || path.match || 0;
+  // Move all hooks to the top before any conditional returns
+  const finalScore = path?.hybridScore || path?.match || 0;
   const animatedValue = animatedValues?.[`path-${index}`] || animatedScore;
   
   // Animate score on mount
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setAnimatedScore(finalScore);
-    }, index * 100); // Stagger animations
-    
-    return () => clearTimeout(timer);
-  }, [finalScore, index]);
+    if (path && path.title) {
+      const timer = setTimeout(() => {
+        setAnimatedScore(finalScore);
+      }, index * 100); // Stagger animations
+      
+      return () => clearTimeout(timer);
+    }
+  }, [finalScore, index, path]);
 
   const colorClasses = [
     'from-purple-500 to-pink-500',
@@ -105,6 +99,15 @@ export const MLEnhancedCareerCard = ({
   const getCareerExplanation = (title) => {
     return careerExplanations[title] || 'Leverage technology to solve problems and create innovative solutions in the digital world.';
   };
+
+  // Error handling for missing path data
+  if (!path || !path.title) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <p className="text-red-600 text-sm">⚠️ Error loading career recommendation</p>
+      </div>
+    );
+  }
 
   // Loading state
   if (isLoading) {
@@ -524,6 +527,12 @@ export const HybridRecommendationsDisplay = ({
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('all');
   
+  // Move useMemo to the top before any conditional returns
+  const limitedAllRecommendations = useMemo(() => {
+    if (!hybridResults?.allRecommendations) return [];
+    return hybridResults.allRecommendations.slice(0, maxRecommendationsPerSection * 2);
+  }, [hybridResults?.allRecommendations, maxRecommendationsPerSection]);
+  
   if (isLoading) {
     return (
       <div className="space-y-12">
@@ -560,12 +569,6 @@ export const HybridRecommendationsDisplay = ({
   
   const { recommendations, allRecommendations, mlInsights, explanations } = hybridResults;
   const { primary = [], inferred = [], adjacent = [], mlDiscovered = [] } = recommendations || {};
-  
-  // Performance optimization: limit displayed recommendations
-  const limitedAllRecommendations = useMemo(() => 
-    (allRecommendations || []).slice(0, maxRecommendationsPerSection * 2), 
-    [allRecommendations, maxRecommendationsPerSection]
-  );
   
   return (
     <div className="space-y-12" role="main" aria-labelledby="recommendations-title">

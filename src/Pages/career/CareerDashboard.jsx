@@ -572,7 +572,7 @@ const CareerDashboard = () => {
                   className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-teal-500 to-green-600 text-white rounded-lg hover:from-teal-600 hover:to-green-700 transition-all transform hover:scale-105"
                 >
                   <span className="text-2xl mb-2">📖</span>
-                  <span className="text-sm font-medium">Guide</span>
+                  <span className="text-sm font-medium">Career Guide</span>
                 </button>
                 
                 <button 

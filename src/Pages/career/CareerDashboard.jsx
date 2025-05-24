@@ -823,7 +823,7 @@ Focus on the most effective resources for their level and timeline.`;
               Welcome back, {userData.name}! 👋
             </h1>
             <p className="text-xl opacity-90 mb-6">
-              Your Claude AI-powered career recommendations and insights
+              Your AI-powered career recommendations and insights
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-sm">
               {userData.currentRole !== 'Not specified' && (
@@ -842,7 +842,7 @@ Focus on the most effective resources for their level and timeline.`;
                 </div>
               )}
               <div className="bg-purple-400 bg-opacity-30 px-4 py-2 rounded-full border border-purple-300">
-                🤖 Claude AI Powered
+                🤖 AI Powered
               </div>
             </div>
           </div>
@@ -887,13 +887,13 @@ Focus on the most effective resources for their level and timeline.`;
         {activeTab === 'paths' && (
           <div className="space-y-8">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-4">Claude AI Career Recommendations</h2>
+              <h2 className="text-3xl font-bold mb-4">AI Career Recommendations</h2>
               <p className="text-gray-600 text-lg">Personalized career paths based on your complete profile analysis</p>
               
               {generatingRecommendations && (
                 <div className="mt-4 flex items-center justify-center space-x-2">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
-                  <span className="text-green-600">Claude AI is analyzing your profile...</span>
+                  <span className="text-green-600">AI is analyzing your profile...</span>
                 </div>
               )}
             </div>
@@ -913,7 +913,7 @@ Focus on the most effective resources for their level and timeline.`;
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🤖</div>
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">Generating AI Recommendations</h3>
-                <p className="text-gray-500">Claude AI is analyzing your profile to create personalized career recommendations.</p>
+                <p className="text-gray-500">AI is analyzing your profile to create personalized career recommendations.</p>
               </div>
             )}
           </div>

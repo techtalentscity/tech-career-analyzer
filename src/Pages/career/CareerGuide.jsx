@@ -1028,7 +1028,7 @@ const CareerGuide = () => {
         <div className="bg-white shadow-sm rounded-lg overflow-hidden mb-8">
           <div className="flex overflow-x-auto scrollbar-hide border-b border-gray-200">
             <button
-              onClick={() => alert('Navigate to dashboard')}
+              onClick={() => window.location.href = '/career/dashboard'}
               className="px-4 py-3 text-sm md:text-base whitespace-nowrap font-medium flex items-center text-white bg-green-600 hover:bg-green-700 transition-colors border-b-2 border-green-500"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

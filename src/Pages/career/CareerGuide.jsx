@@ -8,6 +8,7 @@ const CareerGuide = () => {
 
   // Tabs for different sections
   const tabs = [
+    { id: 'dashboard', label: 'Back to Dashboard', icon: 'arrow-left', action: () => navigate('/career/dashboard') },
     { id: 'insights', label: 'Data-Driven Insights', icon: 'chart' },
     { id: 'coding', label: 'Learning to Code', icon: 'code' },
     { id: 'expert', label: 'Becoming an Expert', icon: 'star' },
@@ -20,6 +21,12 @@ const CareerGuide = () => {
   // Define icons for each tab
   const getTabIcon = (iconName) => {
     switch (iconName) {
+      case 'arrow-left':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        );
       case 'code':
         return (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -64,6 +71,15 @@ const CareerGuide = () => {
         );
       default:
         return null;
+    }
+  };
+
+  // Handle tab click
+  const handleTabClick = (tab) => {
+    if (tab.action) {
+      tab.action();
+    } else {
+      setActiveTab(tab.id);
     }
   };
 
@@ -168,7 +184,7 @@ const CareerGuide = () => {
               
               {/* Top Technologies Section */}
               <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">🔧 Most Emphasized Technologies</h3>
+                <h3 className="text-xl font-semibold mb-4 text-gray-900">Most Emphasized Technologies</h3>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <div className="space-y-3">
@@ -207,7 +223,7 @@ const CareerGuide = () => {
               
               {/* Actionable Recommendations */}
               <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">✅ Top Actionable Recommendations</h3>
+                <h3 className="text-xl font-semibold mb-4 text-gray-900">Top Actionable Recommendations</h3>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div className="flex items-start">
@@ -271,7 +287,7 @@ const CareerGuide = () => {
               
               {/* Career Framework */}
               <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-lg mb-8">
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">🚀 Career Development Framework</h3>
+                <h3 className="text-xl font-semibold mb-4 text-gray-900">Career Development Framework</h3>
                 
                 <div className="grid md:grid-cols-3 gap-6">
                   <div className="bg-white p-5 rounded-lg shadow-sm">
@@ -368,7 +384,7 @@ const CareerGuide = () => {
               
               {/* Target Audiences */}
               <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">🎯 Primary Target Audiences</h3>
+                <h3 className="text-xl font-semibold mb-4 text-gray-900">Primary Target Audiences</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
                     <div>
@@ -403,7 +419,7 @@ const CareerGuide = () => {
               
               {/* Key Insights Summary */}
               <div className="bg-gradient-to-r from-teal-50 to-cyan-50 p-6 rounded-lg">
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">💼 Key Career Themes</h3>
+                <h3 className="text-xl font-semibold mb-4 text-gray-900">Key Career Themes</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <ul className="space-y-3">
                     <li className="flex items-start">
@@ -449,7 +465,7 @@ const CareerGuide = () => {
                 
                 <div className="mt-6 p-4 bg-white rounded-lg">
                   <p className="text-sm text-gray-600 font-medium">
-                    📊 <strong>Analysis Summary:</strong> 16 videos analyzed • 100% success rate • Frame sampling + AI analysis • May 22, 2025
+                    Analysis Summary: 16 videos analyzed • 100% success rate • Frame sampling + AI analysis • May 22, 2025
                   </p>
                 </div>
               </div>
@@ -567,11 +583,11 @@ const CareerGuide = () => {
                 <div className="grid md:grid-cols-3 gap-4">
                   <div className="bg-white p-4 rounded shadow-sm border-l-4 border-green-500">
                     <h4 className="font-bold text-green-700">Python</h4>
-                    <p className="text-sm">⭐ Most recommended (5 mentions). Beginner-friendly syntax. Essential for AI/ML, data science, and automation.</p>
+                    <p className="text-sm">Most recommended (5 mentions). Beginner-friendly syntax. Essential for AI/ML, data science, and automation.</p>
                   </div>
                   <div className="bg-white p-4 rounded shadow-sm border-l-4 border-orange-500">
                     <h4 className="font-bold text-orange-700">Java</h4>
-                    <p className="text-sm">⭐ Highly demanded (6 mentions). Enterprise-ready with strong typing. Excellent for backend and Android development.</p>
+                    <p className="text-sm">Highly demanded (6 mentions). Enterprise-ready with strong typing. Excellent for backend and Android development.</p>
                   </div>
                   <div className="bg-white p-4 rounded shadow-sm border-l-4 border-blue-500">
                     <h4 className="font-bold text-blue-700">JavaScript</h4>
@@ -580,7 +596,7 @@ const CareerGuide = () => {
                 </div>
                 <div className="mt-4 p-3 bg-yellow-100 rounded">
                   <p className="text-sm font-medium text-yellow-800">
-                    💡 Pro Tip: Focus on Python or Java first as they're most emphasized in career guidance, then add JavaScript for web development.
+                    Pro Tip: Focus on Python or Java first as they're most emphasized in career guidance, then add JavaScript for web development.
                   </p>
                 </div>
               </div>
@@ -596,18 +612,6 @@ const CareerGuide = () => {
   return (
     <div className="bg-gray-50 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-2">
-          <button
-            onClick={() => navigate('/career/dashboard')}
-            className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Dashboard
-          </button>
-        </div>
-        
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Tech Career Development Guide</h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -621,11 +625,13 @@ const CareerGuide = () => {
               <button
                 key={tab.id}
                 className={`px-4 py-3 text-sm md:text-base whitespace-nowrap font-medium flex items-center ${
-                  activeTab === tab.id
+                  tab.id === 'dashboard'
+                    ? 'text-teal-600 hover:text-teal-700 hover:bg-teal-50'
+                    : activeTab === tab.id
                     ? 'text-teal-600 border-b-2 border-teal-500'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabClick(tab)}
               >
                 <span className="mr-2">{getTabIcon(tab.icon)}</span>
                 {tab.label}

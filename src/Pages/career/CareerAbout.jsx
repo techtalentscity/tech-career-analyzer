@@ -221,7 +221,7 @@ const CareerAbout = () => {
                   </div>
 
                   <div className="bg-indigo-50 p-6 rounded-xl">
-                    <div className="text-3xl text-indigo-600 mb-3">📊</div>
+                    <div className="text-3xl text-indigo-600 mb-3"></div>
                     <h3 className="text-xl font-bold text-gray-800 mb-2">Skills Gap Analysis</h3>
                     <p className="text-gray-700">
                       Skills gap analysis to identify what you need to learn for your target role

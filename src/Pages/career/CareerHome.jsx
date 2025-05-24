@@ -8,37 +8,31 @@ const FEATURES = [
   {
     title: "Career Path Recommendations",
     description: "Get matched with ideal tech careers based on your profile, with match percentages and timeline estimates",
-    icon: "🎯",
     color: "from-red-500 to-orange-500"
   },
   {
     title: "Strengths Analysis",
     description: "Detailed breakdown of your transferable skills and how they apply to tech roles",
-    icon: "💪",
     color: "from-green-500 to-teal-500"
   },
   {
     title: "Skills Gap Analysis",
     description: "Identify exact technical skills you need to develop for your target career path",
-    icon: "📊",
     color: "from-blue-500 to-cyan-500"
   },
   {
     title: "Learning Roadmap",
     description: "Month-by-month plan with specific courses and projects to build your skills",
-    icon: "🗺️",
     color: "from-purple-500 to-pink-500"
   },
   {
     title: "Transition Strategy",
     description: "Practical steps to move from your current role to your target tech position",
-    icon: "🚀",
     color: "from-indigo-500 to-purple-500"
   },
   {
     title: "Export Results",
     description: "Download your complete career analysis as a PDF for future reference",
-    icon: "📄",
     color: "from-gray-600 to-gray-800"
   }
 ];
@@ -48,28 +42,24 @@ const PLATFORM_FEATURES = [
   {
     title: "Personalized Dashboard",
     description: "Track your tech career journey with a comprehensive overview of your profile, skills, and recommended next steps",
-    icon: "📊",
     color: "bg-blue-100 text-blue-600",
     image: "/images/dashboard-preview.png"
   },
   {
     title: "Curated Learning Resources",
     description: "Access top-rated courses and certifications matched to your specific career path and skill gaps",
-    icon: "📚",
     color: "bg-green-100 text-green-600",
     image: "/images/learning-preview.png"
   },
   {
     title: "Interview Preparation",
     description: "Prepare for technical, behavioral, and coding interviews with our comprehensive resources and practice tools",
-    icon: "💬",
     color: "bg-purple-100 text-purple-600",
     image: "/images/interviews-preview.png"
   },
   {
     title: "Career Development Guide",
     description: "Navigate your tech career with expert advice on learning to code, becoming an expert, and strategic career planning",
-    icon: "📋",
     color: "bg-teal-100 text-teal-600",
     image: "/images/guide-preview.png"
   }
@@ -105,28 +95,24 @@ const PROCESS_STEPS = [
     step: "1",
     title: "Complete Assessment",
     description: "Answer questions about your education, experience, skills, and career goals",
-    icon: "📝",
     animationDelay: "delay-0"
   },
   {
     step: "2",
     title: "AI Analysis",
     description: "Our AI analyzes your profile to identify the best career matches and learning paths",
-    icon: "🤖",
     animationDelay: "delay-100"
   },
   {
     step: "3",
     title: "Get Your Results",
     description: "Receive comprehensive career recommendations with actionable next steps",
-    icon: "📊",
     animationDelay: "delay-200"
   },
   {
     step: "4",
     title: "Access Platform Tools",
     description: "Explore learning resources, interview prep, and our comprehensive career guide",
-    icon: "🛠️",
     animationDelay: "delay-300"
   }
 ];

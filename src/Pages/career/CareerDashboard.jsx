@@ -3842,7 +3842,7 @@ const CareerDashboard = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="text-6xl mb-4"></div>
+                <div className="text-6xl mb-4">🗺️</div>
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">Creating Your Roadmap</h3>
                 <p className="text-gray-500">Your personalized learning path will be generated based on your assessment.</p>
               </div>
@@ -3863,7 +3863,7 @@ const CareerDashboard = () => {
               {careerPaths.length > 0 && (
                 <div className="mt-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400 max-w-2xl mx-auto">
                   <p className="text-sm text-blue-800">
-                    <strong> Tailored Analysis:</strong> These insights are specifically generated for your top career recommendation 
+                    <strong>🎯 Tailored Analysis:</strong> These insights are specifically generated for your top career recommendation 
                     based on your interests in {userData.careerPathsInterest?.join(', ') || 'technology'}.
                   </p>
                 </div>
@@ -3900,7 +3900,7 @@ const CareerDashboard = () => {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <div className="text-4xl mb-4"></div>
+                  <div className="text-4xl mb-4">📊</div>
                   <h4 className="text-lg font-semibold text-gray-600 mb-2">Generating Personalized Market Analysis</h4>
                   <p className="text-gray-500">
                     {careerPaths.length > 0 
@@ -3915,7 +3915,7 @@ const CareerDashboard = () => {
             {/* Job Market Outlook Section */}
             <div>
               <h3 className="text-2xl font-bold mb-6 flex items-center">
-                <span className="mr-3"></span>
+                <span className="mr-3">💼</span>
                 {careerPaths.length > 0 
                   ? `${careerPaths[0].title} Job Market Outlook`
                   : 'Job Market Outlook'
@@ -3942,7 +3942,7 @@ const CareerDashboard = () => {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <div className="text-4xl mb-4"></div>
+                  <div className="text-4xl mb-4">🎯</div>
                   <h4 className="text-lg font-semibold text-gray-600 mb-2">Generating Job Market Analysis</h4>
                   <p className="text-gray-500">
                     {careerPaths.length > 0 
@@ -3970,7 +3970,7 @@ const CareerDashboard = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="text-6xl mb-4"></div>
+                <div className="text-6xl mb-4">🎯</div>
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">Creating Your Action Plan</h3>
                 <p className="text-gray-500">Your personalized action plan will be generated based on your assessment.</p>
               </div>
@@ -4054,31 +4054,26 @@ const CareerDashboard = () => {
             </div>
 
             {/* Resource Sections */}
-            {portfolioGuidance.length > 0 && (
+            {(portfolioGuidance.length > 0 || jobSearchStrategies.length > 0) && (
               <div className="bg-white rounded-2xl p-8 shadow-lg">
                 <h3 className="text-xl font-bold mb-6 flex items-center">
-                  <span className="mr-3"></span>
+                  <span className="mr-3">🎯</span>
                   TRANSITION STRATEGY
                 </h3>
                 <div className="space-y-4">
-                  {portfolioGuidance.filter(item => item.type === 'tip').slice(0, 5).map((tip, index) => (
+                  {[
+                    ...portfolioGuidance.filter(item => 
+                      item.type === 'tip' && 
+                      !item.text.includes('CAREER PATH RECOMMENDATIONS:') &&
+                      !item.text.includes('Why: Strong alignment with their Computer Science background, interest in AI and data analysis, and transferable skills from digital marketing. The role leverages their analytical skills and aligns with their passion for problem-solving.')
+                    ),
+                    ...jobSearchStrategies.filter(item => 
+                      item.type === 'tip' && 
+                      !item.text.includes('Big Data Technologies: Familiarize with big data platforms like Hadoop and Spark for large-scale data processing') &&
+                      !item.text.includes('Cloud Computing: Learn cloud platforms (e.g., AWS, Azure) for data storage and processing in modern data environments')
+                    )
+                  ].slice(0, 8).map((tip, index) => (
                     <div key={index} className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
-                      <p className="text-gray-700">{tip.text}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {jobSearchStrategies.length > 0 && (
-              <div className="bg-white rounded-2xl p-8 shadow-lg">
-                <h3 className="text-xl font-bold mb-6 flex items-center">
-                  <span className="mr-3"></span>
-                  Job Search Strategies
-                </h3>
-                <div className="space-y-4">
-                  {jobSearchStrategies.filter(item => item.type === 'tip').slice(0, 5).map((tip, index) => (
-                    <div key={index} className="bg-gradient-to-r from-green-50 to-teal-50 rounded-lg p-4">
                       <p className="text-gray-700">{tip.text}</p>
                     </div>
                   ))}
@@ -4089,7 +4084,7 @@ const CareerDashboard = () => {
             {careerGrowthResources.length > 0 && (
               <div className="bg-white rounded-2xl p-8 shadow-lg">
                 <h3 className="text-xl font-bold mb-6 flex items-center">
-                  <span className="mr-3"></span>
+                  <span className="mr-3">💪</span>
                   STRENGTHS ANALYSIS
                 </h3>
                 <div className="space-y-4">

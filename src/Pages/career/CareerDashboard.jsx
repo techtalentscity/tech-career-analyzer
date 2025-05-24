@@ -1,4 +1,4 @@
-// CareerDashboard.jsx - SIMPLIFIED GREEN THEMED VERSION
+// CareerDashboard.jsx - ENHANCED WITH PERSONALIZED CAREER ROADMAP
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -29,6 +29,10 @@ const CareerDashboard = () => {
   const [careerGrowthResources, setCareerGrowthResources] = useState([]);
   const [careerPathVisualizations, setCareerPathVisualizations] = useState([]);
   const [activeTab, setActiveTab] = useState('paths'); // Default to paths instead of overview
+  
+  // NEW: Roadmap states
+  const [personalizedRoadmap, setPersonalizedRoadmap] = useState(null);
+  const [generatingRoadmap, setGeneratingRoadmap] = useState(false);
   
   // ENHANCED: Complete recommendation states combining ML + Authentic approaches
   const [hybridResults, setHybridResults] = useState(null);
@@ -73,6 +77,300 @@ const CareerDashboard = () => {
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
 
   const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeX9C7YtHTSBy4COsV6KaogdEvrjXoVQ0O2psoyfs1xqrySNg/formResponse';
+
+  // ============================================================================
+  // NEW: PERSONALIZED ROADMAP GENERATOR
+  // ============================================================================
+
+  const generatePersonalizedRoadmap = async () => {
+    setGeneratingRoadmap(true);
+    
+    try {
+      // Get the top career recommendation
+      const topCareer = hybridResults?.allRecommendations?.[0] || careerPaths[0];
+      
+      if (!topCareer) {
+        toast.error('No career recommendations found. Please retake the assessment.');
+        return;
+      }
+
+      // Simulate API call delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      const roadmap = createDetailedRoadmap(topCareer, userData);
+      setPersonalizedRoadmap(roadmap);
+      
+      toast.success('Your personalized roadmap has been generated!');
+      
+    } catch (error) {
+      console.error('Error generating roadmap:', error);
+      toast.error('Failed to generate roadmap. Please try again.');
+    } finally {
+      setGeneratingRoadmap(false);
+    }
+  };
+
+  const createDetailedRoadmap = (topCareer, userData) => {
+    const experienceLevel = userData.experienceLevel || 'Some exposure';
+    const transitionTimeline = userData.transitionTimeline || '6-12 months';
+    const timeCommitment = userData.timeCommitment || '5-10 hours per week';
+    
+    // Base roadmap structure
+    const baseRoadmap = {
+      careerTitle: topCareer.title,
+      matchScore: topCareer.hybridScore || topCareer.match,
+      totalDuration: transitionTimeline,
+      weeklyCommitment: timeCommitment,
+      phases: []
+    };
+
+    // Define career-specific skills and requirements
+    const careerRequirements = getCareerRequirements(topCareer.title);
+    
+    // Generate phases based on experience level and timeline
+    if (experienceLevel === 'Complete beginner') {
+      baseRoadmap.phases = [
+        createPhase('Foundation Building', '0-2 months', 'Establish fundamental understanding', [
+          'Complete basic programming course (Python/JavaScript)',
+          'Set up development environment',
+          'Learn version control (Git)',
+          'Build first simple project',
+          'Join relevant online communities'
+        ], careerRequirements.foundationSkills),
+        
+        createPhase('Skill Development', '2-4 months', 'Develop core technical skills', [
+          'Complete intermediate programming projects',
+          'Learn frameworks relevant to your target role',
+          'Start building portfolio projects',
+          'Begin networking in the industry',
+          'Take relevant online certifications'
+        ], careerRequirements.coreSkills),
+        
+        createPhase('Portfolio Building', '4-6 months', 'Create impressive portfolio', [
+          'Build 3-4 substantial projects',
+          'Contribute to open source projects',
+          'Create professional portfolio website',
+          'Write technical blog posts',
+          'Practice coding interviews'
+        ], careerRequirements.portfolioProjects),
+        
+        createPhase('Job Preparation', '6+ months', 'Prepare for job applications', [
+          'Optimize LinkedIn and resume',
+          'Practice technical interviews',
+          'Apply to entry-level positions',
+          'Attend networking events',
+          'Consider internships or bootcamps'
+        ], careerRequirements.jobPrepSkills)
+      ];
+    } else if (experienceLevel === 'Some exposure') {
+      baseRoadmap.phases = [
+        createPhase('Skill Assessment & Gap Analysis', '0-1 month', 'Identify your current level', [
+          'Take skills assessment tests',
+          'Review job requirements for target role',
+          'Identify skill gaps',
+          'Create learning plan',
+          'Set up tracking system'
+        ], careerRequirements.assessmentTools),
+        
+        createPhase('Targeted Skill Building', '1-3 months', 'Focus on missing skills', [
+          'Complete advanced courses in weak areas',
+          'Build projects showcasing new skills',
+          'Get feedback from experienced professionals',
+          'Join study groups or bootcamps',
+          'Earn relevant certifications'
+        ], careerRequirements.advancedSkills),
+        
+        createPhase('Professional Portfolio', '3-5 months', 'Showcase your abilities', [
+          'Refactor existing projects with best practices',
+          'Build complex, real-world applications',
+          'Document your work professionally',
+          'Create technical presentations',
+          'Contribute to team projects'
+        ], careerRequirements.professionalProjects),
+        
+        createPhase('Career Transition', '5+ months', 'Land your dream job', [
+          'Apply to mid-level positions',
+          'Negotiate offers effectively',
+          'Build professional network',
+          'Consider freelance opportunities',
+          'Plan for continuous learning'
+        ], careerRequirements.transitionStrategies)
+      ];
+    } else { // Intermediate/Advanced
+      baseRoadmap.phases = [
+        createPhase('Specialization Focus', '0-2 months', 'Deepen expertise in target area', [
+          'Master advanced concepts in target role',
+          'Learn cutting-edge tools and technologies',
+          'Build thought leadership through content',
+          'Mentor others in your current field',
+          'Research industry trends'
+        ], careerRequirements.specializationSkills),
+        
+        createPhase('Strategic Positioning', '2-4 months', 'Position yourself as an expert', [
+          'Speak at conferences or meetups',
+          'Publish advanced technical content',
+          'Lead high-impact projects',
+          'Build strategic relationships',
+          'Obtain advanced certifications'
+        ], careerRequirements.leadershipSkills),
+        
+        createPhase('Career Advancement', '4+ months', 'Secure senior-level opportunities', [
+          'Target senior/lead positions',
+          'Develop team leadership skills',
+          'Build cross-functional expertise',
+          'Consider consulting opportunities',
+          'Plan long-term career strategy'
+        ], careerRequirements.seniorSkills)
+      ];
+    }
+
+    return baseRoadmap;
+  };
+
+  const createPhase = (title, timeline, description, milestones, skills = []) => ({
+    title,
+    timeline,
+    description,
+    milestones,
+    skills,
+    resources: [],
+    completed: false
+  });
+
+  const getCareerRequirements = (careerTitle) => {
+    const requirements = {
+      'Data Scientist': {
+        foundationSkills: ['Python', 'Statistics', 'SQL', 'Excel'],
+        coreSkills: ['Machine Learning', 'Pandas', 'NumPy', 'Matplotlib'],
+        advancedSkills: ['Deep Learning', 'TensorFlow', 'Scikit-learn', 'Data Visualization'],
+        portfolioProjects: ['Predictive Model', 'Data Analysis Dashboard', 'ML Classification'],
+        jobPrepSkills: ['Technical Interview Prep', 'Business Communication', 'Domain Knowledge'],
+        assessmentTools: ['Kaggle Competitions', 'Online Skill Tests', 'Portfolio Review'],
+        professionalProjects: ['End-to-end ML Pipeline', 'Real-world Dataset Analysis'],
+        transitionStrategies: ['Industry Networking', 'Freelance Projects', 'Certification Display'],
+        specializationSkills: ['Advanced ML Algorithms', 'Big Data Tools', 'Cloud Platforms'],
+        leadershipSkills: ['Project Management', 'Team Collaboration', 'Stakeholder Communication'],
+        seniorSkills: ['Strategic Planning', 'Mentoring', 'Cross-functional Leadership']
+      },
+      'Software Developer': {
+        foundationSkills: ['Programming Fundamentals', 'Git', 'Problem Solving', 'Debugging'],
+        coreSkills: ['Web Development', 'Database Management', 'APIs', 'Testing'],
+        advancedSkills: ['Frameworks', 'Architecture Patterns', 'Performance Optimization'],
+        portfolioProjects: ['Full-stack Application', 'Mobile App', 'API Development'],
+        jobPrepSkills: ['Coding Interviews', 'System Design', 'Code Review'],
+        assessmentTools: ['Coding Challenges', 'GitHub Portfolio', 'Technical Interviews'],
+        professionalProjects: ['Production Application', 'Team Collaboration Projects'],
+        transitionStrategies: ['Open Source Contributions', 'Networking Events', 'Job Applications'],
+        specializationSkills: ['Advanced Frameworks', 'DevOps', 'Cloud Services'],
+        leadershipSkills: ['Code Reviews', 'Technical Mentoring', 'Architecture Decisions'],
+        seniorSkills: ['Team Leadership', 'Project Planning', 'Technical Strategy']
+      },
+      'UX/UI Designer': {
+        foundationSkills: ['Design Principles', 'Color Theory', 'Typography', 'User Research'],
+        coreSkills: ['Figma/Sketch', 'Prototyping', 'Wireframing', 'User Testing'],
+        advancedSkills: ['Interaction Design', 'Design Systems', 'Accessibility'],
+        portfolioProjects: ['Mobile App Design', 'Website Redesign', 'User Research Study'],
+        jobPrepSkills: ['Portfolio Presentation', 'Design Critique', 'Client Communication'],
+        assessmentTools: ['Portfolio Review', 'Design Challenges', 'Peer Feedback'],
+        professionalProjects: ['Complete Design System', 'User Experience Optimization'],
+        transitionStrategies: ['Design Community Involvement', 'Client Projects', 'Design Contests'],
+        specializationSkills: ['Advanced Prototyping', 'Design Research', 'Service Design'],
+        leadershipSkills: ['Design Leadership', 'Cross-team Collaboration', 'Design Strategy'],
+        seniorSkills: ['Product Strategy', 'Team Management', 'Business Impact']
+      }
+    };
+
+    return requirements[careerTitle] || requirements['Software Developer'];
+  };
+
+  // ============================================================================
+  // ROADMAP UI COMPONENTS
+  // ============================================================================
+
+  const RoadmapPhase = ({ phase, index, isLast }) => (
+    <div className="relative">
+      {/* Timeline connector */}
+      {!isLast && (
+        <div className="absolute left-6 top-16 w-0.5 h-full bg-gradient-to-b from-green-500 to-lime-500 opacity-30"></div>
+      )}
+      
+      <div className="flex items-start space-x-4 mb-8">
+        {/* Phase number */}
+        <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-green-500 to-lime-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
+          {index + 1}
+        </div>
+        
+        {/* Phase content */}
+        <div className="flex-grow bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">{phase.title}</h3>
+              <p className="text-green-600 font-medium">{phase.timeline}</p>
+            </div>
+            <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+              Phase {index + 1}
+            </span>
+          </div>
+          
+          <p className="text-gray-600 mb-4">{phase.description}</p>
+          
+          {/* Milestones */}
+          <div className="mb-4">
+            <h4 className="font-semibold text-gray-800 mb-3">Key Milestones:</h4>
+            <div className="space-y-2">
+              {phase.milestones.map((milestone, idx) => (
+                <div key={idx} className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <span className="text-gray-700">{milestone}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Skills to focus on */}
+          {phase.skills && phase.skills.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-3">Skills to Focus On:</h4>
+              <div className="flex flex-wrap gap-2">
+                {phase.skills.map((skill, idx) => (
+                  <span 
+                    key={idx}
+                    className="px-3 py-1 bg-lime-100 text-lime-700 rounded-full text-sm"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  const RoadmapSummary = ({ roadmap }) => (
+    <div className="bg-gradient-to-r from-green-500 to-lime-600 text-white rounded-xl p-6 mb-8 shadow-lg">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-2">Your Personalized Career Roadmap</h2>
+        <p className="text-green-100 mb-4">Tailored path to become a {roadmap.careerTitle}</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <div className="bg-white bg-opacity-20 rounded-lg p-4">
+            <div className="text-2xl font-bold">{roadmap.matchScore}%</div>
+            <div className="text-sm text-green-100">Career Match</div>
+          </div>
+          <div className="bg-white bg-opacity-20 rounded-lg p-4">
+            <div className="text-2xl font-bold">{roadmap.totalDuration}</div>
+            <div className="text-sm text-green-100">Timeline</div>
+          </div>
+          <div className="bg-white bg-opacity-20 rounded-lg p-4">
+            <div className="text-2xl font-bold">{roadmap.weeklyCommitment}</div>
+            <div className="text-sm text-green-100">Weekly Time</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   // Debug useEffect to track changes
   useEffect(() => {
@@ -476,13 +774,14 @@ const CareerDashboard = () => {
         </div>
       </div>
 
-      {/* Enhanced Navigation Tabs - Green Theme */}
+      {/* Enhanced Navigation Tabs - Green Theme with NEW ROADMAP TAB */}
       <div className="sticky top-0 bg-white shadow-md z-40">
         <div className="container mx-auto px-6">
           <div className="flex justify-center overflow-x-auto">
             {[
               { id: 'home', label: '🏠 Home', action: () => navigate('/') },
               { id: 'paths', label: '🤖 AI Career Paths' },
+              { id: 'roadmap', label: '🗺️ Career Roadmap' }, // NEW TAB
               { id: 'action', label: '⚡ Action Plan' },
               { id: 'resources', label: '📚 Resources'},
               { id: 'retake', label: '🔄 Retake', action: () => navigate('/career/test') }
@@ -515,6 +814,101 @@ const CareerDashboard = () => {
               userData={userData}
               onLearnMore={(path) => console.log('Learn more about:', path.title)}
             />
+          </div>
+        )}
+
+        {/* NEW: Career Roadmap Tab */}
+        {activeTab === 'roadmap' && (
+          <div className="space-y-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-4">Personalized Career Roadmap</h2>
+              <p className="text-gray-600 text-lg">Get a detailed, step-by-step plan for your career transition</p>
+            </div>
+
+            {!personalizedRoadmap ? (
+              <div className="text-center py-12">
+                <div className="bg-white rounded-2xl p-8 shadow-lg max-w-2xl mx-auto">
+                  <div className="text-6xl mb-6">🗺️</div>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4">Ready to Create Your Roadmap?</h3>
+                  <p className="text-gray-600 mb-6 text-lg">
+                    We'll analyze your top career match ({hybridResults?.allRecommendations?.[0]?.title || 'your selected career'}) 
+                    and create a personalized, timeline-based roadmap with specific milestones, skills to learn, and actionable steps.
+                  </p>
+                  
+                  {hybridResults?.allRecommendations?.[0] && (
+                    <div className="bg-green-50 rounded-lg p-4 mb-6">
+                      <div className="flex items-center justify-center space-x-4">
+                        <div className="text-2xl">🎯</div>
+                        <div>
+                          <div className="font-semibold text-green-800">
+                            Target Career: {hybridResults.allRecommendations[0].title}
+                          </div>
+                          <div className="text-green-600 text-sm">
+                            {hybridResults.allRecommendations[0].hybridScore || hybridResults.allRecommendations[0].match}% match
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <button
+                    onClick={generatePersonalizedRoadmap}
+                    disabled={generatingRoadmap || !hybridResults?.allRecommendations?.length}
+                    className="bg-gradient-to-r from-green-500 to-lime-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-green-600 hover:to-lime-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none shadow-lg"
+                  >
+                    {generatingRoadmap ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        <span>Generating Your Roadmap...</span>
+                      </div>
+                    ) : (
+                      'Generate Personalized Roadmap 🚀'
+                    )}
+                  </button>
+                  
+                  {!hybridResults?.allRecommendations?.length && (
+                    <p className="text-red-500 text-sm mt-4">
+                      Please complete the career assessment first to generate your roadmap.
+                    </p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                <RoadmapSummary roadmap={personalizedRoadmap} />
+                
+                <div className="bg-white rounded-2xl p-8 shadow-lg">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6">Your Roadmap Phases</h3>
+                  
+                  <div className="space-y-6">
+                    {personalizedRoadmap.phases.map((phase, index) => (
+                      <RoadmapPhase 
+                        key={index} 
+                        phase={phase} 
+                        index={index} 
+                        isLast={index === personalizedRoadmap.phases.length - 1}
+                      />
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Action buttons for roadmap */}
+                <div className="text-center space-x-4">
+                  <button
+                    onClick={() => setPersonalizedRoadmap(null)}
+                    className="bg-gray-200 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-300 transition-all font-medium"
+                  >
+                    Generate New Roadmap
+                  </button>
+                  <button
+                    onClick={() => window.print()}
+                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all font-medium"
+                  >
+                    Print Roadmap 📄
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

@@ -1,4 +1,4 @@
-// CareerDashboard.jsx - FULLY CLAUDE AI-POWERED VERSION
+// CareerDashboard.jsx - FULLY AI-POWERED VERSION
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -18,6 +18,10 @@ const CareerDashboard = () => {
   const [actionPlan, setActionPlan] = useState([]);
   const [networkingStrategy, setNetworkingStrategy] = useState([]);
   const [interviewPrep, setInterviewPrep] = useState([]);
+  // NEW: Enhanced states for career-specific content
+  const [learningPlan, setLearningPlan] = useState(null);
+  const [interviewQuestions, setInterviewQuestions] = useState(null);
+  const [generatingLearning, setGeneratingLearning] = useState(false);
   const [learningResources, setLearningResources] = useState([]);
   
   // Generation states
@@ -403,78 +407,210 @@ Focus on realistic, achievable networking actions.`;
     }
   };
 
-  const generateInterviewPrep = async () => {
+  // ============================================================================
+  // ENHANCED LEARNING RESOURCES - CAREER-SPECIFIC
+  // ============================================================================
+
+  const generateCareerLearningPlan = async () => {
+    setGeneratingLearning(true);
+    
     try {
       const topCareer = careerRecommendations[0];
-      const prompt = `Create interview preparation guidance for ${topCareer?.title} roles:
+      if (!topCareer) {
+        toast.error('Please generate career recommendations first.');
+        return;
+      }
 
-**User Context:**
-- Target Role: ${topCareer?.title}
-- Current Experience: ${userData.experienceLevel}
-- Background: ${userData.studyField}
-- Technical Skills: ${userData.jobTechnologies}
+      const prompt = `Create a comprehensive learning plan for someone transitioning to: ${topCareer.title}
 
-Return JSON array of interview prep items:
-[
-  {
-    "text": "Specific interview preparation action",
-    "type": "tip",
-    "category": "Technical" or "Behavioral" or "General",
-    "difficulty": "Beginner" or "Intermediate" or "Advanced"
-  }
-]
+**User Profile:**
+- Current Role: ${userData.currentRole}
+- Experience Level: ${userData.experienceLevel}
+- Educational Background: ${userData.studyField} (${userData.educationLevel})
+- Timeline: ${userData.transitionTimeline}
+- Time Commitment: ${userData.timeCommitment}
+- Current Tech Skills: ${userData.jobTechnologies}
+- Interests: ${userData.interests.join(', ')}
 
-Include technical questions, behavioral questions, and presentation tips.`;
+Create a detailed learning plan with specific resources. Return ONLY JSON:
+{
+  "careerTitle": "${topCareer.title}",
+  "totalDuration": "${userData.transitionTimeline}",
+  "learningTracks": [
+    {
+      "category": "Foundation Skills",
+      "priority": "High",
+      "timeframe": "Month 1-2",
+      "resources": [
+        {
+          "title": "Specific Course/Resource Name",
+          "type": "Course" or "Book" or "Certification" or "Practice" or "Project",
+          "provider": "Coursera/Udemy/FreeCodeCamp/etc",
+          "duration": "4 weeks",
+          "cost": "Free" or "$49" or "$199",
+          "difficulty": "Beginner" or "Intermediate" or "Advanced",
+          "description": "Why this resource is essential",
+          "skills": ["skill1", "skill2", "skill3"]
+        }
+      ]
+    }
+  ],
+  "practiceProjects": [
+    {
+      "title": "Project Name",
+      "description": "What to build and why",
+      "skills": ["skill1", "skill2"],
+      "timeEstimate": "2-3 weeks",
+      "difficulty": "Beginner" or "Intermediate" or "Advanced"
+    }
+  ],
+  "certifications": [
+    {
+      "name": "Certification Name",
+      "provider": "AWS/Google/Microsoft/etc",
+      "cost": "$150",
+      "timeToComplete": "2-4 weeks",
+      "priority": "High" or "Medium" or "Low",
+      "description": "Why this certification matters"
+    }
+  ],
+  "communityResources": [
+    {
+      "name": "Community/Forum Name",
+      "type": "Forum" or "Slack" or "Discord" or "Meetup",
+      "description": "How this helps with learning",
+      "url": "Optional URL if well-known"
+    }
+  ]
+}
 
-      const response = await callClaudeAPI(prompt, 800);
-      const prep = JSON.parse(response);
-      setInterviewPrep(prep);
+Make recommendations specific to their background and very actionable.`;
+
+      const response = await callClaudeAPI(prompt, 2500);
+      const learningPlan = JSON.parse(response);
+      
+      setLearningPlan(learningPlan);
+      toast.success('Learning plan generated!');
       
     } catch (error) {
-      console.error('Error generating interview prep:', error);
-      setInterviewPrep([{
-        text: 'Practice coding challenges and technical questions relevant to your target role',
-        type: 'tip'
-      }]);
+      console.error('Error generating learning plan:', error);
+      toast.error('Failed to generate learning plan.');
+    } finally {
+      setGeneratingLearning(false);
     }
   };
 
-  const generateLearningResources = async () => {
+  // ============================================================================
+  // CAREER-SPECIFIC INTERVIEW QUESTIONS
+  // ============================================================================
+
+  const generateInterviewQuestions = async () => {
+    setGeneratingInterviews(true);
+    
     try {
       const topCareer = careerRecommendations[0];
-      const prompt = `Recommend learning resources for transitioning to ${topCareer?.title}:
+      if (!topCareer) {
+        toast.error('Please generate career recommendations first.');
+        return;
+      }
 
-**User Profile:**
-- Target: ${topCareer?.title}
-- Experience: ${userData.experienceLevel}
-- Timeline: ${userData.transitionTimeline}
-- Interests: ${userData.interests.join(', ')}
-- Time Available: ${userData.timeCommitment}
+      const prompt = `Generate comprehensive interview questions for ${topCareer.title} positions:
 
-Return JSON array of learning recommendations:
-[
-  {
-    "text": "Specific learning resource or action",
-    "type": "course" or "book" or "practice" or "certification",
-    "category": "category name",
-    "difficulty": "Beginner" or "Intermediate" or "Advanced",
-    "timeRequired": "estimated time"
-  }
-]
+**Context:**
+- Target Role: ${topCareer.title}
+- Candidate Background: ${userData.currentRole} transitioning to tech
+- Experience Level: ${userData.experienceLevel}
+- Educational Background: ${userData.studyField}
+- Technical Skills: ${userData.jobTechnologies}
 
-Focus on the most effective resources for their level and timeline.`;
+Create interview questions covering all aspects. Return ONLY JSON:
+{
+  "careerTitle": "${topCareer.title}",
+  "categories": [
+    {
+      "category": "Technical Questions",
+      "description": "Core technical skills assessment",
+      "questions": [
+        {
+          "question": "Specific technical question",
+          "type": "Technical",
+          "difficulty": "Entry" or "Mid" or "Senior",
+          "topic": "Programming/Data/Design/etc",
+          "sampleAnswer": "Brief guidance on how to approach this question",
+          "keyPoints": ["point1", "point2", "point3"]
+        }
+      ]
+    },
+    {
+      "category": "Behavioral Questions",
+      "description": "Assessing soft skills and fit",
+      "questions": [
+        {
+          "question": "Behavioral question",
+          "type": "Behavioral",
+          "difficulty": "Standard",
+          "topic": "Leadership/Communication/Problem-solving",
+          "sampleAnswer": "STAR method guidance",
+          "keyPoints": ["what interviewers look for"]
+        }
+      ]
+    },
+    {
+      "category": "Career Transition Questions",
+      "description": "Questions specific to career changers",
+      "questions": [
+        {
+          "question": "Why are you transitioning from ${userData.currentRole} to ${topCareer.title}?",
+          "type": "Transition",
+          "difficulty": "Standard",
+          "topic": "Career Change",
+          "sampleAnswer": "How to frame your transition positively",
+          "keyPoints": ["emphasize transferable skills", "show passion for tech"]
+        }
+      ]
+    },
+    {
+      "category": "Situational Questions",
+      "description": "Real-world scenario questions",
+      "questions": [
+        {
+          "question": "Situational question",
+          "type": "Situational",
+          "difficulty": "Standard",
+          "topic": "Problem-solving",
+          "sampleAnswer": "Approach to solve the situation",
+          "keyPoints": ["key considerations"]
+        }
+      ]
+    }
+  ],
+  "preparationTips": [
+    {
+      "tip": "Specific preparation advice",
+      "category": "Technical" or "Behavioral" or "General"
+    }
+  ],
+  "commonMistakes": [
+    {
+      "mistake": "What not to do",
+      "correction": "What to do instead"
+    }
+  ]
+}
 
-      const response = await callClaudeAPI(prompt, 800);
-      const resources = JSON.parse(response);
-      setLearningResources(resources);
+Focus on questions that are realistic for someone transitioning from ${userData.currentRole} to ${topCareer.title}.`;
+
+      const response = await callClaudeAPI(prompt, 2500);
+      const questions = JSON.parse(response);
+      
+      setInterviewQuestions(questions);
+      toast.success('Interview questions generated!');
       
     } catch (error) {
-      console.error('Error generating learning resources:', error);
-      setLearningResources([{
-        text: 'Focus on building practical projects that demonstrate your skills to potential employers',
-        type: 'practice',
-        category: 'Portfolio Building'
-      }]);
+      console.error('Error generating interview questions:', error);
+      toast.error('Failed to generate interview questions.');
+    } finally {
+      setGeneratingInterviews(false);
     }
   };
 
@@ -610,8 +746,6 @@ Focus on the most effective resources for their level and timeline.`;
   useEffect(() => {
     if (careerRecommendations.length > 0) {
       generateNetworkingStrategy();
-      generateInterviewPrep();
-      generateLearningResources();
     }
   }, [careerRecommendations]);
 
@@ -810,7 +944,7 @@ Focus on the most effective resources for their level and timeline.`;
   };
 
   if (loading) {
-    return <LoadingSpinner message="Loading your Claude AI-powered career analysis..." />;
+    return <LoadingSpinner message="Loading your AI-powered career analysis..." />;
   }
 
   return (
@@ -923,8 +1057,8 @@ Focus on the most effective resources for their level and timeline.`;
         {activeTab === 'roadmap' && (
           <div className="space-y-8">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-4">Claude AI Career Roadmap</h2>
-              <p className="text-gray-600 text-lg">Personalized step-by-step plan generated by Claude AI</p>
+              <h2 className="text-3xl font-bold mb-4">AI Career Roadmap</h2>
+              <p className="text-gray-600 text-lg">Personalized step-by-step plan generated by AI</p>
             </div>
 
             {!personalizedRoadmap ? (
@@ -933,7 +1067,7 @@ Focus on the most effective resources for their level and timeline.`;
                   <div className="text-6xl mb-6">🗺️</div>
                   <h3 className="text-2xl font-bold text-gray-800 mb-4">Generate Your AI Roadmap</h3>
                   <p className="text-gray-600 mb-6 text-lg">
-                    Claude AI will create a detailed, personalized roadmap for your career transition to{' '}
+                    AI will create a detailed, personalized roadmap for your career transition to{' '}
                     <span className="font-semibold text-green-600">
                       {careerRecommendations[0]?.title || 'your selected career'}
                     </span>.
@@ -947,7 +1081,7 @@ Focus on the most effective resources for their level and timeline.`;
                     {generatingRoadmap ? (
                       <div className="flex items-center space-x-2">
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        <span>Claude AI is creating your roadmap...</span>
+                        <span>AI is creating your roadmap...</span>
                       </div>
                     ) : (
                       '🤖 Generate AI Roadmap'
@@ -960,7 +1094,7 @@ Focus on the most effective resources for their level and timeline.`;
                 {/* Roadmap display - same UI as before but now AI-generated content */}
                 <div className="bg-gradient-to-r from-green-500 to-lime-600 text-white rounded-xl p-6 mb-8 shadow-lg">
                   <div className="text-center">
-                    <h2 className="text-2xl font-bold mb-2">Your Claude AI Roadmap</h2>
+                    <h2 className="text-2xl font-bold mb-2">Your AI Roadmap</h2>
                     <p className="text-green-100 mb-4">Tailored path to become a {personalizedRoadmap.careerTitle}</p>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
@@ -1053,8 +1187,8 @@ Focus on the most effective resources for their level and timeline.`;
         {activeTab === 'market' && (
           <div className="space-y-8">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-4">Claude AI Market Insights</h2>
-              <p className="text-gray-600 text-lg">Real-time market intelligence generated by Claude AI</p>
+              <h2 className="text-3xl font-bold mb-4">AI Market Insights</h2>
+              <p className="text-gray-600 text-lg">Real-time market intelligence generated by AI</p>
             </div>
 
             {!marketInsights ? (
@@ -1063,7 +1197,7 @@ Focus on the most effective resources for their level and timeline.`;
                   <div className="text-6xl mb-6">📊</div>
                   <h3 className="text-2xl font-bold text-gray-800 mb-4">Generate Market Intelligence</h3>
                   <p className="text-gray-600 mb-6 text-lg">
-                    Claude AI will analyze current market trends, salary data, and opportunities for{' '}
+                    AI will analyze current market trends, salary data, and opportunities for{' '}
                     <span className="font-semibold text-blue-600">
                       {careerRecommendations[0]?.title || 'your selected career'}
                     </span>.
@@ -1077,7 +1211,7 @@ Focus on the most effective resources for their level and timeline.`;
                     {generatingInsights ? (
                       <div className="flex items-center space-x-2">
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        <span>Claude AI is analyzing market data...</span>
+                        <span>AI is analyzing market data...</span>
                       </div>
                     ) : (
                       '🤖 Generate AI Market Insights'
@@ -1090,7 +1224,7 @@ Focus on the most effective resources for their level and timeline.`;
                 {/* Market insights display - same UI structure but now AI-generated */}
                 <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl p-6 shadow-lg">
                   <div className="text-center">
-                    <h2 className="text-2xl font-bold mb-2">Claude AI Market Analysis: {marketInsights.careerTitle}</h2>
+                    <h2 className="text-2xl font-bold mb-2">AI Market Analysis: {marketInsights.careerTitle}</h2>
                     <p className="text-blue-100 mb-4">
                       AI-generated insights • Updated {marketInsights.lastUpdated}
                     </p>
@@ -1139,7 +1273,7 @@ Focus on the most effective resources for their level and timeline.`;
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🎯</div>
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">Ready for Your Action Plan?</h3>
-                <p className="text-gray-500">Generate personalized next steps with Claude AI.</p>
+                <p className="text-gray-500">Generate personalized next steps with AI.</p>
               </div>
             )}
           </div>
@@ -1149,8 +1283,8 @@ Focus on the most effective resources for their level and timeline.`;
         {activeTab === 'resources' && (
           <div className="space-y-8">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-4">Claude AI Learning Resources</h2>
-              <p className="text-gray-600 text-lg">Personalized learning recommendations powered by Claude AI</p>
+              <h2 className="text-3xl font-bold mb-4">AI Learning Resources</h2>
+              <p className="text-gray-600 text-lg">Personalized learning recommendations powered by AI</p>
             </div>
             
             {/* Quick Actions Section */}
@@ -1198,6 +1332,255 @@ Focus on the most effective resources for their level and timeline.`;
                 </button>
               </div>
             </div>
+
+            {/* AI-Generated Learning Plan */}
+            {!learningPlan ? (
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <h3 className="text-xl font-bold mb-6 flex items-center">
+                  <span className="mr-2">📚</span>
+                  Career-Specific Learning Plan
+                </h3>
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-4">🎯</div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-2">Generate Your Learning Plan</h4>
+                  <p className="text-gray-600 mb-4">
+                    Get a detailed learning roadmap with specific courses, books, certifications, and projects for{' '}
+                    <span className="font-semibold text-green-600">
+                      {careerRecommendations[0]?.title || 'your career goal'}
+                    </span>.
+                  </p>
+                  
+                  <button
+                    onClick={generateCareerLearningPlan}
+                    disabled={generatingLearning || careerRecommendations.length === 0}
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none shadow-lg"
+                  >
+                    {generatingLearning ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>AI is creating your learning plan...</span>
+                      </div>
+                    ) : (
+                      '🤖 Generate Learning Plan'
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <h3 className="text-xl font-bold mb-6 flex items-center">
+                  <span className="mr-2">📚</span>
+                  Your AI Learning Plan: {learningPlan.careerTitle}
+                </h3>
+                
+                {/* Learning Tracks */}
+                <div className="space-y-6">
+                  {learningPlan.learningTracks.map((track, idx) => (
+                    <div key={idx} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <h4 className="font-semibold text-lg text-gray-800">{track.category}</h4>
+                        <div className="flex space-x-2">
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            track.priority === 'High' ? 'bg-red-100 text-red-700' :
+                            track.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-green-100 text-green-700'
+                          }`}>
+                            {track.priority} Priority
+                          </span>
+                          <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+                            {track.timeframe}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {track.resources.map((resource, resIdx) => (
+                          <div key={resIdx} className="p-3 bg-gray-50 rounded-lg">
+                            <div className="flex justify-between items-start mb-2">
+                              <h5 className="font-medium text-gray-800">{resource.title}</h5>
+                              <span className={`px-2 py-1 rounded-full text-xs ${
+                                resource.cost === 'Free' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
+                              }`}>
+                                {resource.cost}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">{resource.description}</p>
+                            <div className="flex flex-wrap gap-1 mb-2">
+                              {resource.skills.slice(0, 3).map((skill, skillIdx) => (
+                                <span key={skillIdx} className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {resource.provider} • {resource.duration} • {resource.difficulty}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Practice Projects */}
+                {learningPlan.practiceProjects && learningPlan.practiceProjects.length > 0 && (
+                  <div className="mt-6 border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-lg text-gray-800 mb-3">Practice Projects</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {learningPlan.practiceProjects.map((project, idx) => (
+                        <div key={idx} className="p-3 bg-green-50 rounded-lg">
+                          <h5 className="font-medium text-gray-800 mb-2">{project.title}</h5>
+                          <p className="text-sm text-gray-600 mb-2">{project.description}</p>
+                          <div className="text-xs text-gray-500">
+                            {project.timeEstimate} • {project.difficulty}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Certifications */}
+                {learningPlan.certifications && learningPlan.certifications.length > 0 && (
+                  <div className="mt-6 border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-lg text-gray-800 mb-3">Recommended Certifications</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {learningPlan.certifications.map((cert, idx) => (
+                        <div key={idx} className="p-3 bg-yellow-50 rounded-lg">
+                          <div className="flex justify-between items-start mb-2">
+                            <h5 className="font-medium text-gray-800">{cert.name}</h5>
+                            <span className={`px-2 py-1 rounded-full text-xs ${
+                              cert.priority === 'High' ? 'bg-red-100 text-red-700' :
+                              cert.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-green-100 text-green-700'
+                            }`}>
+                              {cert.priority}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">{cert.description}</p>
+                          <div className="text-xs text-gray-500">
+                            {cert.provider} • {cert.cost} • {cert.timeToComplete}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* AI-Generated Interview Questions */}
+            {!interviewQuestions ? (
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <h3 className="text-xl font-bold mb-6 flex items-center">
+                  <span className="mr-2">💬</span>
+                  Career-Specific Interview Prep
+                </h3>
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-4">🎤</div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-2">Generate Interview Questions</h4>
+                  <p className="text-gray-600 mb-4">
+                    Get comprehensive interview questions and answers specifically for{' '}
+                    <span className="font-semibold text-green-600">
+                      {careerRecommendations[0]?.title || 'your career goal'}
+                    </span>{' '}
+                    positions, including technical, behavioral, and transition-specific questions.
+                  </p>
+                  
+                  <button
+                    onClick={generateInterviewQuestions}
+                    disabled={generatingInterviews || careerRecommendations.length === 0}
+                    className="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-emerald-600 hover:to-green-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none shadow-lg"
+                  >
+                    {generatingInterviews ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>AI is creating interview questions...</span>
+                      </div>
+                    ) : (
+                      '🤖 Generate Interview Prep'
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <h3 className="text-xl font-bold mb-6 flex items-center">
+                  <span className="mr-2">💬</span>
+                  Your AI Interview Prep: {interviewQuestions.careerTitle}
+                </h3>
+                
+                {/* Interview Question Categories */}
+                <div className="space-y-6">
+                  {interviewQuestions.categories.map((category, idx) => (
+                    <div key={idx} className="border border-gray-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-lg text-gray-800 mb-2">{category.category}</h4>
+                      <p className="text-sm text-gray-600 mb-4">{category.description}</p>
+                      
+                      <div className="space-y-4">
+                        {category.questions.slice(0, 3).map((q, qIdx) => (
+                          <div key={qIdx} className="p-3 bg-gray-50 rounded-lg">
+                            <div className="flex justify-between items-start mb-2">
+                              <h5 className="font-medium text-gray-800 pr-4">{q.question}</h5>
+                              <span className={`px-2 py-1 rounded-full text-xs flex-shrink-0 ${
+                                q.difficulty === 'Entry' ? 'bg-green-100 text-green-700' :
+                                q.difficulty === 'Mid' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
+                                {q.difficulty}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">
+                              <strong>Approach:</strong> {q.sampleAnswer}
+                            </p>
+                            <div className="text-xs text-gray-500">
+                              <strong>Key Points:</strong> {q.keyPoints.join(', ')}
+                            </div>
+                          </div>
+                        ))}
+                        {category.questions.length > 3 && (
+                          <div className="text-center">
+                            <span className="text-sm text-gray-500">
+                              + {category.questions.length - 3} more questions in this category
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Preparation Tips */}
+                {interviewQuestions.preparationTips && (
+                  <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <h4 className="font-semibold text-gray-800 mb-3">💡 Preparation Tips</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {interviewQuestions.preparationTips.map((tip, idx) => (
+                        <div key={idx} className="text-sm text-gray-700">
+                          <span className="text-blue-600 mr-2">•</span>
+                          {tip.tip}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Common Mistakes */}
+                {interviewQuestions.commonMistakes && (
+                  <div className="mt-4 p-4 bg-red-50 rounded-lg">
+                    <h4 className="font-semibold text-gray-800 mb-3">⚠️ Common Mistakes to Avoid</h4>
+                    <div className="space-y-2">
+                      {interviewQuestions.commonMistakes.slice(0, 3).map((mistake, idx) => (
+                        <div key={idx} className="text-sm">
+                          <div className="text-red-700">❌ {mistake.mistake}</div>
+                          <div className="text-green-700">✅ {mistake.correction}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* AI-Generated Learning Resources */}
             {learningResources.length > 0 && (
@@ -1266,7 +1649,7 @@ Focus on the most effective resources for their level and timeline.`;
               <form onSubmit={submitFeedback} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    How would you rate your experience with Claude AI career recommendations?
+                    How would you rate your experience with AI career recommendations?
                   </label>
                   <div className="flex gap-3">
                     {[1, 2, 3, 4, 5].map((value) => (
@@ -1288,7 +1671,7 @@ Focus on the most effective resources for their level and timeline.`;
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    How can we improve the Claude AI career dashboard?
+                    How can we improve the AI career dashboard?
                   </label>
                   <textarea
                     name="improvements"
@@ -1296,7 +1679,7 @@ Focus on the most effective resources for their level and timeline.`;
                     onChange={handleFeedbackChange}
                     rows="4"
                     className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
-                    placeholder="Tell us about your experience with Claude AI recommendations..."
+                    placeholder="Tell us about your experience with AI recommendations..."
                     required
                   />
                 </div>
@@ -1326,7 +1709,7 @@ Focus on the most effective resources for their level and timeline.`;
       {/* Success Indicators */}
       {careerRecommendations.length > 0 && (
         <div className="fixed bottom-4 left-4 bg-purple-500 text-white px-4 py-2 rounded-lg text-sm shadow-lg z-40">
-          🤖 {careerRecommendations.length} Claude AI recommendations generated
+          🤖 {careerRecommendations.length} AI recommendations generated
         </div>
       )}
     </div>

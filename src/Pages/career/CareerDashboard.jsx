@@ -1330,7 +1330,6 @@ const CareerDashboard = () => {
         description: `Employment projections and opportunities for ${careerPath.title}`,
         category: 'Job Market Trends',
         growth: careerPath.marketDemand === 'high' ? 'Strong' : 'Moderate',
-        icon:,
         personalizedData: {
           trends: [
             'Increasing demand for technical skills',

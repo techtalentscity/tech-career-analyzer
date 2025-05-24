@@ -65,8 +65,8 @@ const CareerDashboard = () => {
    * Generate authentic career paths based ONLY on user's actual form data
    */
   const generateAuthenticCareerPaths = (userData) => {
-    console.log('🎯 Generating AUTHENTIC career paths for user:', userData.name);
-    console.log('📊 User data analysis:', {
+    console.log(' Generating AUTHENTIC career paths for user:', userData.name);
+    console.log('User data analysis:', {
       interests: userData.careerPathsInterest,
       techInterests: userData.techInterests,
       experience: userData.experienceLevel,
@@ -77,7 +77,7 @@ const CareerDashboard = () => {
 
     // CRITICAL: Validate we have user's career interests
     if (!userData.careerPathsInterest || userData.careerPathsInterest.length === 0) {
-      console.error('❌ NO CAREER INTERESTS PROVIDED - Cannot generate authentic recommendations');
+      console.error('NO CAREER INTERESTS PROVIDED - Cannot generate authentic recommendations');
       return [];
     }
 
@@ -88,7 +88,7 @@ const CareerDashboard = () => {
       const careerPath = buildAuthenticCareerPath(userInterest, userData, index);
       if (careerPath) {
         careerPaths.push(careerPath);
-        console.log(`✅ Created authentic path: ${careerPath.title} (${careerPath.match}% match)`);
+        console.log(`Created authentic path: ${careerPath.title} (${careerPath.match}% match)`);
       }
     });
 
@@ -99,7 +99,7 @@ const CareerDashboard = () => {
     // Sort by authenticity score
     careerPaths.sort((a, b) => b.match - a.match);
     
-    console.log(`🎉 Generated ${careerPaths.length} authentic career paths`);
+    console.log(`Generated ${careerPaths.length} authentic career paths`);
     return careerPaths.slice(0, 6);
   };
 
@@ -107,11 +107,11 @@ const CareerDashboard = () => {
    * Build an authentic career path based on user's specific interest
    */
   const buildAuthenticCareerPath = (userInterest, userData, priority) => {
-    console.log(`🔍 Processing user interest: "${userInterest}"`);
+    console.log(`Processing user interest: "${userInterest}"`);
     
     const standardizedPath = mapUserInterestToCareerPath(userInterest);
     if (!standardizedPath) {
-      console.log(`⚠️ Could not map interest "${userInterest}" to valid career path`);
+      console.log(`Could not map interest "${userInterest}" to valid career path`);
       return null;
     }
 
@@ -181,7 +181,7 @@ const CareerDashboard = () => {
     // Partial matches
     for (const [key, value] of Object.entries(careerMappings)) {
       if (interest.includes(key) || key.includes(interest)) {
-        console.log(`✅ Mapped "${userInterest}" → "${value.title}"`);
+        console.log(`Mapped "${userInterest}" → "${value.title}"`);
         return value;
       }
     }
@@ -201,7 +201,7 @@ const CareerDashboard = () => {
 
     for (const [keyword, mapping] of Object.entries(keywordMappings)) {
       if (interest.includes(keyword)) {
-        console.log(`✅ Keyword match "${userInterest}" → "${mapping.title}"`);
+        console.log(`Keyword match "${userInterest}" → "${mapping.title}"`);
         return mapping;
       }
     }
@@ -250,7 +250,7 @@ const CareerDashboard = () => {
     else if (priority === 1) score += 3;
 
     const finalScore = Math.min(Math.round(score), 95);
-    console.log(`📊 ${careerPath.title} score: ${finalScore}% (${reasons.join(', ')})`);
+    console.log(`${careerPath.title} score: ${finalScore}% (${reasons.join(', ')})`);
     return finalScore;
   };
 
@@ -495,7 +495,7 @@ const CareerDashboard = () => {
 
   // Debug useEffect to track career paths changes
   useEffect(() => {
-    console.log('🔍 Career paths state changed:', {
+    console.log('Career paths state changed:', {
       count: careerPaths.length,
       topCareer: careerPaths[0]?.title || 'None'
     });
@@ -573,7 +573,7 @@ const CareerDashboard = () => {
             generatedPaths = generateAuthenticCareerPaths(processedUserData);
             setCareerPaths(generatedPaths);
             
-            console.log('✅ Authentic career paths generated:', generatedPaths.length);
+            console.log('Authentic career paths generated:', generatedPaths.length);
           }
           
           // Extract other data from analysis
@@ -638,7 +638,7 @@ const CareerDashboard = () => {
               generatedPaths = generateAuthenticCareerPaths(processedUserData);
               setCareerPaths(generatedPaths);
               
-              console.log('✅ Stored career paths generated:', generatedPaths.length);
+              console.log('Stored career paths generated:', generatedPaths.length);
             }
             
             // Extract other data from analysis
@@ -673,7 +673,7 @@ const CareerDashboard = () => {
         
                   // CRITICAL: Generate market trends AND job outlook AFTER everything is set up
         if (processedUserData && generatedPaths && generatedPaths.length > 0) {
-          console.log('🎯 Generating market trends and job outlook with:', {
+          console.log('Generating market trends and job outlook with:', {
             careerPaths: generatedPaths.length,
             topCareer: generatedPaths[0]?.title,
             userInterests: processedUserData.careerPathsInterest
@@ -685,10 +685,10 @@ const CareerDashboard = () => {
           const personalizedOutlook = generatePersonalizedJobMarketOutlook(generatedPaths, processedUserData);
           setJobMarketOutlook(personalizedOutlook);
           
-          console.log('✅ Market trends generated:', personalizedTrends.length, personalizedTrends);
-          console.log('✅ Job market outlook generated:', personalizedOutlook.length, personalizedOutlook);
+          console.log('Market trends generated:', personalizedTrends.length, personalizedTrends);
+          console.log('Job market outlook generated:', personalizedOutlook.length, personalizedOutlook);
         } else {
-          console.log('⚠️ No career paths or user data available for market trends');
+          console.log('No career paths or user data available for market trends');
           setMarketTrends(generateGenericMarketTrends());
           setJobMarketOutlook(generateGenericJobMarketOutlook());
         }
@@ -992,17 +992,17 @@ const CareerDashboard = () => {
     console.log('🎯 Rendering MarketTrendsCard:', trend.title, 'personalizedData:', !!trend.personalizedData);
     
     const trendIcons = {
-      'SALARY OUTLOOK': '💰',
-      'MARKET DEMAND': '📈',
-      'SALARY TRENDS': '💰',
-      'INDUSTRY DEMAND': '📊',
-      'TECHNOLOGY SALARY TRENDS': '💰',
-      'TECH INDUSTRY OUTLOOK': '🏭'
+      'SALARY OUTLOOK',
+      'MARKET DEMAND',
+      'SALARY TRENDS',
+      'INDUSTRY DEMAND',
+      'TECHNOLOGY SALARY TRENDS',
+      'TECH INDUSTRY OUTLOOK'
     };
     
     const icon = trendIcons[trend.title.split(' ').slice(-2).join(' ')] || 
                  trendIcons[trend.title.split(' ').slice(-1)[0]] || 
-                 trendIcons[trend.category] || '📊';
+                 trendIcons[trend.category] || ;
     
     // Enhanced content based on personalized trend data
     const getPersonalizedContent = () => {
@@ -1010,14 +1010,14 @@ const CareerDashboard = () => {
       
       // Handle personalized salary trends
       if ((title.includes('SALARY') || title.includes('COMPENSATION')) && trend.personalizedData) {
-        console.log('💰 Rendering salary trend with data:', trend.personalizedData.ranges?.length);
+        console.log('Rendering salary trend with data:', trend.personalizedData.ranges?.length);
         return {
           title: trend.title,
           content: (
             <div>
               <p className="text-gray-700 mb-3">{trend.description}</p>
               <div className="bg-green-50 p-4 rounded-lg mb-4">
-                <h5 className="font-medium text-green-800 mb-3">💰 Salary Ranges for {trend.userCareer}:</h5>
+                <h5 className="font-medium text-green-800 mb-3"> Salary Ranges for {trend.userCareer}:</h5>
                 <ul className="text-sm text-green-700 space-y-2">
                   {trend.personalizedData.ranges.map((range, idx) => (
                     <li key={idx} className="flex items-start">
@@ -1044,21 +1044,21 @@ const CareerDashboard = () => {
       
       // Handle personalized demand trends
       if ((title.includes('DEMAND') || title.includes('MARKET')) && trend.personalizedData) {
-        console.log('📈 Rendering demand trend with data:', trend.personalizedData.opportunities?.length);
+        console.log('Rendering demand trend with data:', trend.personalizedData.opportunities?.length);
         return {
           title: trend.title,
           content: (
             <div>
               <p className="text-gray-700 mb-3">{trend.description}</p>
               <div className="bg-purple-50 p-4 rounded-lg mb-4">
-                <h5 className="font-medium text-purple-800 mb-3">📈 Growth Outlook:</h5>
+                <h5 className="font-medium text-purple-800 mb-3">Growth Outlook:</h5>
                 <div className="text-sm text-purple-700 space-y-2">
                   <div><strong>Job Growth:</strong> {trend.personalizedData.growth}</div>
                   <div><strong>Market Outlook:</strong> {trend.personalizedData.outlook}</div>
                 </div>
               </div>
               <div className="bg-indigo-50 p-4 rounded-lg mb-4">
-                <h5 className="font-medium text-indigo-800 mb-2">🔥 Hot Skills for {trend.userCareer}:</h5>
+                <h5 className="font-medium text-indigo-800 mb-2">Hot Skills for {trend.userCareer}:</h5>
                 <div className="flex flex-wrap gap-2">
                   {trend.personalizedData.hotSkills.slice(0, 4).map((skill, idx) => (
                     <span key={idx} className="px-2 py-1 bg-indigo-200 text-indigo-800 rounded-full text-xs font-medium">
@@ -1068,7 +1068,7 @@ const CareerDashboard = () => {
                 </div>
               </div>
               <div className="bg-teal-50 p-4 rounded-lg">
-                <h5 className="font-medium text-teal-800 mb-2">🏭 Top Industries:</h5>
+                <h5 className="font-medium text-teal-800 mb-2">Top Industries:</h5>
                 <ul className="text-sm text-teal-700 space-y-1">
                   {trend.personalizedData.industries.slice(0, 3).map((industry, idx) => (
                     <li key={idx} className="flex items-start">

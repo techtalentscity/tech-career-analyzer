@@ -26,7 +26,7 @@ const CareerDashboard = () => {
   
   // NEW v2.0 User Data Model - EXACT MATCH TO TECHNICAL SPEC
   const [userData, setUserData] = useState({
-    // 🎯 Career Path Recommendation Criteria (16 total)
+    // Career Path Recommendation Criteria (16 total)
     // Tier 1: Core Drivers (45%)
     futureGoal: '',                    // 15% - Primary destination
     techInterests: '',                 // 12% - Specific path selection  
@@ -51,14 +51,14 @@ const CareerDashboard = () => {
     internships: '',                   // 1% - Early experience
     publications: '',                  // 1% - Thought leadership
 
-    // 📚 Skill Gap Additional Criteria
+    // Skill Gap Additional Criteria
     certificationsDetail: '',
     experienceLevel: '',
     yearsExperience: '',
     currentRole: '',
     toolsUsed: [],
 
-    // ⚖️ Learning Roadmap Additional Criteria
+    // Learning Roadmap Additional Criteria
     timeCommitment: '',
     targetSalary: '',
     transitionTimeline: '',
@@ -109,7 +109,7 @@ const CareerDashboard = () => {
    * Uses all 16 criteria with 4-tier weighted scoring
    */
   const generateCareerPathRecommendation = (profile) => {
-    console.log('🎯 Generating Career Path Recommendation (v2.0)...');
+    console.log('Generating Career Path Recommendation (v2.0)...');
     
     // Fixed 4-tier weighting system (as per v2.0 spec)
     const weights = {
@@ -277,11 +277,11 @@ const CareerDashboard = () => {
   };
 
   /**
-   * NEW v2.0: Skill Gap Analysis Engine (📚) 
+   * NEW v2.0: Skill Gap Analysis Engine  
    * Builds on Career Path + additional criteria
    */
   const generateSkillGapAnalysis = (profile, careerPath) => {
-    console.log('📚 Generating Skill Gap Analysis (v2.0)...');
+    console.log('Generating Skill Gap Analysis (v2.0)...');
     
     const additionalCriteria = [
       'certificationsDetail', 'experienceLevel', 'yearsExperience', 'currentRole', 'toolsUsed'
@@ -315,7 +315,7 @@ const CareerDashboard = () => {
    * Builds on Career Path + Skill Gap + additional criteria  
    */
   const generateLearningRoadmap = (profile, careerPath, skillGap) => {
-    console.log('⚖️ Generating Learning Roadmap (v2.0)...');
+    console.log('Generating Learning Roadmap (v2.0)...');
     
     const additionalCriteria = [
       'timeCommitment', 'targetSalary', 'transitionTimeline', 
@@ -353,7 +353,7 @@ const CareerDashboard = () => {
    * Main Career Recommendation Engine v2.0 - SEQUENTIAL DEPENDENCY IMPLEMENTATION
    */
   const generateAdvancedCareerRecommendations = async (rawProfile) => {
-    console.log('🎯 Starting Career Recommendation Engine v2.0 (Sequential Dependency)...');
+    console.log('Starting Career Recommendation Engine v2.0 (Sequential Dependency)...');
     
     try {
       // Step 1: Generate Primary Career Path Recommendation (16 criteria)
@@ -1038,7 +1038,7 @@ const CareerDashboard = () => {
 
   // Fallback system
   const generateFallbackRecommendations = (profile) => {
-    console.log('🔄 Generating fallback recommendations (v2.0)...');
+    console.log('Generating fallback recommendations (v2.0)...');
     
     const fallbackCareerPath = {
       id: 'fallback_cp',
@@ -1330,7 +1330,7 @@ const CareerDashboard = () => {
         description: `Employment projections and opportunities for ${careerPath.title}`,
         category: 'Job Market Trends',
         growth: careerPath.marketDemand === 'high' ? 'Strong' : 'Moderate',
-        icon: '📈',
+        icon:,
         personalizedData: {
           trends: [
             'Increasing demand for technical skills',
@@ -1354,7 +1354,7 @@ const CareerDashboard = () => {
         title: `Focus on ${careerPathRecommendation.title} Path`,
         text: `Develop expertise aligned with your top career recommendation`,
         priority: 'high',
-        icon: '🎯',
+        icon:,
         timeline: '2-4 weeks',
         personalized: true,
         resources: careerPathRecommendation.recommendedPaths || []
@@ -1368,7 +1368,7 @@ const CareerDashboard = () => {
           title: `Learn ${skillGap.skill}`,
           text: `Develop ${skillGap.skill} skills to bridge identified gap`,
           priority: 'medium',
-          icon: '📚',
+          icon:,
           timeline: skillGap.estimatedLearningTime || '4-6 weeks',
           personalized: true,
           resources: [skillGap.skill]
@@ -1383,7 +1383,7 @@ const CareerDashboard = () => {
           title: `Start ${firstPhase.title}`,
           text: `Begin your learning journey with phase 1 activities`,
           priority: 'high',
-          icon: '🚀',
+          icon:,
           timeline: firstPhase.duration || '2-3 months',
           personalized: true,
           resources: firstPhase.resources || []
@@ -1463,7 +1463,7 @@ const CareerDashboard = () => {
           <div className="flex justify-between items-start mb-6">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">🎯</span>
+                <span className="text-2xl"></span>
                 <span className="text-xs font-medium text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
                   Career Path v2.0
                 </span>
@@ -1872,17 +1872,17 @@ const CareerDashboard = () => {
             <div className="flex flex-wrap justify-center gap-4 text-sm">
               {userData.currentRole && (
                 <div className="bg-white bg-opacity-20 px-4 py-2 rounded-full">
-                  📍 Currently: {userData.currentRole}
+                  Currently: {userData.currentRole}
                 </div>
               )}
               {careerPathRecommendation && (
                 <div className="bg-white bg-opacity-20 px-4 py-2 rounded-full">
-                  🎯 Path: {careerPathRecommendation.title} ({careerPathConfidence}%)
+                  Path: {careerPathRecommendation.title} ({careerPathConfidence}%)
                 </div>
               )}
               {userData.transitionTimeline && (
                 <div className="bg-white bg-opacity-20 px-4 py-2 rounded-full">
-                  ⏰ Timeline: {userData.transitionTimeline}
+                  Timeline: {userData.transitionTimeline}
                 </div>
               )}
               {systemResponse && systemResponse.dataCompleteness > 0 && (
@@ -1897,7 +1897,7 @@ const CareerDashboard = () => {
               )}
               {careerPathRecommendation?.confidence === 'high' && (
                 <div className="bg-yellow-500 bg-opacity-20 px-4 py-2 rounded-full border border-yellow-300">
-                  🏆 High-Confidence Path
+                  High-Confidence Path
                 </div>
               )}
             </div>
@@ -1910,13 +1910,13 @@ const CareerDashboard = () => {
         <div className="container mx-auto px-6">
           <div className="flex overflow-x-auto">
             {[
-              { id: 'home', icon: '🏠', action: () => navigate('/') },
-              { id: 'overview', label: 'Overview', icon: '📊' },
-              { id: 'career-path', label: 'Career Path', icon: '🎯' },
-              { id: 'skill-gap', label: 'Skill Gap', icon: '📚' },
-              { id: 'roadmap', label: 'Learning Roadmap', icon: '⚖️' },
-              { id: 'market', label: 'Market Insights', icon: '📈' },
-              { id: 'action', label: 'Action Plan', icon: '🚀' }
+              { id: 'home', label: 'Home', action: () => navigate('/') },
+              { id: 'overview', label: 'Overview'},
+              { id: 'career-path', label: 'Career Path'},
+              { id: 'skill-gap', label: 'Skill Gap'},
+              { id: 'roadmap', label: 'Learning Roadmap'},
+              { id: 'market', label: 'Market Insights'},
+              { id: 'action', label: 'Action Plan'}
             ].map(tab => (
               <button
                 key={tab.id}
@@ -1944,10 +1944,10 @@ const CareerDashboard = () => {
             {/* Enhanced Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {[
-                { label: 'Path Confidence', value: `${careerPathConfidence}%`, color: 'from-green-500 to-emerald-500', icon: '🎯' },
-                { label: 'Skill Gaps', value: skillGapsCount.toString(), color: 'from-blue-500 to-cyan-500', icon: '📚' },
-                { label: 'Learning Phases', value: learningPhasesCount.toString(), color: 'from-purple-500 to-pink-500', icon: '⚖️' },
-                { label: 'Action Items', value: nextSteps.length.toString(), color: 'from-orange-500 to-red-500', icon: '✅' }
+                { label: 'Path Confidence', value: `${careerPathConfidence}%`, color: 'from-green-500 to-emerald-500'},
+                { label: 'Skill Gaps', value: skillGapsCount.toString(), color: 'from-blue-500 to-cyan-500'},
+                { label: 'Learning Phases', value: learningPhasesCount.toString(), color: 'from-purple-500 to-pink-500'},
+                { label: 'Action Items', value: nextSteps.length.toString(), color: 'from-orange-500 to-red-500'}
               ].map((stat, index) => (
                 <div key={index} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                   <div className="flex items-center justify-between mb-4">
@@ -1964,7 +1964,7 @@ const CareerDashboard = () => {
             {/* v2.0 System Performance Indicator */}
             <div className="bg-white rounded-2xl p-8 shadow-lg">
               <h2 className="text-2xl font-bold mb-6 flex items-center">
-                <span className="mr-3">🔬</span>
+                <span className="mr-3"></span>
                 Technical Specification v2.0 - Sequential Dependency System
               </h2>
               {systemResponse && (
@@ -2109,7 +2109,7 @@ const CareerDashboard = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="text-6xl mb-4">🎯</div>
+                <div className="text-6xl mb-4"></div>
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">Generating Career Path (v2.0)</h3>
                 <p className="text-gray-500">Our sequential dependency engine is analyzing your 16 criteria profile.</p>
               </div>
@@ -2162,7 +2162,7 @@ const CareerDashboard = () => {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <div className="text-4xl mb-4">📚</div>
+                    <div className="text-4xl mb-4"></div>
                     <h4 className="text-lg font-semibold text-gray-600 mb-2">No Significant Skill Gaps</h4>
                     <p className="text-gray-500">You're well-prepared for your target career path!</p>
                   </div>
@@ -2172,7 +2172,7 @@ const CareerDashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {skillGapAnalysis.strengthsToLeverage && skillGapAnalysis.strengthsToLeverage.length > 0 && (
                     <div className="bg-white rounded-xl p-6 shadow-lg">
-                      <h4 className="font-semibold text-lg text-gray-800 mb-4">💪 Strengths to Leverage</h4>
+                      <h4 className="font-semibold text-lg text-gray-800 mb-4">Strengths to Leverage</h4>
                       <ul className="space-y-2">
                         {skillGapAnalysis.strengthsToLeverage.map((strength, idx) => (
                           <li key={idx} className="flex items-start">
@@ -2186,11 +2186,11 @@ const CareerDashboard = () => {
 
                   {skillGapAnalysis.recommendedCertifications && skillGapAnalysis.recommendedCertifications.length > 0 && (
                     <div className="bg-white rounded-xl p-6 shadow-lg">
-                      <h4 className="font-semibold text-lg text-gray-800 mb-4">🏆 Recommended Certifications</h4>
+                      <h4 className="font-semibold text-lg text-gray-800 mb-4">Recommended Certifications</h4>
                       <ul className="space-y-2">
                         {skillGapAnalysis.recommendedCertifications.map((cert, idx) => (
                           <li key={idx} className="flex items-start">
-                            <span className="text-blue-500 mr-2 mt-0.5">🎓</span>
+                            <span className="text-blue-500 mr-2 mt-0.5"></span>
                             <span className="text-gray-700">{cert}</span>
                           </li>
                         ))}
@@ -2201,7 +2201,7 @@ const CareerDashboard = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="text-6xl mb-4">📚</div>
+                <div className="text-6xl mb-4"></div>
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">Analyzing Skill Gaps (v2.0)</h3>
                 <p className="text-gray-500">Building skill analysis on your career path recommendation.</p>
               </div>
@@ -2264,7 +2264,7 @@ const CareerDashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {learningRoadmap.flexibilityOptions && learningRoadmap.flexibilityOptions.length > 0 && (
                     <div className="bg-white rounded-xl p-6 shadow-lg">
-                      <h4 className="font-semibold text-lg text-gray-800 mb-4">🔄 Flexibility Options</h4>
+                      <h4 className="font-semibold text-lg text-gray-800 mb-4">Flexibility Options</h4>
                       <ul className="space-y-2">
                         {learningRoadmap.flexibilityOptions.map((option, idx) => (
                           <li key={idx} className="flex items-start">
@@ -2278,7 +2278,7 @@ const CareerDashboard = () => {
 
                   {learningRoadmap.supportRecommendations && learningRoadmap.supportRecommendations.length > 0 && (
                     <div className="bg-white rounded-xl p-6 shadow-lg">
-                      <h4 className="font-semibold text-lg text-gray-800 mb-4">🤝 Support Recommendations</h4>
+                      <h4 className="font-semibold text-lg text-gray-800 mb-4">Support Recommendations</h4>
                       <ul className="space-y-2">
                         {learningRoadmap.supportRecommendations.map((support, idx) => (
                           <li key={idx} className="flex items-start">
@@ -2328,7 +2328,7 @@ const CareerDashboard = () => {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <div className="text-4xl mb-4">📊</div>
+                  <div className="text-4xl mb-4"></div>
                   <h4 className="text-lg font-semibold text-gray-600 mb-2">Generating Market Analysis</h4>
                   <p className="text-gray-500">Creating personalized market insights...</p>
                 </div>
@@ -2338,7 +2338,7 @@ const CareerDashboard = () => {
             {/* Job Market Outlook Section */}
             <div>
               <h3 className="text-2xl font-bold mb-6 flex items-center">
-                <span className="mr-3">💼</span>
+                <span className="mr-3"></span>
                 Job Market Outlook
               </h3>
               
@@ -2350,7 +2350,7 @@ const CareerDashboard = () => {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <div className="text-4xl mb-4">🔮</div>
+                  <div className="text-4xl mb-4"></div>
                   <h4 className="text-lg font-semibold text-gray-600 mb-2">Generating Job Market Analysis</h4>
                   <p className="text-gray-500">Creating job market insights...</p>
                 </div>
@@ -2373,7 +2373,7 @@ const CareerDashboard = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="text-6xl mb-4">🚀</div>
+                <div className="text-6xl mb-4"></div>
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">Creating Your Action Plan</h3>
                 <p className="text-gray-500">Your personalized action plan will be generated based on v2.0 analysis.</p>
               </div>

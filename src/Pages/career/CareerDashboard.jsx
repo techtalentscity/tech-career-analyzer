@@ -4069,12 +4069,18 @@ const CareerDashboard = () => {
                     ...portfolioGuidance.filter(item => 
                       item.type === 'tip' && 
                       !item.text.includes('CAREER PATH RECOMMENDATIONS:') &&
-                      !item.text.includes('Why: Strong alignment with their Computer Science background, interest in AI and data analysis, and transferable skills from digital marketing. The role leverages their analytical skills and aligns with their passion for problem-solving.')
+                      !item.text.includes('Why: Strong alignment with their Computer Science background, interest in AI and data analysis, and transferable skills from digital marketing. The role leverages their analytical skills and aligns with their passion for problem-solving.') &&
+                      !item.text.includes('Analytical Skills: Experience in data analysis from digital marketing is directly transferable to data-focused tech roles') &&
+                      !item.text.includes('Timeline: 6-9 months, given their current enrollment in a Python course and background in data analysis') &&
+                      !item.text.includes('Communication: Client communication skills are valuable for translating technical concepts to non-technical stakeholders')
                     ),
                     ...jobSearchStrategies.filter(item => 
                       item.type === 'tip' && 
                       !item.text.includes('Big Data Technologies: Familiarize with big data platforms like Hadoop and Spark for large-scale data processing') &&
-                      !item.text.includes('Cloud Computing: Learn cloud platforms (e.g., AWS, Azure) for data storage and processing in modern data environments')
+                      !item.text.includes('Cloud Computing: Learn cloud platforms (e.g., AWS, Azure) for data storage and processing in modern data environments') &&
+                      !item.text.includes('Analytical Skills: Experience in data analysis from digital marketing is directly transferable to data-focused tech roles') &&
+                      !item.text.includes('Timeline: 6-9 months, given their current enrollment in a Python course and background in data analysis') &&
+                      !item.text.includes('Communication: Client communication skills are valuable for translating technical concepts to non-technical stakeholders')
                     )
                   ].slice(0, 8).map((tip, index) => (
                     <div key={index} className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">

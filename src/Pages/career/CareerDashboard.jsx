@@ -23,6 +23,8 @@ const CareerDashboard = () => {
   const [interviewQuestions, setInterviewQuestions] = useState(null);
   const [generatingLearning, setGeneratingLearning] = useState(false);
   const [generatingInterviews, setGeneratingInterviews] = useState(false);
+  // Enhanced states with timestamp tracking
+  const [contentTimestamp, setContentTimestamp] = useState(null);
   const [learningResources, setLearningResources] = useState([]);
   
   // Generation states
@@ -66,8 +68,272 @@ const CareerDashboard = () => {
   const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeX9C7YtHTSBy4COsV6KaogdEvrjXoVQ0O2psoyfs1xqrySNg/formResponse';
 
   // ============================================================================
-  // CLAUDE API INTEGRATION FUNCTIONS
+  // DOWNLOAD FUNCTIONALITY FOR AI CONTENT
   // ============================================================================
+
+  const downloadContent = (content, filename, type = 'text') => {
+    let dataStr;
+    let downloadType;
+
+    if (type === 'json') {
+      dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(content, null, 2));
+      downloadType = 'json';
+    } else if (type === 'markdown') {
+      dataStr = "data:text/markdown;charset=utf-8," + encodeURIComponent(content);
+      downloadType = 'md';
+    } else {
+      dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(content);
+      downloadType = 'txt';
+    }
+
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", `${filename}.${downloadType}`);
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    
+    toast.success(`${filename} downloaded successfully!`);
+  };
+
+  const downloadCareerRecommendations = () => {
+    const content = `# AI Career Recommendations
+
+Generated on: ${new Date().toLocaleDateString()}
+User: ${userData.name}
+
+## Top Career Recommendations:
+
+${careerRecommendations.map((career, index) => `
+### ${index + 1}. ${career.title} (${career.match}% Match)
+
+**Description:** ${career.description}
+
+**Why This Fits You:** ${career.whyGoodFit}
+
+**Key Skills Needed:**
+${career.keySkills.map(skill => `- ${skill}`).join('\n')}
+
+**Salary Range:** ${career.salaryRange}
+**Demand Level:** ${career.demandLevel}
+**Entry Path:** ${career.entryPath}
+
+---
+`).join('\n')}`;
+
+    downloadContent(content, `AI_Career_Recommendations_${userData.name}`, 'markdown');
+  };
+
+  const downloadRoadmap = () => {
+    if (!personalizedRoadmap) return;
+    
+    const content = `# ${personalizedRoadmap.careerTitle} - AI Career Roadmap
+
+Generated on: ${new Date().toLocaleDateString()}
+User: ${userData.name}
+Career Match: ${personalizedRoadmap.matchScore}%
+Timeline: ${personalizedRoadmap.totalDuration}
+Weekly Commitment: ${personalizedRoadmap.weeklyCommitment}
+
+---
+
+${personalizedRoadmap.phases.map((phase, index) => `
+## Phase ${index + 1}: ${phase.title}
+**Timeline:** ${phase.timeline}
+**Description:** ${phase.description}
+
+### Key Milestones:
+${phase.milestones.map(milestone => `- ${milestone}`).join('\n')}
+
+### Skills to Learn:
+${phase.skills ? phase.skills.map(skill => `- ${skill}`).join('\n') : 'No specific skills listed'}
+
+---
+`).join('\n')}`;
+
+    downloadContent(content, `AI_Career_Roadmap_${personalizedRoadmap.careerTitle}_${userData.name}`, 'markdown');
+  };
+
+  const downloadMarketInsights = () => {
+    if (!marketInsights) return;
+    
+    const content = `# ${marketInsights.careerTitle} - AI Market Insights
+
+Generated on: ${marketInsights.lastUpdated}
+User: ${userData.name}
+
+## Market Overview
+- **Demand Level:** ${marketInsights.overview.demandLevel}
+- **Growth Projection:** ${marketInsights.overview.growthProjection}
+- **Competition Level:** ${marketInsights.overview.competitionLevel}
+- **Entry Barrier:** ${marketInsights.overview.entryBarrier}
+
+## Salary Insights
+- **Entry Level:** ${marketInsights.salary.entry}
+- **Mid Level:** ${marketInsights.salary.mid}
+- **Senior Level:** ${marketInsights.salary.senior}
+- **Top 10%:** ${marketInsights.salary.topPercentile}
+
+## Job Market Statistics
+- **Total Jobs:** ${marketInsights.jobMarket.totalJobs}
+- **New Monthly Jobs:** ${marketInsights.jobMarket.newJobsMonthly}
+- **Remote Percentage:** ${marketInsights.jobMarket.remotePercentage}
+- **Top Companies:** ${marketInsights.jobMarket.topCompanies.join(', ')}
+
+## Skills in Demand
+**Trending:** ${marketInsights.skills.trending.join(', ')}
+**Essential:** ${marketInsights.skills.essential.join(', ')}
+**Emerging:** ${marketInsights.skills.emerging.join(', ')}
+
+## Location Insights
+**Top Cities:** ${marketInsights.locations.topCities.join(', ')}
+**Remote Work:** ${marketInsights.locations.remote}
+**International:** ${marketInsights.locations.international.join(', ')}
+
+## Market Trends
+${marketInsights.trends.map(trend => `- ${trend}`).join('\n')}
+
+## AI Recommendations
+${marketInsights.recommendations.map(rec => `
+### ${rec.title}
+**Type:** ${rec.type}
+**Description:** ${rec.description}
+**Action:** ${rec.action}
+`).join('\n')}`;
+
+    downloadContent(content, `AI_Market_Insights_${marketInsights.careerTitle}_${userData.name}`, 'markdown');
+  };
+
+  const downloadActionPlan = () => {
+    if (!actionPlan.length) return;
+    
+    const content = `# AI Action Plan
+
+Generated on: ${new Date().toLocaleDateString()}
+User: ${userData.name}
+Career Goal: ${careerRecommendations[0]?.title || 'Not specified'}
+
+## Your Personalized Action Steps:
+
+${actionPlan.map((step, index) => `
+### ${index + 1}. ${step.title}
+**Timeline:** ${step.timeline}
+**Priority:** ${step.priority.toUpperCase()}
+**Personalized:** ${step.personalized ? 'Yes' : 'No'}
+
+**Description:** ${step.text}
+
+${step.resources ? `**Recommended Resources:**
+${step.resources.map(resource => `- ${resource}`).join('\n')}` : ''}
+
+---
+`).join('\n')}`;
+
+    downloadContent(content, `AI_Action_Plan_${userData.name}`, 'markdown');
+  };
+
+  const downloadLearningPlan = () => {
+    if (!learningPlan) return;
+    
+    const content = `# ${learningPlan.careerTitle} - AI Learning Plan
+
+Generated on: ${new Date().toLocaleDateString()}
+User: ${userData.name}
+Timeline: ${learningPlan.totalDuration}
+
+## Learning Tracks
+
+${learningPlan.learningTracks.map(track => `
+### ${track.category}
+**Priority:** ${track.priority}
+**Timeframe:** ${track.timeframe}
+
+#### Resources:
+${track.resources.map(resource => `
+**${resource.title}**
+- Provider: ${resource.provider}
+- Type: ${resource.type}
+- Duration: ${resource.duration}
+- Cost: ${resource.cost}
+- Difficulty: ${resource.difficulty}
+- Description: ${resource.description}
+- Skills: ${resource.skills.join(', ')}
+`).join('\n')}
+`).join('\n')}
+
+${learningPlan.practiceProjects ? `
+## Practice Projects
+${learningPlan.practiceProjects.map(project => `
+### ${project.title}
+**Time Estimate:** ${project.timeEstimate}
+**Difficulty:** ${project.difficulty}
+**Description:** ${project.description}
+**Skills:** ${project.skills.join(', ')}
+`).join('\n')}` : ''}
+
+${learningPlan.certifications ? `
+## Recommended Certifications
+${learningPlan.certifications.map(cert => `
+### ${cert.name}
+**Provider:** ${cert.provider}
+**Cost:** ${cert.cost}
+**Time to Complete:** ${cert.timeToComplete}
+**Priority:** ${cert.priority}
+**Description:** ${cert.description}
+`).join('\n')}` : ''}
+
+${learningPlan.communityResources ? `
+## Community Resources
+${learningPlan.communityResources.map(community => `
+### ${community.name}
+**Type:** ${community.type}
+**Description:** ${community.description}
+${community.url ? `**URL:** ${community.url}` : ''}
+`).join('\n')}` : ''}`;
+
+    downloadContent(content, `AI_Learning_Plan_${learningPlan.careerTitle}_${userData.name}`, 'markdown');
+  };
+
+  const downloadInterviewQuestions = () => {
+    if (!interviewQuestions) return;
+    
+    const content = `# ${interviewQuestions.careerTitle} - AI Interview Questions
+
+Generated on: ${new Date().toLocaleDateString()}
+User: ${userData.name}
+
+${interviewQuestions.categories.map(category => `
+## ${category.category}
+**Description:** ${category.description}
+
+${category.questions.map((q, index) => `
+### Question ${index + 1}: ${q.question}
+**Type:** ${q.type}
+**Difficulty:** ${q.difficulty}
+**Topic:** ${q.topic}
+
+**Sample Answer Approach:** ${q.sampleAnswer}
+
+**Key Points to Address:**
+${q.keyPoints.map(point => `- ${point}`).join('\n')}
+
+---
+`).join('\n')}
+`).join('\n')}
+
+${interviewQuestions.preparationTips ? `
+## Preparation Tips
+${interviewQuestions.preparationTips.map(tip => `- ${tip.tip} (${tip.category})`).join('\n')}` : ''}
+
+${interviewQuestions.commonMistakes ? `
+## Common Mistakes to Avoid
+${interviewQuestions.commonMistakes.map(mistake => `
+**Mistake:** ${mistake.mistake}
+**Better Approach:** ${mistake.correction}
+`).join('\n')}` : ''}`;
+
+    downloadContent(content, `AI_Interview_Questions_${interviewQuestions.careerTitle}_${userData.name}`, 'markdown');
+  };
 
   const callClaudeAPI = async (prompt, maxTokens = 1000) => {
     try {
@@ -171,6 +437,7 @@ Focus on realistic, achievable career transitions based on their background.`;
       const recommendations = JSON.parse(response);
       
       setCareerRecommendations(recommendations);
+      setContentTimestamp(new Date());
       toast.success('Career recommendations generated!');
       
     } catch (error) {
@@ -409,8 +676,59 @@ Focus on realistic, achievable networking actions.`;
   };
 
   // ============================================================================
-  // ENHANCED LEARNING RESOURCES - CAREER-SPECIFIC
+  // PERSISTENCE AND AUTO-SAVE FUNCTIONALITY
   // ============================================================================
+
+  // Save generated content to localStorage for persistence
+  useEffect(() => {
+    if (careerRecommendations.length > 0) {
+      const contentData = {
+        careerRecommendations,
+        personalizedRoadmap,
+        marketInsights,
+        actionPlan,
+        learningPlan,
+        interviewQuestions,
+        lastGenerated: new Date().toISOString(),
+        userEmail: userData.email
+      };
+      localStorage.setItem('ai_generated_content', JSON.stringify(contentData));
+    }
+  }, [careerRecommendations, personalizedRoadmap, marketInsights, actionPlan, learningPlan, interviewQuestions, userData.email]);
+
+  // Load persisted content on component mount
+  useEffect(() => {
+    const savedContent = localStorage.getItem('ai_generated_content');
+    if (savedContent && !careerRecommendations.length) {
+      try {
+        const contentData = JSON.parse(savedContent);
+        // Only restore if it's for the same user and within last 24 hours
+        const lastGenerated = new Date(contentData.lastGenerated);
+        const isRecent = (Date.now() - lastGenerated.getTime()) < 24 * 60 * 60 * 1000; // 24 hours
+        const isSameUser = contentData.userEmail === userData.email;
+        
+        if (isRecent && isSameUser && contentData.careerRecommendations) {
+          setCareerRecommendations(contentData.careerRecommendations);
+          if (contentData.personalizedRoadmap) setPersonalizedRoadmap(contentData.personalizedRoadmap);
+          if (contentData.marketInsights) setMarketInsights(contentData.marketInsights);
+          if (contentData.actionPlan) setActionPlan(contentData.actionPlan);
+          if (contentData.learningPlan) setLearningPlan(contentData.learningPlan);
+          if (contentData.interviewQuestions) setInterviewQuestions(contentData.interviewQuestions);
+          
+          console.log('✅ Restored previously generated AI content');
+        }
+      } catch (error) {
+        console.error('Error restoring saved content:', error);
+        localStorage.removeItem('ai_generated_content');
+      }
+    }
+  }, [userData.email, careerRecommendations.length]);
+
+  // Clear saved content when user navigates to retake test
+  const handleRetakeTest = () => {
+    localStorage.removeItem('ai_generated_content');
+    navigate('/career/test');
+  };
 
   const generateCareerLearningPlan = async () => {
     setGeneratingLearning(true);
@@ -995,7 +1313,7 @@ Focus on questions that are realistic for someone transitioning from ${userData.
               { id: 'market', label: '📊 Market Insights' },
               { id: 'action', label: '⚡ Action Plan' },
               { id: 'resources', label: '📚 Resources'},
-              { id: 'retake', label: '🔄 Retake', action: () => navigate('/career/test') }
+              { id: 'retake', label: '🔄 Retake', action: handleRetakeTest }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -1034,15 +1352,30 @@ Focus on questions that are realistic for someone transitioning from ${userData.
             </div>
 
             {careerRecommendations.length > 0 ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {careerRecommendations.map((career, index) => (
-                  <CareerRecommendationCard 
-                    key={index} 
-                    career={career} 
-                    index={index} 
-                    isTop={index === 0}
-                  />
-                ))}
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {careerRecommendations.map((career, index) => (
+                    <CareerRecommendationCard 
+                      key={index} 
+                      career={career} 
+                      index={index} 
+                      isTop={index === 0}
+                    />
+                  ))}
+                </div>
+                
+                {/* Download Button for Career Recommendations */}
+                <div className="text-center mt-6">
+                  <button
+                    onClick={downloadCareerRecommendations}
+                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all font-medium inline-flex items-center space-x-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Download Career Recommendations</span>
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="text-center py-12">
@@ -1265,10 +1598,25 @@ Focus on questions that are realistic for someone transitioning from ${userData.
             </div>
             
             {actionPlan.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {actionPlan.map((step, index) => (
-                  <ActionCard key={index} step={step} index={index} />
-                ))}
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {actionPlan.map((step, index) => (
+                    <ActionCard key={index} step={step} index={index} />
+                  ))}
+                </div>
+                
+                {/* Download Button for Action Plan */}
+                <div className="text-center mt-6">
+                  <button
+                    onClick={downloadActionPlan}
+                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all font-medium inline-flex items-center space-x-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Download Action Plan</span>
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="text-center py-12">
@@ -1440,6 +1788,32 @@ Focus on questions that are realistic for someone transitioning from ${userData.
                     </div>
                   </div>
                 )}
+                
+                {/* Download Button for Interview Questions */}
+                <div className="text-center mt-6">
+                  <button
+                    onClick={downloadInterviewQuestions}
+                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all font-medium inline-flex items-center space-x-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Download Interview Questions</span>
+                  </button>
+                </div>
+                
+                {/* Download Button for Learning Plan */}
+                <div className="text-center mt-6">
+                  <button
+                    onClick={downloadLearningPlan}
+                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all font-medium inline-flex items-center space-x-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Download Learning Plan</span>
+                  </button>
+                </div>
 
                 {/* Certifications */}
                 {learningPlan.certifications && learningPlan.certifications.length > 0 && (
@@ -1710,7 +2084,12 @@ Focus on questions that are realistic for someone transitioning from ${userData.
       {/* Success Indicators */}
       {careerRecommendations.length > 0 && (
         <div className="fixed bottom-4 left-4 bg-purple-500 text-white px-4 py-2 rounded-lg text-sm shadow-lg z-40">
-          🤖 {careerRecommendations.length} AI recommendations generated
+          <div>🤖 {careerRecommendations.length} AI recommendations generated</div>
+          {contentTimestamp && (
+            <div className="text-xs opacity-75">
+              Last updated: {contentTimestamp.toLocaleString()}
+            </div>
+          )}
         </div>
       )}
     </div>

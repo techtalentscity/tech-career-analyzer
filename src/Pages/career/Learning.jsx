@@ -1,4 +1,4 @@
-// src/Pages/career/Learning.jsx
+// src/Pages/career/Learning.jsx - GREEN THEMED VERSION
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -1663,8 +1663,8 @@ const Learning = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6">
+      {/* Header - Green Theme */}
+      <div className="bg-gradient-to-r from-green-600 via-lime-500 to-green-600 text-white p-6">
         <div className="container mx-auto">
           <h1 className="text-3xl font-bold">Learning Resources</h1>
           <p className="text-lg mt-2 opacity-90">
@@ -1673,13 +1673,13 @@ const Learning = () => {
         </div>
       </div>
       
-      {/* Navigation Bar */}
+      {/* Navigation Bar - Green Theme */}
       <div className="bg-white shadow-md">
         <div className="container mx-auto px-4">
           <nav className="flex items-center justify-between py-4">
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center text-gray-600 hover:text-blue-600 transition"
+              className="flex items-center text-gray-600 hover:text-green-600 transition"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -1691,7 +1691,7 @@ const Learning = () => {
               <input
                 type="text"
                 placeholder="Search courses and certifications..."
-                className="w-64 py-2 px-4 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-64 py-2 px-4 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -1705,7 +1705,7 @@ const Learning = () => {
       
       {/* Main Content */}
       <div className="container mx-auto py-8 px-4">
-        {/* Category Tabs */}
+        {/* Category Tabs - Green Theme */}
         <div className="mb-8 overflow-x-auto">
           <div className="flex space-x-2 min-w-max">
             {categories.map((category) => (
@@ -1714,8 +1714,8 @@ const Learning = () => {
                 onClick={() => setActiveTab(category.id)}
                 className={`px-4 py-2 rounded-lg font-medium transition ${
                   activeTab === category.id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                    ? 'bg-green-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-green-50'
                 }`}
               >
                 {category.name}
@@ -1734,7 +1734,7 @@ const Learning = () => {
                 <div className="p-6">
                   <div className="flex items-start justify-between">
                     <h3 className="text-lg font-bold text-gray-900 mb-2 flex-1">{course.title}</h3>
-                    <span className="bg-blue-100 text-blue-800 text-xs font-semibold py-1 px-2 rounded-full">
+                    <span className="bg-green-100 text-green-800 text-xs font-semibold py-1 px-2 rounded-full">
                       {course.rating} ★
                     </span>
                   </div>
@@ -1745,7 +1745,7 @@ const Learning = () => {
                   
                   <div className="flex flex-wrap gap-2 mb-4">
                     {course.tags && course.tags.slice(0, 3).map((tag, index) => (
-                      <span key={index} className="bg-gray-100 text-gray-800 text-xs py-1 px-2 rounded-full">
+                      <span key={index} className="bg-green-100 text-green-800 text-xs py-1 px-2 rounded-full">
                         {tag}
                       </span>
                     ))}
@@ -1783,7 +1783,7 @@ const Learning = () => {
                     href={course.link} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                    className="text-green-600 hover:text-green-800 text-sm font-medium flex items-center"
                   >
                     View Course
                     <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1817,9 +1817,9 @@ const Learning = () => {
                   <div className="flex items-start justify-between">
                     <h3 className="text-lg font-bold text-gray-900 mb-2 flex-1">{cert.title}</h3>
                     <span className={`text-xs font-semibold py-1 px-2 rounded-full ${
-                      cert.popularity === 'Very High' ? 'bg-purple-100 text-purple-800' :
-                      cert.popularity === 'High' ? 'bg-blue-100 text-blue-800' :
-                      'bg-green-100 text-green-800'
+                      cert.popularity === 'Very High' ? 'bg-emerald-100 text-emerald-800' :
+                      cert.popularity === 'High' ? 'bg-green-100 text-green-800' :
+                      'bg-lime-100 text-lime-800'
                     }`}>
                       {cert.popularity}
                     </span>
@@ -1865,7 +1865,7 @@ const Learning = () => {
                     href={cert.link} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                    className="text-green-600 hover:text-green-800 text-sm font-medium flex items-center"
                   >
                     View Certification
                     <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

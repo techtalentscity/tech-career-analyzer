@@ -359,26 +359,6 @@ const CareerHome = () => {
           </div>
         </section>
 
-        {/* Success Stats */}
-        <section className="mb-20 py-8">
-          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            <div className="bg-white rounded-xl p-6 shadow-lg text-center transform hover:-translate-y-1 transition-all duration-300">
-              <div className="text-4xl font-bold text-indigo-600 mb-2">35%</div>
-              <p className="text-gray-700">Faster transition to tech roles compared to self-guided paths</p>
-            </div>
-            <div className="bg-white rounded-xl p-6 shadow-lg text-center transform hover:-translate-y-1 transition-all duration-300">
-              <div className="text-4xl font-bold text-indigo-600 mb-2">
-                <span className="text-2xl">$</span>65K-160K
-              </div>
-              <p className="text-gray-700">Salary range of recommended career paths</p>
-            </div>
-            <div className="bg-white rounded-xl p-6 shadow-lg text-center transform hover:-translate-y-1 transition-all duration-300">
-              <div className="text-4xl font-bold text-indigo-600 mb-2">0.1%</div>
-              <p className="text-gray-700">Investment of your potential first-year tech salary</p>
-            </div>
-          </div>
-        </section>
-
         {/* What's Included Section */}
         <section className="mb-20" aria-label="Features">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800">What You Get</h2>

@@ -153,7 +153,6 @@ const CareerAbout = () => {
             <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl shadow-md p-8">
               <div className="flex items-center mb-6">
                 <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white text-2xl mr-4">
-                  🎯
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">Our Mission</h2>
               </div>
@@ -178,7 +177,6 @@ const CareerAbout = () => {
               <div>
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white text-2xl mr-4">
-                    👁️
                   </div>
                   <h2 className="text-2xl font-bold text-gray-800">Our Vision</h2>
                 </div>
@@ -207,7 +205,7 @@ const CareerAbout = () => {
               <div className="p-6 md:p-10">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="bg-indigo-50 p-6 rounded-xl">
-                    <div className="text-3xl text-indigo-600 mb-3">🤖</div>
+                    <div className="text-3xl text-indigo-600 mb-3"></div>
                     <h3 className="text-xl font-bold text-gray-800 mb-2">AI-Driven Analysis</h3>
                     <p className="text-gray-700">
                       Comprehensive AI-driven career analysis tailored to your background and goals
@@ -215,7 +213,7 @@ const CareerAbout = () => {
                   </div>
 
                   <div className="bg-purple-50 p-6 rounded-xl">
-                    <div className="text-3xl text-purple-600 mb-3">🎯</div>
+                    <div className="text-3xl text-purple-600 mb-3"></div>
                     <h3 className="text-xl font-bold text-gray-800 mb-2">Career Recommendations</h3>
                     <p className="text-gray-700">
                       Personalized career recommendations aligned with your interests and industry trends
@@ -231,7 +229,7 @@ const CareerAbout = () => {
                   </div>
 
                   <div className="bg-purple-50 p-6 rounded-xl">
-                    <div className="text-3xl text-purple-600 mb-3">🗺️</div>
+                    <div className="text-3xl text-purple-600 mb-3"></div>
                     <h3 className="text-xl font-bold text-gray-800 mb-2">Learning Roadmap</h3>
                     <p className="text-gray-700">
                       A custom learning roadmap to guide your upskilling journey
@@ -239,7 +237,7 @@ const CareerAbout = () => {
                   </div>
 
                   <div className="bg-indigo-50 p-6 rounded-xl">
-                    <div className="text-3xl text-indigo-600 mb-3">📚</div>
+                    <div className="text-3xl text-indigo-600 mb-3"></div>
                     <h3 className="text-xl font-bold text-gray-800 mb-2">Learning Resources</h3>
                     <p className="text-gray-700">
                       Curated learning resources to help you grow in your chosen tech path
@@ -247,7 +245,7 @@ const CareerAbout = () => {
                   </div>
 
                   <div className="bg-purple-50 p-6 rounded-xl">
-                    <div className="text-3xl text-purple-600 mb-3">💼</div>
+                    <div className="text-3xl text-purple-600 mb-3"></div>
                     <h3 className="text-xl font-bold text-gray-800 mb-2">Interview Preparation</h3>
                     <p className="text-gray-700">
                       Interview preparation tools to build your confidence and readiness
@@ -256,7 +254,7 @@ const CareerAbout = () => {
                 </div>
 
                 <div className="mt-8 bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-xl">
-                  <div className="text-3xl mb-3">🚀</div>
+                  <div className="text-3xl mb-3"></div>
                   <h3 className="text-xl font-bold text-gray-800 mb-2">Complete Career Transition Guide</h3>
                   <p className="text-gray-700">
                     A complete career transition guide that brings everything together in one place

@@ -66,30 +66,54 @@ const CareerDashboard = () => {
 
   const callClaudeAPI = async (prompt, maxTokens = 1000) => {
     try {
-      // Replace with your actual Claude API integration
-      const response = await fetch('/api/claude/generate', {
+      // Using your existing Claude API proxy infrastructure
+      const requestBody = {
+        model: 'claude-3-5-sonnet-20240620', // Using your configured model
+        max_tokens: maxTokens,
+        temperature: 0.7,
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ]
+      };
+
+      console.log('Calling Claude API with request:', {
+        model: requestBody.model,
+        max_tokens: requestBody.max_tokens,
+        promptLength: prompt.length
+      });
+
+      const response = await fetch('/api/claude-proxy', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.REACT_APP_CLAUDE_API_KEY}`,
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          prompt,
-          max_tokens: maxTokens,
-          temperature: 0.7
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
-        throw new Error(`Claude API error: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Claude API Error Response:', errorText);
+        throw new Error(`Claude API error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
-      return data.completion || data.response || data.content;
+      console.log('Claude API Response received successfully');
+      
+      // Extract text from your Claude API response format
+      if (data.content && Array.isArray(data.content) && data.content[0]?.text) {
+        return data.content[0].text;
+      } else if (data.completion) {
+        return data.completion;
+      } else {
+        throw new Error('Unexpected response format from Claude API');
+      }
       
     } catch (error) {
       console.error('Claude API Error:', error);
-      throw new Error('Failed to generate AI response');
+      throw new Error(`Failed to generate AI response: ${error.message}`);
     }
   };
 

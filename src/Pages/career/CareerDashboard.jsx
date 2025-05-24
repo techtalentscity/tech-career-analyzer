@@ -550,7 +550,7 @@ const CareerDashboard = () => {
             {/* Quick Actions Section - Green Theme */}
             <div className="bg-white rounded-2xl p-6 shadow-lg">
               <h3 className="text-xl font-bold mb-6">Quick Actions</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 <button 
                   onClick={() => navigate('/career/learning')}
                   className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-lime-500 to-green-600 text-white rounded-lg hover:from-lime-600 hover:to-green-700 transition-all transform hover:scale-105"
@@ -575,109 +575,21 @@ const CareerDashboard = () => {
                   <span className="text-sm font-medium">Guide</span>
                 </button>
                 
-                <a 
-                  href="https://calendly.com/info-favoredonline/30min" 
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button 
+                  onClick={() => navigate('/career/portfolioplatforms')}
+                  className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-yellow-500 to-green-500 text-white rounded-lg hover:from-yellow-600 hover:to-green-600 transition-all transform hover:scale-105"
+                >
+                  <span className="text-2xl mb-2">🚀</span>
+                  <span className="text-sm font-medium">Projects</span>
+                </button>
+                
+                <button 
+                  onClick={() => navigate('/career/mentorship')}
                   className="flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-r from-purple-500 to-green-500 text-white rounded-lg hover:from-purple-600 hover:to-green-600 transition-all transform hover:scale-105"
                 >
                   <span className="text-2xl mb-2">🤝</span>
                   <span className="text-sm font-medium">Mentorship</span>
-                </a>
-              </div>
-            </div>
-
-            {/* Mentorship Section - Green Theme */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg">
-              <h3 className="text-xl font-bold mb-6 flex items-center">
-                <span className="mr-3">🤝</span>
-                1-on-1 CAREER MENTORSHIP
-              </h3>
-              <div className="bg-gradient-to-br from-purple-50 to-green-50 rounded-xl p-6 border border-purple-200">
-                <div className="text-center mb-6">
-                  <div className="text-4xl mb-4">👨‍💼</div>
-                  <h4 className="text-2xl font-bold text-gray-800 mb-2">Ready to Accelerate Your Tech Career?</h4>
-                  <p className="text-gray-600 text-lg">Get personalized guidance from an experienced tech career mentor</p>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div className="space-y-3">
-                    <h5 className="font-semibold text-gray-800 mb-3">What You'll Get:</h5>
-                    <div className="space-y-2 text-sm text-gray-700">
-                      <div className="flex items-start">
-                        <span className="text-green-500 mr-2 mt-0.5">✓</span>
-                        Personalized career roadmap review
-                      </div>
-                      <div className="flex items-start">
-                        <span className="text-green-500 mr-2 mt-0.5">✓</span>
-                        Skills gap analysis and learning strategy
-                      </div>
-                      <div className="flex items-start">
-                        <span className="text-green-500 mr-2 mt-0.5">✓</span>
-                        Industry insights and market trends
-                      </div>
-                      <div className="flex items-start">
-                        <span className="text-green-500 mr-2 mt-0.5">✓</span>
-                        Interview preparation and portfolio review
-                      </div>
-                      <div className="flex items-start">
-                        <span className="text-green-500 mr-2 mt-0.5">✓</span>
-                        Job search strategies and networking tips
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <h5 className="font-semibold text-gray-800 mb-3">Session Details:</h5>
-                    <div className="space-y-2 text-sm text-gray-700">
-                      <div className="flex items-start">
-                        <span className="text-purple-500 mr-2 mt-0.5">⏰</span>
-                        30-minute focused session
-                      </div>
-                      <div className="flex items-start">
-                        <span className="text-purple-500 mr-2 mt-0.5">💻</span>
-                        Virtual meeting (Zoom/Google Meet)
-                      </div>
-                      <div className="flex items-start">
-                        <span className="text-purple-500 mr-2 mt-0.5">📋</span>
-                        Actionable next steps and resources
-                      </div>
-                      <div className="flex items-start">
-                        <span className="text-purple-500 mr-2 mt-0.5">📧</span>
-                        Follow-up summary with recommendations
-                      </div>
-                      <div className="flex items-start">
-                        <span className="text-purple-500 mr-2 mt-0.5">🎯</span>
-                        Tailored to your AI career recommendations
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="text-center">
-                  <div className="mb-4 p-4 bg-white rounded-lg border-2 border-green-200">
-                    <p className="text-sm text-green-700 mb-2">
-                      <strong>Perfect for:</strong> Career changers, recent graduates, and professionals looking to advance in tech
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      Book now to get personalized insights based on your AI-generated career recommendations
-                    </p>
-                  </div>
-                  
-                  <a 
-                    href="https://calendly.com/info-favoredonline/30min" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-purple-600 to-green-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-green-700 transition-all transform hover:scale-105 shadow-lg"
-                  >
-                    <span className="mr-2">🗓️</span>
-                    Book Your 30-Minute Session
-                  </a>
-                  
-                  <p className="text-xs text-gray-500 mt-3">
-                    Secure booking through Calendly • Choose your preferred time slot
-                  </p>
-                </div>
+                </button>
               </div>
             </div>
           </div>

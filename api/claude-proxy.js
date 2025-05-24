@@ -76,7 +76,7 @@ export default async function handler(req, res) {
       timestamp: new Date().toISOString()
     };
     
-    console.log('🤖 Career Path Recommendation System API Request:', requestMetadata);
+    console.log(Career Path Recommendation System API Request:', requestMetadata);
     
     // Validate v2.0 specific requirements
     if (isV2Request) {
@@ -409,7 +409,7 @@ async function processV2Response(data, requestMetadata, responseTime, internalMe
  * Process legacy response (backward compatibility)
  */
 async function processLegacyResponse(data, requestMetadata, responseTime) {
-  console.log('📊 Processing legacy response with v1.x compatibility');
+  console.log('Processing legacy response with v1.x compatibility');
   
   const processedResponse = {
     ...data,
@@ -429,7 +429,7 @@ async function processLegacyResponse(data, requestMetadata, responseTime) {
     console.log('✅ Legacy content in modern format');
   } else if (data.completion) {
     // Convert legacy Claude API format to new format
-    console.log('🔄 Converting legacy format to modern format');
+    console.log('Converting legacy format to modern format');
     processedResponse.content = [{ type: 'text', text: data.completion }];
   }
   

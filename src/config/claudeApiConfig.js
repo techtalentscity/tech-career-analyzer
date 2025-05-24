@@ -1,596 +1,181 @@
-// src/config/claudeApiConfig.js - UPDATED FOR CAREER PATH RECOMMENDATION SYSTEM v2.0
+// src/config/claudeApiConfig.js
 
-// Claude API configuration for Career Path Recommendation System v2.0
+// Claude API configuration
 const CLAUDE_API_CONFIG = {
   models: {
     default: 'claude-3-5-sonnet-20240620',
-    faster: 'claude-3-haiku-20240307',
-    premium: 'claude-3-opus-20240229'
+    faster: 'claude-3-haiku-20240307'
   },
   maxTokens: {
     formSuggestions: 1024,
-    careerPathRecommendation: 4096,
-    skillGapAnalysis: 3072,
-    learningRoadmap: 4096,
-    completeAnalysis: 8192
-  },
-  systemVersion: '2.0',
-  engineType: 'Sequential Dependency Recommendation Engine',
-  aiContentGeneration: {
-    enabled: true,
-    dynamicPersonalization: true,
-    realTimeGeneration: true
+    careerAnalysis: 4096
   }
 };
 
-// v2.0 Sequential Dependency Engine Prompts for Claude API requests
+// Prompts for different Claude API requests
 const CLAUDE_PROMPTS = {
   formSuggestions: 
-    "I'm filling out a career assessment form for the Career Path Recommendation System v2.0. " +
-    "This system uses a Sequential Dependency Engine (Career Path → Skill Gap → Learning Roadmap) " +
-    "with a 4-Tier Scoring System analyzing 16 career path criteria plus additional criteria. " +
-    "Based on a typical career changer profile, suggest realistic answers for a comprehensive form that captures: " +
-    "TIER 1 - CORE DRIVERS (45%): Future Goal, Tech Interests, Leverage Domain Expertise, Career Paths Interest. " +
-    "TIER 2 - STRONG MOTIVATORS (25%): Industry Preference, Tech Motivation, Tech Passion. " +
-    "TIER 3 - SUPPORTING EVIDENCE (20%): Transferable Skills, Job Technologies, Job Responsibilities, Job Projects. " +
-    "TIER 4 - BACKGROUND CONTEXT (10%): Continue Current Role, Study Field, Certifications, Internships, Publications. " +
-    "SKILL GAP CRITERIA: Certifications Detail, Experience Level, Years Experience, Current Role, Tools Used. " +
-    "LEARNING ROADMAP CRITERIA: Time Commitment, Target Salary, Transition Timeline, Learning Comfort, Transition Reason, Guidance Needed.",
+    "I'm filling out a tech career assessment form for someone transitioning into tech. " +
+    "Based on a typical career changer profile, suggest realistic answers for a form with these fields: " +
+    "Education Level, Field of Study, Years of Experience, Current/Previous Role, " +
+    "Job Responsibilities, Notable Projects or Achievements, Software or Technologies Used, Internships or Relevant Experience, " +
+    "Publications or Research, " +
+    "What they like doing best, Biggest motivation for tech career, " +
+    "What they're passionate about, Primary reason for transition, Transferable skills from previous career, " +
+    "Previous tech exposure, Anticipated challenges in transition, Tech areas they're curious about, " +
+    "Comfort with learning new tools, Preferred work method, Current tech experience level, " +
+    "Tools and platforms used, Certifications and courses, Tech career paths interest, " +
+    "Industry preference, Whether to leverage domain expertise, Target salary range, " +
+    "Weekly time commitment, Transition timeline, Whether continuing current role, " +
+    "Guidance needed, and 12-month goal.",
   
-  careerPathRecommendation: (formData) => `
-    I'm a career transition expert using the Career Path Recommendation System v2.0 with Sequential Dependency Engine 
-    and 4-Tier Scoring System to generate AI-powered career path recommendations.
-
-    CAREER PATH RECOMMENDATION SYSTEM v2.0 ANALYSIS FRAMEWORK:
+  careerAnalysis: (formData) => `
+    I'm a career transition expert helping someone move into technology from a different field.
+    Please analyze this comprehensive career assessment for someone looking to transition into tech.
+    Focus especially on their job experience, educational background, transferable skills, interests, tech preferences, and background.
     
-    You must generate a SINGLE, AI-OPTIMIZED CAREER PATH RECOMMENDATION using the 4-Tier Scoring System 
-    with 16 weighted criteria, followed by Sequential Dependency components.
-
-    ====================================================================
-    🎯 CAREER PATH RECOMMENDATION (Primary Component)
-    ====================================================================
-    Analyze using 16 criteria organized into 4 tiers with weighted scoring:
-
-    TIER 1: CORE DRIVERS (45% weight):
-    - Future Goal (15%): ${formData.futureGoal || 'Not specified'}
-    - Tech Interests (12%): ${formData.techInterests || 'Not specified'}  
-    - Leverage Domain Expertise (10%): ${formData.leverageDomainExpertise || 'Not specified'}
-    - Career Paths Interest (8%): ${Array.isArray(formData.careerPathsInterest) ? formData.careerPathsInterest.join(', ') : formData.careerPathsInterest || 'Not specified'}
-
-    TIER 2: STRONG MOTIVATORS (25% weight):
-    - Industry Preference (10%): ${Array.isArray(formData.industryPreference) ? formData.industryPreference.join(', ') : formData.industryPreference || 'Not specified'}
-    - Tech Motivation (8%): ${formData.techMotivation || 'Not specified'}
-    - Tech Passion (7%): ${formData.techPassion || 'Not specified'}
-
-    TIER 3: SUPPORTING EVIDENCE (20% weight):
-    - Transferable Skills (8%): ${formData.transferableSkills || 'Not specified'}
-    - Job Technologies (4%): ${formData.jobTechnologies || 'Not specified'}
-    - Job Responsibilities (4%): ${formData.jobResponsibilities || 'Not specified'}
-    - Job Projects (4%): ${formData.jobProjects || 'Not specified'}
-
-    TIER 4: BACKGROUND CONTEXT (10% weight):
-    - Continue Current Role (3%): ${formData.continueCurrent || formData.currentRole || 'Not specified'}
-    - Study Field (3%): ${formData.studyField || 'Not specified'}
-    - Certifications (2%): ${formData.certifications || 'Not specified'}
-    - Internships (1%): ${formData.internships || 'Not specified'}
-    - Publications (1%): ${formData.publications || 'Not specified'}
-
-    ====================================================================
-    📚 SKILL GAP ANALYSIS CRITERIA (Secondary Component):
-    ====================================================================
-    Additional criteria for skill gap analysis:
-    - Certifications Detail: ${formData.certificationsDetail || 'Not specified'}
-    - Experience Level: ${formData.experienceLevel || 'Not specified'}
-    - Years Experience: ${formData.yearsExperience || 'Not specified'}
-    - Current Role: ${formData.currentRole || 'Not specified'}
-    - Tools Used: ${Array.isArray(formData.toolsUsed) ? formData.toolsUsed.join(', ') : formData.toolsUsed || 'Not specified'}
-
-    ====================================================================
-    ⚖️ LEARNING ROADMAP CRITERIA (Tertiary Component):
-    ====================================================================
-    Additional criteria for learning roadmap:
-    - Time Commitment: ${formData.timeCommitment || 'Not specified'}
-    - Target Salary: ${formData.targetSalary || 'Not specified'}
-    - Transition Timeline: ${formData.transitionTimeline || 'Not specified'}
-    - Learning Comfort: ${formData.learningComfort || 'Not specified'}
-    - Transition Reason: ${formData.transitionReason || 'Not specified'}
-    - Guidance Needed: ${Array.isArray(formData.guidanceNeeded) ? formData.guidanceNeeded.join(', ') : formData.guidanceNeeded || 'Not specified'}
-
-    ====================================================================
-    v2.0 SEQUENTIAL DEPENDENCY ENGINE ANALYSIS REQUIREMENTS:
-    ====================================================================
-
-    CRITICAL: You MUST analyze this using the Sequential Dependency approach and provide your response 
-    in the EXACT JSON format below. Generate AI-personalized content based on the user's specific criteria.
-
-    IMPORTANT: All content (titles, descriptions, skills, etc.) must be AI-GENERATED and personalized 
-    to this specific user profile. No static templates or generic responses.
-
-    FORMAT YOUR RESPONSE AS VALID JSON:
-
-    {
-      "careerPath": {
-        "id": "cp_[generate_unique_id]",
-        "type": "career-path",
-        "title": "[AI-GENERATED career path title based on futureGoal + techInterests + leverageDomainExpertise + continueCurrent]",
-        "description": "[AI-GENERATED detailed description leveraging user's specific interests, goals, and domain expertise]",
-        "reasoning": "[AI-GENERATED explanation of why this path aligns with their 4-tier criteria analysis]",
-        "confidence": "[high|medium|low based on data completeness]",
-        "confidenceScore": [number 0-100],
-        "recommendedPaths": ["[AI-GENERATED path 1]", "[AI-GENERATED path 2]", "[AI-GENERATED path 3]"],
-        "industryFocus": ["[AI-SELECTED from industryPreference]", "[AI-SELECTED secondary industry]"],
-        "marketDemand": "[high|medium|low based on AI analysis]",
-        "metadata": {
-          "criteriaUsed": ["[list of 16 criteria that had valid data]"],
-          "missingCriteria": ["[list of 16 criteria that were missing]"],
-          "tierScores": {
-            "coreDriving": [decimal 0-1 representing Tier 1 score],
-            "strongMotivators": [decimal 0-1 representing Tier 2 score],
-            "supportingEvidence": [decimal 0-1 representing Tier 3 score],
-            "backgroundContext": [decimal 0-1 representing Tier 4 score]
-          },
-          "totalWeightedScore": [decimal 0-1 representing combined score],
-          "fallbackApplied": [boolean - true if less than 8 of 16 criteria present]
-        }
-      },
-      "skillGap": {
-        "id": "sg_[generate_unique_id]",
-        "type": "skill-gap",
-        "careerPathId": "[reference to career path id]",
-        "currentSkillLevel": "[AI-ASSESSED from experienceLevel + toolsUsed + yearsExperience]",
-        "requiredSkills": ["[AI-GENERATED skill 1]", "[AI-GENERATED skill 2]", "[AI-GENERATED skill 3]", "[AI-GENERATED skill 4]", "[AI-GENERATED skill 5]"],
-        "skillGaps": [
-          {
-            "skill": "[AI-GENERATED specific skill name]",
-            "currentLevel": "[AI-ASSESSED: none|basic|intermediate|advanced]",
-            "requiredLevel": "[AI-DETERMINED: basic|intermediate|advanced|expert]",
-            "priority": "[high|medium|low based on career path importance]",
-            "estimatedLearningTime": "[AI-CALCULATED based on gap size + timeCommitment]"
-          }
-        ],
-        "strengthsToLeverage": ["[AI-IDENTIFIED from transferableSkills + jobTechnologies + toolsUsed]"],
-        "recommendedCertifications": ["[AI-RECOMMENDED cert 1]", "[AI-RECOMMENDED cert 2]"],
-        "confidence": "[high|medium|low]",
-        "confidenceScore": [number 0-100],
-        "metadata": {
-          "basedOnCareerPath": true,
-          "criteriaUsed": ["[skill gap criteria that had valid data]"],
-          "missingCriteria": ["[skill gap criteria that were missing]"]
-        }
-      },
-      "learningRoadmap": {
-        "id": "lr_[generate_unique_id]",
-        "type": "learning-roadmap",
-        "careerPathId": "[reference to career path id]",
-        "skillGapId": "[reference to skill gap id]",
-        "phases": [
-          {
-            "phase": 1,
-            "title": "[AI-GENERATED phase name based on skill progression]",
-            "duration": "[AI-CALCULATED based on timeCommitment + skill complexity]",
-            "skills": ["[AI-CURATED skills for this phase]"],
-            "resources": ["[AI-RECOMMENDED learning resources based on learningComfort + guidanceNeeded]"],
-            "milestones": ["[AI-GENERATED achievement markers]"]
-          }
-        ],
-        "totalTimelineEstimate": "[AI-CALCULATED based on phases + transitionTimeline + timeCommitment]",
-        "budgetEstimate": "[AI-ESTIMATED based on recommended resources + certifications]",
-        "flexibilityOptions": ["[AI-GENERATED alternatives based on timeCommitment + learningComfort]"],
-        "supportRecommendations": ["[AI-CURATED based on guidanceNeeded + transitionReason]"],
-        "confidence": "[high|medium|low]",
-        "confidenceScore": [number 0-100],
-        "metadata": {
-          "basedOnCareerPath": true,
-          "basedOnSkillGap": true,
-          "criteriaUsed": ["[learning roadmap criteria that had valid data]"],
-          "missingCriteria": ["[learning roadmap criteria that were missing]"]
-        }
-      },
-      "overallConfidence": [number 0-100 - weighted average of all three components],
-      "dataCompleteness": [number 0-100 - percentage of all 22 criteria completed],
-      "careerPathCriteriaComplete": [number 0-16 - count of valid career path criteria],
-      "processedAt": "[current ISO timestamp]"
-    }
-
-    ====================================================================
-    AI CONTENT GENERATION INSTRUCTIONS:
-    ====================================================================
-
-    1. **CAREER PATH TITLE GENERATION**: 
-       - Analyze futureGoal + techInterests + leverageDomainExpertise + continueCurrent
-       - Generate specific, personalized role title (e.g., "Healthcare AI Engineer with Clinical Background")
-       - Consider experience level for seniority prefix
-
-    2. **DESCRIPTION GENERATION**:
-       - Personalize based on user's specific interests, goals, and domain
-       - Reference their industry preferences and motivation
-       - Explain how they can leverage their current expertise
-
-    3. **SKILL GAP ANALYSIS**:
-       - Assess current skills from toolsUsed + jobTechnologies + experienceLevel
-       - Generate specific skill gaps based on career path requirements
-       - Calculate realistic learning times based on timeCommitment
-
-    4. **LEARNING ROADMAP GENERATION**:
-       - Create 2-4 phases based on skill complexity and timeline
-       - Adapt to timeCommitment (full-time vs part-time vs flexible)
-       - Personalize resources based on learningComfort and guidanceNeeded
-
-    5. **SCORING AND VALIDATION**:
-       - Apply 4-tier weighted scoring (45%, 25%, 20%, 10%)
-       - Count valid criteria out of 16 for career path
-       - Apply fallback logic if < 8 criteria present
-       - Calculate confidence based on data completeness and tier performance
-
-    CRITICAL INSTRUCTIONS:
-    - Generate completely personalized content - no generic templates
-    - All skills, certifications, and resources must be relevant to their specific profile
-    - Ensure sequential dependency: skill gaps build on career path, roadmap builds on both
-    - Apply proper 4-tier weighting in confidence calculations
-    - Reference specific user data points throughout the analysis
-    - Generate realistic timelines and budget estimates
-    - Provide valid JSON response that can be parsed programmatically
-
-    The user should receive a sophisticated, AI-generated analysis that feels completely 
-    personalized to their unique career transition profile using the v2.0 Sequential Dependency Engine.
-  `,
-
-  skillGapAnalysis: (userProfile, careerPath) => `
-    Generate a detailed skill gap analysis building on the career path recommendation.
+    ASSESSMENT DATA (IMPORTANT FIELDS MARKED):
     
-    Career Path: ${careerPath.title}
-    User Profile: ${JSON.stringify(userProfile, null, 2)}
+    BACKGROUND INFORMATION:
+    - Education Level (IMPORTANT): ${formData.educationLevel || 'Not specified'}
+    - Field of Study (IMPORTANT): ${formData.studyField || 'Not specified'}
+    - Current/Previous Role: ${formData.currentRole || 'Not specified'}
+    - Years of Experience: ${formData.yearsExperience || 'Not specified'}
     
-    Analyze current skills vs required skills and generate personalized skill development plan.
-  `,
-
-  learningRoadmap: (userProfile, careerPath, skillGap) => `
-    Generate a comprehensive learning roadmap building on career path and skill gap analysis.
+    JOB EXPERIENCE DETAILS (IMPORTANT):
+    - Key Job Responsibilities: ${formData.jobResponsibilities || 'Not specified'}
+    - Notable Projects or Achievements: ${formData.jobProjects || 'Not specified'}
+    - Software or Technologies Used: ${formData.jobTechnologies || 'Not specified'}
+    - Internships or Relevant Experience: ${formData.internships || 'Not specified'}
+    - Publications or Research (IMPORTANT): ${formData.publications || 'Not specified'}
     
-    Career Path: ${careerPath.title}
-    Skill Gaps: ${skillGap.skillGaps.map(gap => gap.skill).join(', ')}
-    Time Commitment: ${userProfile.timeCommitment}
-    Learning Comfort: ${userProfile.learningComfort}
+    PERSONAL STRENGTHS & MOTIVATION (IMPORTANT):
+    - Biggest motivation for tech career: ${formData.techMotivation || 'Not specified'}
+    - What they're passionate about: ${formData.techPassion || 'Not specified'}
     
-    Create personalized learning phases with resources, timelines, and milestones.
+    TECH PREFERENCES & INTERESTS (IMPORTANT):
+    - Tech areas they're interested in: ${formData.techInterests || 'Not specified'}
+    - Comfort with learning new tools: ${formData.learningComfort || 'Not specified'}
+    - Work preference: ${formData.workPreference || 'Not specified'}
+    - Current tech experience level: ${formData.experienceLevel || 'Not specified'}
+    - Tools & platforms used: ${formData.toolsUsed ? formData.toolsUsed.join(', ') : 'None'}
+    - Certifications/courses: ${formData.certifications || 'Not specified'}
+    - Certification details: ${formData.certificationsDetail || 'Not specified'}
+    
+    TRANSITION INFORMATION:
+    - Primary reason for transition: ${formData.transitionReason || 'Not specified'}
+    - Transferable skills: ${formData.transferableSkills || 'Not specified'}
+    - Anticipated challenges: ${formData.anticipatedChallenges || 'Not specified'}
+    
+    CAREER ASPIRATIONS:
+    - Tech career paths interest: ${formData.careerPathsInterest ? formData.careerPathsInterest.join(', ') : 'Not specified'}
+    - Industry preferences: ${formData.industryPreference ? formData.industryPreference.join(', ') : 'Not specified'}
+    - Leverage domain expertise: ${formData.leverageDomainExpertise || 'Not specified'}
+    - Target salary range: ${formData.targetSalary || 'Not specified'}
+    
+    COMMITMENT & GOALS:
+    - Weekly time commitment: ${formData.timeCommitment || 'Not specified'}
+    - Transition timeline: ${formData.transitionTimeline || 'Not specified'}
+    - Continue current role: ${formData.continueCurrent || 'Not specified'}
+    - Guidance needed: ${formData.guidanceNeeded || 'Not specified'}
+    - 12-month goal: ${formData.futureGoal || 'Not specified'}
+    
+    Based on this comprehensive assessment, provide a detailed analysis with the following sections.
+    
+    IMPORTANT: Format your response EXACTLY as shown below, maintaining the exact structure and numbering:
+    
+    1. CAREER PATH RECOMMENDATIONS:
+       a) [Role Name] ([X]% match)
+       - Why: [Detailed explanation]
+       - Timeline: [Specific timeline]
+       
+       b) [Role Name] ([X]% match)
+       - Why: [Detailed explanation]
+       - Timeline: [Specific timeline]
+    
+    2. STRENGTHS ANALYSIS:
+       - [Strength Category]: [Detailed explanation]
+       - [Strength Category]: [Detailed explanation]
+       (Use bullet points with "-" for this section)
+    
+    3. SKILLS GAP ANALYSIS:
+       FORMAT EACH SKILL AS A NUMBERED ITEM WITH TITLE AND DESCRIPTION ON SEPARATE LINES:
+       
+       1. [Skill Name]: [Brief description of the gap and what needs to be learned]
+       
+       2. [Skill Name]: [Brief description of the gap and what needs to be learned]
+       
+       3. [Skill Name]: [Brief description of the gap and what needs to be learned]
+       
+       (Continue numbering for all skills. Each skill should have the format "N. Skill Name: Description")
+    
+    4. LEARNING ROADMAP:
+       Month 1-2:
+       - [Specific tasks and resources]
+       - [More tasks]
+       
+       Month 3-4:
+       - [Specific tasks and resources]
+       - [More tasks]
+       
+       Month 5-6:
+       - [Specific tasks and resources]
+       - [More tasks]
+    
+    5. TRANSITION STRATEGY:
+       - [Strategy point]
+       - [Strategy point]
+       - [Strategy point]
+    
+    6. MARKET TRENDS ANALYSIS:
+       Include current (as of 2025) job market data for the recommended career paths with the following specific sections:
+       
+       1. JOB MARKET OUTLOOK: 
+          Provide detailed job growth projections, hiring rates, and demand levels for each recommended career path. 
+          Include specific percentages when possible.
+       
+       2. SALARY TRENDS: 
+          Detail current salary ranges for entry-level, mid-level, and senior positions in each recommended 
+          career path, including how these have changed in the past year. Use specific dollar ranges.
+       
+       3. REGIONAL OPPORTUNITIES: 
+          Analyze which geographic regions show the strongest demand for each career path, including remote 
+          work opportunities and emerging tech hubs.
+       
+       4. EMERGING TECHNOLOGIES: 
+          Identify the most important emerging technologies or skills within each career path that are 
+          becoming requirements for new hires in 2025.
+       
+       5. INDUSTRY SECTOR ANALYSIS: 
+          Evaluate which industry sectors are most actively hiring for each career path (e.g., healthcare, 
+          finance, retail) and their growth trajectories.
+          
+    7. NETWORKING STRATEGY:
+       - [Specific networking tips tailored to their background and target roles]
+       - [Industry events or communities to join]
+       - [Online platforms for tech networking]
+       - [How to leverage existing network from previous career]
+       - [Informational interview strategies]
+    
+    8. PERSONAL BRANDING:
+       - [Resume transformation recommendations]
+       - [LinkedIn profile optimization]
+       - [Portfolio development strategy]
+       - [How to highlight transferable skills]
+       - [Online presence recommendations]
+    
+    9. INTERVIEW PREPARATION:
+       - [Technical interview strategies]
+       - [Behavioral question preparation]
+       - [How to discuss career transition effectively]
+       - [Practice project recommendations]
+       - [How to address skills gaps during interviews]
+    
+    Make your analysis practical, personalized, and actionable. Focus on leveraging their specific educational background,
+    field of study, strengths, and interests to create a realistic path into tech. The market trends analysis should be 
+    particularly relevant to their indicated interests (${formData.careerPathsInterest ? formData.careerPathsInterest.join(', ') : 'various tech roles'})
+    and include current, accurate market data for 2025.
   `
 };
 
-// Career Path Recommendation System v2.0 validation functions
-const CAREER_PATH_VALIDATION = {
-  // Validate data completeness for v2.0 system (16 career path criteria)
-  validateV2Data: (userProfile) => {
-    // 16 Career Path Recommendation criteria organized by tier
-    const tier1CoreDrivers = ['futureGoal', 'techInterests', 'leverageDomainExpertise', 'careerPathsInterest'];
-    const tier2StrongMotivators = ['industryPreference', 'techMotivation', 'techPassion'];
-    const tier3SupportingEvidence = ['transferableSkills', 'jobTechnologies', 'jobResponsibilities', 'jobProjects'];
-    const tier4BackgroundContext = ['continueCurrent', 'studyField', 'certifications', 'internships', 'publications'];
-    
-    const careerPathCriteria = [...tier1CoreDrivers, ...tier2StrongMotivators, ...tier3SupportingEvidence, ...tier4BackgroundContext];
-    
-    // Additional criteria for Skill Gap and Learning Roadmap
-    const additionalCriteria = [
-      'certificationsDetail', 'experienceLevel', 'yearsExperience', 'currentRole', 'toolsUsed',
-      'timeCommitment', 'targetSalary', 'transitionTimeline', 'learningComfort', 'transitionReason', 'guidanceNeeded'
-    ];
-    
-    // All criteria combined
-    const allCriteria = [...careerPathCriteria, ...additionalCriteria];
-    
-    // Validate career path criteria
-    const validCareerPathCriteria = careerPathCriteria.filter(field => CAREER_PATH_VALIDATION.isV2Valid(userProfile[field]));
-    const careerPathCriteriaComplete = validCareerPathCriteria.length;
-    
-    // Validate all criteria
-    const validAllCriteria = allCriteria.filter(field => CAREER_PATH_VALIDATION.isV2Valid(userProfile[field]));
-    const totalValid = validAllCriteria.length;
-    
-    // v2.0 validation rules
-    const requiresFallback = careerPathCriteriaComplete < 8; // Less than 50% of 16 criteria
-    const isValid = careerPathCriteriaComplete >= 4; // Minimum 25% of criteria needed
-    
-    // Tier analysis
-    const tierAnalysis = {
-      tier1CoreDrivers: CAREER_PATH_VALIDATION.validateTier(userProfile, tier1CoreDrivers),
-      tier2StrongMotivators: CAREER_PATH_VALIDATION.validateTier(userProfile, tier2StrongMotivators),
-      tier3SupportingEvidence: CAREER_PATH_VALIDATION.validateTier(userProfile, tier3SupportingEvidence),
-      tier4BackgroundContext: CAREER_PATH_VALIDATION.validateTier(userProfile, tier4BackgroundContext)
-    };
-    
-    return {
-      isValid,
-      requiresFallback,
-      careerPathCriteriaComplete,
-      totalCriteriaComplete: totalValid,
-      dataCompleteness: Math.round((totalValid / allCriteria.length) * 100),
-      careerPathCompleteness: Math.round((careerPathCriteriaComplete / careerPathCriteria.length) * 100),
-      validCareerPathCriteria,
-      validAllCriteria,
-      tierAnalysis,
-      systemVersion: '2.0'
-    };
-  },
-
-  // Validate specific tier
-  validateTier: (userProfile, tierFields) => {
-    const validFields = tierFields.filter(field => CAREER_PATH_VALIDATION.isV2Valid(userProfile[field]));
-    return {
-      validCount: validFields.length,
-      totalCount: tierFields.length,
-      completeness: Math.round((validFields.length / tierFields.length) * 100),
-      validFields,
-      missingFields: tierFields.filter(field => !CAREER_PATH_VALIDATION.isV2Valid(userProfile[field]))
-    };
-  },
-
-  // Enhanced validation function for v2.0 system
-  isV2Valid: (value) => {
-    if (!value) return false;
-    
-    if (typeof value === 'string') {
-      const invalid = ['', 'none', 'not sure', 'unclear', 'n/a', 'unknown', 'unsure', 'not specified'];
-      const trimmed = value.toLowerCase().trim();
-      return !invalid.includes(trimmed) && trimmed.length > 2;
-    }
-    
-    if (Array.isArray(value)) {
-      return value.length > 0 && 
-             !value.some(v => ['not sure', 'unclear', 'unknown', 'not specified'].includes(v?.toLowerCase?.()));
-    }
-    
-    return true;
-  },
-
-  // Calculate 4-tier weighted scoring
-  calculate4TierScore: (userProfile) => {
-    const weights = {
-      // Tier 1: Core Drivers (45%)
-      futureGoal: 0.15,
-      techInterests: 0.12,
-      leverageDomainExpertise: 0.10,
-      careerPathsInterest: 0.08,
-      
-      // Tier 2: Strong Motivators (25%)
-      industryPreference: 0.10,
-      techMotivation: 0.08,
-      techPassion: 0.07,
-      
-      // Tier 3: Supporting Evidence (20%)
-      transferableSkills: 0.08,
-      jobTechnologies: 0.04,
-      jobResponsibilities: 0.04,
-      jobProjects: 0.04,
-      
-      // Tier 4: Background Context (10%)
-      continueCurrent: 0.03,
-      studyField: 0.03,
-      certifications: 0.02,
-      internships: 0.01,
-      publications: 0.01
-    };
-    
-    let tierScores = {
-      coreDriving: 0,
-      strongMotivators: 0,
-      supportingEvidence: 0,
-      backgroundContext: 0
-    };
-    
-    let criteriaCount = 0;
-    let usedCriteria = [];
-    let missingCriteria = [];
-    
-    // Calculate tier scores
-    Object.entries(weights).forEach(([field, weight]) => {
-      if (CAREER_PATH_VALIDATION.isV2Valid(userProfile[field])) {
-        const fieldScore = weight * CAREER_PATH_VALIDATION.getFieldScore(field, userProfile[field]);
-        
-        // Assign to appropriate tier
-        if (['futureGoal', 'techInterests', 'leverageDomainExpertise', 'careerPathsInterest'].includes(field)) {
-          tierScores.coreDriving += fieldScore;
-        } else if (['industryPreference', 'techMotivation', 'techPassion'].includes(field)) {
-          tierScores.strongMotivators += fieldScore;
-        } else if (['transferableSkills', 'jobTechnologies', 'jobResponsibilities', 'jobProjects'].includes(field)) {
-          tierScores.supportingEvidence += fieldScore;
-        } else if (['continueCurrent', 'studyField', 'certifications', 'internships', 'publications'].includes(field)) {
-          tierScores.backgroundContext += fieldScore;
-        }
-        
-        criteriaCount++;
-        usedCriteria.push(field);
-      } else {
-        missingCriteria.push(field);
-      }
-    });
-    
-    const totalWeightedScore = tierScores.coreDriving + tierScores.strongMotivators + 
-                              tierScores.supportingEvidence + tierScores.backgroundContext;
-    
-    const fallbackApplied = criteriaCount < 8; // Less than 50% of 16 criteria
-    
-    return {
-      tierScores,
-      totalWeightedScore,
-      criteriaCount,
-      usedCriteria,
-      missingCriteria,
-      fallbackApplied
-    };
-  },
-
-  // Get scoring value for specific field
-  getFieldScore: (field, value) => {
-    // Simplified scoring - in practice this would be more sophisticated
-    switch (field) {
-      case 'futureGoal':
-        return value.toLowerCase().includes('ai') || value.toLowerCase().includes('data') || 
-               value.toLowerCase().includes('software') ? 0.9 : 0.7;
-      
-      case 'techInterests':
-        const hotTech = ['machine learning', 'ai', 'cloud', 'data science', 'cybersecurity'];
-        const hasHotTech = hotTech.some(tech => value.toLowerCase().includes(tech));
-        return hasHotTech ? 0.9 : 0.7;
-      
-      case 'leverageDomainExpertise':
-        return value.toLowerCase() === 'yes' ? 0.9 : value.toLowerCase() === 'maybe' ? 0.6 : 0.4;
-      
-      case 'industryPreference':
-        const highGrowthIndustries = ['technology', 'healthcare', 'finance'];
-        if (Array.isArray(value)) {
-          const hasHighGrowth = value.some(industry => 
-            highGrowthIndustries.some(hg => industry.toLowerCase().includes(hg))
-          );
-          return hasHighGrowth ? 0.9 : 0.6;
-        }
-        return 0.6;
-      
-      case 'transferableSkills':
-        const valuableSkills = ['analytical', 'problem', 'technical', 'communication', 'leadership'];
-        const skillMatches = valuableSkills.filter(skill => 
-          value.toLowerCase().includes(skill)
-        ).length;
-        return Math.min(0.5 + (skillMatches * 0.1), 0.9);
-      
-      default:
-        return 0.7; // Default score for valid fields
-    }
-  },
-
-  // Determine confidence level based on scoring
-  determineConfidence: (criteriaCount, totalWeightedScore) => {
-    const maxCriteria = 16;
-    const completeness = criteriaCount / maxCriteria;
-    const scoreQuality = Math.min(totalWeightedScore, 1);
-    
-    const confidenceScore = (completeness * 0.6) + (scoreQuality * 0.4);
-    const normalizedScore = Math.round(confidenceScore * 100);
-    
-    let level;
-    if (confidenceScore >= 0.75) level = 'high';
-    else if (confidenceScore >= 0.5) level = 'medium';
-    else level = 'low';
-    
-    return { level, score: normalizedScore };
-  }
-};
-
-// v2.0 API response structure for Sequential Dependency Engine
-const V2_RESPONSE_STRUCTURE = {
-  careerPath: {
-    id: 'string',
-    type: 'career-path',
-    title: 'string (AI-generated)',
-    description: 'string (AI-generated)',
-    reasoning: 'string (AI-generated)',
-    confidence: 'high|medium|low',
-    confidenceScore: 'number (0-100)',
-    recommendedPaths: ['string (AI-generated)'],
-    industryFocus: ['string (AI-selected)'],
-    marketDemand: 'high|medium|low',
-    metadata: {
-      criteriaUsed: ['string'],
-      missingCriteria: ['string'],
-      tierScores: {
-        coreDriving: 'number (0-1)',
-        strongMotivators: 'number (0-1)',
-        supportingEvidence: 'number (0-1)',
-        backgroundContext: 'number (0-1)'
-      },
-      totalWeightedScore: 'number (0-1)',
-      fallbackApplied: 'boolean'
-    }
-  },
-  skillGap: {
-    id: 'string',
-    type: 'skill-gap',
-    careerPathId: 'string (reference)',
-    currentSkillLevel: 'string (AI-assessed)',
-    requiredSkills: ['string (AI-generated)'],
-    skillGaps: [{
-      skill: 'string (AI-generated)',
-      currentLevel: 'none|basic|intermediate|advanced',
-      requiredLevel: 'basic|intermediate|advanced|expert',
-      priority: 'high|medium|low',
-      estimatedLearningTime: 'string (AI-calculated)'
-    }],
-    strengthsToLeverage: ['string (AI-identified)'],
-    recommendedCertifications: ['string (AI-recommended)'],
-    confidence: 'high|medium|low',
-    confidenceScore: 'number (0-100)',
-    metadata: {
-      basedOnCareerPath: 'boolean',
-      criteriaUsed: ['string'],
-      missingCriteria: ['string']
-    }
-  },
-  learningRoadmap: {
-    id: 'string',
-    type: 'learning-roadmap',
-    careerPathId: 'string (reference)',
-    skillGapId: 'string (reference)',
-    phases: [{
-      phase: 'number',
-      title: 'string (AI-generated)',
-      duration: 'string (AI-calculated)',
-      skills: ['string (AI-curated)'],
-      resources: ['string (AI-recommended)'],
-      milestones: ['string (AI-generated)']
-    }],
-    totalTimelineEstimate: 'string (AI-calculated)',
-    budgetEstimate: 'string (AI-estimated)',
-    flexibilityOptions: ['string (AI-generated)'],
-    supportRecommendations: ['string (AI-curated)'],
-    confidence: 'high|medium|low',
-    confidenceScore: 'number (0-100)',
-    metadata: {
-      basedOnCareerPath: 'boolean',
-      basedOnSkillGap: 'boolean',
-      criteriaUsed: ['string'],
-      missingCriteria: ['string']
-    }
-  },
-  overallConfidence: 'number (0-100)',
-  dataCompleteness: 'number (0-100)',
-  careerPathCriteriaComplete: 'number (0-16)',
-  processedAt: 'ISO string'
-};
-
-// Legacy support for backward compatibility  
-const TECHNICAL_SPEC_VALIDATION = {
-  validateMinimumData: (formData) => {
-    console.log("⚠️ Using legacy validation - consider upgrading to v2.0");
-    
-    const constantVariables = [
-      formData.yearsExperience,
-      formData.studyField, 
-      formData.interests,
-      formData.transferableSkills
-    ];
-    
-    const validConstants = constantVariables.filter(variable => 
-      variable && 
-      variable !== 'Not specified' && 
-      variable !== 'none' && 
-      variable !== 'not sure'
-    ).length;
-    
-    return {
-      isValid: validConstants >= 1,
-      constantsPresent: validConstants,
-      requiresFallback: validConstants < 2,
-      dataQuality: validConstants / 4,
-      legacy: true
-    };
-  }
-};
-
-// Export configuration for v2.0 system
-export { 
-  CLAUDE_API_CONFIG, 
-  CLAUDE_PROMPTS, 
-  CAREER_PATH_VALIDATION,
-  V2_RESPONSE_STRUCTURE,
-  
-  // Legacy exports for backward compatibility
-  TECHNICAL_SPEC_VALIDATION
-};
+export { CLAUDE_API_CONFIG, CLAUDE_PROMPTS };

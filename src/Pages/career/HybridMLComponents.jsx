@@ -1,5 +1,5 @@
 // ============================================================================
-// HybridMLComponents.jsx - ENHANCED VERSION (FIXED HOOKS)
+// HybridMLComponents.jsx - CLEAN VERSION (ALL HOOKS FIXED)
 // Complete UI Components for Hybrid ML + Rule-Based Recommendations
 // ============================================================================
 
@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 // ============================================================================
-// ENHANCED CAREER PATH CARD WITH IMPROVED ERROR HANDLING
+// ENHANCED CAREER PATH CARD WITH FIXED HOOKS
 // ============================================================================
 
 export const MLEnhancedCareerCard = ({ 
@@ -19,24 +19,14 @@ export const MLEnhancedCareerCard = ({
   onLearnMore,
   isLoading = false 
 }) => {
+  // ALL HOOKS MUST BE CALLED FIRST - NO EXCEPTIONS
   const [isExpanded, setIsExpanded] = useState(false);
   const [animatedScore, setAnimatedScore] = useState(0);
   
-  // Move all hooks to the top before any conditional returns
+  // Calculate values BEFORE any conditions
   const finalScore = path?.hybridScore || path?.match || 0;
   const animatedValue = animatedValues?.[`path-${index}`] || animatedScore;
   
-  // Animate score on mount
-  useEffect(() => {
-    if (path && path.title) {
-      const timer = setTimeout(() => {
-        setAnimatedScore(finalScore);
-      }, index * 100); // Stagger animations
-      
-      return () => clearTimeout(timer);
-    }
-  }, [finalScore, index, path]);
-
   const colorClasses = [
     'from-purple-500 to-pink-500',
     'from-blue-500 to-cyan-500', 
@@ -57,7 +47,7 @@ export const MLEnhancedCareerCard = ({
     return badgeStyles[badgeColor] || badgeStyles.blue;
   };
   
-  // Memoized career explanations for better performance
+  // Memoized career explanations - MUST BE CALLED UNCONDITIONALLY
   const careerExplanations = useMemo(() => ({
     'Software Developer': 'Build and maintain software applications, websites, and systems using programming languages and frameworks.',
     'Data Scientist': 'Analyze complex data to extract insights, build predictive models, and drive data-driven decision making.',
@@ -100,7 +90,18 @@ export const MLEnhancedCareerCard = ({
     return careerExplanations[title] || 'Leverage technology to solve problems and create innovative solutions in the digital world.';
   };
 
-  // Error handling for missing path data
+  // useEffect - MUST BE CALLED UNCONDITIONALLY
+  useEffect(() => {
+    if (path && path.title && finalScore > 0) {
+      const timer = setTimeout(() => {
+        setAnimatedScore(finalScore);
+      }, index * 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [finalScore, index, path]);
+
+  // NOW we can do conditional rendering AFTER all hooks are called
   if (!path || !path.title) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -109,7 +110,6 @@ export const MLEnhancedCareerCard = ({
     );
   }
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="bg-white rounded-2xl p-6 shadow-lg animate-pulse">
@@ -351,10 +351,12 @@ MLEnhancedCareerCard.propTypes = {
 };
 
 // ============================================================================
-// ENHANCED ML INSIGHTS DASHBOARD WITH ERROR HANDLING
+// ENHANCED ML INSIGHTS DASHBOARD WITH FIXED HOOKS
 // ============================================================================
 
 export const MLInsightsDashboard = ({ mlInsights, userData, isLoading = false }) => {
+  // NO HOOKS IN THIS COMPONENT - SAFE TO PROCEED WITH CONDITIONS
+  
   if (isLoading) {
     return (
       <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 shadow-lg mb-8 animate-pulse">
@@ -513,7 +515,7 @@ MLInsightsDashboard.propTypes = {
 };
 
 // ============================================================================
-// ENHANCED HYBRID RECOMMENDATIONS DISPLAY WITH PERFORMANCE OPTIMIZATIONS
+// ENHANCED HYBRID RECOMMENDATIONS DISPLAY WITH ALL HOOKS FIXED
 // ============================================================================
 
 export const HybridRecommendationsDisplay = ({ 
@@ -524,15 +526,17 @@ export const HybridRecommendationsDisplay = ({
   onLearnMore,
   maxRecommendationsPerSection = 6
 }) => {
+  // ALL HOOKS MUST BE DECLARED FIRST
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('all');
   
-  // Move useMemo to the top before any conditional returns
+  // useMemo MUST be called unconditionally at the top
   const limitedAllRecommendations = useMemo(() => {
     if (!hybridResults?.allRecommendations) return [];
     return hybridResults.allRecommendations.slice(0, maxRecommendationsPerSection * 2);
   }, [hybridResults?.allRecommendations, maxRecommendationsPerSection]);
   
+  // NOW we can do conditional rendering
   if (isLoading) {
     return (
       <div className="space-y-12">

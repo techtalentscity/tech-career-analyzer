@@ -651,7 +651,7 @@ const Interviews = () => {
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-700 text-white p-6">
+      <div className="bg-gradient-to-r from-lime-500 to-green-600 text-white p-6">
         <div className="container mx-auto">
           <h1 className="text-3xl font-bold">Interview Preparation</h1>
           <p className="text-lg mt-2 opacity-90">
@@ -666,7 +666,7 @@ const Interviews = () => {
           <nav className="flex items-center justify-between py-4">
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center text-gray-600 hover:text-purple-600 transition"
+              className="flex items-center text-gray-600 hover:text-lime-600 transition"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -678,7 +678,7 @@ const Interviews = () => {
               <input
                 type="text"
                 placeholder="Search interview resources..."
-                className="w-64 py-2 px-4 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-64 py-2 px-4 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -701,7 +701,7 @@ const Interviews = () => {
                 onClick={() => setActiveTab(category.id)}
                 className={`px-4 py-2 rounded-lg font-medium transition ${
                   activeTab === category.id
-                    ? 'bg-purple-600 text-white'
+                    ? 'bg-lime-600 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -722,7 +722,7 @@ const Interviews = () => {
                   <div className="flex items-start justify-between">
                     <h3 className="text-lg font-bold text-gray-900 mb-2 flex-1">{resource.title}</h3>
                     <span className={`text-xs font-semibold py-1 px-2 rounded-full ${
-                      resource.popularity === 'Very High' ? 'bg-purple-100 text-purple-800' :
+                      resource.popularity === 'Very High' ? 'bg-lime-100 text-lime-800' :
                       resource.popularity === 'High' ? 'bg-blue-100 text-blue-800' :
                       resource.popularity === 'Medium' ? 'bg-green-100 text-green-800' :
                       'bg-gray-100 text-gray-800'
@@ -738,7 +738,7 @@ const Interviews = () => {
                       resource.type === 'Book' ? 'text-red-600' :
                       resource.type === 'Platform' ? 'text-blue-600' :
                       resource.type === 'Course' ? 'text-green-600' :
-                      'text-purple-600'
+                      'text-lime-600'
                     } font-medium`}>
                       {resource.type}
                     </span>
@@ -797,7 +797,7 @@ const Interviews = () => {
                     href={resource.link} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-purple-600 hover:text-purple-800 text-sm font-medium flex items-center"
+                    className="text-lime-600 hover:text-lime-800 text-sm font-medium flex items-center"
                   >
                     View Resource
                     <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -826,7 +826,7 @@ const Interviews = () => {
           
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-lg font-semibold mb-3 text-purple-700">For Technical Interviews</h3>
+              <h3 className="text-lg font-semibold mb-3 text-lime-700">For Technical Interviews</h3>
               <ul className="space-y-3">
                 <li className="flex items-start">
                   <svg className="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -862,7 +862,7 @@ const Interviews = () => {
             </div>
             
             <div>
-              <h3 className="text-lg font-semibold mb-3 text-purple-700">For Behavioral Interviews</h3>
+              <h3 className="text-lg font-semibold mb-3 text-lime-700">For Behavioral Interviews</h3>
               <ul className="space-y-3">
                 <li className="flex items-start">
                   <svg className="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -899,8 +899,8 @@ const Interviews = () => {
           </div>
           
           <div className="mt-8">
-            <h3 className="text-lg font-semibold mb-3 text-purple-700">General Interview Preparation</h3>
-            <div className="bg-purple-50 rounded-lg p-4">
+            <h3 className="text-lg font-semibold mb-3 text-lime-700">General Interview Preparation</h3>
+            <div className="bg-lime-50 rounded-lg p-4">
               <ol className="list-decimal pl-5 space-y-2">
                 <li><strong>Research the company</strong> - Understand the business, products, culture, and recent news</li>
                 <li><strong>Practice common questions</strong> - Both technical and behavioral, using mock interviews when possible</li>

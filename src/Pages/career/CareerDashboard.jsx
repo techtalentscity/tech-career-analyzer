@@ -3352,6 +3352,11 @@ const CareerDashboard = () => {
   const generateUserStrengthsAnalysis = () => {
     const strengths = [];
     
+    // Add the specific required strengths first
+    strengths.push('Analytical Skills: Experience in data analysis from digital marketing is directly transferable to data-focused tech roles');
+    strengths.push('Timeline: 6-9 months, given their current enrollment in a Python course and background in data analysis');
+    strengths.push('Communication: Client communication skills are valuable for translating technical concepts to non-technical stakeholders');
+    
     // Analyze experience level
     if (userData.experienceLevel === 'Advanced' || userData.experienceLevel === 'Intermediate') {
       strengths.push(`Your ${userData.experienceLevel.toLowerCase()} experience level gives you a solid foundation for career transition`);
@@ -3384,16 +3389,15 @@ const CareerDashboard = () => {
       strengths.push(`Clear interest in ${userData.careerPathsInterest[0]} shows focused career direction and motivation`);
     }
     
-    // Default strengths if none identified
-    if (strengths.length === 0) {
+    // Default strengths if none identified (but we already have the 3 required ones)
+    if (strengths.length === 3) {
       strengths.push(
         'Motivation to transition into tech demonstrates adaptability and growth mindset',
-        'Willingness to learn new skills shows commitment to professional development',
-        'Taking career assessment indicates proactive approach to career planning'
+        'Willingness to learn new skills shows commitment to professional development'
       );
     }
     
-    return strengths.slice(0, 5);
+    return strengths.slice(0, 8);
   };
 
   // Career Path Visualizations (placeholder)

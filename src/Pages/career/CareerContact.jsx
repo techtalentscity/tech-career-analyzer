@@ -111,7 +111,7 @@ const CareerContact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-lime-50 via-green-50 to-emerald-50 overflow-hidden flex flex-col">
       {/* Header */}
       <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-6 py-3">
@@ -129,9 +129,9 @@ const CareerContact = () => {
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Home</Link>
-              <Link to="/about" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">About</Link>
-              <Link to="/contact" className="text-indigo-600 font-medium transition-colors border-b-2 border-indigo-600">Contact</Link>
+              <Link to="/" className="text-gray-700 hover:text-lime-600 font-medium transition-colors">Home</Link>
+              <Link to="/about" className="text-gray-700 hover:text-lime-600 font-medium transition-colors">About</Link>
+              <Link to="/contact" className="text-lime-600 font-medium transition-colors border-b-2 border-lime-600">Contact</Link>
               
               {currentUser ? (
                 <div className="flex items-center space-x-4">
@@ -144,7 +144,7 @@ const CareerContact = () => {
                   {isAuthorized && (
                     <Link 
                       to="/career/dashboard" 
-                      className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg text-sm transition-colors"
+                      className="bg-lime-100 hover:bg-lime-200 text-lime-800 px-4 py-2 rounded-lg text-sm transition-colors"
                     >
                       Dashboard
                     </Link>
@@ -159,7 +159,7 @@ const CareerContact = () => {
               ) : (
                 <button 
                   onClick={() => navigate('/login')} 
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+                  className="bg-lime-600 hover:bg-lime-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
                 >
                   <span className="mr-2">G</span>
                   Login with Google
@@ -171,7 +171,7 @@ const CareerContact = () => {
             <div className="md:hidden">
               <button 
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
-                className="text-gray-700 hover:text-indigo-600 focus:outline-none"
+                className="text-gray-700 hover:text-lime-600 focus:outline-none"
               >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
@@ -184,9 +184,9 @@ const CareerContact = () => {
           {mobileMenuOpen && (
             <div className="md:hidden mt-3 pb-3 border-t border-gray-200">
               <div className="flex flex-col space-y-3 mt-3">
-                <Link to="/" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Home</Link>
-                <Link to="/about" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">About</Link>
-                <Link to="/contact" className="text-indigo-600 font-medium transition-colors">Contact</Link>
+                <Link to="/" className="text-gray-700 hover:text-lime-600 font-medium transition-colors">Home</Link>
+                <Link to="/about" className="text-gray-700 hover:text-lime-600 font-medium transition-colors">About</Link>
+                <Link to="/contact" className="text-lime-600 font-medium transition-colors">Contact</Link>
                 
                 {currentUser ? (
                   <div className="flex flex-col space-y-3 pt-3 border-t border-gray-100">
@@ -199,7 +199,7 @@ const CareerContact = () => {
                     {isAuthorized && (
                       <Link 
                         to="/career/dashboard" 
-                        className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg text-sm transition-colors text-center"
+                        className="bg-lime-100 hover:bg-lime-200 text-lime-800 px-4 py-2 rounded-lg text-sm transition-colors text-center"
                       >
                         Dashboard
                       </Link>
@@ -214,7 +214,7 @@ const CareerContact = () => {
                 ) : (
                   <button 
                     onClick={() => navigate('/login')} 
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+                    className="bg-lime-600 hover:bg-lime-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
                   >
                     <span className="mr-2">G</span>
                     Login with Google
@@ -232,24 +232,24 @@ const CareerContact = () => {
           {/* Page Title */}
           <div className="mb-12 text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Contact Us</h1>
-            <div className="h-1 w-24 bg-gradient-to-r from-indigo-500 to-purple-600 mx-auto rounded-full"></div>
+            <div className="h-1 w-24 bg-gradient-to-r from-lime-500 to-green-600 mx-auto rounded-full"></div>
           </div>
 
           {/* Contact Information Section */}
           <section className="mb-16">
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 md:p-10 text-white">
+              <div className="bg-gradient-to-r from-lime-500 to-green-600 p-6 md:p-10 text-white">
                 <h2 className="text-3xl font-bold mb-4">Need immediate assistance?</h2>
-                <p className="text-lg text-indigo-100 max-w-3xl">
+                <p className="text-lg text-lime-100 max-w-3xl">
                   For urgent issues, you can reach our support team at:
                 </p>
               </div>
 
               <div className="p-6 md:p-10">
                 <div className="grid md:grid-cols-2 gap-8">
-                  <div className="bg-indigo-50 p-6 rounded-xl">
+                  <div className="bg-lime-50 p-6 rounded-xl">
                     <div className="flex items-center mb-4">
-                      <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 text-2xl mr-4">
+                      <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center text-lime-600 text-2xl mr-4">
                         📧
                       </div>
                       <h3 className="text-xl font-bold">Email Support</h3>
@@ -259,7 +259,7 @@ const CareerContact = () => {
                     </p>
                     <a 
                       href="mailto:info.favoredonline@gmail.com" 
-                      className="text-indigo-600 font-medium text-lg hover:text-indigo-800 transition-colors"
+                      className="text-lime-600 font-medium text-lg hover:text-lime-800 transition-colors"
                     >
                       info.favoredonline@gmail.com
                     </a>
@@ -268,9 +268,9 @@ const CareerContact = () => {
                     </p>
                   </div>
 
-                  <div className="bg-purple-50 p-6 rounded-xl">
+                  <div className="bg-green-50 p-6 rounded-xl">
                     <div className="flex items-center mb-4">
-                      <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 text-2xl mr-4">
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-2xl mr-4">
                         ⏱️
                       </div>
                       <h3 className="text-xl font-bold">Office Hours</h3>
@@ -280,15 +280,15 @@ const CareerContact = () => {
                     </p>
                     <ul className="space-y-2 text-gray-700">
                       <li className="flex items-start">
-                        <span className="text-purple-500 mr-2">•</span>
+                        <span className="text-green-500 mr-2">•</span>
                         <span><span className="font-medium">Monday - Friday:</span> 9:00 AM - 5:00 PM</span>
                       </li>
                       <li className="flex items-start">
-                        <span className="text-purple-500 mr-2">•</span>
+                        <span className="text-green-500 mr-2">•</span>
                         <span><span className="font-medium">Saturday:</span> 10:00 AM - 2:00 PM</span>
                       </li>
                       <li className="flex items-start">
-                        <span className="text-purple-500 mr-2">•</span>
+                        <span className="text-green-500 mr-2">•</span>
                         <span><span className="font-medium">Sunday:</span> Closed</span>
                       </li>
                     </ul>
@@ -319,7 +319,7 @@ const CareerContact = () => {
                         id="firstName"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500"
                         placeholder="Your first name"
                         required
                       />
@@ -332,7 +332,7 @@ const CareerContact = () => {
                         id="lastName"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500"
                         placeholder="Your last name"
                         required
                       />
@@ -345,7 +345,7 @@ const CareerContact = () => {
                         id="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500"
                         placeholder="Your email address"
                         required
                       />
@@ -358,7 +358,7 @@ const CareerContact = () => {
                         id="contactNo"
                         value={contactNo}
                         onChange={(e) => setContactNo(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500"
                         placeholder="Your contact number (optional)"
                       />
                     </div>
@@ -371,7 +371,7 @@ const CareerContact = () => {
                         id="message"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
-                        className="w-full h-[calc(100%-40px)] min-h-[150px] px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full h-[calc(100%-40px)] min-h-[150px] px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500"
                         placeholder="How can we help you?"
                         required
                       ></textarea>
@@ -382,7 +382,7 @@ const CareerContact = () => {
                     <button
                       type="submit"
                       disabled={formStatus.isSubmitting}
-                      className={`bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-lg ${formStatus.isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                      className={`bg-gradient-to-r from-lime-500 to-green-600 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:from-lime-600 hover:to-green-700 transition-all duration-300 shadow-lg ${formStatus.isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
                       {formStatus.isSubmitting ? 'Sending...' : 'Send Message'}
                     </button>

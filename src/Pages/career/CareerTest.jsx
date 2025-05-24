@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import FormSection from '../../components/FormSection';
@@ -6,6 +6,16 @@ import claudeApiService from '../../services/claudeApiService';
 import storageService from '../../services/storageService';
 import googleFormService from '../../services/googleFormService';
 import { toast } from 'react-toastify';
+
+// Move EnhancedFormSection outside the main component to prevent re-creation
+const EnhancedFormSection = React.memo(({ title, children }) => (
+  <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
+    <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b border-gray-200">
+      {title}
+    </h2>
+    {children}
+  </div>
+));
 
 const CareerTest = () => {
   const navigate = useNavigate();
@@ -69,7 +79,7 @@ const CareerTest = () => {
   const [careerAnalysis, setCareerAnalysis] = useState(null);
 
   // Helper function to show a user-friendly message for API errors
-  const getErrorMessage = (error) => {
+  const getErrorMessage = useCallback((error) => {
     if (!error) return "An unknown error occurred";
     
     // Check if it's an overload error (529)
@@ -99,7 +109,7 @@ const CareerTest = () => {
     
     // Return the actual error message as fallback
     return error.message;
-  };
+  }, []);
 
   useEffect(() => {
     // Check for messages passed via location state (e.g., from results page)
@@ -108,16 +118,16 @@ const CareerTest = () => {
     }
   }, [location]);
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData(prevState => ({
       ...prevState,
       [name]: value
     }));
-  };
+  }, []);
 
-  // Handler for checkboxes
-  const handleCheckboxChange = (fieldName, value) => {
+  // Handler for checkboxes - using useCallback to prevent re-creation
+  const handleCheckboxChange = useCallback((fieldName, value) => {
     setFormData(prevState => {
       // If value is already in array, remove it (unchecked)
       // Otherwise, add it (checked)
@@ -130,11 +140,11 @@ const CareerTest = () => {
         [fieldName]: updatedArray
       };
     });
-  };
+  }, []);
 
-  const toggleAiAssistant = () => {
+  const toggleAiAssistant = useCallback(() => {
     setShowAiAssistant(!showAiAssistant);
-  };
+  }, [showAiAssistant]);
 
   const handleAiFillForm = async () => {
     try {
@@ -472,8 +482,8 @@ const CareerTest = () => {
     }
   };
 
-  // Helper function to render a checkbox group
-  const renderCheckboxGroup = (fieldName, options, required = false) => {
+  // Helper function to render a checkbox group - memoized to prevent re-creation
+  const renderCheckboxGroup = useCallback((fieldName, options, required = false) => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {options.map(option => (
@@ -498,7 +508,48 @@ const CareerTest = () => {
         ))}
       </div>
     );
-  };
+  }, [formData, handleCheckboxChange]);
+
+  // Memoize options arrays to prevent re-creation on every render
+  const toolsOptions = useMemo(() => [
+    { value: 'VS Code', label: 'VS Code' },
+    { value: 'GitHub', label: 'GitHub' },
+    { value: 'JavaScript', label: 'JavaScript' },
+    { value: 'Python', label: 'Python' },
+    { value: 'React', label: 'React' },
+    { value: 'Node.js', label: 'Node.js' },
+    { value: 'SQL', label: 'SQL' },
+    { value: 'AWS', label: 'AWS' },
+    { value: 'Docker', label: 'Docker' },
+    { value: 'None', label: 'None' }
+  ], []);
+
+  const careerPathsOptions = useMemo(() => [
+    { value: 'Software Development', label: 'Software Development' },
+    { value: 'Data Analysis/Science', label: 'Data Analysis/Science' },
+    { value: 'UX/UI Design', label: 'UX/UI Design' },
+    { value: 'Product Management', label: 'Product Management' },
+    { value: 'Cybersecurity', label: 'Cybersecurity' },
+    { value: 'Cloud Engineering', label: 'Cloud Engineering' },
+    { value: 'DevOps', label: 'DevOps' },
+    { value: 'AI/Machine Learning', label: 'AI/Machine Learning' },
+    { value: 'Technical Writing', label: 'Technical Writing' },
+    { value: 'Quality Assurance', label: 'Quality Assurance' },
+    { value: 'Technical Support', label: 'Technical Support' },
+    { value: 'Not Sure Yet', label: 'Not Sure Yet' }
+  ], []);
+
+  const industryOptions = useMemo(() => [
+    { value: 'Healthcare/Medical', label: 'Healthcare/Medical' },
+    { value: 'Finance/Fintech', label: 'Finance/Fintech' },
+    { value: 'Education', label: 'Education' },
+    { value: 'E-commerce', label: 'E-commerce' },
+    { value: 'Entertainment/Media', label: 'Entertainment/Media' },
+    { value: 'Government', label: 'Government' },
+    { value: 'Same as current industry', label: 'Same as current industry' },
+    { value: 'No preference', label: 'No preference' },
+    { value: 'Other', label: 'Other' }
+  ], []);
 
   // Beautiful Enhanced Loading Spinner
   if (loading || aiAnalyzing) {
@@ -513,57 +564,6 @@ const CareerTest = () => {
       </div>
     );
   }
-
-  // Define options for checkbox groups
-  const toolsOptions = [
-    { value: 'VS Code', label: 'VS Code' },
-    { value: 'GitHub', label: 'GitHub' },
-    { value: 'JavaScript', label: 'JavaScript' },
-    { value: 'Python', label: 'Python' },
-    { value: 'React', label: 'React' },
-    { value: 'Node.js', label: 'Node.js' },
-    { value: 'SQL', label: 'SQL' },
-    { value: 'AWS', label: 'AWS' },
-    { value: 'Docker', label: 'Docker' },
-    { value: 'None', label: 'None' }
-  ];
-
-  const careerPathsOptions = [
-    { value: 'Software Development', label: 'Software Development' },
-    { value: 'Data Analysis/Science', label: 'Data Analysis/Science' },
-    { value: 'UX/UI Design', label: 'UX/UI Design' },
-    { value: 'Product Management', label: 'Product Management' },
-    { value: 'Cybersecurity', label: 'Cybersecurity' },
-    { value: 'Cloud Engineering', label: 'Cloud Engineering' },
-    { value: 'DevOps', label: 'DevOps' },
-    { value: 'AI/Machine Learning', label: 'AI/Machine Learning' },
-    { value: 'Technical Writing', label: 'Technical Writing' },
-    { value: 'Quality Assurance', label: 'Quality Assurance' },
-    { value: 'Technical Support', label: 'Technical Support' },
-    { value: 'Not Sure Yet', label: 'Not Sure Yet' }
-  ];
-
-  const industryOptions = [
-    { value: 'Healthcare/Medical', label: 'Healthcare/Medical' },
-    { value: 'Finance/Fintech', label: 'Finance/Fintech' },
-    { value: 'Education', label: 'Education' },
-    { value: 'E-commerce', label: 'E-commerce' },
-    { value: 'Entertainment/Media', label: 'Entertainment/Media' },
-    { value: 'Government', label: 'Government' },
-    { value: 'Same as current industry', label: 'Same as current industry' },
-    { value: 'No preference', label: 'No preference' },
-    { value: 'Other', label: 'Other' }
-  ];
-
-  // Enhanced FormSection Component
-  const EnhancedFormSection = ({ title, children }) => (
-    <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b border-gray-200">
-        {title}
-      </h2>
-      {children}
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">

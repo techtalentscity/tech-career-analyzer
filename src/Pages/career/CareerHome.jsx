@@ -7,137 +7,152 @@ import { useAuth } from '../../context/AuthContext';
 // Constants
 const FEATURES = [
   {
-    title: "Career Path Recommendations",
-    description: "Get matched with ideal tech careers based on your profile, with match percentages and timeline estimates",
-    color: "from-lime-500 to-green-600"
+    title: "AI Career Recommendations",
+    description: "Get personalized career paths with match percentages based on Claude AI analysis of your complete profile",
+    color: "from-lime-500 to-green-600",
+    icon: "🤖"
   },
   {
-    title: "Strengths Analysis",
-    description: "Detailed breakdown of your transferable skills and how they apply to tech roles",
-    color: "from-green-500 to-emerald-500"
+    title: "Personalized Roadmaps",
+    description: "AI-generated phase-by-phase career transition plans with specific timelines and milestones",
+    color: "from-green-500 to-emerald-500",
+    icon: "🗺️"
   },
   {
-    title: "Skills Gap Analysis",
-    description: "Identify exact technical skills you need to develop for your target career path",
-    color: "from-yellow-400 to-lime-500"
+    title: "Market Intelligence",
+    description: "Real-time salary data, job market trends, and demand analysis powered by AI for your target careers",
+    color: "from-blue-500 to-purple-600",
+    icon: "📊"
   },
   {
-    title: "Learning Roadmap",
-    description: "Month-by-month plan with specific courses and projects to build your skills",
-    color: "from-lime-400 to-green-500"
-  },
-  {
-    title: "Transition Strategy",
-    description: "Practical steps to move from your current role to your target tech position",
-    color: "from-green-600 to-lime-600"
-  },
-  {
-    title: "Export Results",
-    description: "Download your complete career analysis as a PDF for future reference",
-    color: "from-gray-600 to-gray-800"
-  }
-];
-
-// New section to showcase platform features
-const PLATFORM_FEATURES = [
-  {
-    title: "Personalized Dashboard",
-    description: "Track your tech career journey with a comprehensive overview of your profile, skills, and recommended next steps",
-    color: "bg-lime-100 text-lime-700",
-    image: "/images/dashboard-preview.png"
-  },
-  {
-    title: "Curated Learning Resources",
-    description: "Access top-rated courses and certifications matched to your specific career path and skill gaps",
-    color: "bg-green-100 text-green-700",
-    image: "/images/learning-preview.png"
+    title: "Learning Plans",
+    description: "Comprehensive learning paths with specific courses, certifications, and practice projects",
+    color: "from-purple-500 to-blue-600",
+    icon: "📚"
   },
   {
     title: "Interview Preparation",
-    description: "Prepare for technical, behavioral, and coding interviews with our comprehensive resources and practice tools",
+    description: "Career-specific interview questions with sample answers, including technical and behavioral questions",
+    color: "from-emerald-500 to-green-600",
+    icon: "💬"
+  },
+  {
+    title: "Downloadable Reports",
+    description: "Professional PDF downloads of all AI-generated content for offline reference and sharing",
+    color: "from-gray-600 to-gray-800",
+    icon: "📄"
+  }
+];
+
+// Updated platform features to match actual sections
+const PLATFORM_FEATURES = [
+  {
+    title: "AI-Powered Dashboard",
+    description: "Comprehensive overview with AI-generated career recommendations, personalized roadmaps, and market insights",
+    color: "bg-lime-100 text-lime-700",
+    features: ["Career match percentages", "Timeline tracking", "Progress monitoring", "AI insights"]
+  },
+  {
+    title: "Learning Resources Hub",
+    description: "Curated courses, certifications, and practice projects specifically matched to your career transition goals",
+    color: "bg-green-100 text-green-700",
+    features: ["Skill-specific courses", "Certification paths", "Practice projects", "Community resources"]
+  },
+  {
+    title: "Interview Mastery Suite",
+    description: "Complete interview preparation with technical, behavioral, and career-transition specific questions",
     color: "bg-emerald-100 text-emerald-700",
-    image: "/images/interviews-preview.png"
+    features: ["Technical questions", "Behavioral prep", "Sample answers", "Common mistakes guide"]
   },
   {
     title: "Career Development Guide",
-    description: "Navigate your tech career with expert advice on learning to code, becoming an expert, and strategic career planning",
+    description: "Expert guidance on learning to code, skill development, networking strategies, and career planning",
     color: "bg-yellow-100 text-yellow-700",
-    image: "/images/guide-preview.png"
+    features: ["Learning strategies", "Networking tips", "Portfolio guidance", "Mentorship resources"]
   }
 ];
 
-// Top courses showcase section
-const TOP_COURSES = [
-  {
-    title: "The Web Developer Bootcamp",
-    provider: "Udemy",
-    instructor: "Colt Steele",
-    rating: "4.7",
-    image: "/images/web-dev-bootcamp.jpg"
-  },
-  {
-    title: "The Complete JavaScript Course",
-    provider: "Udemy",
-    instructor: "Jonas Schmedtmann",
-    rating: "4.8",
-    image: "/images/js-course.jpg"
-  },
-  {
-    title: "CS50: Introduction to Computer Science",
-    provider: "Harvard (edX)",
-    instructor: "David J. Malan",
-    rating: "4.9",
-    image: "/images/cs50-course.jpg"
-  }
-];
-
+// Updated process steps to reflect AI-powered analysis
 const PROCESS_STEPS = [
   {
     step: "1",
     title: "Complete Assessment",
-    description: "Answer questions about your education, experience, skills, and career goals",
-    animationDelay: "delay-0"
+    description: "Comprehensive questionnaire covering your education, experience, skills, and career aspirations",
+    animationDelay: "delay-0",
+    icon: "📝"
   },
   {
     step: "2",
     title: "AI Analysis",
-    description: "Our AI analyzes your profile to identify the best career matches and learning paths",
-    animationDelay: "delay-100"
+    description: "Claude AI analyzes 50+ factors from your profile to identify optimal career matches and transition paths",
+    animationDelay: "delay-100",
+    icon: "🤖"
   },
   {
     step: "3",
-    title: "Get Your Results",
-    description: "Receive comprehensive career recommendations with actionable next steps",
-    animationDelay: "delay-200"
+    title: "Personalized Results",
+    description: "Receive detailed recommendations with match scores, learning plans, and market insights",
+    animationDelay: "delay-200",
+    icon: "📊"
   },
   {
     step: "4",
-    title: "Access Platform Tools",
-    description: "Explore learning resources, interview prep, and our comprehensive career guide",
-    animationDelay: "delay-300"
+    title: "Full Platform Access",
+    description: "Access comprehensive resources including learning materials, interview prep, and career guidance",
+    animationDelay: "delay-300",
+    icon: "🚀"
   }
 ];
 
 const FAQs = [
   {
+    question: "How does the AI analysis work?",
+    answer: "Our system uses Claude AI to analyze your complete profile including education, experience, skills, and goals. It compares this against thousands of successful career transitions to provide personalized recommendations with match scores."
+  },
+  {
+    question: "What makes this different from other career assessments?",
+    answer: "Unlike generic tests, our AI creates fully personalized content including specific learning plans, interview questions for your target role, market salary data, and downloadable PDF reports. You get actionable next steps, not just general advice."
+  },
+  {
     question: "How long does the assessment take?",
-    answer: "The assessment typically takes 15-20 minutes to complete. We recommend setting aside uninterrupted time to thoughtfully answer each question."
+    answer: "The initial assessment takes 15-20 minutes, but the AI continues generating personalized content throughout your 30-day access period, including roadmaps, learning plans, and interview preparation materials."
   },
   {
     question: "What if I don't have any tech experience?",
-    answer: "That's perfectly fine! Our AI is designed to identify transferable skills from any background and recommend career paths with realistic transition plans."
+    answer: "Perfect! Our AI specializes in identifying transferable skills from any background. Many successful users started with zero tech experience and used our personalized transition plans to break into the industry."
   },
   {
-    question: "How accurate are the recommendations?",
-    answer: "Our recommendations are based on analysis of thousands of successful career transitions. While individual results vary, most users find our suggestions highly relevant."
+    question: "Can I download my results?",
+    answer: "Yes! All AI-generated content can be downloaded as professional PDF reports, including your career recommendations, learning plan, interview questions, and market insights."
   },
   {
-    question: "Can I retake the assessment?",
-    answer: "Yes, you can retake the assessment anytime to update your profile or explore different career options."
+    question: "What ongoing support do I get?",
+    answer: "During your 30-day access, you can generate new AI content, access our comprehensive learning resources, interview preparation tools, career development guides, and mentorship resources."
+  }
+];
+
+// Updated testimonials to reflect AI-powered features
+const TESTIMONIALS = [
+  {
+    name: "Sarah M.",
+    role: "Marketing → Data Analyst",
+    initial: "SM",
+    color: "lime",
+    quote: "The AI-generated learning plan was incredible. It identified exactly which Python courses I needed and even suggested specific projects to build my portfolio. I landed my first data analyst role in 8 months!"
   },
   {
-    question: "What resources are available after I get my results?",
-    answer: "You'll gain access to our full platform which includes a comprehensive dashboard, curated learning resources, interview preparation tools, and a detailed career development guide."
+    name: "Michael R.",
+    role: "Teacher → Software Developer",
+    initial: "MR",
+    color: "green",
+    quote: "The interview preparation was game-changing. The AI generated technical questions specific to frontend development roles, complete with sample answers. I felt confident in every interview."
+  },
+  {
+    name: "Jennifer L.",
+    role: "Finance → Product Manager",
+    initial: "JL",
+    color: "emerald",
+    quote: "What impressed me most was the market insights. The AI showed me exactly which PM skills were in highest demand and the salary ranges I could expect. The roadmap was spot-on."
   }
 ];
 
@@ -305,32 +320,33 @@ const CareerHome = () => {
             <div className="max-w-4xl">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-2 w-2 bg-white rounded-full animate-pulse"></div>
-                <span className="text-lime-100 uppercase tracking-wider text-sm font-medium">AI-Powered Career Intelligence</span>
+                <span className="text-lime-100 uppercase tracking-wider text-sm font-medium">🤖 Claude AI-Powered Career Intelligence</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                Discover Your Tech
+                Discover Your Perfect
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-lime-200">
-                  Career Path
+                  Tech Career Path
                 </span>
               </h1>
-              <p className="text-lg md:text-xl mb-10 text-lime-100 max-w-2xl">
-                Get comprehensive AI-powered analysis of your career options with personalized recommendations, skills gap analysis, and learning roadmap.
+              <p className="text-lg md:text-xl mb-10 text-lime-100 max-w-3xl">
+                Get comprehensive AI analysis with personalized career recommendations, learning roadmaps, 
+                interview preparation, and downloadable reports - all powered by advanced AI technology.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={handleStartTest}
                   className="bg-white text-lime-600 px-8 md:px-12 py-4 md:py-5 rounded-full font-bold text-lg hover:bg-gradient-to-r hover:from-white hover:to-lime-50 transform hover:scale-105 transition-all duration-300 shadow-xl flex items-center justify-center group"
-                  aria-label="Start your career assessment"
+                  aria-label="Start your AI career assessment"
                 >
-                  {currentUser ? "Continue Your Assessment" : "Start Your Assessment"}
+                  {currentUser ? "Continue AI Assessment" : "Start AI Assessment"}
                   <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
                 </button>
                 <button
                   onClick={handleViewPlatformFeatures}
                   className="bg-transparent border-2 border-white text-white px-8 md:px-12 py-4 md:py-5 rounded-full font-bold text-lg hover:bg-white hover:text-lime-600 transform hover:scale-105 transition-all duration-300 shadow-xl"
-                  aria-label="Explore platform features"
+                  aria-label="Explore AI-powered features"
                 >
-                  Explore Platform Features
+                  Explore AI Features
                 </button>
               </div>
             </div>
@@ -341,29 +357,29 @@ const CareerHome = () => {
         <section className="mb-16 text-center">
           <div className="flex flex-wrap justify-center gap-8 md:gap-16">
             <div className="flex items-center space-x-2">
-              <span className="text-2xl">🔒</span>
-              <span className="text-gray-600">Privacy Protected</span>
+              <span className="text-2xl">🤖</span>
+              <span className="text-gray-600">AI-Powered Analysis</span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="text-2xl">⚡</span>
-              <span className="text-gray-600">Instant Results</span>
+              <span className="text-2xl">📄</span>
+              <span className="text-gray-600">PDF Downloads</span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="text-2xl">🎯</span>
-              <span className="text-gray-600">Science-Based</span>
+              <span className="text-2xl">💬</span>
+              <span className="text-gray-600">Interview Prep</span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="text-2xl">💯</span>
-              <span className="text-gray-600">Comprehensive Platform</span>
+              <span className="text-2xl">📚</span>
+              <span className="text-gray-600">Learning Resources</span>
             </div>
           </div>
         </section>
 
         {/* What's Included Section */}
-        <section className="mb-20" aria-label="Features">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800">What You Get</h2>
+        <section className="mb-20" aria-label="AI-powered features">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800">AI-Powered Career Analysis</h2>
           <p className="text-center text-gray-600 text-lg mb-12 max-w-3xl mx-auto">
-            Our comprehensive career assessment provides everything you need to make an informed career transition
+            Our Claude AI technology provides comprehensive career analysis with personalized recommendations and actionable insights
           </p>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
@@ -385,137 +401,178 @@ const CareerHome = () => {
         </section>
 
         {/* Sample Results Preview */}
-        <section ref={sampleResultsRef} className="mb-20" aria-label="Sample results">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">What Your Results Look Like</h2>
+        <section ref={sampleResultsRef} className="mb-20" aria-label="AI-generated sample results">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">AI-Generated Results Preview</h2>
           <div className="bg-white rounded-3xl shadow-xl p-6 md:p-8">
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h3 className="font-bold text-xl mb-4 text-lime-600">Career Matches</h3>
+                <h3 className="font-bold text-xl mb-4 text-lime-600 flex items-center">
+                  <span className="mr-2">🤖</span>AI Career Matches
+                </h3>
                 <div className="space-y-3">
                   {[
-                    { title: "Data Analyst", match: 85, color: "green" },
-                    { title: "AI Research Assistant", match: 70, color: "lime" },
-                    { title: "Technical Writer", match: 65, color: "yellow" }
+                    { title: "Data Analyst", match: 92, color: "green", salary: "$75k - $120k", timeline: "6-9 months" },
+                    { title: "Frontend Developer", match: 85, color: "lime", salary: "$80k - $130k", timeline: "8-12 months" },
+                    { title: "Product Manager", match: 78, color: "yellow", salary: "$90k - $150k", timeline: "10-14 months" }
                   ].map((career, index) => (
-                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                      <span>{career.title}</span>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-24 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className={`h-2 bg-${career.color}-500 rounded-full transition-all duration-1000`} 
-                            style={{ width: `${career.match}%` }}
-                          ></div>
+                    <div key={index} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="font-semibold">{career.title}</span>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-16 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className={`h-2 bg-${career.color}-500 rounded-full transition-all duration-1000`} 
+                              style={{ width: `${career.match}%` }}
+                            ></div>
+                          </div>
+                          <span className={`font-bold text-${career.color}-600`}>{career.match}%</span>
                         </div>
-                        <span className={`font-bold text-${career.color}-600`}>{career.match}%</span>
+                      </div>
+                      <div className="text-sm text-gray-600 grid grid-cols-2 gap-2">
+                        <span>💰 {career.salary}</span>
+                        <span>⏱️ {career.timeline}</span>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
               <div>
-                <h3 className="font-bold text-xl mb-4 text-lime-600">Your Strengths</h3>
-                <ul className="space-y-2">
+                <h3 className="font-bold text-xl mb-4 text-lime-600 flex items-center">
+                  <span className="mr-2">📋</span>AI Learning Plan
+                </h3>
+                <div className="space-y-3">
                   {[
-                    "Strong analytical skills",
-                    "Computer Science background",
-                    "Project management experience",
-                    "Excellent communication abilities",
-                    "Problem-solving mindset"
-                  ].map((strength, index) => (
-                    <li key={index} className="flex items-center group">
-                      <span className="text-green-500 mr-2 transform group-hover:scale-110 transition-transform">✓</span>
-                      <span className="group-hover:text-lime-600 transition-colors">{strength}</span>
-                    </li>
+                    { phase: "Phase 1: Foundation", duration: "Month 1-2", skills: "Python basics, SQL fundamentals" },
+                    { phase: "Phase 2: Core Skills", duration: "Month 3-4", skills: "Data analysis, Pandas, NumPy" },
+                    { phase: "Phase 3: Advanced", duration: "Month 5-6", skills: "Machine Learning, Visualization" },
+                    { phase: "Phase 4: Portfolio", duration: "Month 7-8", skills: "Real projects, GitHub portfolio" }
+                  ].map((phase, index) => (
+                    <div key={index} className="p-3 bg-gradient-to-r from-green-50 to-lime-50 rounded-lg border-l-4 border-green-500">
+                      <div className="font-semibold text-gray-800">{phase.phase}</div>
+                      <div className="text-sm text-green-600 font-medium">{phase.duration}</div>
+                      <div className="text-sm text-gray-600">{phase.skills}</div>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             </div>
-            <div className="mt-8 p-4 bg-lime-50 rounded-lg">
-              <p className="text-sm text-lime-700 font-medium">
-                <span className="font-bold">Next Step:</span> Complete the full assessment to get your personalized career roadmap
+            <div className="mt-8 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+              <p className="text-sm text-purple-700 font-medium flex items-center">
+                <span className="text-lg mr-2">🤖</span>
+                <span><strong>AI-Generated:</strong> Complete assessment to get your personalized career roadmap with downloadable PDF reports</span>
               </p>
             </div>
           </div>
         </section>
 
-        {/* Pricing Section */}
+        {/* Platform Features */}
+        <section ref={platformFeaturesRef} className="mb-20" aria-label="Platform features">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Complete Career Transition Platform</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            {PLATFORM_FEATURES.map((feature, index) => (
+              <div key={index} className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className={`inline-block px-4 py-2 rounded-full text-sm font-medium mb-4 ${feature.color}`}>
+                  AI-Powered
+                </div>
+                <h3 className="text-2xl font-bold mb-4 text-gray-800">{feature.title}</h3>
+                <p className="text-gray-600 mb-6">{feature.description}</p>
+                <ul className="space-y-2">
+                  {feature.features.map((item, idx) => (
+                    <li key={idx} className="flex items-center text-gray-700">
+                      <span className="text-green-500 mr-2">✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Pricing Section - Updated */}
         <section className="mb-20 text-center">
-          <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl p-8 md:p-12 max-w-3xl mx-auto relative overflow-hidden">
+          <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl p-8 md:p-12 max-w-4xl mx-auto relative overflow-hidden">
             <div className="absolute top-0 right-0 bg-gradient-to-r from-lime-400 to-green-500 text-white px-8 py-2 transform rotate-45 translate-x-10 translate-y-3">
-              Limited Time Offer
+              🤖 AI-Powered
             </div>
             
-            <h2 className="text-3xl font-bold mb-4 text-gray-800">Career Transition Analysis</h2>
-            <p className="text-gray-600 mb-8">Complete access to your personalized career roadmap for 30 days</p>
+            <h2 className="text-3xl font-bold mb-4 text-gray-800">Complete AI Career Analysis</h2>
+            <p className="text-gray-600 mb-8">Comprehensive AI-powered career transition platform with 30-day access</p>
             
             <div className="flex justify-center items-center mb-6">
-              <span className="text-gray-400 line-through text-2xl mr-4">$79</span>
+              <span className="text-gray-400 line-through text-2xl mr-4">$99</span>
               <span className="text-4xl font-bold text-lime-600">$60</span>
             </div>
             
-            <ul className="text-left max-w-md mx-auto mb-8 space-y-2">
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Complete career path recommendations</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Personalized skills gap analysis</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Custom learning roadmap</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Networking & interview preparation strategies</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Downloadable PDF report</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Full access to learning resources & guides</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Interview preparation tools & resources</span>
-              </li>
-            </ul>
-            
-            <div className="mb-6">
-              <div className="text-sm text-gray-500 mb-2">Special offer ends in:</div>
-              <div className="flex justify-center gap-3">
-                <div className="bg-gray-100 p-2 rounded-lg w-16">
-                  <div className="text-xl font-bold">13</div>
-                  <div className="text-xs text-gray-500">Days</div>
-                </div>
-                <div className="bg-gray-100 p-2 rounded-lg w-16">
-                  <div className="text-xl font-bold">07</div>
-                  <div className="text-xs text-gray-500">Hours</div>
-                </div>
-                <div className="bg-gray-100 p-2 rounded-lg w-16">
-                  <div className="text-xl font-bold">32</div>
-                  <div className="text-xs text-gray-500">Minutes</div>
-                </div>
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div>
+                <h4 className="font-bold text-lg mb-3 text-gray-800">🤖 AI-Generated Content</h4>
+                <ul className="text-left space-y-2">
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">✓</span>
+                    <span>Personalized career recommendations with match scores</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">✓</span>
+                    <span>Custom learning roadmaps with specific timelines</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">✓</span>
+                    <span>Market insights with salary data and trends</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">✓</span>
+                    <span>Career-specific interview questions with answers</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">✓</span>
+                    <span>Professional PDF downloads of all content</span>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-bold text-lg mb-3 text-gray-800">📚 Platform Resources</h4>
+                <ul className="text-left space-y-2">
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">✓</span>
+                    <span>Comprehensive learning resource library</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">✓</span>
+                    <span>Interview preparation tools and guides</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">✓</span>
+                    <span>Career development strategy guides</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">✓</span>
+                    <span>Portfolio building and project guidance</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">✓</span>
+                    <span>Mentorship and networking resources</span>
+                  </li>
+                </ul>
               </div>
             </div>
             
             <button
               onClick={handleStartTest}
               className="bg-gradient-to-r from-lime-500 to-green-600 text-white px-12 py-4 rounded-full font-bold text-lg hover:from-lime-600 hover:to-green-700 transform hover:scale-105 transition-all duration-300 shadow-xl"
-              aria-label="Begin your career assessment"
+              aria-label="Begin your AI career assessment"
             >
-              {currentUser ? "Continue Your Assessment" : "Start Your Assessment"}
+              {currentUser ? "Continue AI Assessment" : "Start AI Assessment"}
             </button>
+            
+            <p className="mt-4 text-sm text-gray-500">🛡️ 7-day satisfaction guarantee</p>
           </div>
         </section>
 
         {/* How It Works */}
-        <section className="mb-20" aria-label="Process">
+        <section className="mb-20" aria-label="How our AI process works">
           <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-8 md:p-12">
-            <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">How It Works</h2>
+            <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">How Our AI Analysis Works</h2>
             <div className="grid md:grid-cols-4 gap-8">
               {PROCESS_STEPS.map((item, index) => (
                 <article 
@@ -526,203 +583,38 @@ const CareerHome = () => {
                     {item.step}
                   </div>
                   <h3 className="font-bold text-xl mb-2">{item.title}</h3>
-                  <p className="text-gray-600">{item.description}</p>
-                  <div className="text-3xl mt-4 transform hover:scale-110 transition-transform">{item.icon}</div>
+                  <p className="text-gray-600 mb-4">{item.description}</p>
+                  <div className="text-3xl transform hover:scale-110 transition-transform">{item.icon}</div>
                 </article>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Value Comparison */}
-        <section className="mb-20">
-          <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Why Choose Our Analysis</h2>
-          
-          <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
-            <div className="grid md:grid-cols-3">
-              <div className="p-8 bg-gradient-to-br from-lime-500 to-green-600 text-white">
-                <h3 className="text-xl font-bold mb-4">Our AI Career Analysis</h3>
-                <div className="text-3xl font-bold mb-4">$60</div>
-                <p className="mb-6 text-lime-100">One-time payment for 30-day access</p>
-                <ul className="space-y-3">
-                  <li className="flex items-start">
-                    <span className="text-green-200 mr-2">✓</span>
-                    <span>Personalized to your skills & background</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-200 mr-2">✓</span>
-                    <span>Specific learning roadmap with timeline</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-200 mr-2">✓</span>
-                    <span>Current market data on salary & demand</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-200 mr-2">✓</span>
-                    <span>Complete transition strategy</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-200 mr-2">✓</span>
-                    <span>Downloadable PDF report</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-200 mr-2">✓</span>
-                    <span>Full platform access with learning resources</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-200 mr-2">✓</span>
-                    <span>Interview preparation tools & guides</span>
-                  </li>
-                </ul>
-              </div>
-              
-              <div className="col-span-2 grid grid-cols-2">
-                <div className="p-8 border-b md:border-r">
-                  <h3 className="text-xl font-bold mb-4 text-gray-800">Career Coach</h3>
-                  <div className="text-3xl font-bold mb-4 text-gray-700">$150-300</div>
-                  <p className="mb-6 text-gray-500">Per hour session</p>
-                  <ul className="space-y-3 text-gray-600">
-                    <li className="flex items-start">
-                      <span className="text-gray-400 mr-2">✓</span>
-                      <span>Personalized advice</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-red-400 mr-2">✗</span>
-                      <span>No detailed learning paths</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-red-400 mr-2">✗</span>
-                      <span>Limited market data</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-red-400 mr-2">✗</span>
-                      <span>Multiple sessions needed ($$$)</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-red-400 mr-2">✗</span>
-                      <span>No integrated learning resources</span>
-                    </li>
-                  </ul>
-                </div>
-                
-                <div className="p-8 border-b">
-                  <h3 className="text-xl font-bold mb-4 text-gray-800">Generic Assessments</h3>
-                  <div className="text-3xl font-bold mb-4 text-gray-700">$0-30</div>
-                  <p className="mb-6 text-gray-500">Basic assessment</p>
-                  <ul className="space-y-3 text-gray-600">
-                    <li className="flex items-start">
-                      <span className="text-red-400 mr-2">✗</span>
-                      <span>Generic recommendations</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-red-400 mr-2">✗</span>
-                      <span>No specific learning path</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-red-400 mr-2">✗</span>
-                      <span>No skills gap analysis</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-red-400 mr-2">✗</span>
-                      <span>No transition strategy</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-red-400 mr-2">✗</span>
-                      <span>No additional career resources</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Risk Reversal */}
-        <section className="mb-20">
-          <div className="bg-gradient-to-r from-green-50 to-lime-50 rounded-2xl p-8 border border-green-100 shadow-sm max-w-4xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center">
-              <div className="text-4xl mr-6 text-green-500 mb-4 md:mb-0">🛡️</div>
-              <div>
-                <h3 className="text-xl font-bold mb-2 text-gray-800">Satisfaction Guarantee</h3>
-                <p className="text-gray-700">
-                  If you don't feel our analysis provides actionable insights for your career transition, 
-                  contact us within 7 days for a full refund. We're confident our assessment will 
-                  deliver significant value to your career planning.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* AI Credentials */}
-        <section className="mb-20">
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-8 max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">The Science Behind Our Analysis</h2>
-            
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-4xl mb-4 text-lime-600">💾</div>
-                <h3 className="font-bold mb-2">Data-Driven</h3>
-                <p className="text-gray-600">Trained on thousands of successful tech career transitions</p>
-              </div>
-              
-              <div className="text-center">
-                <div className="text-4xl mb-4 text-lime-600">👨‍💼</div>
-                <h3 className="font-bold mb-2">Expert Developed</h3>
-                <p className="text-gray-600">Created by tech industry leaders and career coaches</p>
-              </div>
-              
-              <div className="text-center">
-                <div className="text-4xl mb-4 text-lime-600">🔄</div>
-                <h3 className="font-bold mb-2">Regularly Updated</h3>
-                <p className="text-gray-600">Constantly refreshed with latest market trends and salary data</p>
-              </div>
-            </div>
-            
-            <div className="mt-8 p-4 bg-lime-50 rounded-lg">
-              <p className="text-sm text-lime-700 text-center">
-                Our AI analyzes 50+ factors from your background to create a truly personalized transition plan
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Social Proof */}
+        {/* Success Stories - Updated */}
         <section className="mb-20 bg-gray-50 py-12 rounded-3xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800">Success Stories</h2>
-          <p className="text-center text-gray-600 mb-10">Join thousands who have successfully transitioned to tech careers</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800">AI-Powered Success Stories</h2>
+          <p className="text-center text-gray-600 mb-10">Real career transitions powered by our AI recommendations</p>
           
           <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto px-6">
-            <div className="bg-white rounded-xl p-6 shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center text-lime-600 font-bold">IO</div>
-                <div className="ml-4">
-                  <div className="font-bold">Isaac O.</div>
-                  <div className="text-sm text-gray-500">Design & Tech Ops Coordinator</div>
+            {TESTIMONIALS.map((testimonial, index) => (
+              <div key={index} className="bg-white rounded-xl p-6 shadow-md">
+                <div className="flex items-center mb-4">
+                  <div className={`w-12 h-12 bg-${testimonial.color}-100 rounded-full flex items-center justify-center text-${testimonial.color}-600 font-bold`}>
+                    {testimonial.initial}
+                  </div>
+                  <div className="ml-4">
+                    <div className="font-bold">{testimonial.name}</div>
+                    <div className="text-sm text-gray-500">{testimonial.role}</div>
+                  </div>
+                </div>
+                <p className="text-gray-700">"{testimonial.quote}"</p>
+                <div className="mt-3 flex items-center text-sm text-purple-600">
+                  <span className="mr-1">🤖</span>
+                  <span>AI-Powered Results</span>
                 </div>
               </div>
-              <p className="text-gray-700">"The personalized learning roadmap was incredibly detailed. It broke down complex tech concepts into manageable monthly goals that fit my schedule."</p>
-            </div>
-            <div className="bg-white rounded-xl p-6 shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold">TA</div>
-                <div className="ml-4">
-                  <div className="font-bold">Temitope A.</div>
-                  <div className="text-sm text-gray-500">Project Manager</div>
-                </div>
-              </div>
-              <p className="text-gray-700">"The skills gap analysis was eye-opening. It identified exactly which technical skills I needed to focus on and which of my existing abilities were most valuable."</p>
-            </div>
-            <div className="bg-white rounded-xl p-6 shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 font-bold">OO</div>
-                <div className="ml-4">
-                  <div className="font-bold">Oyebolade O.</div>
-                  <div className="text-sm text-gray-500">Technical Program Manager</div>
-                </div>
-              </div>
-              <p className="text-gray-700">"What impressed me most was the networking strategy and personal branding sections. The actionable advice helped me position my experience for tech roles effectively."</p>
-            </div>
+            ))}
           </div>
         </section>
 
@@ -753,22 +645,23 @@ const CareerHome = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="relative" aria-label="Call to action">
+        <section className="relative" aria-label="Final call to action">
           <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-lime-500 rounded-3xl blur-xl opacity-70"></div>
           <div className="relative bg-gradient-to-r from-green-500 to-lime-500 rounded-3xl p-8 md:p-12 text-center text-white shadow-2xl">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Find Your Tech Career Path?</h2>
+            <div className="text-4xl mb-4">🤖</div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready for AI-Powered Career Analysis?</h2>
             <p className="mb-10 text-lg md:text-xl text-green-100 max-w-3xl mx-auto">
-              Take our comprehensive assessment and get personalized recommendations for your tech career transition.
+              Get comprehensive AI analysis with personalized recommendations, learning plans, interview prep, and downloadable reports.
             </p>
             <button
               onClick={handleStartTest}
               className="bg-white text-green-600 px-8 md:px-12 py-4 md:py-5 rounded-full font-bold text-lg hover:bg-gradient-to-r hover:from-white hover:to-green-50 transform hover:scale-105 transition-all duration-300 shadow-xl"
-              aria-label="Begin your career assessment"
+              aria-label="Begin your AI career assessment"
             >
-              {currentUser ? "Continue Your Assessment" : "Begin Your Assessment"}
+              {currentUser ? "Continue AI Assessment" : "Start AI Assessment"}
             </button>
             <p className="mt-8 text-sm text-green-200">
-              Join the professionals who've successfully transitioned to tech careers
+              Join professionals who've successfully transitioned with AI-powered insights
             </p>
           </div>
         </section>
@@ -787,7 +680,7 @@ const CareerHome = () => {
             <span className="text-xl font-bold">Favored Online</span>
           </div>
           <p className="text-gray-400 text-sm">
-            © {new Date().getFullYear()} Favored Online. All rights reserved.
+            © {new Date().getFullYear()} Favored Online. All rights reserved. Powered by Claude AI.
           </p>
         </div>
       </footer>

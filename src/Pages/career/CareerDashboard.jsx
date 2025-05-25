@@ -471,9 +471,9 @@ ${interviewQuestions.commonMistakes.map(mistake => `
 
   const callClaudeAPI = async (prompt, maxTokens = 1000) => {
     try {
-      // Using your faster Claude Haiku model for better speed
+      // Using your existing Claude API proxy infrastructure
       const requestBody = {
-        model: 'claude-3-haiku-20240307', // Switched to faster model
+        model: 'claude-3-5-sonnet-20240620', // Using your configured model
         max_tokens: maxTokens,
         temperature: 0.7,
         messages: [
